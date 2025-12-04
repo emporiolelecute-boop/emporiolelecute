@@ -117,6 +117,10 @@ export const products: Product[] = [
     description: "Vela decorativa em formato de coração com fragrância suave e duradoura. Ideal para lembrancinhas de casamento, dia dos namorados ou eventos românticos.",
     price: "R$ 6,90",
     image: "https://img.elo7.com.br/product/685x685/53A84F6/lembrancinha-vela-coracao-lembrancinha-casamento.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/53A84F6/lembrancinha-vela-coracao-lembrancinha-casamento.jpg",
+      "https://img.elo7.com.br/product/685x685/53A850A/lembrancinha-vela-coracao-lembrancinha-casamento.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-vela-coracao/dp/1FB93D8",
     rating: 5,
     category: "velas",
@@ -130,6 +134,10 @@ export const products: Product[] = [
     description: "Lembrancinha especial de batizado com sabonete em formato de anjinho e tag personalizada. Embalagem delicada em tons de branco e azul ou rosa.",
     price: "R$ 5,50",
     image: "https://img.elo7.com.br/product/685x685/514C60C/lembrancinha-batizado-anjo-lembrancinha-batizado.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/514C60C/lembrancinha-batizado-anjo-lembrancinha-batizado.jpg",
+      "https://img.elo7.com.br/product/685x685/514C620/lembrancinha-batizado-anjo-lembrancinha-batizado.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-batizado-anjo/dp/1FB93CC",
     badge: "Especial",
     rating: 5,
@@ -144,6 +152,10 @@ export const products: Product[] = [
     description: "Sabonete artesanal em formato de estrela com acabamento glitter. Brilho especial para festas infantis, chá de revelação ou aniversários.",
     price: "R$ 4,40",
     image: "https://img.elo7.com.br/product/685x685/51C93C4/lembrancinha-sabonete-estrela-lembrancinha-aniversario.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/51C93C4/lembrancinha-sabonete-estrela-lembrancinha-aniversario.jpg",
+      "https://img.elo7.com.br/product/685x685/51C93D8/lembrancinha-sabonete-estrela-lembrancinha-aniversario.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-estrela/dp/1FB93CF",
     rating: 5,
     category: "sabonetes",
@@ -157,6 +169,10 @@ export const products: Product[] = [
     description: "Elegante mini vela em formato de flor de lótus flutuante. Ideal para decoração de eventos, centro de mesa ou lembrancinha sofisticada.",
     price: "R$ 8,90",
     image: "https://img.elo7.com.br/product/685x685/5466EC6/lembrancinha-vela-lotus-lembrancinha-casamento.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/5466EC6/lembrancinha-vela-lotus-lembrancinha-casamento.jpg",
+      "https://img.elo7.com.br/product/685x685/5466EDA/lembrancinha-vela-lotus-lembrancinha-casamento.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-vela-lotus/dp/1FB93DA",
     badge: "Premium",
     rating: 5,
@@ -171,6 +187,10 @@ export const products: Product[] = [
     description: "Kit especial para brindes corporativos com sabonete e vela personalizados com logo da empresa. Embalagem premium com acabamento profissional.",
     price: "R$ 12,90",
     image: "https://img.elo7.com.br/product/685x685/54D8F16/lembrancinha-corporativa-brinde-empresa.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/54D8F16/lembrancinha-corporativa-brinde-empresa.jpg",
+      "https://img.elo7.com.br/product/685x685/54D8F2A/lembrancinha-corporativa-brinde-empresa.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-corporativa/dp/1FB93DC",
     badge: "Corporativo",
     rating: 5,
@@ -185,6 +205,10 @@ export const products: Product[] = [
     description: "Sabonete artesanal em formato de concha marinha. Perfeito para lembrancinhas de festa na praia, luau ou temas tropicais. Fragrância refrescante de brisa do mar.",
     price: "R$ 4,80",
     image: "https://img.elo7.com.br/product/685x685/52DEAFC/lembrancinha-sabonete-concha-tema-praia.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/52DEAFC/lembrancinha-sabonete-concha-tema-praia.jpg",
+      "https://img.elo7.com.br/product/685x685/52DEB10/lembrancinha-sabonete-concha-tema-praia.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-concha/dp/1FB93D1",
     rating: 5,
     category: "sabonetes",
@@ -198,6 +222,10 @@ export const products: Product[] = [
     description: "Vela aromática com essência de lavanda real. Embalagem rústica com tag personalizada. Ideal para lembrancinhas de chá de panela ou despedida de solteira.",
     price: "R$ 7,20",
     image: "https://img.elo7.com.br/product/685x685/5501E8C/lembrancinha-vela-lavanda-aromatica.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/5501E8C/lembrancinha-vela-lavanda-aromatica.jpg",
+      "https://img.elo7.com.br/product/685x685/5501EA0/lembrancinha-vela-lavanda-aromatica.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-vela-lavanda/dp/1FB93DD",
     rating: 5,
     category: "velas",
@@ -211,6 +239,10 @@ export const products: Product[] = [
     description: "Lindo sabonete em formato de girassol, símbolo de alegria e energia. Cores vibrantes e aroma suave. Perfeito para festas com tema fazendinha ou tropical.",
     price: "R$ 5,20",
     image: "https://img.elo7.com.br/product/685x685/50F1A5C/lembrancinha-sabonete-girassol-lembrancinha-aniversario.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/50F1A5C/lembrancinha-sabonete-girassol-lembrancinha-aniversario.jpg",
+      "https://img.elo7.com.br/product/685x685/50F1A70/lembrancinha-sabonete-girassol-lembrancinha-aniversario.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-girassol/dp/1FB93CE",
     rating: 5,
     category: "sabonetes",
@@ -224,6 +256,10 @@ export const products: Product[] = [
     description: "Delicado sabonete em formato de passarinho com ninho. Tema encantador para maternidade e chá de bebê. Embalagem com laço e tag personalizada.",
     price: "R$ 5,80",
     image: "https://img.elo7.com.br/product/685x685/513C6F4/lembrancinha-passarinho-ninho-maternidade.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/513C6F4/lembrancinha-passarinho-ninho-maternidade.jpg",
+      "https://img.elo7.com.br/product/685x685/513C708/lembrancinha-passarinho-ninho-maternidade.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-passarinho-ninho/dp/1FB93CB",
     badge: "Fofo",
     rating: 5,
@@ -238,6 +274,10 @@ export const products: Product[] = [
     description: "Kit com mini sabonetes em formato de flores variadas. Rosa, margarida e botão de flor. Embalagem charmosa para lembrancinhas delicadas.",
     price: "R$ 6,50",
     image: "https://img.elo7.com.br/product/685x685/52A3E8C/lembrancinha-mini-flores-kit-sabonete.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/52A3E8C/lembrancinha-mini-flores-kit-sabonete.jpg",
+      "https://img.elo7.com.br/product/685x685/52A3EA0/lembrancinha-mini-flores-kit-sabonete.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-mini-flores/dp/1FB93D3",
     rating: 5,
     category: "kits",
@@ -251,6 +291,10 @@ export const products: Product[] = [
     description: "Fofo sabonete em formato de carrinho de bebê. Ideal para chá de bebê e maternidade. Disponível em azul, rosa ou neutro. Hipoalergênico.",
     price: "R$ 4,90",
     image: "https://img.elo7.com.br/product/685x685/50C8D2E/lembrancinha-carrinho-bebe-cha-bebe.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/50C8D2E/lembrancinha-carrinho-bebe-cha-bebe.jpg",
+      "https://img.elo7.com.br/product/685x685/50C8D42/lembrancinha-carrinho-bebe-cha-bebe.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-carrinho-bebe/dp/1FB93C9",
     rating: 5,
     category: "sabonetes",
@@ -264,6 +308,10 @@ export const products: Product[] = [
     description: "Divertida vela em formato de cupcake com detalhes coloridos. Perfeita para aniversários infantis e festas temáticas. Aroma doce e suave.",
     price: "R$ 7,80",
     image: "https://img.elo7.com.br/product/685x685/54E2C1A/lembrancinha-vela-cupcake-aniversario.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/54E2C1A/lembrancinha-vela-cupcake-aniversario.jpg",
+      "https://img.elo7.com.br/product/685x685/54E2C2E/lembrancinha-vela-cupcake-aniversario.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-vela-cupcake/dp/1FB93DB",
     badge: "Divertido",
     rating: 5,
@@ -278,6 +326,10 @@ export const products: Product[] = [
     description: "Elegante sabonete em formato de coroa real. Ideal para festas de princesa, 15 anos ou debutante. Acabamento dourado ou prateado. Embalagem luxuosa.",
     price: "R$ 5,40",
     image: "https://img.elo7.com.br/product/685x685/51B4D8C/lembrancinha-sabonete-coroa-princesa.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/51B4D8C/lembrancinha-sabonete-coroa-princesa.jpg",
+      "https://img.elo7.com.br/product/685x685/51B4DA0/lembrancinha-sabonete-coroa-princesa.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-coroa/dp/1FB93CD",
     rating: 5,
     category: "sabonetes",
