@@ -1,0 +1,233 @@
+import { useState } from "react";
+import { ExternalLink, Heart, Star, ArrowRight, Send, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { Product } from "@/data/products";
+
+interface ProductCardProps {
+  product: Product;
+}
+
+const ProductCard = ({ product }: ProductCardProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    whatsapp: ""
+  });
+  const { toast } = useToast();
+
+  const getBadgeStyles = (badge?: string) => {
+    switch (badge) {
+      case "Mais Vendido":
+        return "bg-primary text-primary-foreground";
+      case "Promoção":
+        return "bg-green-500 text-white";
+      case "Personalizável":
+        return "bg-coral-dark text-white";
+      case "Novidade":
+        return "bg-blue-500 text-white";
+      case "Premium":
+        return "bg-amber-500 text-white";
+      case "Especial":
+        return "bg-purple-500 text-white";
+      case "Corporativo":
+        return "bg-slate-700 text-white";
+      default:
+        return "bg-muted text-foreground";
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-order-email", {
+        body: {
+          ...formData,
+          product: product.name,
+          type: "product"
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Pedido enviado! 🎉",
+        description: "Entraremos em contato em breve pelo WhatsApp.",
+      });
+      setIsOpen(false);
+      setFormData({ name: "", email: "", whatsapp: "" });
+    } catch (error) {
+      console.error("Error sending order:", error);
+      toast({
+        title: "Erro ao enviar",
+        description: "Tente novamente ou entre em contato pelo WhatsApp.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <article 
+      className="bg-card rounded-2xl overflow-hidden shadow-card border border-border/50 product-card group"
+      itemScope
+      itemType="https://schema.org/Product"
+    >
+      {/* Product Image */}
+      <div className="relative aspect-square overflow-hidden">
+        <img 
+          src={product.image}
+          alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
+          itemProp="image"
+          width="685"
+          height="685"
+        />
+        
+        {/* Badge */}
+        {product.badge && (
+          <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold ${getBadgeStyles(product.badge)}`}>
+            {product.badge}
+          </span>
+        )}
+        
+        {/* Favorite Button */}
+        <button 
+          className="absolute top-4 right-4 w-10 h-10 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-soft opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
+          aria-label="Adicionar aos favoritos"
+        >
+          <Heart className="h-5 w-5" />
+        </button>
+        
+        {/* Quick View Overlay */}
+        <a 
+          href={product.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 bg-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+        >
+          <span className="bg-primary-foreground text-foreground px-6 py-3 rounded-full font-semibold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            Ver no Elo7
+            <ExternalLink className="h-4 w-4" />
+          </span>
+        </a>
+      </div>
+      
+      {/* Product Info */}
+      <div className="p-6">
+        {/* Rating */}
+        <div className="flex items-center gap-1 mb-3" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+          {[...Array(product.rating)].map((_, i) => (
+            <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
+          ))}
+          <span className="text-xs text-muted-foreground ml-2" itemProp="ratingValue">{product.rating}.0</span>
+        </div>
+        
+        {/* Name */}
+        <h3 className="font-display text-xl text-foreground mb-2 group-hover:text-primary transition-colors" itemProp="name">
+          {product.name}
+        </h3>
+        
+        {/* Description */}
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-3" itemProp="description">
+          {product.description}
+        </p>
+        
+        {/* Price */}
+        <div className="flex items-center gap-3 mb-4" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+          <span className="text-2xl font-display font-semibold text-primary" itemProp="price">{product.price}</span>
+          {product.originalPrice && (
+            <span className="text-sm text-muted-foreground line-through">{product.originalPrice}</span>
+          )}
+          <meta itemProp="priceCurrency" content="BRL" />
+          <meta itemProp="availability" content="https://schema.org/InStock" />
+        </div>
+        
+        {/* CTA Buttons */}
+        <div className="flex gap-2">
+          <a 
+            href={product.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1"
+          >
+            <Button 
+              variant="outline" 
+              className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-full transition-all duration-300"
+            >
+              Ver Detalhes
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </a>
+          
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full">
+                <Send className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="font-display text-2xl">Encomendar {product.name}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Nome completo</label>
+                  <Input
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Seu nome"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Email</label>
+                  <Input
+                    required
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="seu@email.com"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">WhatsApp</label>
+                  <Input
+                    required
+                    value={formData.whatsapp}
+                    onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                    placeholder="(41) 99999-9999"
+                    className="mt-1"
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Enviando..." : "Enviar Pedido"}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Entraremos em contato para confirmar os detalhes
+                </p>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+export default ProductCard;

@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   
+  <!-- Homepage -->
   <url>
     <loc>https://emporiolelecute.com.br/</loc>
     <lastmod>2024-12-04</lastmod>
@@ -14,6 +15,35 @@
     </image:image>
   </url>
   
+  <!-- Products Catalog Page -->
+  <url>
+    <loc>https://emporiolelecute.com.br/produtos</loc>
+    <lastmod>2024-12-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg</image:loc>
+      <image:title>Catálogo de Lembrancinhas Artesanais</image:title>
+      <image:caption>Catálogo completo de sabonetes artesanais, velas perfumadas e kits personalizados</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- Shipping/Delivery Page -->
+  <url>
+    <loc>https://emporiolelecute.com.br/envio</loc>
+    <lastmod>2024-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://emporiolelecute.com.br/envio-brasil</loc>
+    <lastmod>2024-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Section Anchors -->
   <url>
     <loc>https://emporiolelecute.com.br/#produtos</loc>
     <lastmod>2024-12-04</lastmod>
@@ -48,6 +78,20 @@
     <lastmod>2024-12-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://emporiolelecute.com.br/#faq</loc>
+    <lastmod>2024-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://emporiolelecute.com.br/#orcamento</loc>
+    <lastmod>2024-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
   </url>
   
   <url>
