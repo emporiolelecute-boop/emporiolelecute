@@ -32,6 +32,8 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
           src={images[currentIndex]}
           alt={`${productName} - Imagem ${currentIndex + 1}`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
         />
 
         {/* Zoom Button */}
@@ -94,6 +96,8 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
                 src={image}
                 alt={`${productName} - Miniatura ${index + 1}`}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             </button>
           ))}
@@ -108,6 +112,8 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
               src={images[currentIndex]}
               alt={`${productName} - Imagem ampliada`}
               className="w-full h-auto max-h-[90vh] object-contain rounded-xl"
+              loading="eager"
+              decoding="async"
             />
             {images.length > 1 && (
               <>
