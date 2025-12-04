@@ -3,20 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import banner from "@/assets/banner.jpg";
 import logo from "@/assets/logo.jpg";
+import { useParallax, useCountUp } from "@/hooks/use-scroll-animation";
 
 const Hero = () => {
+  const [parallaxRef, offset] = useParallax(0.3);
+  const [productsRef, productsCount] = useCountUp(81, 2000);
+  const [reviewsRef, reviewsCount] = useCountUp(37, 2000);
+
   return (
     <section 
       id="inicio" 
       className="relative min-h-screen flex flex-col pt-20 overflow-hidden"
       aria-label="Seção principal - Empório LeleCute"
     >
-      {/* Full Width Banner Image */}
-      <div className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden">
+      {/* Full Width Banner Image with Parallax */}
+      <div ref={parallaxRef} className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden">
         <img 
           src={banner}
           alt="Banner Empório LeleCute - Lembrancinhas Artesanais Personalizadas"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-100"
+          style={{ transform: `translateY(${offset * 0.5}px)` }}
           loading="eager"
           fetchPriority="high"
         />
@@ -24,7 +30,7 @@ const Hero = () => {
         
         {/* Large Logo Overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-background/80 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg">
+          <div className="bg-background/80 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg animate-scale-in">
             <img 
               src={logo}
               alt="Logo Empório LeleCute - Ateliê Criativo"
@@ -68,14 +74,14 @@ const Hero = () => {
               chá de bebê, batizado, casamento e todas as suas comemorações.
             </p>
             
-            {/* Stats */}
+            {/* Stats with Count Up Animation */}
             <div className="flex flex-wrap justify-center gap-8 mb-10 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-              <div className="text-center">
-                <p className="text-3xl font-display font-semibold text-primary">81+</p>
+              <div className="text-center" ref={productsRef}>
+                <p className="text-3xl font-display font-semibold text-primary">{productsCount}+</p>
                 <p className="text-sm text-muted-foreground">Produtos Únicos</p>
               </div>
-              <div className="text-center">
-                <p className="text-3xl font-display font-semibold text-primary">37+</p>
+              <div className="text-center" ref={reviewsRef}>
+                <p className="text-3xl font-display font-semibold text-primary">{reviewsCount}+</p>
                 <p className="text-sm text-muted-foreground">Avaliações 5★</p>
               </div>
               <div className="text-center">
@@ -151,7 +157,7 @@ const Hero = () => {
                 <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm">Envio para todo Brasil</span>
+                <Link to="/envio" className="text-sm hover:text-primary transition-colors">Envio para todo Brasil</Link>
               </div>
               <div className="flex items-center gap-2">
                 <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
