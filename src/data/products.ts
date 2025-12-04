@@ -45,6 +45,10 @@ export const products: Product[] = [
     price: "R$ 7,60",
     originalPrice: "R$ 8,50",
     image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg",
+      "https://img.elo7.com.br/product/685x685/54800EA/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg"
+    ],
     link: "https://www.elo7.com.br/vela-margarida-perfumada-cartao-personalizado/dp/1FB93E2",
     badge: "Promoção",
     rating: 5,
@@ -60,6 +64,10 @@ export const products: Product[] = [
     longDescription: "Kit especial contendo três sabonetes artesanais: borboleta decorativa, letra inicial personalizada e mini coração. Todos feitos com base glicerinada hipoalergênica. Cores e aromas personalizáveis conforme tema do evento. Embalagem delicada com laço de cetim.",
     price: "R$ 4,60",
     image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg",
+      "https://img.elo7.com.br/product/685x685/548B940/lembrancinha-sabonete-borboleta-letra-coracao.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-borboleta-letra-coracao/dp/1FB93BF",
     badge: "Personalizável",
     rating: 5,
@@ -74,6 +82,10 @@ export const products: Product[] = [
     description: "Sabonete artesanal em formato de rosa com tag personalizada. Embalagem elegante com laço de cetim. Perfeito para lembrancinhas de casamento ou chá de panela.",
     price: "R$ 5,90",
     image: "https://img.elo7.com.br/product/685x685/5232E3C/lembrancinha-sabonete-rosa-lembrancinha-casamento.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/5232E3C/lembrancinha-sabonete-rosa-lembrancinha-casamento.jpg",
+      "https://img.elo7.com.br/product/685x685/5232E50/lembrancinha-sabonete-rosa-lembrancinha-casamento.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-rosa/dp/1FB93D5",
     rating: 5,
     category: "sabonetes",
@@ -87,6 +99,10 @@ export const products: Product[] = [
     description: "Adorável sabonete em formato de ursinho, perfeito para lembrancinhas de maternidade e chá de bebê. Feito com fórmula hipoalergênica e fragrâncias suaves.",
     price: "R$ 4,20",
     image: "https://img.elo7.com.br/product/685x685/506FA16/lembrancinha-sabonete-ursinho-lembrancinha-maternidade.jpg",
+    images: [
+      "https://img.elo7.com.br/product/685x685/506FA16/lembrancinha-sabonete-ursinho-lembrancinha-maternidade.jpg",
+      "https://img.elo7.com.br/product/685x685/506FA2A/lembrancinha-sabonete-ursinho-lembrancinha-maternidade.jpg"
+    ],
     link: "https://www.elo7.com.br/lembrancinha-sabonete-ursinho/dp/1FB93CA",
     badge: "Novidade",
     rating: 5,
