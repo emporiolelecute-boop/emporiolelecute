@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Heart, Star, Send, ExternalLink, Share2, Truck, Shield, Palette } from "lucide-react";
+import { ArrowLeft, Star, Send, ExternalLink, Truck, Shield, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -10,9 +10,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
+import ProductGallery from "@/components/ProductGallery";
 import { getProductBySlug, products } from "@/data/products";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
-import { useEffect } from "react";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -99,21 +99,12 @@ const ProductPage = () => {
         {/* Product Detail */}
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 mb-16">
-            {/* Image */}
-            <div className="relative">
-              <div className="aspect-square rounded-3xl overflow-hidden bg-card shadow-lg">
-                <img 
-                  src={product.image}
-                  alt={`${product.name} - Lembrancinha artesanal Empório LeleCute`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {product.badge && (
-                <span className="absolute top-6 left-6 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold">
-                  {product.badge}
-                </span>
-              )}
-            </div>
+            {/* Image Gallery */}
+            <ProductGallery
+              images={product.images || [product.image]}
+              productName={product.name}
+              badge={product.badge}
+            />
 
             {/* Info */}
             <div className="flex flex-col">

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Menu, X, Heart, ShoppingBag, Instagram, Facebook } from "lucide-react";
+import { Menu, X, Heart, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SearchBar from "@/components/SearchBar";
 import logo from "@/assets/logo.jpg";
 
 const Header = () => {
@@ -54,8 +55,13 @@ const Header = () => {
               ))}
             </ul>
 
+            {/* Search Bar */}
+            <div className="border-l border-border pl-6">
+              <SearchBar />
+            </div>
+
             {/* Social Links */}
-            <div className="flex items-center gap-3 border-l border-border pl-6">
+            <div className="flex items-center gap-3">
               {socialLinks.map((link) => (
                 <a
                   key={link.href}
