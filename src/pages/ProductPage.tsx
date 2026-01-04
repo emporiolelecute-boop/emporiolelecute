@@ -16,7 +16,8 @@ import {
   Minus,
   Plus,
   MessageCircle,
-  ShoppingCart
+  ShoppingCart,
+  Tag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,7 @@ const ProductPage = () => {
     pixDiscount: dbProduct.pix_discount,
     productionDays: dbProduct.production_days,
     weight: dbProduct.weight || 25,
+    keywords: dbProduct.keywords || [],
   } : null;
 
   // Related products
@@ -209,13 +211,13 @@ const ProductPage = () => {
         {/* Product Detail */}
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
-            {/* Image Gallery - Elo7 Style with Vertical Thumbnails */}
+            {/* Image Gallery - Horizontal layout with thumbnails below */}
             <div className="relative">
               <ProductGallery
                 images={product.images.length > 0 ? product.images : ['/placeholder.svg']}
                 productName={product.name}
                 badge={product.badge}
-                layout="vertical"
+                layout="horizontal"
               />
               
               {/* Favorite Button */}
@@ -231,7 +233,7 @@ const ProductPage = () => {
               </button>
 
               {/* Reduced Shipping Badge */}
-              <div className="absolute top-4 left-28 md:left-28 z-10">
+              <div className="absolute top-4 left-4 z-10">
                 <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 flex items-center gap-1.5">
                   <Truck className="h-4 w-4" />
                   Frete reduzido
@@ -432,22 +434,42 @@ const ProductPage = () => {
               </div>
 
               {/* Trust Badges - Horizontal */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border/50">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <div>
-                    <span className="text-xs font-medium text-foreground block">Compra Segura e Protegida</span>
-                    <p className="text-[10px] text-muted-foreground">Seu pedido ou seu dinheiro de volta</p>
-                  </div>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="flex flex-col items-center text-center p-3 bg-card rounded-lg border border-border/50">
+                  <Send className="h-5 w-5 text-primary mb-2" />
+                  <span className="text-xs font-medium text-foreground">Envio todo Brasil</span>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border/50">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <div>
-                    <span className="text-xs font-medium text-foreground block">100% Artesanal</span>
-                    <p className="text-[10px] text-muted-foreground">Feito à mão com carinho</p>
-                  </div>
+                <div className="flex flex-col items-center text-center p-3 bg-card rounded-lg border border-border/50">
+                  <Shield className="h-5 w-5 text-primary mb-2" />
+                  <span className="text-xs font-medium text-foreground">Hipoalergênico</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-3 bg-card rounded-lg border border-border/50">
+                  <Heart className="h-5 w-5 text-primary mb-2" />
+                  <span className="text-xs font-medium text-foreground">100% Artesanal</span>
                 </div>
               </div>
+
+              {/* Tags Section */}
+              {product.keywords && product.keywords.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">Tags</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {product.keywords.map((keyword, index) => (
+                      <Link
+                        key={index}
+                        to={`/produtos?search=${encodeURIComponent(keyword)}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary-light rounded-full text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <Tag className="h-3 w-3" />
+                        {keyword}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* WhatsApp */}
               <a

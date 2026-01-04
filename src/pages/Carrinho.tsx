@@ -618,6 +618,17 @@ const Carrinho = () => {
                       ))}
                     </div>
                   </RadioGroup>
+                  
+                  {/* Shipping Estimate Notice */}
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-800 flex items-start gap-2">
+                      <Truck className="h-4 w-4 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Importante:</strong> Os valores de frete apresentados são uma estimativa. 
+                        O valor final será calculado e confirmado pelo WhatsApp antes da finalização do pedido.
+                      </span>
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

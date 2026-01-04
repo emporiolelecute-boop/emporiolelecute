@@ -12,13 +12,17 @@ import {
   X,
   Home,
   Upload,
-  Sparkles
+  Sparkles,
+  ShoppingCart,
+  Users
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: ShoppingCart, label: 'Pedidos', path: '/admin/pedidos' },
+  { icon: Users, label: 'Clientes', path: '/admin/clientes' },
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
