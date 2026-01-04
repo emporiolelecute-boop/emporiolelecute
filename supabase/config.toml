@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.chat]
 verify_jwt = false
+
+[functions.scrape-elo7]
+verify_jwt = true

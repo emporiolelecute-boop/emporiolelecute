@@ -11,10 +11,10 @@ const ProductsSection = () => {
   const [headerRef, headerVisible] = useScrollAnimation<HTMLDivElement>();
   const [gridRef, gridVisible] = useScrollAnimation<HTMLDivElement>({ threshold: 0.05 });
 
-  // Convert db products to Product format for ProductCard
+  // Convert db products to Product format for ProductCard - show 6 featured
   const products: Product[] = (dbProducts || [])
     .filter(p => p.is_active)
-    .slice(0, 9)
+    .slice(0, 6)
     .map(p => ({
       id: p.id,
       slug: p.slug,
@@ -75,7 +75,7 @@ const ProductsSection = () => {
           ) : (
             <div 
               ref={gridRef}
-              className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 transition-all duration-700 ${
+              className={`grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12 transition-all duration-700 ${
                 gridVisible ? "opacity-100" : "opacity-0"
               }`}
             >

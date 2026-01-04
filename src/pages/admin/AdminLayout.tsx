@@ -10,7 +10,8 @@ import {
   LogOut, 
   Menu,
   X,
-  Home
+  Home,
+  Upload
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ const menuItems = [
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
+  { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
 ];
 
 const AdminLayout = () => {

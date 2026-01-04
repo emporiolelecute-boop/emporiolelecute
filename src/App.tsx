@@ -16,6 +16,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductForm from "./pages/admin/AdminProductForm";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminOccasions from "./pages/admin/AdminOccasions";
+import AdminImport from "./pages/admin/AdminImport";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => {
                 <Route path="produtos/:id" element={<AdminProductForm />} />
                 <Route path="categorias" element={<AdminCategories />} />
                 <Route path="ocasioes" element={<AdminOccasions />} />
+                <Route path="importar" element={<AdminImport />} />
               </Route>
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
