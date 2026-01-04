@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Heart, Instagram, Facebook, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
@@ -9,19 +9,20 @@ import logo from "@/assets/logo.jpg";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { itemCount } = useCart();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
-    { href: "#inicio", label: "Início" },
-    { href: "#sobre", label: "Sobre" },
-    { href: "#produtos", label: "Produtos" },
-    { href: "#ocasioes", label: "Ocasiões" },
-    { href: "#depoimentos", label: "Depoimentos" },
-    { href: "#orcamento", label: "Contato" },
+    { href: "/", section: "inicio", label: "Início" },
+    { href: "/#sobre", section: "sobre", label: "Sobre" },
+    { href: "/produtos", section: null, label: "Produtos" },
+    { href: "/#ocasioes", section: "ocasioes", label: "Ocasiões" },
+    { href: "/#depoimentos", section: "depoimentos", label: "Depoimentos" },
+    { href: "/#orcamento", section: "orcamento", label: "Contato" },
   ];
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const element = document.querySelector(href);
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
     if (element) {
       const headerHeight = 80;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
@@ -30,7 +31,25 @@ const Header = () => {
         behavior: 'smooth'
       });
     }
+  };
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { href: string; section: string | null }) => {
+    e.preventDefault();
     setIsMenuOpen(false);
+    
+    // If it's a route without section (like /produtos), navigate directly
+    if (!link.section) {
+      navigate(link.href);
+      return;
+    }
+    
+    // If we're on the home page, scroll to section
+    if (location.pathname === '/') {
+      scrollToSection(link.section);
+    } else {
+      // Navigate to home page with hash, then scroll
+      navigate(link.href);
+    }
   };
 
   const socialLinks = [
@@ -43,9 +62,8 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-3" aria-label="Navegação principal">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a 
-            href="#inicio" 
-            onClick={(e) => handleNavClick(e, '#inicio')}
+          <Link 
+            to="/"
             className="flex items-center gap-2 group"
             aria-label="Empório LeleCute - Página inicial"
           >
@@ -56,7 +74,7 @@ const Header = () => {
               width="48"
               height="48"
             />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
@@ -65,7 +83,7 @@ const Header = () => {
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
+                    onClick={(e) => handleNavClick(e, link)}
                     className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
                   >
                     {link.label}
@@ -142,7 +160,7 @@ const Header = () => {
                   <a
                     href={link.href}
                     className="block px-6 py-3 text-foreground/80 hover:text-primary hover:bg-primary-light/50 transition-colors"
-                    onClick={(e) => handleNavClick(e, link.href)}
+                    onClick={(e) => handleNavClick(e, link)}
                   >
                     {link.label}
                   </a>

@@ -38,11 +38,11 @@ const Footer = () => {
           <div>
             <h3 className="font-display text-xl mb-4">Ocasiões</h3>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li>• Maternidade & Chá de Bebê</li>
-              <li>• Batizado & Primeira Comunhão</li>
-              <li>• Casamento & Bodas</li>
-              <li>• Aniversário & Festas</li>
-              <li>• Eventos Corporativos</li>
+              <li><Link to="/produtos?ocasiao=maternidade" className="hover:text-primary transition-colors">• Maternidade & Chá de Bebê</Link></li>
+              <li><Link to="/produtos?ocasiao=batizado" className="hover:text-primary transition-colors">• Batizado & Primeira Comunhão</Link></li>
+              <li><Link to="/produtos?ocasiao=casamento" className="hover:text-primary transition-colors">• Casamento & Bodas</Link></li>
+              <li><Link to="/produtos?ocasiao=aniversario" className="hover:text-primary transition-colors">• Aniversário & Festas</Link></li>
+              <li><Link to="/produtos?ocasiao=corporativo" className="hover:text-primary transition-colors">• Eventos Corporativos</Link></li>
             </ul>
           </div>
 

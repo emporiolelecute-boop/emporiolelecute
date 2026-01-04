@@ -417,6 +417,88 @@ function generateQuoteEmailHtml(data: QuoteRequest): string {
   `;
 }
 
+// Status update email
+interface StatusUpdateRequest {
+  type: 'status_update';
+  orderCode: string;
+  customerEmail: string;
+  customerName: string;
+  newStatus: string;
+  statusLabel: string;
+}
+
+function generateStatusUpdateEmailHtml(data: StatusUpdateRequest): string {
+  const statusColors: Record<string, string> = {
+    pending: '#EAB308',
+    confirmed: '#3B82F6',
+    processing: '#8B5CF6',
+    shipped: '#6366F1',
+    delivered: '#22C55E',
+    cancelled: '#EF4444',
+  };
+
+  const statusMessages: Record<string, string> = {
+    pending: 'Seu pedido está aguardando confirmação de pagamento.',
+    confirmed: 'Pagamento confirmado! Iniciaremos a produção em breve.',
+    processing: 'Seu pedido está sendo produzido com muito carinho.',
+    shipped: 'Seu pedido foi enviado! Em breve chegará até você.',
+    delivered: 'Seu pedido foi entregue. Esperamos que você adore!',
+    cancelled: 'Infelizmente seu pedido foi cancelado.',
+  };
+
+  const statusColor = statusColors[data.newStatus] || '#f88770';
+  const statusMessage = statusMessages[data.newStatus] || 'O status do seu pedido foi atualizado.';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: 'Nunito', Arial, sans-serif; background: #fdf8f7; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header { background: linear-gradient(135deg, #f88770 0%, #e66753 100%); padding: 30px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .status-badge { display: inline-block; background: ${statusColor}; color: white; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 14px; margin: 20px 0; }
+        .content { padding: 30px; text-align: center; }
+        .order-code { font-size: 24px; font-weight: bold; color: #f88770; margin: 10px 0; }
+        .message { color: #666; font-size: 16px; line-height: 1.6; margin: 20px 0; }
+        .cta { display: inline-block; background: #f88770; color: white; padding: 12px 24px; border-radius: 50px; text-decoration: none; margin-top: 15px; }
+        .footer { background: #fdf8f7; padding: 20px; text-align: center; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🌸 Empório LeleCute</h1>
+        </div>
+        
+        <div class="content">
+          <p style="color: #666; margin: 0;">Olá, <strong>${escapeHtml(data.customerName)}</strong>!</p>
+          
+          <p class="order-code">Pedido ${escapeHtml(data.orderCode)}</p>
+          
+          <p style="color: #666; margin: 10px 0;">Novo status:</p>
+          <span class="status-badge">${escapeHtml(data.statusLabel)}</span>
+          
+          <p class="message">${statusMessage}</p>
+          
+          <a href="https://emporiolelecute.lovable.app/rastrear?code=${escapeHtml(data.orderCode)}" class="cta">📦 Acompanhar Pedido</a>
+          
+          <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            Dúvidas? Entre em contato pelo WhatsApp (41) 99221-4299
+          </p>
+        </div>
+        
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Empório LeleCute - Ateliê Criativo</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -424,6 +506,28 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const requestData = await req.json();
+    
+    // Check if it's a status update
+    if (requestData.type === 'status_update') {
+      const statusData = requestData as StatusUpdateRequest;
+      
+      console.log("Processing status update:", statusData.orderCode, statusData.newStatus);
+
+      const statusEmailHtml = generateStatusUpdateEmailHtml(statusData);
+      const emailResponse = await resend.emails.send({
+        from: "Empório LeleCute <onboarding@resend.dev>",
+        to: [statusData.customerEmail],
+        subject: `📦 Atualização do Pedido ${statusData.orderCode} - ${statusData.statusLabel}`,
+        html: statusEmailHtml,
+      });
+
+      console.log("Status update email sent:", emailResponse);
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
     
     // Check if it's a new order format (has orderCode)
     if (requestData.orderCode) {

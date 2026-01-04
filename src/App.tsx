@@ -19,6 +19,8 @@ import AdminProductForm from "./pages/admin/AdminProductForm";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminOccasions from "./pages/admin/AdminOccasions";
 import AdminImport from "./pages/admin/AdminImport";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminCustomers from "./pages/admin/AdminCustomers";
 import { CartProvider } from "./contexts/CartContext";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
@@ -60,6 +62,8 @@ const App = () => {
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="pedidos" element={<AdminOrders />} />
+                  <Route path="clientes" element={<AdminCustomers />} />
                   <Route path="produtos" element={<AdminProducts />} />
                   <Route path="produtos/novo" element={<AdminProductForm />} />
                   <Route path="produtos/:id" element={<AdminProductForm />} />
