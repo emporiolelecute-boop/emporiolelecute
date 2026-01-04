@@ -7,9 +7,10 @@ interface ProductGalleryProps {
   images: string[];
   productName: string;
   badge?: string;
+  layout?: 'horizontal' | 'vertical';
 }
 
-const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => {
+const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: ProductGalleryProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -67,117 +68,21 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
   return (
     <div className={cn(
       "relative transition-all duration-500",
-      isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+      layout === 'vertical' && "flex gap-4"
     )}>
-      {/* Main Image */}
-      <div 
-        className="relative aspect-square rounded-2xl lg:rounded-3xl overflow-hidden bg-muted shadow-lg group cursor-zoom-in"
-        onClick={() => setIsZoomed(true)}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Image with fade transition */}
-        <div className="relative w-full h-full">
-          {images.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`${productName} - Imagem ${index + 1}`}
-              className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-all duration-500",
-                index === currentIndex 
-                  ? "opacity-100 scale-100" 
-                  : "opacity-0 scale-105"
-              )}
-              loading={index === 0 ? "eager" : "lazy"}
-              decoding="async"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder.svg';
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Zoom Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsZoomed(true);
-          }}
-          className="absolute top-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
-          aria-label="Ampliar imagem"
-        >
-          <ZoomIn className="h-5 w-5 text-foreground" />
-        </button>
-
-        {/* Navigation Arrows */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goToPrevious();
-              }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
-              aria-label="Imagem anterior"
-            >
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goToNext();
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
-              aria-label="Próxima imagem"
-            >
-              <ChevronRight className="h-5 w-5 text-foreground" />
-            </button>
-          </>
-        )}
-
-        {/* Badge */}
-        {badge && (
-          <span className="absolute top-5 left-5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold shadow-lg animate-pulse">
-            {badge}
-          </span>
-        )}
-
-        {/* Dots Navigation (mobile friendly) */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 bg-background/80 backdrop-blur-sm rounded-full">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToSlide(index);
-                }}
-                className={cn(
-                  "w-2 h-2 rounded-full transition-all duration-300",
-                  index === currentIndex 
-                    ? "bg-primary w-6" 
-                    : "bg-muted-foreground/40 hover:bg-muted-foreground/60"
-                )}
-                aria-label={`Ver imagem ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Thumbnails - Desktop */}
-      {images.length > 1 && (
-        <div className="hidden sm:flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-          {images.map((image, index) => (
+      {/* Vertical Thumbnails - Left Side */}
+      {layout === 'vertical' && images.length > 1 && (
+        <div className="hidden md:flex flex-col gap-3 w-20 shrink-0">
+          {images.slice(0, 5).map((image, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={cn(
-                "flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 relative group",
+                "w-20 h-20 rounded-lg overflow-hidden transition-all duration-300 relative border-2",
                 index === currentIndex
-                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
-                  : "opacity-70 hover:opacity-100 hover:scale-105"
+                  ? "border-primary shadow-md"
+                  : "border-transparent opacity-70 hover:opacity-100 hover:border-muted-foreground/30"
               )}
             >
               <img
@@ -190,13 +95,146 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
                   (e.target as HTMLImageElement).src = '/placeholder.svg';
                 }}
               />
-              {index === currentIndex && (
-                <div className="absolute inset-0 bg-primary/10" />
-              )}
             </button>
           ))}
+          {images.length > 5 && (
+            <button
+              onClick={() => setIsZoomed(true)}
+              className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:bg-muted/80 transition-colors"
+            >
+              +{images.length - 5}
+            </button>
+          )}
         </div>
       )}
+
+      {/* Main Image Container */}
+      <div className="flex-1">
+        <div 
+          className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg group cursor-zoom-in"
+          onClick={() => setIsZoomed(true)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Image with fade transition */}
+          <div className="relative w-full h-full">
+            {images.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`${productName} - Imagem ${index + 1}`}
+                className={cn(
+                  "absolute inset-0 w-full h-full object-cover transition-all duration-500",
+                  index === currentIndex 
+                    ? "opacity-100 scale-100" 
+                    : "opacity-0 scale-105"
+                )}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Zoom Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsZoomed(true);
+            }}
+            className="absolute bottom-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+            aria-label="Ampliar imagem"
+          >
+            <ZoomIn className="h-5 w-5 text-foreground" />
+          </button>
+
+          {/* Navigation Arrows */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrevious();
+                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+                aria-label="Imagem anterior"
+              >
+                <ChevronLeft className="h-5 w-5 text-foreground" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+                aria-label="Próxima imagem"
+              >
+                <ChevronRight className="h-5 w-5 text-foreground" />
+              </button>
+            </>
+          )}
+
+          {/* Badge */}
+          {badge && (
+            <span className="absolute top-4 left-4 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold shadow-lg">
+              {badge}
+            </span>
+          )}
+
+          {/* Dots Navigation (mobile) */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 bg-background/80 backdrop-blur-sm rounded-full md:hidden">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToSlide(index);
+                  }}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all duration-300",
+                    index === currentIndex 
+                      ? "bg-primary w-6" 
+                      : "bg-muted-foreground/40 hover:bg-muted-foreground/60"
+                  )}
+                  aria-label={`Ver imagem ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Horizontal Thumbnails - Below (for horizontal layout) */}
+        {layout === 'horizontal' && images.length > 1 && (
+          <div className="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+            {images.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={cn(
+                  "flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 relative border-2",
+                  index === currentIndex
+                    ? "border-primary shadow-md"
+                    : "border-transparent opacity-70 hover:opacity-100"
+                )}
+              >
+                <img
+                  src={image}
+                  alt={`${productName} - Miniatura ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Zoom Dialog - Fullscreen Gallery */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>

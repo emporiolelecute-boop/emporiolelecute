@@ -11,10 +11,15 @@ import {
   Heart, 
   Package,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Share2,
+  ChevronRight,
+  Minus,
+  Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Dialog, 
   DialogContent, 
@@ -45,6 +50,7 @@ const ProductPage = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
   const [cep, setCep] = useState("");
+  const [personalization, setPersonalization] = useState("");
   const [formData, setFormData] = useState({ name: "", email: "", whatsapp: "" });
   const { toast } = useToast();
 
@@ -64,6 +70,7 @@ const ProductPage = () => {
     minQuantity: dbProduct.min_quantity,
     pixDiscount: dbProduct.pix_discount,
     productionDays: dbProduct.production_days,
+    weight: dbProduct.weight || 25,
   } : null;
 
   // Related products
@@ -114,6 +121,7 @@ const ProductPage = () => {
           ...formData, 
           product: product.name, 
           quantity,
+          personalization,
           type: "product" 
         }
       });
@@ -126,6 +134,7 @@ const ProductPage = () => {
       });
       setIsOpen(false);
       setFormData({ name: "", email: "", whatsapp: "" });
+      setPersonalization("");
     } catch {
       toast({
         title: "Erro ao enviar",
@@ -150,6 +159,23 @@ const ProductPage = () => {
       title: "Frete calculado",
       description: "PAC: R$ 18,90 (5-8 dias úteis) | SEDEX: R$ 32,50 (2-3 dias úteis)",
     });
+  };
+
+  const handleShare = async () => {
+    if (navigator.share && product) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: `Confira ${product.name} no Empório LeleCute!`,
+          url: window.location.href,
+        });
+      } catch {
+        // User cancelled sharing
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link copiado!", description: "Cole onde quiser compartilhar." });
+    }
   };
 
   if (isLoading) {
@@ -188,6 +214,9 @@ const ProductPage = () => {
     ? Math.round((1 - product.price / product.originalPrice) * 100) 
     : null;
 
+  // Generate product code from ID
+  const productCode = product.id.slice(0, 8).toUpperCase();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -197,22 +226,23 @@ const ProductPage = () => {
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
             <Link to="/" className="hover:text-primary transition-colors">Início</Link>
-            <span>/</span>
-            <Link to="/produtos" className="hover:text-primary transition-colors">Produtos</Link>
-            <span>/</span>
-            <span className="text-foreground font-medium">{product.name}</span>
+            <ChevronRight className="h-4 w-4" />
+            <Link to="/produtos" className="hover:text-primary transition-colors">Lembrancinhas</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground">{product.name}</span>
           </nav>
         </div>
 
         {/* Product Detail */}
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
-            {/* Image Gallery with Favorite Button */}
+            {/* Image Gallery - Elo7 Style with Vertical Thumbnails */}
             <div className="relative">
               <ProductGallery
                 images={product.images.length > 0 ? product.images : ['/placeholder.svg']}
                 productName={product.name}
                 badge={product.badge}
+                layout="vertical"
               />
               
               {/* Favorite Button */}
@@ -228,31 +258,28 @@ const ProductPage = () => {
               </button>
 
               {/* Reduced Shipping Badge */}
-              <div className="absolute top-4 left-4 z-10">
-                <Badge className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 flex items-center gap-1.5">
+              <div className="absolute top-4 left-28 md:left-28 z-10">
+                <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 flex items-center gap-1.5">
                   <Truck className="h-4 w-4" />
                   Frete reduzido
                 </Badge>
               </div>
             </div>
 
-            {/* Info - Elo7 Style */}
+            {/* Info Section - Reference Style */}
             <div className="flex flex-col">
-              <Link 
-                to="/produtos" 
-                className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-4 w-fit transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Voltar aos produtos
-              </Link>
+              {/* Product Name & Rating */}
+              <h1 className="font-display text-2xl md:text-3xl text-foreground mb-3 leading-tight">
+                {product.name}
+              </h1>
 
               {/* Rating */}
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star 
                       key={i} 
-                      className={`h-5 w-5 ${
+                      className={`h-4 w-4 ${
                         i < product.rating 
                           ? 'text-amber-400 fill-amber-400' 
                           : 'text-muted-foreground/30'
@@ -260,238 +287,252 @@ const ProductPage = () => {
                     />
                   ))}
                 </div>
-                <span className="text-muted-foreground text-sm">({product.rating}.0)</span>
+                <span className="text-sm text-muted-foreground">(45 avaliações)</span>
               </div>
 
-              <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground mb-4 leading-tight">
-                {product.name}
-              </h1>
+              {/* Price Section - Clean Style */}
+              <div className="mb-6">
+                <p className="text-sm text-muted-foreground mb-1">Preço por unidade</p>
+                <p className="text-3xl font-bold text-primary">
+                  R$ {product.price.toFixed(2).replace('.', ',')}
+                </p>
+              </div>
 
-              {/* Elo7 Style Pricing Section */}
-              <div className="bg-card rounded-xl border border-border p-5 mb-6 space-y-4">
-                {/* Unit Price + Min Quantity */}
-                <div className="flex items-baseline justify-between">
+              {/* Description */}
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                {product.description || `Lembrancinha especial com sabonete artesanal. Perfeito para lembrancinhas de maternidade, batizado e eventos especiais.`}
+              </p>
+
+              {/* Technical Specifications */}
+              <div className="bg-muted/50 rounded-xl p-5 mb-6">
+                <h3 className="font-semibold text-foreground mb-4">Especificações Técnicas</h3>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-muted-foreground">Valor unitário</span>
-                    <p className="text-2xl font-semibold text-foreground">
-                      R$ {product.price.toFixed(2).replace('.', ',')}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Código</p>
+                    <p className="text-sm font-medium text-foreground">{productCode}</p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm text-muted-foreground">Compra mínima</span>
-                    <p className="text-lg font-medium text-foreground">{product.minQuantity} un.</p>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Peso</p>
+                    <p className="text-sm font-medium text-foreground">{product.weight}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Dimensões</p>
+                    <p className="text-sm font-medium text-foreground">6 x 6 x 4 cm</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Prazo</p>
+                    <p className="text-sm font-medium text-foreground">Até {product.productionDays} dias úteis</p>
                   </div>
                 </div>
+              </div>
 
-                {/* Divider */}
-                <div className="border-t border-border" />
+              {/* Personalization Field */}
+              <div className="bg-card rounded-xl border border-border p-5 mb-6">
+                <h3 className="font-semibold text-foreground mb-3">Personalização</h3>
+                <Textarea
+                  placeholder="Digite o nome, data ou mensagem para personalização..."
+                  value={personalization}
+                  onChange={(e) => setPersonalization(e.target.value)}
+                  className="min-h-[80px] resize-none"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Informe os dados para personalização do seu produto
+                </p>
+              </div>
 
-                {/* Total Price with Discount */}
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    {product.originalPrice && (
-                      <span className="text-lg text-muted-foreground line-through">
-                        R$ {(product.originalPrice * quantity).toFixed(2).replace('.', ',')}
-                      </span>
-                    )}
-                    {discountPercent && (
-                      <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
-                        -{discountPercent}%
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-3xl font-bold text-foreground">
-                    R$ {totalPrice.toFixed(2).replace('.', ',')}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    ou <span className="font-medium">3x sem juros</span> de R$ {installmentValue.toFixed(2).replace('.', ',')}
-                  </p>
+              {/* Quantity Selector */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium text-foreground">Quantidade</span>
+                  <span className="text-sm text-muted-foreground">(Mínimo: {product.minQuantity})</span>
                 </div>
-
-                {/* PIX Discount */}
-                <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3 flex items-center gap-3">
-                  <div className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                    -{product.pixDiscount}% no Pix
-                  </div>
-                  <span className="text-green-700 dark:text-green-400 font-semibold">
-                    R$ {pixPrice.toFixed(2).replace('.', ',')}
-                  </span>
-                </div>
-
-                {/* Quantity Selector */}
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">Quantidade:</span>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => setQuantity(Math.max(product.minQuantity, quantity - 5))}
+                  <div className="flex items-center border border-border rounded-lg overflow-hidden">
+                    <button 
+                      onClick={() => setQuantity(Math.max(product.minQuantity, quantity - 1))}
                       disabled={quantity <= product.minQuantity}
+                      className="p-3 hover:bg-muted transition-colors disabled:opacity-50"
                     >
-                      -
-                    </Button>
+                      <Minus className="h-4 w-4" />
+                    </button>
                     <Input 
                       type="number"
                       value={quantity}
                       onChange={(e) => setQuantity(Math.max(product.minQuantity, parseInt(e.target.value) || product.minQuantity))}
-                      className="w-20 text-center h-8"
+                      className="w-20 text-center border-0 rounded-none focus-visible:ring-0"
                       min={product.minQuantity}
                     />
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => setQuantity(quantity + 5)}
+                    <button 
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="p-3 hover:bg-muted transition-colors"
                     >
-                      +
-                    </Button>
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="text-lg font-semibold text-foreground">
+                    Total: <span className="text-primary">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Production Time */}
-              <div className="flex items-center gap-3 mb-4 p-3 bg-muted/50 rounded-lg">
-                <Clock className="h-5 w-5 text-primary" />
-                <div>
-                  <span className="text-sm font-medium text-foreground">Feito sob encomenda</span>
-                  <p className="text-xs text-muted-foreground">Prazo de produção: até {product.productionDays} dias úteis</p>
-                </div>
-              </div>
-
-              {/* Freight Calculator */}
-              <div className="bg-card rounded-xl border border-border p-4 mb-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Truck className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Calcular frete</span>
-                </div>
-                <div className="flex gap-2">
+              {/* CEP Calculator */}
+              <div className="bg-card rounded-xl border border-border p-5 mb-6">
+                <h3 className="font-semibold text-foreground mb-3">CEP de Entrega</h3>
+                <div className="flex gap-3">
                   <Input
-                    placeholder="Digite seu CEP"
+                    placeholder="00000-000"
                     value={cep}
                     onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
                     className="flex-1"
                   />
-                  <Button variant="outline" onClick={handleCalculateFreight}>
+                  <Button onClick={handleCalculateFreight} className="bg-primary hover:bg-primary-dark">
                     Calcular
                   </Button>
                 </div>
-                <a 
-                  href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline mt-2 inline-block"
-                >
-                  Não sei meu CEP
-                </a>
               </div>
 
-              {/* Buy Button - Elo7 Orange Style */}
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger asChild>
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                  >
-                    <Package className="h-5 w-5 mr-2" />
-                    Quero comprar
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="font-display text-2xl">
-                      Encomendar {product.name}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                    <div className="bg-muted/50 p-3 rounded-lg text-sm">
-                      <p className="font-medium">Resumo do pedido:</p>
-                      <p className="text-muted-foreground">
-                        {quantity}x {product.name} = R$ {totalPrice.toFixed(2).replace('.', ',')}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Nome completo</label>
-                      <Input 
-                        required 
-                        value={formData.name} 
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                        placeholder="Seu nome" 
-                        className="mt-1" 
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Email</label>
-                      <Input 
-                        required 
-                        type="email" 
-                        value={formData.email} 
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
-                        placeholder="seu@email.com" 
-                        className="mt-1" 
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">WhatsApp</label>
-                      <Input 
-                        required 
-                        value={formData.whatsapp} 
-                        onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })} 
-                        placeholder="(41) 99999-9999" 
-                        className="mt-1" 
-                      />
-                    </div>
+              {/* Action Buttons */}
+              <div className="flex gap-3 mb-4">
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogTrigger asChild>
                     <Button 
-                      type="submit" 
-                      className="w-full bg-orange-500 hover:bg-orange-600 rounded-lg" 
-                      disabled={isSubmitting}
+                      size="lg" 
+                      className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                     >
-                      {isSubmitting ? "Enviando..." : "Enviar Pedido"}
+                      <Package className="h-5 w-5 mr-2" />
+                      Adicionar ao Carrinho
                     </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="font-display text-2xl">
+                        Encomendar {product.name}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                      <div className="bg-muted/50 p-3 rounded-lg text-sm">
+                        <p className="font-medium">Resumo do pedido:</p>
+                        <p className="text-muted-foreground">
+                          {quantity}x {product.name} = R$ {totalPrice.toFixed(2).replace('.', ',')}
+                        </p>
+                        {personalization && (
+                          <p className="text-muted-foreground mt-1">
+                            Personalização: {personalization}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Nome completo</label>
+                        <Input 
+                          required 
+                          value={formData.name} 
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                          placeholder="Seu nome" 
+                          className="mt-1" 
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Email</label>
+                        <Input 
+                          required 
+                          type="email" 
+                          value={formData.email} 
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+                          placeholder="seu@email.com" 
+                          className="mt-1" 
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">WhatsApp</label>
+                        <Input 
+                          required 
+                          value={formData.whatsapp} 
+                          onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })} 
+                          placeholder="(41) 99999-9999" 
+                          className="mt-1" 
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-primary hover:bg-primary-dark rounded-lg" 
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Enviando..." : "Enviar Pedido"}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Favorite Button */}
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-4"
+                  onClick={() => setIsFavorite(!isFavorite)}
+                >
+                  <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                </Button>
+
+                {/* Share Button */}
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-4"
+                  onClick={handleShare}
+                >
+                  <Share2 className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Favorite/Share Labels */}
+              <div className="flex gap-6 text-sm text-muted-foreground mb-6">
+                <button onClick={() => setIsFavorite(!isFavorite)} className="flex items-center gap-1 hover:text-primary">
+                  <Heart className="h-4 w-4" /> Favoritar
+                </button>
+                <button onClick={handleShare} className="flex items-center gap-1 hover:text-primary">
+                  <Share2 className="h-4 w-4" /> Compartilhar
+                </button>
+              </div>
+
+              {/* Trust Badges - Horizontal */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border/50">
+                  <Shield className="h-5 w-5 text-green-600" />
+                  <div>
+                    <span className="text-xs font-medium text-foreground block">Compra Segura e Protegida</span>
+                    <p className="text-[10px] text-muted-foreground">Seu pedido ou seu dinheiro de volta</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border/50">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  <div>
+                    <span className="text-xs font-medium text-foreground block">100% Artesanal</span>
+                    <p className="text-[10px] text-muted-foreground">Feito à mão com carinho</p>
+                  </div>
+                </div>
+              </div>
 
               {/* Elo7 Link */}
               {product.link && (
                 <a 
                   href={product.link} 
                   target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="mt-3"
+                  rel="noopener noreferrer"
                 >
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="w-full border-2 border-primary text-primary hover:bg-primary-light rounded-lg py-5"
+                    className="w-full border-2 border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 rounded-lg py-5"
                   >
                     <ExternalLink className="h-5 w-5 mr-2" />
-                    Ver no Elo7
+                    Comprar no Elo7
                   </Button>
                 </a>
               )}
 
-              {/* Trust Badges */}
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 p-3 bg-card rounded-lg border border-border/50">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <div>
-                    <span className="text-xs font-medium text-foreground">Compra Segura</span>
-                    <p className="text-[10px] text-muted-foreground">Proteção garantida</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-3 bg-card rounded-lg border border-border/50">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <div>
-                    <span className="text-xs font-medium text-foreground">Hipoalergênico</span>
-                    <p className="text-[10px] text-muted-foreground">Matéria-prima segura</p>
-                  </div>
-                </div>
-              </div>
-
               {/* WhatsApp */}
               <a
-                href={`https://wa.me/5541992214299?text=Olá! Tenho interesse no produto: ${product.name} (${quantity} unidades)`}
+                href={`https://wa.me/5541992214299?text=Olá! Tenho interesse no produto: ${product.name} (${quantity} unidades)${personalization ? ` - Personalização: ${personalization}` : ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 p-4 mt-4 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
@@ -504,7 +545,7 @@ const ProductPage = () => {
             </div>
           </div>
 
-          {/* Description Section - Enhanced */}
+          {/* Description Section */}
           <div className="mb-16">
             <h2 className="font-display text-2xl text-foreground mb-6">Descrição do produto</h2>
             <div className="grid lg:grid-cols-3 gap-6">
@@ -544,7 +585,7 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
                   </li>
                   <li className="flex items-start gap-3 text-sm">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                    <span className="text-muted-foreground">Aromas: Lavanda, Capim Limão, Mamãe e Bebê, Flor de Cerejeira</span>
+                    <span className="text-muted-foreground">Aromas: Lavanda, Capim Limão, Mamãe e Bebê</span>
                   </li>
                 </ul>
               </div>
