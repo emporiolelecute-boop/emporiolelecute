@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, ZoomIn, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface ProductGalleryProps {
   images: string[];
@@ -11,6 +12,12 @@ interface ProductGalleryProps {
 const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -24,22 +31,81 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
     setCurrentIndex(index);
   };
 
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        goToNext();
+      } else {
+        goToPrevious();
+      }
+    }
+    setTouchStart(null);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goToPrevious();
+      if (e.key === 'ArrowRight') goToNext();
+      if (e.key === 'Escape') setIsZoomed(false);
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="relative">
+    <div className={cn(
+      "relative transition-all duration-500",
+      isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+    )}>
       {/* Main Image */}
-      <div className="relative aspect-square rounded-3xl overflow-hidden bg-card shadow-lg group">
-        <img
-          src={images[currentIndex]}
-          alt={`${productName} - Imagem ${currentIndex + 1}`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
-        />
+      <div 
+        className="relative aspect-square rounded-2xl lg:rounded-3xl overflow-hidden bg-muted shadow-lg group cursor-zoom-in"
+        onClick={() => setIsZoomed(true)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Image with fade transition */}
+        <div className="relative w-full h-full">
+          {images.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt={`${productName} - Imagem ${index + 1}`}
+              className={cn(
+                "absolute inset-0 w-full h-full object-cover transition-all duration-500",
+                index === currentIndex 
+                  ? "opacity-100 scale-100" 
+                  : "opacity-0 scale-105"
+              )}
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+          ))}
+        </div>
 
         {/* Zoom Button */}
         <button
-          onClick={() => setIsZoomed(true)}
-          className="absolute top-4 right-4 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsZoomed(true);
+          }}
+          className="absolute top-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+          aria-label="Ampliar imagem"
         >
           <ZoomIn className="h-5 w-5 text-foreground" />
         </button>
@@ -48,15 +114,21 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
         {images.length > 1 && (
           <>
             <button
-              onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious();
+              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
               aria-label="Imagem anterior"
             >
               <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
             <button
-              onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
               aria-label="Próxima imagem"
             >
               <ChevronRight className="h-5 w-5 text-foreground" />
@@ -66,31 +138,47 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
 
         {/* Badge */}
         {badge && (
-          <span className="absolute top-6 left-6 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold">
+          <span className="absolute top-5 left-5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold shadow-lg animate-pulse">
             {badge}
           </span>
         )}
 
-        {/* Counter */}
+        {/* Dots Navigation (mobile friendly) */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-background/80 backdrop-blur-sm rounded-full text-xs font-medium">
-            {currentIndex + 1} / {images.length}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-3 py-2 bg-background/80 backdrop-blur-sm rounded-full">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToSlide(index);
+                }}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all duration-300",
+                  index === currentIndex 
+                    ? "bg-primary w-6" 
+                    : "bg-muted-foreground/40 hover:bg-muted-foreground/60"
+                )}
+                aria-label={`Ver imagem ${index + 1}`}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails - Desktop */}
       {images.length > 1 && (
-        <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+        <div className="hidden sm:flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
           {images.map((image, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all duration-200 ${
+              className={cn(
+                "flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 relative group",
                 index === currentIndex
-                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                  : "opacity-60 hover:opacity-100"
-              }`}
+                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
+                  : "opacity-70 hover:opacity-100 hover:scale-105"
+              )}
             >
               <img
                 src={image}
@@ -98,38 +186,96 @@ const ProductGallery = ({ images, productName, badge }: ProductGalleryProps) => 
                 className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
               />
+              {index === currentIndex && (
+                <div className="absolute inset-0 bg-primary/10" />
+              )}
             </button>
           ))}
         </div>
       )}
 
-      {/* Zoom Dialog */}
+      {/* Zoom Dialog - Fullscreen Gallery */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl p-0 bg-transparent border-none">
-          <div className="relative">
-            <img
-              src={images[currentIndex]}
-              alt={`${productName} - Imagem ampliada`}
-              className="w-full h-auto max-h-[90vh] object-contain rounded-xl"
-              loading="eager"
-              decoding="async"
-            />
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-background/95 backdrop-blur-xl border-none">
+          <div className="relative h-full flex flex-col">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsZoomed(false)}
+              className="absolute top-4 right-4 z-50 p-2 bg-background/80 rounded-full hover:bg-background transition-colors"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Image Counter */}
+            <div className="absolute top-4 left-4 z-50 px-3 py-1.5 bg-background/80 rounded-full text-sm font-medium">
+              {currentIndex + 1} / {images.length}
+            </div>
+
+            {/* Main Zoomed Image */}
+            <div 
+              className="flex-1 flex items-center justify-center p-8"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <img
+                src={images[currentIndex]}
+                alt={`${productName} - Imagem ampliada`}
+                className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
+                loading="eager"
+                decoding="async"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
+              />
+            </div>
+
+            {/* Navigation Arrows */}
             {images.length > 1 && (
               <>
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-background/90 rounded-full hover:bg-background transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-all hover:scale-110 shadow-lg"
+                  aria-label="Imagem anterior"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-background/90 rounded-full hover:bg-background transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-all hover:scale-110 shadow-lg"
+                  aria-label="Próxima imagem"
                 >
                   <ChevronRight className="h-6 w-6" />
                 </button>
               </>
+            )}
+
+            {/* Thumbnail Strip */}
+            {images.length > 1 && (
+              <div className="flex justify-center gap-2 p-4 bg-background/50">
+                {images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={cn(
+                      "w-16 h-16 rounded-lg overflow-hidden transition-all duration-300",
+                      index === currentIndex
+                        ? "ring-2 ring-primary scale-110"
+                        : "opacity-60 hover:opacity-100"
+                    )}
+                  >
+                    <img
+                      src={image}
+                      alt={`Miniatura ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         </DialogContent>
