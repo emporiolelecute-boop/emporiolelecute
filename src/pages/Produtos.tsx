@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
+import Chatbot from "@/components/Chatbot";
 import { products, categories, occasions } from "@/data/products";
 
 const Produtos = () => {
@@ -193,6 +194,7 @@ const Produtos = () => {
       
       <Footer />
       <WhatsAppButton />
+      <Chatbot />
     </div>
   );
 };
