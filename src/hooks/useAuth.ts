@@ -11,20 +11,19 @@ export function useAuth() {
 
   const checkAdminRole = useCallback(async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+      // Prefer server-side role check (SECURITY DEFINER), avoids any RLS/policy edge cases
+      const { data: hasAdminRole, error: rpcError } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
 
-      if (error) {
-        console.error('Error checking admin role:', error);
+      if (rpcError) {
+        console.error('Error checking admin role (rpc):', rpcError);
         setIsAdmin(false);
         return;
       }
 
-      setIsAdmin(!!data);
+      setIsAdmin(!!hasAdminRole);
     } finally {
       // Ensure we always mark the role check as completed
       setAdminChecked(true);
