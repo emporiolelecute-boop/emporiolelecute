@@ -45,7 +45,6 @@ const ProductPage = () => {
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
-  const [cep, setCep] = useState("");
   const [personalization, setPersonalization] = useState("");
   const [addedToCart, setAddedToCart] = useState(false);
   const { toast } = useToast();
@@ -121,20 +120,6 @@ const ProductPage = () => {
     setAddedToCart(true);
   };
 
-  const handleCalculateFreight = () => {
-    if (cep.length < 8) {
-      toast({
-        title: "CEP inválido",
-        description: "Digite um CEP válido com 8 dígitos.",
-        variant: "destructive"
-      });
-      return;
-    }
-    toast({
-      title: "Frete calculado",
-      description: "PAC: R$ 18,90 (5-8 dias úteis) | SEDEX: R$ 32,50 (2-3 dias úteis)",
-    });
-  };
 
   const handleShare = async () => {
     if (navigator.share && product) {
@@ -324,17 +309,24 @@ const ProductPage = () => {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border border-border rounded-lg overflow-hidden">
                     <button 
-                      onClick={() => setQuantity(Math.max(product.minQuantity, quantity - 1))}
+                      onClick={() => quantity > product.minQuantity && setQuantity(quantity - 1)}
                       disabled={quantity <= product.minQuantity}
-                      className="p-3 hover:bg-muted transition-colors disabled:opacity-50"
+                      className="p-3 hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <Input 
+                    <input 
                       type="number"
                       value={quantity}
-                      onChange={(e) => setQuantity(Math.max(product.minQuantity, parseInt(e.target.value) || product.minQuantity))}
-                      className="w-20 text-center border-0 rounded-none focus-visible:ring-0"
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val >= product.minQuantity) {
+                          setQuantity(val);
+                        } else if (e.target.value === '') {
+                          setQuantity(product.minQuantity);
+                        }
+                      }}
+                      className="w-20 text-center border-0 bg-transparent focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       min={product.minQuantity}
                     />
                     <button 
@@ -350,20 +342,11 @@ const ProductPage = () => {
                 </div>
               </div>
 
-              {/* CEP Calculator */}
-              <div className="bg-card rounded-xl border border-border p-5 mb-6">
-                <h3 className="font-semibold text-foreground mb-3">CEP de Entrega</h3>
-                <div className="flex gap-3">
-                  <Input
-                    placeholder="00000-000"
-                    value={cep}
-                    onChange={(e) => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleCalculateFreight} className="bg-primary hover:bg-primary-dark">
-                    Calcular
-                  </Button>
-                </div>
+              {/* Note about shipping */}
+              <div className="bg-primary-light/50 rounded-xl border border-primary/20 p-4 mb-6">
+                <p className="text-sm text-foreground/80 text-center">
+                  <span className="font-semibold text-primary">📦 Frete:</span> O valor do frete será calculado após a confirmação do pedido via WhatsApp.
+                </p>
               </div>
 
               {/* Action Buttons */}

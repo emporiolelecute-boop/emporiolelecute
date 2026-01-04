@@ -47,8 +47,11 @@ const Header = () => {
     if (location.pathname === '/') {
       scrollToSection(link.section);
     } else {
-      // Navigate to home page with hash, then scroll
-      navigate(link.href);
+      // Navigate to home page first, then scroll after a short delay
+      navigate('/');
+      setTimeout(() => {
+        scrollToSection(link.section!);
+      }, 100);
     }
   };
 
