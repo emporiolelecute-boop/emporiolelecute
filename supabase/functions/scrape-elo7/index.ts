@@ -1,12 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ProductData {
+interface ScrapedProduct {
   name: string;
   price: number;
   originalPrice?: number;
@@ -17,226 +16,264 @@ interface ProductData {
   slug: string;
 }
 
-function extractProductId(url: string): string {
-  const match = url.match(/\/dp\/([A-Z0-9]+)/);
-  return match ? match[1] : '';
-}
-
-function generateSlug(name: string): string {
+function createSlug(name: string): string {
   return name
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 50);
 }
 
-async function scrapeElo7Product(url: string): Promise<ProductData | null> {
+function extractProductData(markdown: string, html: string, url: string): ScrapedProduct | null {
   try {
-    console.log('Scraping:', url);
-    
-    // Clean URL (remove fragments)
-    const cleanUrl = url.split('#')[0];
-    
-    const response = await fetch(cleanUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-      },
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch:', response.status);
-      return null;
-    }
-
-    const html = await response.text();
-    
-    // Extract product name from title tag
-    const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-    let name = titleMatch ? titleMatch[1].split('|')[0].trim() : '';
-    name = name.replace(/ - Elo7.*$/, '').trim();
-    
-    // Extract price - look for JSON-LD or meta tags
+    let name = '';
     let price = 0;
     let originalPrice: number | undefined;
-    
-    // Try JSON-LD first
+    let minQuantity = 10;
+    let description = '';
+    let images: string[] = [];
+
+    // Extract product name from markdown title or HTML
+    const titleMatch = markdown.match(/^#\s+(.+?)(?:\s*\||\s*-|\n)/m);
+    if (titleMatch) {
+      name = titleMatch[1].trim().replace(/ - Elo7.*$/, '').replace(/\|.*$/, '').trim();
+    }
+
+    // Fallback: try from HTML title
+    if (!name) {
+      const htmlTitleMatch = html.match(/<title>([^<]+)<\/title>/i);
+      if (htmlTitleMatch) {
+        name = htmlTitleMatch[1].split('|')[0].split('-')[0].trim();
+      }
+    }
+
+    // Try JSON-LD for structured data
     const jsonLdMatch = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi);
     if (jsonLdMatch) {
       for (const match of jsonLdMatch) {
         try {
           const jsonContent = match.replace(/<script[^>]*>|<\/script>/gi, '');
           const data = JSON.parse(jsonContent);
-          if (data['@type'] === 'Product' && data.offers) {
-            price = parseFloat(data.offers.price) || 0;
+          if (data['@type'] === 'Product') {
+            if (!name && data.name) name = data.name;
+            if (data.offers?.price) price = parseFloat(data.offers.price);
+            if (data.image) {
+              const imgArray = Array.isArray(data.image) ? data.image : [data.image];
+              images = imgArray.slice(0, 5);
+            }
             break;
           }
         } catch (e) {
-          // Continue to next match
+          // Continue
         }
       }
     }
-    
-    // Fallback: look for price in HTML
+
+    // Extract price from markdown - look for R$ pattern
     if (price === 0) {
-      const priceMatch = html.match(/R\$\s*([\d.,]+)/);
-      if (priceMatch) {
-        price = parseFloat(priceMatch[1].replace('.', '').replace(',', '.')) || 0;
+      const priceMatches = markdown.match(/R\$\s*([\d.,]+)/g);
+      if (priceMatches && priceMatches.length > 0) {
+        const firstPrice = priceMatches[0].replace(/R\$\s*/, '').replace('.', '').replace(',', '.');
+        price = parseFloat(firstPrice);
+        
+        if (priceMatches.length > 1) {
+          const secondPrice = priceMatches[1].replace(/R\$\s*/, '').replace('.', '').replace(',', '.');
+          const secondPriceNum = parseFloat(secondPrice);
+          if (secondPriceNum > price) {
+            originalPrice = secondPriceNum;
+          }
+        }
       }
     }
-    
+
     // Extract minimum quantity
-    let minQuantity = 10;
-    const minQtyMatch = html.match(/[Pp]edido\s+m[íi]nimo\s+(?:de\s+)?(\d+)/);
+    const minQtyMatch = markdown.match(/(?:quantidade\s*mínima|pedido\s*mínimo|mín[.:]?\s*|m[íi]nimo\s*(?:de\s*)?)\s*:?\s*(\d+)/i);
     if (minQtyMatch) {
-      minQuantity = parseInt(minQtyMatch[1]) || 10;
+      minQuantity = parseInt(minQtyMatch[1], 10);
     }
-    
-    // Extract images - look for high quality versions
-    const images: string[] = [];
-    const imgRegex = /https:\/\/img\.elo7\.com\.br\/product\/(?:685x685|zoom)\/([A-Z0-9]+)\/[^"'\s]+\.jpg/gi;
-    let imgMatch;
-    const seenCodes = new Set<string>();
-    
-    while ((imgMatch = imgRegex.exec(html)) !== null) {
-      const code = imgMatch[1];
-      if (!seenCodes.has(code)) {
-        seenCodes.add(code);
-        // Use 685x685 version for consistency
-        const imgUrl = `https://img.elo7.com.br/product/685x685/${code}/${generateSlug(name)}.jpg`;
-        images.push(imgMatch[0]);
-        if (images.length >= 5) break;
+
+    // Extract description
+    const descMatch = markdown.match(/^#.+\n+([^#\n].{20,300})/m);
+    if (descMatch) {
+      description = descMatch[1].trim().substring(0, 300);
+    }
+
+    // Extract images from HTML
+    if (images.length === 0) {
+      const imgRegex = /https:\/\/img\.elo7\.com\.br\/product\/(?:685x685|zoom|original)\/([A-Z0-9]+)\/[^"'\s]+\.(?:jpg|jpeg|png|webp)/gi;
+      let imgMatch;
+      const seenCodes = new Set<string>();
+      
+      while ((imgMatch = imgRegex.exec(html)) !== null) {
+        const code = imgMatch[1];
+        if (!seenCodes.has(code) && images.length < 5) {
+          seenCodes.add(code);
+          images.push(imgMatch[0]);
+        }
       }
     }
-    
-    // Extract description
-    let description = '';
-    const descMatch = html.match(/class="product-description[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    if (descMatch) {
-      description = descMatch[1]
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .substring(0, 500);
+
+    // Try markdown images
+    if (images.length === 0) {
+      const mdImgMatches = markdown.matchAll(/!\[[^\]]*\]\(([^)]+elo7[^)]+)\)/g);
+      for (const match of mdImgMatches) {
+        if (images.length < 5) {
+          images.push(match[1]);
+        }
+      }
     }
-    
+
+    // Any elo7 image URL
+    if (images.length === 0) {
+      const anyImgMatch = html.matchAll(/https:\/\/img\.elo7\.com\.br[^"'\s]+\.(?:jpg|jpeg|png|webp)/gi);
+      for (const match of anyImgMatch) {
+        if (images.length < 5 && !images.includes(match[0])) {
+          images.push(match[0]);
+        }
+      }
+    }
+
     if (!name || price === 0) {
-      console.error('Could not extract required data from:', url);
+      console.log(`Failed to extract essential data from ${url}: name="${name}", price=${price}`);
       return null;
     }
-    
+
     return {
       name,
       price,
       originalPrice,
       minQuantity,
-      description,
-      images: images.length > 0 ? images : [`https://img.elo7.com.br/product/685x685/${extractProductId(url)}/product.jpg`],
-      elo7Link: cleanUrl,
-      slug: generateSlug(name),
+      description: description || `${name} - Produto artesanal personalizado do Empório LeleCute`,
+      images,
+      elo7Link: url,
+      slug: createSlug(name),
     };
   } catch (error) {
-    console.error('Error scraping:', url, error);
+    console.error(`Error parsing product from ${url}:`, error);
+    return null;
+  }
+}
+
+async function scrapeUrl(url: string, apiKey: string): Promise<ScrapedProduct | null> {
+  try {
+    console.log(`Scraping: ${url}`);
+    
+    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        formats: ['markdown', 'html'],
+        onlyMainContent: false,
+        waitFor: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Firecrawl error for ${url}: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    
+    if (!data.success) {
+      console.error(`Firecrawl failed for ${url}:`, data.error);
+      return null;
+    }
+
+    const markdown = data.data?.markdown || '';
+    const html = data.data?.html || '';
+
+    return extractProductData(markdown, html, url);
+  } catch (error) {
+    console.error(`Error scraping ${url}:`, error);
     return null;
   }
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { urls, saveToDb } = await req.json();
-    
-    if (!urls || !Array.isArray(urls)) {
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!apiKey) {
+      console.error('FIRECRAWL_API_KEY not configured');
       return new Response(
-        JSON.stringify({ error: 'URLs array is required' }),
+        JSON.stringify({ 
+          success: false, 
+          error: 'Firecrawl não configurado. Conecte o Firecrawl nas configurações do projeto.' 
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { urls } = await req.json();
+
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'URLs são obrigatórias' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Processing ${urls.length} URLs`);
-    
-    const results: ProductData[] = [];
+    console.log(`Starting scrape of ${urls.length} URLs with Firecrawl`);
+
+    const products: ScrapedProduct[] = [];
     const errors: string[] = [];
-    
-    // Process URLs in batches of 3 to avoid rate limiting
-    for (let i = 0; i < urls.length; i += 3) {
-      const batch = urls.slice(i, i + 3);
-      const batchPromises = batch.map((url: string) => scrapeElo7Product(url));
-      const batchResults = await Promise.all(batchPromises);
+
+    // Process URLs in batches of 3 to avoid rate limits
+    const batchSize = 3;
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
       
-      for (let j = 0; j < batchResults.length; j++) {
-        if (batchResults[j]) {
-          results.push(batchResults[j]!);
+      console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(urls.length/batchSize)}`);
+      
+      const results = await Promise.all(
+        batch.map(url => scrapeUrl(url, apiKey))
+      );
+
+      results.forEach((product, index) => {
+        if (product) {
+          products.push(product);
+          console.log(`✓ Extracted: ${product.name} - R$${product.price}`);
         } else {
-          errors.push(batch[j]);
+          errors.push(batch[index]);
+          console.log(`✗ Failed: ${batch[index]}`);
         }
-      }
-      
-      // Small delay between batches
-      if (i + 3 < urls.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      });
+
+      // Delay between batches to respect rate limits
+      if (i + batchSize < urls.length) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
     }
 
-    // Save to database if requested
-    if (saveToDb && results.length > 0) {
-      const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-      
-      if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        
-        const productsToInsert = results.map(p => ({
-          name: p.name,
-          slug: p.slug + '-' + Date.now().toString(36).slice(-4), // Add unique suffix
-          price: p.price,
-          original_price: p.originalPrice,
-          min_quantity: p.minQuantity,
-          description: p.description,
-          images: p.images,
-          elo7_link: p.elo7Link,
-          is_active: true,
-          rating: 5.0,
-          pix_discount: 3,
-          production_days: 7,
-        }));
-        
-        const { data, error } = await supabase
-          .from('products')
-          .upsert(productsToInsert, { onConflict: 'slug' })
-          .select();
-        
-        if (error) {
-          console.error('Database error:', error);
-          return new Response(
-            JSON.stringify({ error: 'Failed to save products', details: error }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        
-        console.log(`Saved ${data?.length || 0} products to database`);
-      }
-    }
+    console.log(`Scrape complete: ${products.length} success, ${errors.length} failed`);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
-        scraped: results.length,
+        scraped: products.length,
         failed: errors.length,
-        products: results,
+        products,
         errors,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Handler error:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Erro desconhecido' 
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
