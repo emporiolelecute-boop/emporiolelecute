@@ -4,7 +4,6 @@ import {
   ArrowLeft, 
   Star, 
   Send, 
-  ExternalLink, 
   Truck, 
   Shield, 
   Clock, 
@@ -15,7 +14,8 @@ import {
   Share2,
   ChevronRight,
   Minus,
-  Plus
+  Plus,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -511,24 +511,6 @@ const ProductPage = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Elo7 Link */}
-              {product.link && (
-                <a 
-                  href={product.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    className="w-full border-2 border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 rounded-lg py-5"
-                  >
-                    <ExternalLink className="h-5 w-5 mr-2" />
-                    Comprar no Elo7
-                  </Button>
-                </a>
-              )}
 
               {/* WhatsApp */}
               <a
