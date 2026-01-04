@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import {
-  useDbProduct,
+  useDbProductById,
   useDbCategories,
   useDbOccasions,
   useCreateProduct,
@@ -31,7 +31,7 @@ const AdminProductForm = () => {
   const { toast } = useToast();
   const isEditing = !!id;
 
-  const { data: existingProduct, isLoading: loadingProduct } = useDbProduct(id || '');
+  const { data: existingProduct, isLoading: loadingProduct } = useDbProductById(id || '');
   const { data: categories } = useDbCategories();
   const { data: occasions } = useDbOccasions();
   const createProduct = useCreateProduct();
