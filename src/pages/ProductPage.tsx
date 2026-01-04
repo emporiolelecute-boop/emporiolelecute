@@ -504,13 +504,74 @@ const ProductPage = () => {
             </div>
           </div>
 
-          {/* Description Section */}
+          {/* Description Section - Enhanced */}
           <div className="mb-16">
-            <h2 className="font-display text-2xl text-foreground mb-4">Descrição do produto</h2>
-            <div className="bg-card rounded-xl border border-border p-6">
-              <p className="text-muted-foreground leading-relaxed">
-                {product.longDescription || product.description}
-              </p>
+            <h2 className="font-display text-2xl text-foreground mb-6">Descrição do produto</h2>
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Main Description */}
+              <div className="lg:col-span-2 bg-card rounded-xl border border-border p-6">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {product.longDescription || product.description || `${product.name} artesanal da LeleCute.
+
+Cada peça é feita à mão com ingredientes hipoalergênicos de alta qualidade. Perfeito para lembrancinhas de maternidade, chá de bebê, batizado, casamento, aniversário e eventos corporativos.
+
+Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclusivos.`}
+                </p>
+              </div>
+
+              {/* Features */}
+              <div className="bg-muted/50 rounded-xl p-6">
+                <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  Diferenciais
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3 text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <span className="text-muted-foreground">Feito à mão com ingredientes hipoalergênicos</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <span className="text-muted-foreground">Personalização de cores e aromas</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <span className="text-muted-foreground">Tag/cinta personalizada com seu tema</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <span className="text-muted-foreground">Embalagem especial para presente</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <span className="text-muted-foreground">Aromas: Lavanda, Capim Limão, Mamãe e Bebê, Flor de Cerejeira</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Info Cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Package className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Mínimo</h3>
+              <p className="text-sm text-muted-foreground">{product.minQuantity} unidades</p>
+            </div>
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Clock className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Produção</h3>
+              <p className="text-sm text-muted-foreground">Até {product.productionDays} dias úteis</p>
+            </div>
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Truck className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Envio</h3>
+              <p className="text-sm text-muted-foreground">Para todo Brasil</p>
+            </div>
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Shield className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-foreground mb-1">Qualidade</h3>
+              <p className="text-sm text-muted-foreground">100% artesanal</p>
             </div>
           </div>
 
