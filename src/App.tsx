@@ -9,6 +9,13 @@ import Produtos from "./pages/Produtos";
 import ProductPage from "./pages/ProductPage";
 import Envio from "./pages/Envio";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminProductForm from "./pages/admin/AdminProductForm";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminOccasions from "./pages/admin/AdminOccasions";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
 const queryClient = new QueryClient();
@@ -40,6 +47,18 @@ const App = () => {
               <Route path="/produtos/:slug" element={<ProductPage />} />
               <Route path="/envio" element={<Envio />} />
               <Route path="/envio-brasil" element={<Envio />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="produtos" element={<AdminProducts />} />
+                <Route path="produtos/novo" element={<AdminProductForm />} />
+                <Route path="produtos/:id" element={<AdminProductForm />} />
+                <Route path="categorias" element={<AdminCategories />} />
+                <Route path="ocasioes" element={<AdminOccasions />} />
+              </Route>
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
