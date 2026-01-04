@@ -14,7 +14,8 @@ import {
   Upload,
   Sparkles,
   ShoppingCart,
-  Users
+  Users,
+  Settings
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ const menuItems = [
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
+  { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
 ];
 
 const AdminLayout = () => {
