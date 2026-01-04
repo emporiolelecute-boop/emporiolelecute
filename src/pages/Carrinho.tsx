@@ -1,25 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, Trash2, Minus, Plus, ArrowLeft, MessageCircle, MapPin, User, Mail, Phone, Truck, Package, Loader2, CheckCircle } from "lucide-react";
+import { ShoppingCart, Trash2, Minus, Plus, ArrowLeft, MessageCircle, MapPin, User, Mail, Phone, Package, Loader2, CheckCircle, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-interface ShippingOption {
-  id: string;
-  name: string;
-  price: number;
-  days: string;
-  company: string;
-}
 
 interface AddressData {
   cep: string;
@@ -67,8 +58,6 @@ const Carrinho = () => {
     state: '',
   });
   
-  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const [selectedShipping, setSelectedShipping] = useState<string>('');
   const [loadingCep, setLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -92,32 +81,6 @@ const Carrinho = () => {
             city: data.localidade || '',
             state: data.uf || '',
           }));
-          
-          // Simulate shipping options based on location
-          const baseShipping = data.uf === 'PR' ? 15 : data.uf === 'SP' || data.uf === 'SC' ? 22 : 35;
-          setShippingOptions([
-            {
-              id: 'pac',
-              name: 'PAC',
-              price: baseShipping,
-              days: data.uf === 'PR' ? '3-5 dias úteis' : '5-10 dias úteis',
-              company: 'Correios',
-            },
-            {
-              id: 'sedex',
-              name: 'SEDEX',
-              price: baseShipping + 15,
-              days: data.uf === 'PR' ? '1-2 dias úteis' : '2-4 dias úteis',
-              company: 'Correios',
-            },
-            {
-              id: 'express',
-              name: 'Entrega Expressa',
-              price: baseShipping + 25,
-              days: '1 dia útil',
-              company: 'Região Metropolitana de Curitiba',
-            },
-          ]);
         } else {
           toast({
             title: "CEP não encontrado",
@@ -137,10 +100,6 @@ const Carrinho = () => {
     }
   };
 
-  const selectedShippingOption = shippingOptions.find(s => s.id === selectedShipping);
-  const shippingPrice = selectedShippingOption?.price || 0;
-  const grandTotal = total + shippingPrice;
-
   const formatWhatsAppMessage = (code: string) => {
     const itemsList = items
       .map((item, index) => 
@@ -148,7 +107,7 @@ const Carrinho = () => {
       )
       .join('\n\n');
 
-    return `🛒 *NOVO PEDIDO - EMPÓRIO LELECUTE*\n\n📋 *Código do Pedido:* ${code}\n\n👤 *DADOS DO CLIENTE*\nNome: ${customer.name}\nTelefone: ${customer.phone}\nEmail: ${customer.email}\n\n📍 *ENDEREÇO DE ENTREGA*\nCEP: ${address.cep}\nEndereço: ${address.street} ${address.number}${address.complement ? `, ${address.complement}` : ''}\nCidade: ${address.city} - ${address.state}\n\n📦 *PRODUTOS*\n${itemsList}\n\n🚚 *FRETE SELECIONADO*\nTransportadora: ${selectedShippingOption?.name} - ${selectedShippingOption?.company}\nPrazo: ${selectedShippingOption?.days}\nValor: R$ ${shippingPrice.toFixed(2).replace('.', ',')}\n\n💰 *VALORES*\nSubtotal: R$ ${total.toFixed(2).replace('.', ',')}\nFrete: R$ ${shippingPrice.toFixed(2).replace('.', ',')}\n*TOTAL: R$ ${grandTotal.toFixed(2).replace('.', ',')}*\n\n_Aguardando confirmação e dados para pagamento_`;
+    return `🛒 *NOVO PEDIDO - EMPÓRIO LELECUTE*\n\n📋 *Código do Pedido:* ${code}\n\n👤 *DADOS DO CLIENTE*\nNome: ${customer.name}\nTelefone: ${customer.phone}\nEmail: ${customer.email}\n\n📍 *ENDEREÇO DE ENTREGA*\nCEP: ${address.cep}\nEndereço: ${address.street} ${address.number}${address.complement ? `, ${address.complement}` : ''}\nBairro: ${address.neighborhood || '-'}\nCidade: ${address.city} - ${address.state}\n\n📦 *PRODUTOS*\n${itemsList}\n\n💰 *SUBTOTAL DOS PRODUTOS: R$ ${total.toFixed(2).replace('.', ',')}*\n\n🚚 *FRETE:* A calcular\n\n_Aguardando cálculo do frete e confirmação do pedido_`;
   };
 
   const handleSubmitOrder = async () => {
@@ -166,15 +125,6 @@ const Carrinho = () => {
       toast({
         title: "Endereço incompleto",
         description: "Preencha o endereço completo",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedShipping) {
-      toast({
-        title: "Selecione o frete",
-        description: "Escolha uma opção de entrega",
         variant: "destructive",
       });
       return;
@@ -200,12 +150,12 @@ const Carrinho = () => {
           address_neighborhood: address.neighborhood || null,
           address_city: address.city,
           address_state: address.state,
-          shipping_method: selectedShippingOption?.name || '',
-          shipping_company: selectedShippingOption?.company || null,
-          shipping_days: selectedShippingOption?.days || null,
-          shipping_price: shippingPrice,
+          shipping_method: 'A calcular via WhatsApp',
+          shipping_company: null,
+          shipping_days: null,
+          shipping_price: 0,
           subtotal: total,
-          total: grandTotal,
+          total: total,
           status: 'pending',
         })
         .select()
@@ -251,10 +201,9 @@ const Carrinho = () => {
             price: item.price,
             personalization: item.personalization,
           })),
-          shipping: selectedShippingOption,
           subtotal: total,
-          shippingPrice,
-          total: grandTotal,
+          shippingPrice: 0,
+          total: total,
         },
       });
 
@@ -305,7 +254,7 @@ const Carrinho = () => {
               {orderCode}
             </p>
             <p className="text-muted-foreground mb-8">
-              Finalize seu pedido pelo WhatsApp. Você receberá uma cópia por email.
+              Finalize seu pedido pelo WhatsApp. O frete será calculado e informado antes da confirmação final.
             </p>
             <div className="space-y-3">
               <Button 
@@ -584,53 +533,21 @@ const Carrinho = () => {
                 </div>
               </div>
 
-              {/* Shipping Options */}
-              {shippingOptions.length > 0 && (
-                <div className="bg-card rounded-xl border border-border p-4 md:p-6">
-                  <h2 className="font-display text-xl text-foreground mb-4 flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-primary" />
-                    Opções de Entrega
-                  </h2>
-                  <RadioGroup value={selectedShipping} onValueChange={setSelectedShipping}>
-                    <div className="space-y-3">
-                      {shippingOptions.map((option) => (
-                        <label
-                          key={option.id}
-                          className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-colors ${
-                            selectedShipping === option.id 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                        >
-                          <RadioGroupItem value={option.id} id={option.id} />
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground">
-                              {option.name} - {option.company}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {option.days}
-                            </p>
-                          </div>
-                          <p className="font-bold text-primary">
-                            R$ {option.price.toFixed(2).replace('.', ',')}
-                          </p>
-                        </label>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                  
-                  {/* Shipping Estimate Notice */}
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-xs text-amber-800 flex items-start gap-2">
-                      <Truck className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>
-                        <strong>Importante:</strong> Os valores de frete apresentados são uma estimativa. 
-                        O valor final será calculado e confirmado pelo WhatsApp antes da finalização do pedido.
-                      </span>
+              {/* Shipping Notice */}
+              <div className="bg-primary-light/50 rounded-xl border border-primary/20 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Truck className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Sobre o Frete</h3>
+                    <p className="text-sm text-muted-foreground">
+                      O valor do frete será calculado e informado pelo WhatsApp após o envio do pedido. 
+                      Trabalhamos com Correios (PAC e SEDEX) e o valor é calculado de acordo com o CEP de destino e peso dos produtos.
                     </p>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Right Column - Summary */}
@@ -647,23 +564,21 @@ const Carrinho = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Frete</span>
-                    <span className="text-foreground">
-                      {selectedShippingOption 
-                        ? `R$ ${shippingPrice.toFixed(2).replace('.', ',')}` 
-                        : 'Selecione'
-                      }
-                    </span>
+                    <span className="text-foreground text-primary font-medium">A calcular</span>
                   </div>
                 </div>
 
                 <Separator className="my-4" />
 
-                <div className="flex justify-between items-center mb-6">
-                  <span className="font-semibold text-foreground">Total</span>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-foreground">Subtotal</span>
                   <span className="text-2xl font-bold text-primary">
-                    R$ {grandTotal.toFixed(2).replace('.', ',')}
+                    R$ {total.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
+                <p className="text-xs text-muted-foreground text-center mb-6">
+                  + frete (calculado via WhatsApp)
+                </p>
 
                 <div className="space-y-3">
                   <Button 

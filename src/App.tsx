@@ -21,6 +21,7 @@ import AdminOccasions from "./pages/admin/AdminOccasions";
 import AdminImport from "./pages/admin/AdminImport";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminSettings from "./pages/admin/AdminSettings";
 import { CartProvider } from "./contexts/CartContext";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
@@ -70,6 +71,7 @@ const App = () => {
                   <Route path="categorias" element={<AdminCategories />} />
                   <Route path="ocasioes" element={<AdminOccasions />} />
                   <Route path="importar" element={<AdminImport />} />
+                  <Route path="configuracoes" element={<AdminSettings />} />
                 </Route>
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

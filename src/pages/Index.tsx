@@ -1,11 +1,12 @@
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
+import HeroSlider from "@/components/HeroSlider";
+import CategoriesHighlight from "@/components/CategoriesHighlight";
 import About from "@/components/About";
-import ProductsSection from "@/components/ProductsSection";
-import Occasions from "@/components/Occasions";
+import BestSellers from "@/components/BestSellers";
+import OccasionsSection from "@/components/OccasionsSection";
 import Testimonials from "@/components/Testimonials";
-import FAQ from "@/components/FAQ";
-import QuoteForm from "@/components/QuoteForm";
+import FAQSection from "@/components/FAQSection";
+import QuoteFormSection from "@/components/QuoteFormSection";
 import InstagramFeed from "@/components/InstagramFeed";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -16,13 +17,14 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <Hero />
+        <HeroSlider />
+        <CategoriesHighlight />
         <About />
-        <ProductsSection />
-        <Occasions />
+        <BestSellers />
+        <OccasionsSection />
         <Testimonials />
-        <FAQ />
-        <QuoteForm />
+        <FAQSection />
+        <QuoteFormSection />
         <InstagramFeed />
       </main>
       <Footer />
