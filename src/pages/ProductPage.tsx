@@ -46,6 +46,7 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(10);
   const [cep, setCep] = useState("");
   const [personalization, setPersonalization] = useState("");
+  const [addedToCart, setAddedToCart] = useState(false);
   const { toast } = useToast();
 
   // Convert to display format
@@ -115,6 +116,7 @@ const ProductPage = () => {
       minQuantity: product.minQuantity,
       quantity,
     });
+    setAddedToCart(true);
   };
 
   const handleCalculateFreight = () => {
@@ -366,11 +368,24 @@ const ProductPage = () => {
               <div className="flex gap-3 mb-4">
                 <Button 
                   size="lg" 
-                  className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  className={`flex-1 rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all ${
+                    addedToCart 
+                      ? 'bg-green-500 hover:bg-green-600 text-white' 
+                      : 'bg-primary hover:bg-primary-dark text-primary-foreground'
+                  }`}
                   onClick={handleAddToCart}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Adicionar ao Carrinho
+                  {addedToCart ? (
+                    <>
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      Adicionado!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Adicionar ao Carrinho
+                    </>
+                  )}
                 </Button>
 
                 {/* Favorite Button */}
@@ -393,6 +408,18 @@ const ProductPage = () => {
                   <Share2 className="h-5 w-5" />
                 </Button>
               </div>
+
+              {/* Go to Cart Button - Shows after adding to cart */}
+              {addedToCart && (
+                <Button 
+                  size="lg" 
+                  className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all mb-4"
+                  onClick={() => navigate('/carrinho')}
+                >
+                  Finalizar Compra Agora
+                  <ChevronRight className="h-5 w-5 ml-2" />
+                </Button>
+              )}
 
               {/* Favorite/Share Labels */}
               <div className="flex gap-6 text-sm text-muted-foreground mb-6">
