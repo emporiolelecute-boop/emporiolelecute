@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ExternalLink, Heart, Star, ArrowRight, Send, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Heart, Star, ArrowRight, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -47,7 +48,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("send-order-email", {
+      const { error } = await supabase.functions.invoke("send-order-email", {
         body: {
           ...formData,
           product: product.name,
@@ -82,7 +83,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       itemType="https://schema.org/Product"
     >
       {/* Product Image */}
-      <div className="relative aspect-square overflow-hidden">
+      <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden">
         <img 
           src={product.image}
           alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
@@ -102,6 +103,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         
         {/* Favorite Button */}
         <button 
+          onClick={(e) => e.preventDefault()}
           className="absolute top-4 right-4 w-10 h-10 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-soft opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
           aria-label="Adicionar aos favoritos"
         >
@@ -109,18 +111,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </button>
         
         {/* Quick View Overlay */}
-        <a 
-          href={product.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute inset-0 bg-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
-        >
+        <div className="absolute inset-0 bg-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <span className="bg-primary-foreground text-foreground px-6 py-3 rounded-full font-semibold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-            Ver no Elo7
-            <ExternalLink className="h-4 w-4" />
+            Ver Detalhes
+            <ArrowRight className="h-4 w-4" />
           </span>
-        </a>
-      </div>
+        </div>
+      </Link>
       
       {/* Product Info */}
       <div className="p-6">
@@ -133,9 +130,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
         
         {/* Name */}
-        <h3 className="font-display text-xl text-foreground mb-2 group-hover:text-primary transition-colors" itemProp="name">
-          {product.name}
-        </h3>
+        <Link to={`/produtos/${product.slug}`}>
+          <h3 className="font-display text-xl text-foreground mb-2 group-hover:text-primary transition-colors" itemProp="name">
+            {product.name}
+          </h3>
+        </Link>
         
         {/* Description */}
         <p className="text-sm text-muted-foreground mb-4 line-clamp-3" itemProp="description">
@@ -154,12 +153,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         
         {/* CTA Buttons */}
         <div className="flex gap-2">
-          <a 
-            href={product.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1"
-          >
+          <Link to={`/produtos/${product.slug}`} className="flex-1">
             <Button 
               variant="outline" 
               className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-full transition-all duration-300"
@@ -167,7 +161,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               Ver Detalhes
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
-          </a>
+          </Link>
           
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Filter, Grid, List, ShoppingBag } from "lucide-react";
+import { Search, Grid, List, ShoppingBag, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,13 +8,64 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import Chatbot from "@/components/Chatbot";
-import { products, categories, occasions } from "@/data/products";
+import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
+import type { Product } from "@/data/products";
 
 const Produtos = () => {
+  const { data: dbProducts, isLoading: loadingProducts } = useDbProducts();
+  const { data: dbCategories } = useDbCategories();
+  const { data: dbOccasions } = useDbOccasions();
+  
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Convert db products to Product format
+  const products: Product[] = useMemo(() => {
+    return (dbProducts || [])
+      .filter(p => p.is_active)
+      .map(p => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        description: p.description || '',
+        longDescription: p.long_description || undefined,
+        price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
+        originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
+        image: p.images[0] || '/placeholder.svg',
+        images: p.images,
+        link: p.elo7_link || '',
+        badge: p.badge || undefined,
+        rating: Math.round(p.rating),
+        category: 'outros' as const,
+        occasions: [],
+        keywords: p.keywords,
+        categoryId: p.category_id,
+      }));
+  }, [dbProducts]);
+
+  // Categories with icons
+  const categories = useMemo(() => {
+    return (dbCategories || []).map(c => ({
+      id: c.id,
+      name: c.name,
+      icon: c.slug === 'sabonetes' ? '🧼' : c.slug === 'velas' ? '🕯️' : c.slug === 'kits' ? '🎁' : '✨'
+    }));
+  }, [dbCategories]);
+
+  // Occasions with icons
+  const occasions = useMemo(() => {
+    return (dbOccasions || []).map(o => ({
+      id: o.id,
+      name: o.name,
+      icon: o.slug === 'maternidade' ? '👶' : 
+            o.slug === 'cha-bebe' ? '🍼' : 
+            o.slug === 'batizado' ? '⛪' : 
+            o.slug === 'casamento' ? '💒' : 
+            o.slug === 'aniversario' ? '🎂' : '🏢'
+    }));
+  }, [dbOccasions]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -23,12 +74,12 @@ const Produtos = () => {
         product.description.toLowerCase().includes(search.toLowerCase()) ||
         product.keywords.some(k => k.toLowerCase().includes(search.toLowerCase()));
       
-      const matchesCategory = !selectedCategory || product.category === selectedCategory;
-      const matchesOccasion = !selectedOccasion || product.occasions.includes(selectedOccasion as any);
+      const matchesCategory = !selectedCategory || (product as any).categoryId === selectedCategory;
+      const matchesOccasion = !selectedOccasion; // TODO: filter by occasion when product_occasions is loaded
       
       return matchesSearch && matchesCategory && matchesOccasion;
     });
-  }, [search, selectedCategory, selectedOccasion]);
+  }, [products, search, selectedCategory, selectedOccasion]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,23 +104,21 @@ const Produtos = () => {
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-12">
-          {/* Filters */}
-          <div className="bg-card p-6 rounded-2xl shadow-soft border border-border/50 mb-8">
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        {/* Filters */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Search and View Toggle */}
+            <div className="flex-1 flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nome, tipo ou palavra-chave..."
+                  placeholder="Buscar lembrancinhas..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-12 py-6 rounded-full"
+                  className="pl-10 rounded-full"
                 />
               </div>
-              
-              {/* View Mode */}
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2">
                 <Button
                   variant={viewMode === "grid" ? "default" : "outline"}
                   size="icon"
@@ -88,103 +137,102 @@ const Produtos = () => {
                 </Button>
               </div>
             </div>
-            
-            {/* Category Filters */}
-            <div className="mt-6">
-              <p className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Categorias
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 rounded-full"
-                  onClick={() => setSelectedCategory(null)}
-                >
-                  Todos
-                </Badge>
-                {categories.map((cat) => (
-                  <Badge
-                    key={cat.id}
-                    variant={selectedCategory === cat.id ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 rounded-full"
-                    onClick={() => setSelectedCategory(cat.id)}
-                  >
-                    {cat.icon} {cat.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            
-            {/* Occasion Filters */}
-            <div className="mt-4">
-              <p className="text-sm font-medium text-foreground mb-3">Ocasiões</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={selectedOccasion === null ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 rounded-full"
-                  onClick={() => setSelectedOccasion(null)}
-                >
-                  Todas
-                </Badge>
-                {occasions.map((occ) => (
-                  <Badge
-                    key={occ.id}
-                    variant={selectedOccasion === occ.id ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 rounded-full"
-                    onClick={() => setSelectedOccasion(occ.id)}
-                  >
-                    {occ.icon} {occ.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
           </div>
 
-          {/* Results Count */}
-          <p className="text-muted-foreground mb-6">
-            Exibindo <span className="font-semibold text-foreground">{filteredProducts.length}</span> produtos
-          </p>
-
-          {/* Products Grid */}
-          <div className={`grid gap-8 ${viewMode === "grid" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
-            {filteredProducts.map((product, index) => (
-              <div 
-                key={product.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
+          {/* Category Filters */}
+          <div className="mt-6">
+            <h3 className="text-sm font-medium text-foreground mb-3">Categorias</h3>
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant={selectedCategory === null ? "default" : "outline"}
+                className="cursor-pointer px-4 py-2 text-sm"
+                onClick={() => setSelectedCategory(null)}
               >
-                <ProductCard product={product} />
-              </div>
-            ))}
+                Todos
+              </Badge>
+              {categories.map((category) => (
+                <Badge
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 text-sm"
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  {category.icon} {category.name}
+                </Badge>
+              ))}
+            </div>
           </div>
 
-          {/* No Results */}
-          {filteredProducts.length === 0 && (
+          {/* Occasion Filters */}
+          <div className="mt-4">
+            <h3 className="text-sm font-medium text-foreground mb-3">Ocasiões</h3>
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant={selectedOccasion === null ? "default" : "outline"}
+                className="cursor-pointer px-4 py-2 text-sm"
+                onClick={() => setSelectedOccasion(null)}
+              >
+                Todas
+              </Badge>
+              {occasions.map((occasion) => (
+                <Badge
+                  key={occasion.id}
+                  variant={selectedOccasion === occasion.id ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 text-sm"
+                  onClick={() => setSelectedOccasion(occasion.id)}
+                >
+                  {occasion.icon} {occasion.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Products Grid */}
+        <div className="container mx-auto px-4">
+          {loadingProducts ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <div className={`grid gap-6 ${
+              viewMode === "grid" 
+                ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                : "grid-cols-1 max-w-3xl mx-auto"
+            }`}>
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-16">
-              <p className="text-xl text-muted-foreground mb-4">
-                Nenhum produto encontrado
-              </p>
+              <p className="text-muted-foreground mb-4">Nenhum produto encontrado</p>
               <Button onClick={() => { setSearch(""); setSelectedCategory(null); setSelectedOccasion(null); }}>
                 Limpar filtros
               </Button>
             </div>
           )}
+        </div>
 
-          {/* CTA */}
-          <div className="text-center mt-16 p-8 bg-primary-light rounded-2xl">
-            <h3 className="font-display text-2xl text-foreground mb-4">
+        {/* WhatsApp CTA */}
+        <div className="container mx-auto px-4 mt-16">
+          <div className="bg-gradient-to-r from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-center text-primary-foreground">
+            <h2 className="font-display text-3xl md:text-4xl mb-4">
               Não encontrou o que procura?
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Criamos lembrancinhas sob medida para você! Entre em contato e solicite um orçamento personalizado.
+            </h2>
+            <p className="text-primary-foreground/80 mb-6 max-w-xl mx-auto">
+              Criamos lembrancinhas personalizadas para qualquer ocasião. 
+              Entre em contato pelo WhatsApp e conte-nos sua ideia!
             </p>
             <a
-              href="https://wa.me/5541992214299?text=Olá! Gostaria de encomendar uma lembrancinha personalizada."
+              href="https://wa.me/5541992214299?text=Olá! Gostaria de um orçamento personalizado"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-8">
+              <Button 
+                size="lg" 
+                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full"
+              >
                 Falar no WhatsApp
               </Button>
             </a>

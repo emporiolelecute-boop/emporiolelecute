@@ -1,15 +1,39 @@
-import { ShoppingBag, ArrowRight } from "lucide-react";
+import { ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/data/products";
+import { useDbProducts } from "@/hooks/useProducts";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import type { Product } from "@/data/products";
 
 const ProductsSection = () => {
-  // Show first 9 products on homepage
-  const featuredProducts = products.slice(0, 9);
+  const { data: dbProducts, isLoading } = useDbProducts();
   const [headerRef, headerVisible] = useScrollAnimation<HTMLDivElement>();
   const [gridRef, gridVisible] = useScrollAnimation<HTMLDivElement>({ threshold: 0.05 });
+
+  // Convert db products to Product format for ProductCard
+  const products: Product[] = (dbProducts || [])
+    .filter(p => p.is_active)
+    .slice(0, 9)
+    .map(p => ({
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      description: p.description || '',
+      longDescription: p.long_description || undefined,
+      price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
+      originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
+      image: p.images[0] || '/placeholder.svg',
+      images: p.images,
+      link: p.elo7_link || '',
+      badge: p.badge || undefined,
+      rating: Math.round(p.rating),
+      category: 'outros' as const,
+      occasions: [],
+      keywords: p.keywords,
+    }));
+
+  const totalProducts = dbProducts?.filter(p => p.is_active).length || 0;
 
   return (
     <section 
@@ -44,28 +68,32 @@ const ProductsSection = () => {
           </div>
 
           {/* Products Grid */}
-          <div 
-            ref={gridRef}
-            className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 transition-all duration-700 ${
-              gridVisible ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            {featuredProducts.map((product, index) => (
-              <div 
-                key={product.id}
-                className="transition-all duration-500"
-                style={{ 
-                  transitionDelay: gridVisible ? `${index * 100}ms` : "0ms",
-                  opacity: gridVisible ? 1 : 0,
-                  transform: gridVisible ? "translateY(0)" : "translateY(30px)"
-                }}
-              >
-                <Link to={`/produtos/${product.slug}`}>
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div 
+              ref={gridRef}
+              className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 transition-all duration-700 ${
+                gridVisible ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              {products.map((product, index) => (
+                <div 
+                  key={product.id}
+                  className="transition-all duration-500"
+                  style={{ 
+                    transitionDelay: gridVisible ? `${index * 100}ms` : "0ms",
+                    opacity: gridVisible ? 1 : 0,
+                    transform: gridVisible ? "translateY(0)" : "translateY(30px)"
+                  }}
+                >
                   <ProductCard product={product} />
-                </Link>
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* View All CTA */}
           <div className="text-center">
@@ -75,7 +103,7 @@ const ProductsSection = () => {
                 className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-10 py-6 text-lg shadow-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
               >
                 <ShoppingBag className="h-5 w-5 mr-2" />
-                Ver Todos os {products.length} Produtos
+                Ver Todos os {totalProducts} Produtos
                 <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
