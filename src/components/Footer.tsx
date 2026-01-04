@@ -1,4 +1,5 @@
-import { Heart, Instagram, Facebook, MapPin, Phone, Mail, ExternalLink } from "lucide-react";
+import { Heart, Instagram, Facebook, MapPin, Phone, Mail, ExternalLink, Package } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 
 const Footer = () => {
@@ -26,6 +27,7 @@ const Footer = () => {
           <div>
             <h3 className="font-display text-xl mb-4">Links Úteis</h3>
             <ul className="space-y-3 text-sm text-primary-foreground/80">
+              <li><Link to="/rastrear" className="hover:text-primary transition-colors flex items-center gap-2"><Package className="h-3 w-3" /> Rastrear Pedido</Link></li>
               <li><a href="https://www.elo7.com.br/emporiolelecute" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center gap-2">Loja no Elo7 <ExternalLink className="h-3 w-3" /></a></li>
               <li><a href="https://emporiolelecute.com.br/loja/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center gap-2">Loja Virtual <ExternalLink className="h-3 w-3" /></a></li>
               <li><a href="https://br.pinterest.com/emporiolelecute" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center gap-2">Pinterest <ExternalLink className="h-3 w-3" /></a></li>
