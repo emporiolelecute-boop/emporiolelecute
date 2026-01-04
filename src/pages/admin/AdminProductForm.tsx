@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, X, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImageUploader from '@/components/admin/ImageUploader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -424,30 +425,12 @@ const AdminProductForm = () => {
           <CardHeader>
             <CardTitle className="text-lg font-display">Imagens</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {formData.images.map((image, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={image}
-                  onChange={(e) => handleArrayChange('images', index, e.target.value)}
-                  placeholder="URL da imagem"
-                />
-                {formData.images.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeArrayItem('images', index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <Button type="button" variant="outline" onClick={() => addArrayItem('images')}>
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar imagem
-            </Button>
+          <CardContent>
+            <ImageUploader 
+              images={formData.images}
+              onImagesChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+              maxImages={8}
+            />
           </CardContent>
         </Card>
 

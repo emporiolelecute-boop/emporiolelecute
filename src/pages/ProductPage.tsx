@@ -10,7 +10,8 @@ import {
   Clock, 
   Heart, 
   Package,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,55 +31,81 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
-import { getProductBySlug, products } from "@/data/products";
+import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
+import type { Product } from "@/data/products";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const product = getProductBySlug(slug || "");
+  const { data: dbProduct, isLoading } = useDbProduct(slug || "");
+  const { data: allProducts } = useDbProducts();
+  
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
   const [cep, setCep] = useState("");
   const [formData, setFormData] = useState({ name: "", email: "", whatsapp: "" });
   const { toast } = useToast();
 
-  // Default values for Elo7-style display
-  const minQuantity = 10;
-  const pixDiscount = 3;
-  const productionDays = 7;
-  
-  // Parse price from string to number
-  const priceValue = product ? parseFloat(product.price.replace('R$ ', '').replace(',', '.')) : 0;
-  const originalPriceValue = product?.originalPrice 
-    ? parseFloat(product.originalPrice.replace('R$ ', '').replace(',', '.')) 
-    : null;
+  // Convert to display format
+  const product = dbProduct ? {
+    id: dbProduct.id,
+    slug: dbProduct.slug,
+    name: dbProduct.name,
+    description: dbProduct.description || '',
+    longDescription: dbProduct.long_description || undefined,
+    price: dbProduct.price,
+    originalPrice: dbProduct.original_price,
+    images: dbProduct.images,
+    link: dbProduct.elo7_link || '',
+    badge: dbProduct.badge || undefined,
+    rating: Math.round(dbProduct.rating),
+    minQuantity: dbProduct.min_quantity,
+    pixDiscount: dbProduct.pix_discount,
+    productionDays: dbProduct.production_days,
+  } : null;
 
-  // Calculate totals
-  const totalPrice = priceValue * quantity;
-  const pixPrice = totalPrice * (1 - pixDiscount / 100);
-  const installmentValue = totalPrice / 3;
-  const discountPercent = originalPriceValue 
-    ? Math.round((1 - priceValue / originalPriceValue) * 100) 
-    : null;
+  // Related products
+  const relatedProducts: Product[] = (allProducts || [])
+    .filter(p => p.is_active && p.id !== dbProduct?.id)
+    .slice(0, 4)
+    .map(p => ({
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      description: p.description || '',
+      price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
+      originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
+      image: p.images[0] || '/placeholder.svg',
+      images: p.images,
+      link: p.elo7_link || '',
+      badge: p.badge || undefined,
+      rating: Math.round(p.rating),
+      category: 'outros' as const,
+      occasions: [],
+      keywords: p.keywords,
+    }));
 
   // Track product view
   useEffect(() => {
     if (product) {
-      trackProductView(product.name, product.id, product.price);
+      trackProductView(product.name, product.id, `R$ ${product.price.toFixed(2)}`);
     }
   }, [product]);
 
-  const relatedProducts = products
-    .filter(p => p.id !== product?.id && p.occasions.some(o => product?.occasions.includes(o)))
-    .slice(0, 4);
+  // Set initial quantity to min quantity
+  useEffect(() => {
+    if (product) {
+      setQuantity(product.minQuantity);
+    }
+  }, [product]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
     
-    setIsLoading(true);
+    setIsSubmitting(true);
     trackInquiry(product.name, product.id);
 
     try {
@@ -106,7 +133,7 @@ const ProductPage = () => {
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -125,6 +152,18 @@ const ProductPage = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-24 pb-16 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
@@ -141,6 +180,14 @@ const ProductPage = () => {
     );
   }
 
+  // Calculate totals
+  const totalPrice = product.price * quantity;
+  const pixPrice = totalPrice * (1 - product.pixDiscount / 100);
+  const installmentValue = totalPrice / 3;
+  const discountPercent = product.originalPrice 
+    ? Math.round((1 - product.price / product.originalPrice) * 100) 
+    : null;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -153,8 +200,6 @@ const ProductPage = () => {
             <span>/</span>
             <Link to="/produtos" className="hover:text-primary transition-colors">Produtos</Link>
             <span>/</span>
-            <span className="capitalize">{product.category}</span>
-            <span>/</span>
             <span className="text-foreground font-medium">{product.name}</span>
           </nav>
         </div>
@@ -165,7 +210,7 @@ const ProductPage = () => {
             {/* Image Gallery with Favorite Button */}
             <div className="relative">
               <ProductGallery
-                images={product.images || [product.image]}
+                images={product.images.length > 0 ? product.images : ['/placeholder.svg']}
                 productName={product.name}
                 badge={product.badge}
               />
@@ -228,11 +273,13 @@ const ProductPage = () => {
                 <div className="flex items-baseline justify-between">
                   <div>
                     <span className="text-sm text-muted-foreground">Valor unitário</span>
-                    <p className="text-2xl font-semibold text-foreground">{product.price}</p>
+                    <p className="text-2xl font-semibold text-foreground">
+                      R$ {product.price.toFixed(2).replace('.', ',')}
+                    </p>
                   </div>
                   <div className="text-right">
                     <span className="text-sm text-muted-foreground">Compra mínima</span>
-                    <p className="text-lg font-medium text-foreground">{minQuantity} un.</p>
+                    <p className="text-lg font-medium text-foreground">{product.minQuantity} un.</p>
                   </div>
                 </div>
 
@@ -242,9 +289,9 @@ const ProductPage = () => {
                 {/* Total Price with Discount */}
                 <div>
                   <div className="flex items-center gap-3 mb-1">
-                    {originalPriceValue && (
+                    {product.originalPrice && (
                       <span className="text-lg text-muted-foreground line-through">
-                        R$ {(originalPriceValue * quantity).toFixed(2).replace('.', ',')}
+                        R$ {(product.originalPrice * quantity).toFixed(2).replace('.', ',')}
                       </span>
                     )}
                     {discountPercent && (
@@ -264,7 +311,7 @@ const ProductPage = () => {
                 {/* PIX Discount */}
                 <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3 flex items-center gap-3">
                   <div className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                    -{pixDiscount}% no Pix
+                    -{product.pixDiscount}% no Pix
                   </div>
                   <span className="text-green-700 dark:text-green-400 font-semibold">
                     R$ {pixPrice.toFixed(2).replace('.', ',')}
@@ -279,17 +326,17 @@ const ProductPage = () => {
                       variant="outline" 
                       size="icon" 
                       className="h-8 w-8"
-                      onClick={() => setQuantity(Math.max(minQuantity, quantity - 5))}
-                      disabled={quantity <= minQuantity}
+                      onClick={() => setQuantity(Math.max(product.minQuantity, quantity - 5))}
+                      disabled={quantity <= product.minQuantity}
                     >
                       -
                     </Button>
                     <Input 
                       type="number"
                       value={quantity}
-                      onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
+                      onChange={(e) => setQuantity(Math.max(product.minQuantity, parseInt(e.target.value) || product.minQuantity))}
                       className="w-20 text-center h-8"
-                      min={minQuantity}
+                      min={product.minQuantity}
                     />
                     <Button 
                       variant="outline" 
@@ -308,7 +355,7 @@ const ProductPage = () => {
                 <Clock className="h-5 w-5 text-primary" />
                 <div>
                   <span className="text-sm font-medium text-foreground">Feito sob encomenda</span>
-                  <p className="text-xs text-muted-foreground">Prazo de produção: até {productionDays} dias úteis</p>
+                  <p className="text-xs text-muted-foreground">Prazo de produção: até {product.productionDays} dias úteis</p>
                 </div>
               </div>
 
@@ -397,30 +444,32 @@ const ProductPage = () => {
                     <Button 
                       type="submit" 
                       className="w-full bg-orange-500 hover:bg-orange-600 rounded-lg" 
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     >
-                      {isLoading ? "Enviando..." : "Enviar Pedido"}
+                      {isSubmitting ? "Enviando..." : "Enviar Pedido"}
                     </Button>
                   </form>
                 </DialogContent>
               </Dialog>
 
               {/* Elo7 Link */}
-              <a 
-                href={product.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="mt-3"
-              >
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="w-full border-2 border-primary text-primary hover:bg-primary-light rounded-lg py-5"
+              {product.link && (
+                <a 
+                  href={product.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="mt-3"
                 >
-                  <ExternalLink className="h-5 w-5 mr-2" />
-                  Ver no Elo7
-                </Button>
-              </a>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full border-2 border-primary text-primary hover:bg-primary-light rounded-lg py-5"
+                  >
+                    <ExternalLink className="h-5 w-5 mr-2" />
+                    Ver no Elo7
+                  </Button>
+                </a>
+              )}
 
               {/* Trust Badges */}
               <div className="mt-6 grid grid-cols-2 gap-3">
