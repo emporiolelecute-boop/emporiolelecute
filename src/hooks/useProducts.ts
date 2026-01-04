@@ -73,6 +73,24 @@ export function useDbProduct(slug: string) {
   });
 }
 
+// Fetch single product by ID
+export function useDbProductById(id: string) {
+  return useQuery({
+    queryKey: ['product-by-id', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as DbProduct | null;
+    },
+    enabled: !!id,
+  });
+}
+
 // Fetch all categories
 export function useDbCategories() {
   return useQuery({
