@@ -1,11 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const systemPrompt = `Você é a LeleCute, assistente virtual do Empório LeleCute, uma loja de sabonetes e velas artesanais para lembrancinhas de eventos.
+const buildSystemPrompt = (products: any[]) => {
+  const productList = products.map(p => 
+    `- ${p.name}: R$ ${Number(p.price).toFixed(2).replace('.', ',')}${p.description ? ` - ${p.description}` : ''}`
+  ).join('\n');
+
+  return `Você é a LeleCute, assistente virtual do Empório LeleCute, uma loja de sabonetes e velas artesanais para lembrancinhas de eventos.
 
 SOBRE A LOJA:
 - Somos especialistas em lembrancinhas artesanais para maternidade, chá de bebê, batizado, casamento, aniversário e eventos corporativos
@@ -16,14 +22,13 @@ SOBRE A LOJA:
 - Desconto de 3% no PIX
 - Enviamos para todo o Brasil
 
-PRODUTOS POPULARES:
-- Sabonetes artesanais: margarida, rosa, borboleta, ursinho, estrela, coroa, concha, girassol (R$ 4,20 a R$ 5,90)
-- Velas perfumadas: margarida, coração, flor de lótus, lavanda, cupcake (R$ 6,90 a R$ 8,90)
-- Kits especiais: batizado com anjinho, corporativo com logo, mini flores (R$ 5,50 a R$ 12,90)
+CATÁLOGO DE PRODUTOS ATUALIZADO:
+${productList}
 
 CONTATO:
 - WhatsApp: (41) 99221-4299
 - Loja Elo7: www.elo7.com.br/lelecute
+- Site: emporiolelecute.lovable.app
 
 INSTRUÇÕES:
 - Seja simpática, acolhedora e use emojis ocasionalmente
@@ -32,7 +37,9 @@ INSTRUÇÕES:
 - Sugira produtos baseados na ocasião mencionada
 - Para pedidos ou orçamentos personalizados, direcione ao WhatsApp
 - Mantenha respostas concisas (máximo 3-4 frases)
+- Quando mencionar produtos, cite os preços atualizados
 - Se não souber responder algo específico, sugira entrar em contato pelo WhatsApp`;
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -42,10 +49,32 @@ serve(async (req) => {
   try {
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
+
+    // Fetch products from database
+    let products: any[] = [];
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data, error } = await supabase
+        .from('products')
+        .select('name, price, description, slug, category_id, badge')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (!error && data) {
+        products = data;
+        console.log(`Loaded ${products.length} products for chatbot context`);
+      } else {
+        console.error('Error fetching products:', error);
+      }
+    }
+
+    const systemPrompt = buildSystemPrompt(products);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
