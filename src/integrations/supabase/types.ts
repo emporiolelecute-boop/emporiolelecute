@@ -14,16 +14,218 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      occasions: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      product_occasions: {
+        Row: {
+          occasion_id: string
+          product_id: string
+        }
+        Insert: {
+          occasion_id: string
+          product_id: string
+        }
+        Update: {
+          occasion_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_occasions_occasion_id_fkey"
+            columns: ["occasion_id"]
+            isOneToOne: false
+            referencedRelation: "occasions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_occasions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          badge: string | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          elo7_link: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          keywords: string[] | null
+          long_description: string | null
+          min_quantity: number | null
+          name: string
+          original_price: number | null
+          pix_discount: number | null
+          price: number
+          production_days: number | null
+          rating: number | null
+          slug: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          badge?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          elo7_link?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          keywords?: string[] | null
+          long_description?: string | null
+          min_quantity?: number | null
+          name: string
+          original_price?: number | null
+          pix_discount?: number | null
+          price: number
+          production_days?: number | null
+          rating?: number | null
+          slug: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          badge?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          elo7_link?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          keywords?: string[] | null
+          long_description?: string | null
+          min_quantity?: number | null
+          name?: string
+          original_price?: number | null
+          pix_discount?: number | null
+          price?: number
+          production_days?: number | null
+          rating?: number | null
+          slug?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +352,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
