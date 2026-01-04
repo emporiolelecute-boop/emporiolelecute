@@ -13,8 +13,22 @@ const Header = () => {
     { href: "#produtos", label: "Produtos" },
     { href: "#ocasioes", label: "Ocasiões" },
     { href: "#depoimentos", label: "Depoimentos" },
-    { href: "#contato", label: "Contato" },
+    { href: "#orcamento", label: "Contato" },
   ];
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const element = document.querySelector(href);
+    if (element) {
+      const headerHeight = 80;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - headerHeight,
+        behavior: 'smooth'
+      });
+    }
+    setIsMenuOpen(false);
+  };
 
   const socialLinks = [
     { href: "https://www.instagram.com/emporiolelecute", icon: Instagram, label: "Instagram" },
@@ -28,6 +42,7 @@ const Header = () => {
           {/* Logo */}
           <a 
             href="#inicio" 
+            onClick={(e) => handleNavClick(e, '#inicio')}
             className="flex items-center gap-2 group"
             aria-label="Empório LeleCute - Página inicial"
           >
@@ -47,6 +62,7 @@ const Header = () => {
                 <li key={link.href}>
                   <a
                     href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
                     className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
                   >
                     {link.label}
@@ -109,7 +125,7 @@ const Header = () => {
                   <a
                     href={link.href}
                     className="block px-6 py-3 text-foreground/80 hover:text-primary hover:bg-primary-light/50 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={(e) => handleNavClick(e, link.href)}
                   >
                     {link.label}
                   </a>
