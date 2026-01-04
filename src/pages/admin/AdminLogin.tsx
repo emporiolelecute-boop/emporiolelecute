@@ -17,7 +17,7 @@ const loginSchema = z.object({
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user, isAdmin, loading } = useAuth();
+  const { signIn, signUp, user, isAdmin, adminChecked, loading } = useAuth();
   const { toast } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -57,9 +57,9 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
 
     try {
@@ -113,8 +113,17 @@ const AdminLogin = () => {
     );
   }
 
+  // If logged in but role-check hasn't completed yet, keep a stable loading state
+  if (user && !adminChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream to-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   // If logged in but not admin
-  if (user && !isAdmin) {
+  if (user && adminChecked && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream to-background p-4">
         <Card className="w-full max-w-md">

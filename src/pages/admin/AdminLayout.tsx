@@ -31,6 +31,7 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
+    // Avoid redirect loops: wait for role check to finish (loading covers role check)
     if (!loading && (!user || !isAdmin)) {
       navigate('/admin/login');
     }
