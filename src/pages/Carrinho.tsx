@@ -185,6 +185,58 @@ const Carrinho = () => {
     setOrderCode(code);
 
     try {
+      // Save order to database
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          order_code: code,
+          customer_name: customer.name,
+          customer_email: customer.email,
+          customer_phone: customer.phone,
+          address_cep: address.cep,
+          address_street: address.street,
+          address_number: address.number,
+          address_complement: address.complement || null,
+          address_neighborhood: address.neighborhood || null,
+          address_city: address.city,
+          address_state: address.state,
+          shipping_method: selectedShippingOption?.name || '',
+          shipping_company: selectedShippingOption?.company || null,
+          shipping_days: selectedShippingOption?.days || null,
+          shipping_price: shippingPrice,
+          subtotal: total,
+          total: grandTotal,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('Order save error:', orderError);
+        throw orderError;
+      }
+
+      // Save order items
+      if (orderData) {
+        const orderItems = items.map(item => ({
+          order_id: orderData.id,
+          product_name: item.name,
+          product_slug: item.slug,
+          product_image: item.image,
+          quantity: item.quantity,
+          unit_price: item.price,
+          personalization: item.personalization || null,
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) {
+          console.error('Order items save error:', itemsError);
+        }
+      }
+
       // Send email to store
       const emailResponse = await supabase.functions.invoke('send-order-email', {
         body: {
@@ -193,6 +245,8 @@ const Carrinho = () => {
           address,
           items: items.map(item => ({
             name: item.name,
+            slug: item.slug,
+            image: item.image,
             quantity: item.quantity,
             price: item.price,
             personalization: item.personalization,
@@ -264,8 +318,14 @@ const Carrinho = () => {
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Abrir WhatsApp
               </Button>
+              <Link to={`/rastrear?code=${orderCode}`}>
+                <Button variant="outline" className="w-full">
+                  <Package className="h-5 w-5 mr-2" />
+                  Rastrear Pedido
+                </Button>
+              </Link>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 className="w-full"
                 onClick={() => {
                   clearCart();

@@ -56,6 +56,125 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          personalization: string | null
+          product_image: string | null
+          product_name: string
+          product_slug: string | null
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          personalization?: string | null
+          product_image?: string | null
+          product_name: string
+          product_slug?: string | null
+          quantity: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          personalization?: string | null
+          product_image?: string | null
+          product_name?: string
+          product_slug?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address_cep: string
+          address_city: string
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string
+          address_state: string
+          address_street: string
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          notes: string | null
+          order_code: string
+          shipping_company: string | null
+          shipping_days: string | null
+          shipping_method: string
+          shipping_price: number
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          address_cep: string
+          address_city: string
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number: string
+          address_state: string
+          address_street: string
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          notes?: string | null
+          order_code: string
+          shipping_company?: string | null
+          shipping_days?: string | null
+          shipping_method: string
+          shipping_price?: number
+          status?: string
+          subtotal: number
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          address_cep?: string
+          address_city?: string
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string
+          address_state?: string
+          address_street?: string
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          notes?: string | null
+          order_code?: string
+          shipping_company?: string | null
+          shipping_days?: string | null
+          shipping_method?: string
+          shipping_price?: number
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_occasions: {
         Row: {
           occasion_id: string

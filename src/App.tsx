@@ -9,6 +9,7 @@ import Produtos from "./pages/Produtos";
 import ProductPage from "./pages/ProductPage";
 import Carrinho from "./pages/Carrinho";
 import Envio from "./pages/Envio";
+import RastrearPedido from "./pages/RastrearPedido";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -52,6 +53,8 @@ const App = () => {
                 <Route path="/carrinho" element={<Carrinho />} />
                 <Route path="/envio" element={<Envio />} />
                 <Route path="/envio-brasil" element={<Envio />} />
+                <Route path="/rastrear" element={<RastrearPedido />} />
+                <Route path="/rastrear/:code" element={<RastrearPedido />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
