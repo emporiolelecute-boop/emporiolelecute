@@ -29,6 +29,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
+import Chatbot from "@/components/Chatbot";
 import { getProductBySlug, products } from "@/data/products";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
 
@@ -482,6 +483,7 @@ const ProductPage = () => {
       
       <Footer />
       <WhatsAppButton />
+      <Chatbot />
     </div>
   );
 };
