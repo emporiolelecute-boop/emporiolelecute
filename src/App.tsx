@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import Index from "./pages/Index";
 import Produtos from "./pages/Produtos";
 import ProductPage from "./pages/ProductPage";
+import Carrinho from "./pages/Carrinho";
 import Envio from "./pages/Envio";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -17,6 +18,7 @@ import AdminProductForm from "./pages/admin/AdminProductForm";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminOccasions from "./pages/admin/AdminOccasions";
 import AdminImport from "./pages/admin/AdminImport";
+import { CartProvider } from "./contexts/CartContext";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
 const queryClient = new QueryClient();
@@ -37,36 +39,39 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AnalyticsWrapper>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/produtos" element={<Produtos />} />
-              <Route path="/produtos/:slug" element={<ProductPage />} />
-              <Route path="/envio" element={<Envio />} />
-              <Route path="/envio-brasil" element={<Envio />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="produtos" element={<AdminProducts />} />
-                <Route path="produtos/novo" element={<AdminProductForm />} />
-                <Route path="produtos/:id" element={<AdminProductForm />} />
-                <Route path="categorias" element={<AdminCategories />} />
-                <Route path="ocasioes" element={<AdminOccasions />} />
-                <Route path="importar" element={<AdminImport />} />
-              </Route>
-              
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AnalyticsWrapper>
-        </BrowserRouter>
-      </TooltipProvider>
+      <CartProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AnalyticsWrapper>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/produtos" element={<Produtos />} />
+                <Route path="/produtos/:slug" element={<ProductPage />} />
+                <Route path="/carrinho" element={<Carrinho />} />
+                <Route path="/envio" element={<Envio />} />
+                <Route path="/envio-brasil" element={<Envio />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="produtos" element={<AdminProducts />} />
+                  <Route path="produtos/novo" element={<AdminProductForm />} />
+                  <Route path="produtos/:id" element={<AdminProductForm />} />
+                  <Route path="categorias" element={<AdminCategories />} />
+                  <Route path="ocasioes" element={<AdminOccasions />} />
+                  <Route path="importar" element={<AdminImport />} />
+                </Route>
+                
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AnalyticsWrapper>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CartProvider>
     </QueryClientProvider>
   );
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
   Star, 
@@ -15,18 +15,12 @@ import {
   ChevronRight,
   Minus,
   Plus,
-  MessageCircle
+  MessageCircle,
+  ShoppingCart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,20 +32,20 @@ import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
+import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@/data/products";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { data: dbProduct, isLoading } = useDbProduct(slug || "");
   const { data: allProducts } = useDbProducts();
+  const { addItem } = useCart();
   
-  const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
   const [cep, setCep] = useState("");
   const [personalization, setPersonalization] = useState("");
-  const [formData, setFormData] = useState({ name: "", email: "", whatsapp: "" });
   const { toast } = useToast();
 
   // Convert to display format
@@ -108,42 +102,19 @@ const ProductPage = () => {
     }
   }, [product]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddToCart = () => {
     if (!product) return;
     
-    setIsSubmitting(true);
-    trackInquiry(product.name, product.id);
-
-    try {
-      const { error } = await supabase.functions.invoke("send-order-email", {
-        body: { 
-          ...formData, 
-          product: product.name, 
-          quantity,
-          personalization,
-          type: "product" 
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Pedido enviado! 🎉",
-        description: "Entraremos em contato em breve pelo WhatsApp.",
-      });
-      setIsOpen(false);
-      setFormData({ name: "", email: "", whatsapp: "" });
-      setPersonalization("");
-    } catch {
-      toast({
-        title: "Erro ao enviar",
-        description: "Tente novamente ou entre em contato pelo WhatsApp.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    addItem({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      price: product.price,
+      image: product.images[0] || '/placeholder.svg',
+      personalization,
+      minQuantity: product.minQuantity,
+      quantity,
+    });
   };
 
   const handleCalculateFreight = () => {
@@ -393,75 +364,14 @@ const ProductPage = () => {
 
               {/* Action Buttons */}
               <div className="flex gap-3 mb-4">
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      size="lg" 
-                      className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                    >
-                      <Package className="h-5 w-5 mr-2" />
-                      Adicionar ao Carrinho
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="font-display text-2xl">
-                        Encomendar {product.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                      <div className="bg-muted/50 p-3 rounded-lg text-sm">
-                        <p className="font-medium">Resumo do pedido:</p>
-                        <p className="text-muted-foreground">
-                          {quantity}x {product.name} = R$ {totalPrice.toFixed(2).replace('.', ',')}
-                        </p>
-                        {personalization && (
-                          <p className="text-muted-foreground mt-1">
-                            Personalização: {personalization}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Nome completo</label>
-                        <Input 
-                          required 
-                          value={formData.name} 
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                          placeholder="Seu nome" 
-                          className="mt-1" 
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Email</label>
-                        <Input 
-                          required 
-                          type="email" 
-                          value={formData.email} 
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
-                          placeholder="seu@email.com" 
-                          className="mt-1" 
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">WhatsApp</label>
-                        <Input 
-                          required 
-                          value={formData.whatsapp} 
-                          onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })} 
-                          placeholder="(41) 99999-9999" 
-                          className="mt-1" 
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-primary hover:bg-primary-dark rounded-lg" 
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Enviando..." : "Enviar Pedido"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  size="lg" 
+                  className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  Adicionar ao Carrinho
+                </Button>
 
                 {/* Favorite Button */}
                 <Button 
