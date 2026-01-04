@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Menu, X, Heart, Instagram, Facebook } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Menu, X, Heart, Instagram, Facebook, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
+import { useCart } from "@/contexts/CartContext";
 import logo from "@/assets/logo.jpg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { itemCount } = useCart();
 
   const navLinks = [
     { href: "#inicio", label: "Início" },
@@ -92,6 +95,20 @@ const Header = () => {
               ))}
             </div>
 
+            {/* Cart Icon */}
+            <Link 
+              to="/carrinho" 
+              className="relative p-2 text-foreground/80 hover:text-primary transition-colors"
+              aria-label="Carrinho de compras"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              )}
+            </Link>
+
             {/* CTA Button */}
             <a
               href="https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas."
@@ -144,6 +161,19 @@ const Header = () => {
                     <link.icon className="h-5 w-5" />
                   </a>
                 ))}
+                <Link 
+                  to="/carrinho" 
+                  className="relative p-2 text-foreground/80 hover:text-primary transition-colors ml-auto"
+                  aria-label="Carrinho de compras"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {itemCount > 99 ? '99+' : itemCount}
+                    </span>
+                  )}
+                </Link>
               </li>
               <li className="px-6 pt-4">
                 <a
