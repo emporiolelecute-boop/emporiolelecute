@@ -435,6 +435,28 @@ const ProductPage = () => {
               )}
 
 
+              {/* Payment Methods */}
+              <div className="mb-6">
+                <p className="text-sm text-muted-foreground mb-3">Formas de pagamento:</p>
+                <div className="flex flex-wrap gap-2">
+                  {paymentConfig?.accepted_methods?.pix && (
+                    <span className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                      PIX
+                    </span>
+                  )}
+                  {paymentConfig?.accepted_methods?.credit_card && (
+                    <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                      Cartão de Crédito
+                    </span>
+                  )}
+                  {paymentConfig?.accepted_methods?.boleto && (
+                    <span className="px-3 py-1.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                      Boleto Bancário
+                    </span>
+                  )}
+                </div>
+              </div>
+
               {/* Trust Badges - Horizontal */}
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <div className="flex flex-col items-center text-center p-3 bg-card rounded-lg border border-border/50">
