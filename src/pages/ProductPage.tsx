@@ -172,8 +172,9 @@ const ProductPage = () => {
 
   // Calculate totals
   const totalPrice = product.price * quantity;
-  const pixPrice = totalPrice * (1 - product.pixDiscount / 100);
-  const installmentValue = totalPrice / 3;
+  const pixDiscountPercent = 7; // Fixed 7% PIX discount
+  const pixPrice = totalPrice * (1 - pixDiscountPercent / 100);
+  const installmentValue = totalPrice / 3; // 3x installments
   const discountPercent = product.originalPrice 
     ? Math.round((1 - product.price / product.originalPrice) * 100) 
     : null;
@@ -266,14 +267,14 @@ const ProductPage = () => {
                   R$ {totalPrice.toFixed(2).replace('.', ',')}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  ou 6x sem juros de R$ {installmentValue.toFixed(2).replace('.', ',')} no cartão
+                  ou 3x sem juros de R$ {installmentValue.toFixed(2).replace('.', ',')} no cartão
                 </p>
               </div>
 
               {/* PIX Discount */}
               <div className="flex items-center gap-3 mb-6">
                 <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                  -{product.pixDiscount}% no Pix
+                  -{pixDiscountPercent}% no Pix
                 </span>
                 <span className="text-lg font-semibold text-green-600">
                   R$ {pixPrice.toFixed(2).replace('.', ',')}
