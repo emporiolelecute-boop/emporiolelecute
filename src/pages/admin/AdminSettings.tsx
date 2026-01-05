@@ -35,6 +35,11 @@ interface StoreSettings {
   payment_config: {
     pix_discount: number;
     installments: number;
+    accepted_methods: {
+      pix: boolean;
+      credit_card: boolean;
+      boleto: boolean;
+    };
   };
 }
 
@@ -68,6 +73,11 @@ const AdminSettings = () => {
     payment_config: {
       pix_discount: 7,
       installments: 3,
+      accepted_methods: {
+        pix: true,
+        credit_card: true,
+        boleto: false,
+      },
     },
   });
 
@@ -445,64 +455,186 @@ const AdminSettings = () => {
         </Card>
 
         {/* Payment Configuration */}
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-primary" />
               Pagamento
             </CardTitle>
-            <CardDescription>Configure desconto PIX e parcelamento</CardDescription>
+            <CardDescription>Configure desconto PIX, parcelamento e métodos aceitos</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Percent className="w-4 h-4" />
-                Desconto no PIX (%)
-              </Label>
-              <Input 
-                type="number"
-                min="0"
-                max="30"
-                value={settings.payment_config.pix_discount}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  payment_config: {
-                    ...settings.payment_config,
-                    pix_discount: parseInt(e.target.value) || 0
-                  }
-                })}
-                placeholder="7"
-              />
-              <p className="text-xs text-muted-foreground">
-                Percentual de desconto para pagamentos via PIX
-              </p>
-            </div>
+          <CardContent>
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Settings */}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Percent className="w-4 h-4" />
+                    Desconto no PIX (%)
+                  </Label>
+                  <Input 
+                    type="number"
+                    min="0"
+                    max="30"
+                    value={settings.payment_config.pix_discount}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      payment_config: {
+                        ...settings.payment_config,
+                        pix_discount: parseInt(e.target.value) || 0
+                      }
+                    })}
+                    placeholder="7"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label>Parcelamento no Cartão</Label>
-              <Select 
-                value={settings.payment_config.installments.toString()}
-                onValueChange={(value) => setSettings({
-                  ...settings,
-                  payment_config: {
-                    ...settings.payment_config,
-                    installments: parseInt(value)
-                  }
-                })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2x sem juros</SelectItem>
-                  <SelectItem value="3">3x sem juros</SelectItem>
-                  <SelectItem value="6">6x sem juros</SelectItem>
-                  <SelectItem value="12">12x sem juros</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Quantidade máxima de parcelas sem juros
-              </p>
+                <div className="space-y-2">
+                  <Label>Parcelamento no Cartão</Label>
+                  <Select 
+                    value={settings.payment_config.installments.toString()}
+                    onValueChange={(value) => setSettings({
+                      ...settings,
+                      payment_config: {
+                        ...settings.payment_config,
+                        installments: parseInt(value)
+                      }
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2">2x sem juros</SelectItem>
+                      <SelectItem value="3">3x sem juros</SelectItem>
+                      <SelectItem value="6">6x sem juros</SelectItem>
+                      <SelectItem value="12">12x sem juros</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-4">
+                  <Label>Métodos de Pagamento Aceitos</Label>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-green-500/10 rounded-full flex items-center justify-center">
+                          <span className="text-green-600 font-bold text-xs">PIX</span>
+                        </div>
+                        <span className="font-medium">PIX</span>
+                      </div>
+                      <Switch 
+                        checked={settings.payment_config.accepted_methods?.pix ?? true}
+                        onCheckedChange={(checked) => setSettings({
+                          ...settings,
+                          payment_config: {
+                            ...settings.payment_config,
+                            accepted_methods: {
+                              ...settings.payment_config.accepted_methods,
+                              pix: checked
+                            }
+                          }
+                        })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-500/10 rounded-full flex items-center justify-center">
+                          <CreditCard className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <span className="font-medium">Cartão de Crédito</span>
+                      </div>
+                      <Switch 
+                        checked={settings.payment_config.accepted_methods?.credit_card ?? true}
+                        onCheckedChange={(checked) => setSettings({
+                          ...settings,
+                          payment_config: {
+                            ...settings.payment_config,
+                            accepted_methods: {
+                              ...settings.payment_config.accepted_methods,
+                              credit_card: checked
+                            }
+                          }
+                        })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-amber-500/10 rounded-full flex items-center justify-center">
+                          <span className="text-amber-600 font-bold text-[10px]">BOL</span>
+                        </div>
+                        <span className="font-medium">Boleto Bancário</span>
+                      </div>
+                      <Switch 
+                        checked={settings.payment_config.accepted_methods?.boleto ?? false}
+                        onCheckedChange={(checked) => setSettings({
+                          ...settings,
+                          payment_config: {
+                            ...settings.payment_config,
+                            accepted_methods: {
+                              ...settings.payment_config.accepted_methods,
+                              boleto: checked
+                            }
+                          }
+                        })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="space-y-4">
+                <Label className="text-base font-semibold">Preview em Tempo Real</Label>
+                <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+                  <div className="text-center border-b border-border pb-4">
+                    <p className="text-sm text-muted-foreground mb-1">Valor total (exemplo)</p>
+                    <p className="text-3xl font-bold text-foreground">R$ 100,00</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      ou {settings.payment_config.installments}x sem juros de R$ {(100 / settings.payment_config.installments).toFixed(2).replace('.', ',')} no cartão
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                      -{settings.payment_config.pix_discount}% no Pix
+                    </span>
+                    <span className="text-lg font-semibold text-green-600">
+                      R$ {(100 * (1 - settings.payment_config.pix_discount / 100)).toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-sm text-muted-foreground mb-3">Formas de pagamento aceitas:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {settings.payment_config.accepted_methods?.pix && (
+                        <span className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                          PIX
+                        </span>
+                      )}
+                      {settings.payment_config.accepted_methods?.credit_card && (
+                        <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                          Cartão de Crédito
+                        </span>
+                      )}
+                      {settings.payment_config.accepted_methods?.boleto && (
+                        <span className="px-3 py-1.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                          Boleto Bancário
+                        </span>
+                      )}
+                      {!settings.payment_config.accepted_methods?.pix && 
+                       !settings.payment_config.accepted_methods?.credit_card && 
+                       !settings.payment_config.accepted_methods?.boleto && (
+                        <span className="text-sm text-muted-foreground">Nenhum método selecionado</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Este é um exemplo de como as informações aparecerão na página do produto
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
