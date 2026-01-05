@@ -11,6 +11,10 @@ import Carrinho from "./pages/Carrinho";
 import Envio from "./pages/Envio";
 import RastrearPedido from "./pages/RastrearPedido";
 import NotFound from "./pages/NotFound";
+import Sobre from "./pages/Sobre";
+import Contato from "./pages/Contato";
+import Depoimentos from "./pages/Depoimentos";
+import Ocasioes from "./pages/Ocasioes";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -51,6 +55,10 @@ const App = () => {
             <AnalyticsWrapper>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/sobre" element={<Sobre />} />
+                <Route path="/contato" element={<Contato />} />
+                <Route path="/depoimentos" element={<Depoimentos />} />
+                <Route path="/ocasioes" element={<Ocasioes />} />
                 <Route path="/produtos" element={<Produtos />} />
                 <Route path="/produtos/:slug" element={<ProductPage />} />
                 <Route path="/carrinho" element={<Carrinho />} />
