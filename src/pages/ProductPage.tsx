@@ -96,16 +96,18 @@ const ProductPage = () => {
     if (product) {
       trackProductView(product.name, product.id, `R$ ${product.price.toFixed(2)}`);
     }
-  }, [product]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id]);
 
-  // Set initial quantity to min quantity
+  // Set initial quantity to min quantity (only when product changes)
   useEffect(() => {
     if (product) {
       const q = product.minQuantity;
       setQuantity(q);
       setQuantityInput(String(q));
     }
-  }, [product]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id, product?.minQuantity]);
 
   const handleAddToCart = () => {
     if (!product) return;
