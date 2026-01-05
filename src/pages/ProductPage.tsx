@@ -228,32 +228,61 @@ const ProductPage = () => {
             {/* Info Section - Reference Style */}
             <div className="flex flex-col">
               {/* Product Name & Rating */}
-              <h1 className="font-display text-2xl md:text-3xl text-foreground mb-3 leading-tight">
-                {product.name}
-              </h1>
-
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`h-4 w-4 ${
-                        i < product.rating 
-                          ? 'text-amber-400 fill-amber-400' 
-                          : 'text-muted-foreground/30'
-                      }`} 
-                    />
-                  ))}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <h1 className="font-display text-2xl md:text-3xl text-foreground leading-tight">
+                  {product.name}
+                </h1>
+                <div className="flex items-center gap-1 bg-amber-400 text-white px-2 py-1 rounded-md flex-shrink-0">
+                  <Star className="h-4 w-4 fill-white" />
+                  <span className="font-bold text-sm">{product.rating.toFixed(1)}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">(45 avaliações)</span>
               </div>
 
-              {/* Price Section - Clean Style */}
-              <div className="mb-6">
-                <p className="text-sm text-muted-foreground mb-1">Preço por unidade</p>
-                <p className="text-3xl font-bold text-primary">
-                  R$ {product.price.toFixed(2).replace('.', ',')}
+              {/* Price Info Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Valor unitário</p>
+                  <p className="text-lg font-semibold text-primary">
+                    R$ {product.price.toFixed(2).replace('.', ',')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Compra mínima</p>
+                  <p className="text-lg font-semibold text-foreground underline decoration-primary decoration-2 underline-offset-4">
+                    {product.minQuantity} unidades
+                  </p>
+                </div>
+              </div>
+
+              {/* Total Price Section */}
+              <div className="mb-4">
+                <p className="text-sm text-muted-foreground mb-1">Valor total</p>
+                <p className="text-3xl font-bold text-foreground">
+                  R$ {totalPrice.toFixed(2).replace('.', ',')}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  ou 6x sem juros de R$ {installmentValue.toFixed(2).replace('.', ',')} no cartão
+                </p>
+              </div>
+
+              {/* PIX Discount */}
+              <div className="flex items-center gap-3 mb-6">
+                <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                  -{product.pixDiscount}% no Pix
+                </span>
+                <span className="text-lg font-semibold text-green-600">
+                  R$ {pixPrice.toFixed(2).replace('.', ',')}
+                </span>
+              </div>
+
+              {/* Production Time */}
+              <div className="border-t border-border pt-4 mb-6">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                  <Clock className="h-5 w-5" />
+                  <span className="text-sm">Feito sob encomenda</span>
+                </div>
+                <p className="text-foreground">
+                  Produto pronto em até <span className="font-semibold text-amber-600">{product.productionDays} dias úteis</span>
                 </p>
               </div>
 
@@ -261,20 +290,6 @@ const ProductPage = () => {
               <p className="text-muted-foreground text-sm leading-relaxed mb-6">
                 {product.description || `Lembrancinha especial com sabonete artesanal. Perfeito para lembrancinhas de maternidade, batizado e eventos especiais.`}
               </p>
-
-              {/* Production Time - Highlighted */}
-              <div className="bg-primary/10 border border-primary/20 rounded-xl p-5 mb-6">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-6 w-6 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Prazo de produção</p>
-                    <p className="text-lg font-semibold text-foreground">Até {product.productionDays} dias úteis</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Código do produto: {productCode}
-                </p>
-              </div>
 
               {/* Personalization Field */}
               <div className="bg-card rounded-xl border border-border p-5 mb-6">
@@ -325,9 +340,6 @@ const ProductPage = () => {
                     >
                       <Plus className="h-4 w-4" />
                     </button>
-                  </div>
-                  <div className="text-lg font-semibold text-foreground">
-                    Total: <span className="text-primary">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
                   </div>
                 </div>
               </div>
