@@ -15,7 +15,6 @@ import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
 import Depoimentos from "./pages/Depoimentos";
 import Ocasioes from "./pages/Ocasioes";
-import Sitemap from "./pages/Sitemap";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
