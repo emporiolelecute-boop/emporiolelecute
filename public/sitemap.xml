@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/generate-sitemap</loc>
-  </sitemap>
-</sitemapindex>
-
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-<!--  Homepage  -->
+
+  
+  <!--  Homepage  -->
 <url>
 <loc>https://emporiolelecute.com.br/</loc>
 <lastmod>2026-01-05</lastmod>
@@ -540,3 +536,20 @@
 <priority>0.7</priority>
 </url>
 </urlset>
+
+
+
+
+
+
+  
+
+
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap>
+    <url>
+    <loc>https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/generate-sitemap</loc>
+      <changefreq>weekly</changefreq>
+   </url>
+  </sitemap>
+</sitemapindex>
