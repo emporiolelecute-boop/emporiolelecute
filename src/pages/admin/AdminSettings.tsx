@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, Phone, Mail, MapPin, Instagram, Facebook, ShoppingBag, Truck, Loader2, CheckCircle2 } from 'lucide-react';
+import { Settings, Save, Phone, Mail, MapPin, Instagram, Facebook, ShoppingBag, Truck, Loader2, CreditCard, Percent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,10 @@ interface StoreSettings {
     note: string;
     free_shipping_threshold: number;
   };
+  payment_config: {
+    pix_discount: number;
+    installments: number;
+  };
 }
 
 const AdminSettings = () => {
@@ -60,6 +64,10 @@ const AdminSettings = () => {
     shipping_policy: {
       note: 'O frete será calculado após a confirmação do pedido via WhatsApp',
       free_shipping_threshold: 0,
+    },
+    payment_config: {
+      pix_discount: 7,
+      installments: 3,
     },
   });
 
@@ -431,6 +439,69 @@ const AdminSettings = () => {
               />
               <p className="text-xs text-muted-foreground">
                 Esta mensagem será exibida na página do produto e no carrinho
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment Configuration */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-primary" />
+              Pagamento
+            </CardTitle>
+            <CardDescription>Configure desconto PIX e parcelamento</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Percent className="w-4 h-4" />
+                Desconto no PIX (%)
+              </Label>
+              <Input 
+                type="number"
+                min="0"
+                max="30"
+                value={settings.payment_config.pix_discount}
+                onChange={(e) => setSettings({
+                  ...settings,
+                  payment_config: {
+                    ...settings.payment_config,
+                    pix_discount: parseInt(e.target.value) || 0
+                  }
+                })}
+                placeholder="7"
+              />
+              <p className="text-xs text-muted-foreground">
+                Percentual de desconto para pagamentos via PIX
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Parcelamento no Cartão</Label>
+              <Select 
+                value={settings.payment_config.installments.toString()}
+                onValueChange={(value) => setSettings({
+                  ...settings,
+                  payment_config: {
+                    ...settings.payment_config,
+                    installments: parseInt(value)
+                  }
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2x sem juros</SelectItem>
+                  <SelectItem value="3">3x sem juros</SelectItem>
+                  <SelectItem value="6">6x sem juros</SelectItem>
+                  <SelectItem value="12">12x sem juros</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Quantidade máxima de parcelas sem juros
               </p>
             </div>
           </CardContent>

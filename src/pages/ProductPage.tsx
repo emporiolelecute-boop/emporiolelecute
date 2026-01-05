@@ -32,6 +32,7 @@ import ProductCard from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
+import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
 import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@/data/products";
@@ -41,6 +42,7 @@ const ProductPage = () => {
   const navigate = useNavigate();
   const { data: dbProduct, isLoading } = useDbProduct(slug || "");
   const { data: allProducts } = useDbProducts();
+  const { data: paymentConfig } = usePaymentConfig();
   const { addItem } = useCart();
   
   const [isFavorite, setIsFavorite] = useState(false);
@@ -170,11 +172,12 @@ const ProductPage = () => {
     );
   }
 
-  // Calculate totals
+  // Calculate totals using store settings
   const totalPrice = product.price * quantity;
-  const pixDiscountPercent = 7; // Fixed 7% PIX discount
+  const pixDiscountPercent = paymentConfig?.pix_discount ?? 7;
+  const installments = paymentConfig?.installments ?? 3;
   const pixPrice = totalPrice * (1 - pixDiscountPercent / 100);
-  const installmentValue = totalPrice / 3; // 3x installments
+  const installmentValue = totalPrice / installments;
   const discountPercent = product.originalPrice 
     ? Math.round((1 - product.price / product.originalPrice) * 100) 
     : null;
@@ -267,7 +270,7 @@ const ProductPage = () => {
                   R$ {totalPrice.toFixed(2).replace('.', ',')}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  ou 3x sem juros de R$ {installmentValue.toFixed(2).replace('.', ',')} no cartão
+                  ou {installments}x sem juros de R$ {installmentValue.toFixed(2).replace('.', ',')} no cartão
                 </p>
               </div>
 
