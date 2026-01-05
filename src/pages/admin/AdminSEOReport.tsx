@@ -349,7 +349,7 @@ const AdminSEOReport = () => {
 
             <div className="flex gap-2">
               <a 
-                href="/sitemap.xml" 
+                href="https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/generate-sitemap" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex-1"
@@ -525,6 +525,165 @@ const AdminSEOReport = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Keywords Analysis */}
+        <Card className="border-0 shadow-lg lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-primary" />
+              Análise de Palavras-chave
+            </CardTitle>
+            <CardDescription>Sugestões de otimização baseadas nos seus produtos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <KeywordsAnalysis />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+// Keywords Analysis Component
+const KeywordsAnalysis = () => {
+  const [loading, setLoading] = useState(true);
+  const [keywords, setKeywords] = useState<{ keyword: string; count: number; products: string[] }[]>([]);
+
+  useEffect(() => {
+    fetchKeywords();
+  }, []);
+
+  const fetchKeywords = async () => {
+    try {
+      const { data: products } = await supabase
+        .from('products')
+        .select('name, keywords, description')
+        .eq('is_active', true);
+
+      if (products) {
+        // Extract and count keywords
+        const keywordMap = new Map<string, { count: number; products: string[] }>();
+        
+        products.forEach(product => {
+          // Get keywords from product keywords array
+          const productKeywords = product.keywords || [];
+          
+          // Also extract keywords from product name
+          const nameWords = product.name.toLowerCase().split(' ').filter(w => w.length > 3);
+          
+          [...productKeywords, ...nameWords].forEach(keyword => {
+            const normalizedKeyword = keyword.toLowerCase().trim();
+            if (normalizedKeyword.length > 2) {
+              const existing = keywordMap.get(normalizedKeyword);
+              if (existing) {
+                existing.count++;
+                if (!existing.products.includes(product.name)) {
+                  existing.products.push(product.name);
+                }
+              } else {
+                keywordMap.set(normalizedKeyword, { count: 1, products: [product.name] });
+              }
+            }
+          });
+        });
+
+        // Convert to array and sort by count
+        const sortedKeywords = Array.from(keywordMap.entries())
+          .map(([keyword, data]) => ({ keyword, ...data }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 20);
+
+        setKeywords(sortedKeywords);
+      }
+    } catch (error) {
+      console.error('Error fetching keywords:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const topKeywords = keywords.slice(0, 10);
+  const suggestedKeywords = [
+    'lembrancinha personalizada',
+    'sabonete artesanal',
+    'vela perfumada',
+    'chá de bebê',
+    'maternidade',
+    'batizado',
+    'casamento',
+    'aniversário',
+    'presente personalizado',
+    'lembrancinha maternidade',
+  ];
+
+  const missingKeywords = suggestedKeywords.filter(
+    sk => !keywords.some(k => k.keyword.includes(sk) || sk.includes(k.keyword))
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Current Top Keywords */}
+      <div>
+        <h4 className="font-medium mb-3">Palavras-chave mais usadas nos produtos</h4>
+        <div className="flex flex-wrap gap-2">
+          {topKeywords.map((kw, index) => (
+            <span 
+              key={index}
+              className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm flex items-center gap-2"
+            >
+              {kw.keyword}
+              <span className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                {kw.count}
+              </span>
+            </span>
+          ))}
+          {topKeywords.length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhuma palavra-chave encontrada nos produtos</p>
+          )}
+        </div>
+      </div>
+
+      {/* Suggested Keywords */}
+      <div>
+        <h4 className="font-medium mb-3 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-green-500" />
+          Palavras-chave sugeridas para adicionar
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {missingKeywords.map((kw, index) => (
+            <span 
+              key={index}
+              className="px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400 rounded-full text-sm"
+            >
+              + {kw}
+            </span>
+          ))}
+          {missingKeywords.length === 0 && (
+            <div className="flex items-center gap-2 text-sm text-green-600">
+              <CheckCircle className="w-4 h-4" />
+              Todas as palavras-chave sugeridas estão sendo usadas!
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Tips */}
+      <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Dicas de SEO</h4>
+        <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+          <li>• Adicione palavras-chave relevantes ao nome e descrição dos produtos</li>
+          <li>• Use variações das palavras-chave principais (ex: "sabonete artesanal", "sabonetes artesanais")</li>
+          <li>• Inclua termos de busca locais (ex: "São José dos Pinhais", "Curitiba")</li>
+          <li>• Mantenha o sitemap atualizado após adicionar novos produtos</li>
+        </ul>
       </div>
     </div>
   );
