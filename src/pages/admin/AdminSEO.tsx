@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Save, RefreshCw, Loader2, Globe, FileText, Tag, Mail, CheckCircle, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Save, RefreshCw, Loader2, Globe, FileText, Tag, Mail, CheckCircle, ExternalLink, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ const defaultSEOSettings: SEOSettings = {
 };
 
 const AdminSEO = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generatingSitemap, setGeneratingSitemap] = useState(false);
@@ -189,18 +191,27 @@ const AdminSEO = () => {
           <h1 className="text-4xl font-display font-semibold text-foreground">Configurações SEO</h1>
           <p className="text-muted-foreground mt-2">Gerencie tags, metadados e sitemap para o Google</p>
         </div>
-        <Button 
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-primary hover:bg-primary-dark text-primary-foreground"
-        >
-          {saving ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4 mr-2" />
-          )}
-          Salvar Alterações
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => navigate('/admin/seo/relatorio')}
+          >
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Ver Relatório
+          </Button>
+          <Button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-primary hover:bg-primary-dark text-primary-foreground"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            Salvar Alterações
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
