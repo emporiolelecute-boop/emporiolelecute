@@ -122,19 +122,18 @@ const ProductPage = () => {
 
 
   const handleShare = async () => {
-    if (navigator.share && product) {
-      try {
-        await navigator.share({
-          title: product.name,
-          text: `Confira ${product.name} no Empório LeleCute!`,
-          url: window.location.href,
-        });
-      } catch {
-        // User cancelled sharing
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link copiado!", description: "Cole onde quiser compartilhar." });
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ 
+        title: "Link copiado!", 
+        description: "O link do produto foi copiado para a área de transferência." 
+      });
+    } catch {
+      toast({ 
+        title: "Erro ao copiar", 
+        description: "Não foi possível copiar o link.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -263,27 +262,18 @@ const ProductPage = () => {
                 {product.description || `Lembrancinha especial com sabonete artesanal. Perfeito para lembrancinhas de maternidade, batizado e eventos especiais.`}
               </p>
 
-              {/* Technical Specifications */}
-              <div className="bg-muted/50 rounded-xl p-5 mb-6">
-                <h3 className="font-semibold text-foreground mb-4">Especificações Técnicas</h3>
-                <div className="grid grid-cols-2 gap-4">
+              {/* Production Time - Highlighted */}
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-5 mb-6">
+                <div className="flex items-center gap-3">
+                  <Clock className="h-6 w-6 text-primary" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Código</p>
-                    <p className="text-sm font-medium text-foreground">{productCode}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Peso</p>
-                    <p className="text-sm font-medium text-foreground">{product.weight}g</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Dimensões</p>
-                    <p className="text-sm font-medium text-foreground">6 x 6 x 4 cm</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Prazo</p>
-                    <p className="text-sm font-medium text-foreground">Até {product.productionDays} dias úteis</p>
+                    <p className="text-sm text-muted-foreground">Prazo de produção</p>
+                    <p className="text-lg font-semibold text-foreground">Até {product.productionDays} dias úteis</p>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Código do produto: {productCode}
+                </p>
               </div>
 
               {/* Personalization Field */}
@@ -406,15 +396,6 @@ const ProductPage = () => {
                 </Button>
               )}
 
-              {/* Favorite/Share Labels */}
-              <div className="flex gap-6 text-sm text-muted-foreground mb-6">
-                <button onClick={() => setIsFavorite(!isFavorite)} className="flex items-center gap-1 hover:text-primary">
-                  <Heart className="h-4 w-4" /> Favoritar
-                </button>
-                <button onClick={handleShare} className="flex items-center gap-1 hover:text-primary">
-                  <Share2 className="h-4 w-4" /> Compartilhar
-                </button>
-              </div>
 
               {/* Trust Badges - Horizontal */}
               <div className="grid grid-cols-3 gap-3 mb-6">

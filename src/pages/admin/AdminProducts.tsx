@@ -98,6 +98,7 @@ const AdminProducts = () => {
                     <TableHead className="w-16">Imagem</TableHead>
                     <TableHead>Nome</TableHead>
                     <TableHead>Preço</TableHead>
+                    <TableHead>Tags</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -119,6 +120,27 @@ const AdminProducts = () => {
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>
                         R$ {product.price.toFixed(2).replace('.', ',')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                          {product.keywords && product.keywords.length > 0 ? (
+                            product.keywords.slice(0, 3).map((keyword, idx) => (
+                              <span 
+                                key={idx}
+                                className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full"
+                              >
+                                {keyword}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Sem tags</span>
+                          )}
+                          {product.keywords && product.keywords.length > 3 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{product.keywords.length - 3}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span

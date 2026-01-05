@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Heart, Instagram, Facebook, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
@@ -9,50 +9,21 @@ import logo from "@/assets/logo.jpg";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { itemCount } = useCart();
-  const location = useLocation();
   const navigate = useNavigate();
 
   const navLinks = [
-    { href: "/", section: "inicio", label: "Início" },
-    { href: "/#sobre", section: "sobre", label: "Sobre" },
+    { href: "/sobre", section: null, label: "Sobre" },
     { href: "/produtos", section: null, label: "Produtos" },
-    { href: "/#ocasioes", section: "ocasioes", label: "Ocasiões" },
-    { href: "/#depoimentos", section: "depoimentos", label: "Depoimentos" },
-    { href: "/#orcamento", section: "orcamento", label: "Contato" },
+    { href: "/ocasioes", section: null, label: "Ocasiões" },
+    { href: "/depoimentos", section: null, label: "Depoimentos" },
+    { href: "/contato", section: null, label: "Contato" },
   ];
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerHeight = 80;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - headerHeight,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { href: string; section: string | null }) => {
     e.preventDefault();
     setIsMenuOpen(false);
-    
-    // If it's a route without section (like /produtos), navigate directly
-    if (!link.section) {
-      navigate(link.href);
-      return;
-    }
-    
-    // If we're on the home page, scroll to section
-    if (location.pathname === '/') {
-      scrollToSection(link.section);
-    } else {
-      // Navigate to home page first, then scroll after a short delay
-      navigate('/');
-      setTimeout(() => {
-        scrollToSection(link.section!);
-      }, 100);
-    }
+    navigate(link.href);
   };
 
   const socialLinks = [
