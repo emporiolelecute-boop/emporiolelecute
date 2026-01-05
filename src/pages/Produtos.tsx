@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import Chatbot from "@/components/Chatbot";
+import DynamicSEO from "@/components/DynamicSEO";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
 
@@ -83,6 +84,11 @@ const Produtos = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <DynamicSEO
+        title="Produtos | Empório LeleCute"
+        description="Catálogo completo de lembrancinhas artesanais: sabonetes, velas perfumadas e kits personalizados para todas as ocasiões."
+        url="https://emporiolelecute.com.br/produtos"
+      />
       <Header />
       
       <main className="pt-24 pb-16">

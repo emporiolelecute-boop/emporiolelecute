@@ -1,18 +1,19 @@
-import { Helmet } from "react-helmet";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import QuoteFormSection from "@/components/QuoteFormSection";
+import DynamicSEO from "@/components/DynamicSEO";
 
 const Contato = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Contato | Empório LeleCute - Fale Conosco</title>
-        <meta name="description" content="Entre em contato com o Empório LeleCute. Atendimento personalizado via WhatsApp para orçamentos de lembrancinhas artesanais." />
-      </Helmet>
+      <DynamicSEO
+        title="Contato | Empório LeleCute"
+        description="Entre em contato com o Empório LeleCute. Atendimento personalizado via WhatsApp para orçamentos de lembrancinhas artesanais."
+        url="https://emporiolelecute.com.br/contato"
+      />
       
       <Header />
       

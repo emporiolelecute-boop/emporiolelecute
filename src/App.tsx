@@ -69,7 +69,6 @@ const App = () => {
                 <Route path="/envio-brasil" element={<Envio />} />
                 <Route path="/rastrear" element={<RastrearPedido />} />
                 <Route path="/rastrear/:code" element={<RastrearPedido />} />
-                <Route path="/sitemap.xml" element={<Sitemap />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
