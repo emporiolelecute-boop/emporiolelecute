@@ -15,6 +15,7 @@ import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
 import Depoimentos from "./pages/Depoimentos";
 import Ocasioes from "./pages/Ocasioes";
+import Sitemap from "./pages/Sitemap";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -26,6 +27,7 @@ import AdminImport from "./pages/admin/AdminImport";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminSEO from "./pages/admin/AdminSEO";
 import { CartProvider } from "./contexts/CartContext";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
@@ -66,6 +68,7 @@ const App = () => {
                 <Route path="/envio-brasil" element={<Envio />} />
                 <Route path="/rastrear" element={<RastrearPedido />} />
                 <Route path="/rastrear/:code" element={<RastrearPedido />} />
+                <Route path="/sitemap.xml" element={<Sitemap />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -80,6 +83,7 @@ const App = () => {
                   <Route path="ocasioes" element={<AdminOccasions />} />
                   <Route path="importar" element={<AdminImport />} />
                   <Route path="configuracoes" element={<AdminSettings />} />
+                  <Route path="seo" element={<AdminSEO />} />
                 </Route>
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
