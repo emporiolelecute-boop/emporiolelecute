@@ -16,10 +16,32 @@ Deno.serve(async (req) => {
   try {
     console.log('Starting sitemap generation...')
     
+    // Parse request body for notification settings
+    let sendNotification = false
+    let notificationEmail = ''
+    
+    try {
+      const body = await req.json()
+      sendNotification = body?.sendNotification || false
+      notificationEmail = body?.notificationEmail || ''
+    } catch {
+      // No body or invalid JSON, continue without notification
+    }
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Fetch SEO settings
+    const { data: seoData } = await supabase
+      .from('store_settings')
+      .select('value')
+      .eq('key', 'seo_config')
+      .single()
+    
+    const seoConfig = seoData?.value as { canonical_url?: string } | null
+    const siteUrl = seoConfig?.canonical_url || SITE_URL
     
     // Fetch all active products
     const { data: products, error: productsError } = await supabase
@@ -62,7 +84,7 @@ Deno.serve(async (req) => {
   
   <!-- Homepage -->
   <url>
-    <loc>${SITE_URL}/</loc>
+    <loc>${siteUrl}/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -70,7 +92,7 @@ Deno.serve(async (req) => {
   
   <!-- Products Catalog -->
   <url>
-    <loc>${SITE_URL}/produtos</loc>
+    <loc>${siteUrl}/produtos</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
@@ -87,7 +109,7 @@ Deno.serve(async (req) => {
           : today
         
         sitemap += `  <url>
-    <loc>${SITE_URL}/produtos/${product.slug}</loc>
+    <loc>${siteUrl}/produtos/${product.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>`
@@ -113,7 +135,20 @@ Deno.serve(async (req) => {
     if (occasions && occasions.length > 0) {
       for (const occasion of occasions) {
         sitemap += `  <url>
-    <loc>${SITE_URL}/ocasioes/${occasion.slug}</loc>
+    <loc>${siteUrl}/ocasioes/${occasion.slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`
+      }
+    }
+    
+    // Add category pages
+    if (categories && categories.length > 0) {
+      for (const category of categories) {
+        sitemap += `  <url>
+    <loc>${siteUrl}/produtos?categoria=${category.slug}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -126,57 +161,57 @@ Deno.serve(async (req) => {
     sitemap += `
   <!-- Static Pages -->
   <url>
-    <loc>${SITE_URL}/envio</loc>
+    <loc>${siteUrl}/envio</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>${SITE_URL}/sobre</loc>
+    <loc>${siteUrl}/sobre</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>${SITE_URL}/contato</loc>
+    <loc>${siteUrl}/contato</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>${SITE_URL}/depoimentos</loc>
+    <loc>${siteUrl}/depoimentos</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>${SITE_URL}/carrinho</loc>
+    <loc>${siteUrl}/ocasioes</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   
   <!-- Section Anchors -->
   <url>
-    <loc>${SITE_URL}/#sobre</loc>
+    <loc>${siteUrl}/#sobre</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>${SITE_URL}/#faq</loc>
+    <loc>${siteUrl}/#faq</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>${SITE_URL}/#orcamento</loc>
+    <loc>${siteUrl}/#orcamento</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -184,8 +219,67 @@ Deno.serve(async (req) => {
   
 </urlset>`
     
+    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + 10
     console.log('Sitemap generated successfully')
-    console.log(`Total URLs: ${(products?.length || 0) + (occasions?.length || 0) + 10}`)
+    console.log(`Total URLs: ${totalUrls}`)
+    
+    // Update last sitemap generation time
+    await supabase
+      .from('store_settings')
+      .upsert({
+        key: 'last_sitemap_update',
+        value: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'key'
+      })
+    
+    // Send email notification if configured
+    if (sendNotification && notificationEmail) {
+      try {
+        const resendKey = Deno.env.get('RESEND_API_KEY')
+        if (resendKey) {
+          const emailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${resendKey}`,
+            },
+            body: JSON.stringify({
+              from: 'Empório LeleCute <noreply@emporiolelecute.com.br>',
+              to: [notificationEmail],
+              subject: 'Sitemap Atualizado - Empório LeleCute',
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #F87C6D;">Sitemap Atualizado</h2>
+                  <p>O sitemap do site foi atualizado com sucesso.</p>
+                  <ul>
+                    <li><strong>Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}</li>
+                    <li><strong>Total de URLs:</strong> ${totalUrls}</li>
+                    <li><strong>Produtos:</strong> ${products?.length || 0}</li>
+                    <li><strong>Ocasiões:</strong> ${occasions?.length || 0}</li>
+                    <li><strong>Categorias:</strong> ${categories?.length || 0}</li>
+                  </ul>
+                  <p>
+                    <a href="${siteUrl}/sitemap.xml" style="color: #F87C6D;">
+                      Ver Sitemap
+                    </a>
+                  </p>
+                </div>
+              `,
+            }),
+          })
+          
+          if (!emailResponse.ok) {
+            console.error('Failed to send notification email:', await emailResponse.text())
+          } else {
+            console.log('Notification email sent successfully')
+          }
+        }
+      } catch (emailError) {
+        console.error('Error sending notification email:', emailError)
+      }
+    }
     
     return new Response(sitemap, {
       headers: {
