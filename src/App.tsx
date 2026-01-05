@@ -28,6 +28,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminSEO from "./pages/admin/AdminSEO";
+import AdminSEOReport from "./pages/admin/AdminSEOReport";
 import { CartProvider } from "./contexts/CartContext";
 import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
 
@@ -84,6 +85,7 @@ const App = () => {
                   <Route path="importar" element={<AdminImport />} />
                   <Route path="configuracoes" element={<AdminSettings />} />
                   <Route path="seo" element={<AdminSEO />} />
+                  <Route path="seo/relatorio" element={<AdminSEOReport />} />
                 </Route>
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
