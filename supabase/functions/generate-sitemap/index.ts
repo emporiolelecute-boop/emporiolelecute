@@ -166,6 +166,13 @@ Deno.serve(async (req) => {
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <url>
+    <loc>${siteUrl}/envio-brasil</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
   
   <url>
     <loc>${siteUrl}/sobre</loc>
@@ -180,12 +187,26 @@ Deno.serve(async (req) => {
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  
+
   <url>
     <loc>${siteUrl}/depoimentos</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>${siteUrl}/carrinho</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>${siteUrl}/rastrear</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   
   <url>

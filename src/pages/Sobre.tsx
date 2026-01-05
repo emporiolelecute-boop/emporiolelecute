@@ -1,16 +1,17 @@
-import { Helmet } from "react-helmet";
-import { Heart, Award, Leaf, Users, Star, CheckCircle } from "lucide-react";
+import { Heart, Award, Leaf, Users, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import DynamicSEO from "@/components/DynamicSEO";
 
 const Sobre = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Sobre Nós | Empório LeleCute - Lembrancinhas Artesanais</title>
-        <meta name="description" content="Conheça a história do Empório LeleCute. Há mais de 10 anos criando lembrancinhas artesanais com amor e dedicação para momentos especiais." />
-      </Helmet>
+      <DynamicSEO
+        title="Sobre Nós | Empório LeleCute"
+        description="Conheça a história do Empório LeleCute. Há mais de 10 anos criando lembrancinhas artesanais com amor e dedicação."
+        url="https://emporiolelecute.com.br/sobre"
+      />
       
       <Header />
       
