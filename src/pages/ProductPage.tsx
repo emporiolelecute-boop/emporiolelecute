@@ -45,6 +45,7 @@ const ProductPage = () => {
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
+  const [quantityInput, setQuantityInput] = useState<string>("10");
   const [personalization, setPersonalization] = useState("");
   const [addedToCart, setAddedToCart] = useState(false);
   const { toast } = useToast();
@@ -100,7 +101,9 @@ const ProductPage = () => {
   // Set initial quantity to min quantity
   useEffect(() => {
     if (product) {
-      setQuantity(product.minQuantity);
+      const q = product.minQuantity;
+      setQuantity(q);
+      setQuantityInput(String(q));
     }
   }, [product]);
 
@@ -314,7 +317,12 @@ const ProductPage = () => {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border border-border rounded-lg overflow-hidden">
                     <button 
-                      onClick={() => quantity > product.minQuantity && setQuantity(quantity - 1)}
+                      type="button"
+                      onClick={() => {
+                        const next = Math.max(product.minQuantity, quantity - 1);
+                        setQuantity(next);
+                        setQuantityInput(String(next));
+                      }}
                       disabled={quantity <= product.minQuantity}
                       className="p-3 hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -322,20 +330,32 @@ const ProductPage = () => {
                     </button>
                     <input 
                       type="number"
-                      value={quantity}
+                      inputMode="numeric"
+                      value={quantityInput}
                       onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        if (!isNaN(val) && val >= product.minQuantity) {
-                          setQuantity(val);
-                        } else if (e.target.value === '') {
-                          setQuantity(product.minQuantity);
+                        const raw = e.target.value;
+                        setQuantityInput(raw);
+                        const parsed = Number(raw);
+                        if (Number.isFinite(parsed) && parsed >= product.minQuantity) {
+                          setQuantity(parsed);
                         }
+                      }}
+                      onBlur={() => {
+                        const parsed = Number(quantityInput);
+                        const next = Number.isFinite(parsed) && parsed >= product.minQuantity ? parsed : product.minQuantity;
+                        setQuantity(next);
+                        setQuantityInput(String(next));
                       }}
                       className="w-20 text-center border-0 bg-transparent focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       min={product.minQuantity}
                     />
                     <button 
-                      onClick={() => setQuantity(quantity + 1)}
+                      type="button"
+                      onClick={() => {
+                        const next = quantity + 1;
+                        setQuantity(next);
+                        setQuantityInput(String(next));
+                      }}
                       className="p-3 hover:bg-muted transition-colors"
                     >
                       <Plus className="h-4 w-4" />
