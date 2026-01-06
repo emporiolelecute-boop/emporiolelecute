@@ -157,18 +157,34 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Add static pages
+    // Fetch dynamic pages
+    const { data: dynamicPages } = await supabase
+      .from('pages')
+      .select('slug, updated_at')
+      .eq('status', 'published')
+    
+    // Add dynamic pages
+    if (dynamicPages && dynamicPages.length > 0) {
+      sitemap += `\n  <!-- Dynamic Pages -->\n`
+      for (const page of dynamicPages) {
+        const lastmod = page.updated_at 
+          ? new Date(page.updated_at).toISOString().split('T')[0]
+          : today
+        sitemap += `  <url>
+    <loc>${siteUrl}/${page.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`
+      }
+    }
+    
+    // Add static pages (removed anchor URLs which Google doesn't index)
     sitemap += `
   <!-- Static Pages -->
   <url>
     <loc>${siteUrl}/envio</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>${siteUrl}/envio-brasil</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -196,13 +212,6 @@ Deno.serve(async (req) => {
   </url>
 
   <url>
-    <loc>${siteUrl}/carrinho</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
     <loc>${siteUrl}/rastrear</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
@@ -216,23 +225,8 @@ Deno.serve(async (req) => {
     <priority>0.8</priority>
   </url>
   
-  <!-- Section Anchors -->
   <url>
-    <loc>${siteUrl}/#sobre</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>${siteUrl}/#faq</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>${siteUrl}/#orcamento</loc>
+    <loc>${siteUrl}/orcamento</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

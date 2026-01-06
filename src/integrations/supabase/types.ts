@@ -35,6 +35,60 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_external: boolean | null
+          is_visible: boolean | null
+          label: string
+          menu_location: string
+          page_id: string | null
+          parent_id: string | null
+          position: number | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_external?: boolean | null
+          is_visible?: boolean | null
+          label: string
+          menu_location: string
+          page_id?: string | null
+          parent_id?: string | null
+          position?: number | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_external?: boolean | null
+          is_visible?: boolean | null
+          label?: string
+          menu_location?: string
+          page_id?: string | null
+          parent_id?: string | null
+          position?: number | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       occasions: {
         Row: {
           created_at: string
@@ -175,6 +229,104 @@ export type Database = {
         }
         Relationships: []
       }
+      page_versions: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          page_id: string | null
+          seo_description: string | null
+          seo_title: string | null
+          version_number: number | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          page_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          version_number?: number | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          page_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          version_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_versions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          internal_notes: string | null
+          published_at: string | null
+          seo_canonical: string | null
+          seo_description: string | null
+          seo_nofollow: boolean | null
+          seo_noindex: boolean | null
+          seo_title: string | null
+          slug: string
+          status: string | null
+          title: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          internal_notes?: string | null
+          published_at?: string | null
+          seo_canonical?: string | null
+          seo_description?: string | null
+          seo_nofollow?: boolean | null
+          seo_noindex?: boolean | null
+          seo_title?: string | null
+          slug: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          internal_notes?: string | null
+          published_at?: string | null
+          seo_canonical?: string | null
+          seo_description?: string | null
+          seo_nofollow?: boolean | null
+          seo_noindex?: boolean | null
+          seo_title?: string | null
+          slug?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       product_occasions: {
         Row: {
           occasion_id: string
@@ -201,6 +353,36 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_tags: {
+        Row: {
+          product_id: string
+          tag_id: string
+        }
+        Insert: {
+          product_id: string
+          tag_id: string
+        }
+        Update: {
+          product_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_tags_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]
@@ -339,6 +521,27 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
         }
         Relationships: []
       }

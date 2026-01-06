@@ -123,10 +123,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <div className="p-6">
         {/* Rating */}
         <div className="flex items-center gap-1 mb-3" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+          <meta itemProp="ratingValue" content={String(product.rating)} />
+          <meta itemProp="ratingCount" content="1" />
+          <meta itemProp="reviewCount" content="1" />
+          <meta itemProp="bestRating" content="5" />
           {[...Array(product.rating)].map((_, i) => (
             <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
           ))}
-          <span className="text-xs text-muted-foreground ml-2" itemProp="ratingValue">{product.rating}.0</span>
+          <span className="text-xs text-muted-foreground ml-2">{product.rating}.0</span>
         </div>
         
         {/* Name */}
