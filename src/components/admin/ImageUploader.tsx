@@ -1,5 +1,8 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Loader2, Image as ImageIcon, GripVertical, Star } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,11 +14,136 @@ interface ImageUploaderProps {
   maxImages?: number;
 }
 
-const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderProps) => {
+interface SortableImageItemProps {
+  id: string;
+  url: string;
+  index: number;
+  isMain: boolean;
+  onRemove: () => void;
+  isRemoving: boolean;
+}
+
+const SortableImageItem = ({ id, url, index, isMain, onRemove, isRemoving }: SortableImageItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "relative group aspect-square",
+        isDragging && "opacity-50 z-50"
+      )}
+    >
+      <div className={cn(
+        "w-full h-full rounded-lg overflow-hidden bg-muted border-2 transition-all",
+        isMain ? "border-primary ring-2 ring-primary/20" : "border-border"
+      )}>
+        {url ? (
+          <img
+            src={url}
+            alt={`Imagem ${index + 1}`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageIcon className="w-8 h-8 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      
+      {/* Main image badge */}
+      {isMain && (
+        <span className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1">
+          <Star className="w-3 h-3 fill-current" />
+          Principal
+        </span>
+      )}
+      
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        type="button"
+        className="absolute top-2 right-10 z-10 p-1.5 bg-background/80 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-foreground" />
+      </button>
+      
+      {/* Remove button */}
+      <button
+        type="button"
+        onClick={onRemove}
+        disabled={isRemoving}
+        className="absolute top-2 right-2 z-10 p-1.5 bg-destructive text-destructive-foreground rounded-md opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+      >
+        {isRemoving ? (
+          <Loader2 className="w-3 h-3 animate-spin" />
+        ) : (
+          <X className="w-3 h-3" />
+        )}
+      </button>
+      
+      {/* Index badge */}
+      <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm text-foreground text-xs font-medium px-2 py-1 rounded-md">
+        {index + 1}
+      </div>
+    </div>
+  );
+};
+
+const ImageUploader = ({ images, onImagesChange, maxImages = 8 }: ImageUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const validImages = images.filter(Boolean);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = validImages.indexOf(active.id as string);
+      const newIndex = validImages.indexOf(over.id as string);
+      const newImages = arrayMove(validImages, oldIndex, newIndex);
+      onImagesChange(newImages);
+      
+      if (oldIndex === 0 || newIndex === 0) {
+        toast({
+          title: 'Imagem principal alterada',
+          description: 'A primeira imagem é sempre a principal.',
+        });
+      }
+    }
+  };
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
@@ -47,7 +175,7 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const remainingSlots = maxImages - images.filter(Boolean).length;
+    const remainingSlots = maxImages - validImages.length;
     if (remainingSlots <= 0) {
       toast({
         title: 'Limite de imagens',
@@ -63,7 +191,6 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
     const uploadedUrls: string[] = [];
 
     for (const file of filesToUpload) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         toast({
           title: 'Arquivo inválido',
@@ -73,7 +200,6 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
         continue;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: 'Arquivo muito grande',
@@ -90,7 +216,7 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
     }
 
     if (uploadedUrls.length > 0) {
-      const newImages = [...images.filter(Boolean), ...uploadedUrls];
+      const newImages = [...validImages, ...uploadedUrls];
       onImagesChange(newImages);
       toast({
         title: 'Upload concluído',
@@ -105,9 +231,8 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
   };
 
   const handleRemoveImage = async (index: number) => {
-    const imageUrl = images[index];
+    const imageUrl = validImages[index];
     
-    // Try to delete from storage if it's a Supabase URL
     if (imageUrl.includes('product-images')) {
       setUploadingIndex(index);
       try {
@@ -121,14 +246,18 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
       setUploadingIndex(null);
     }
 
-    const newImages = images.filter((_, i) => i !== index);
-    onImagesChange(newImages.length > 0 ? newImages : ['']);
+    const newImages = validImages.filter((_, i) => i !== index);
+    onImagesChange(newImages.length > 0 ? newImages : []);
   };
 
-  const handleUrlChange = (index: number, url: string) => {
-    const newImages = [...images];
-    newImages[index] = url;
+  const setAsMainImage = (index: number) => {
+    if (index === 0) return;
+    const newImages = arrayMove(validImages, index, 0);
     onImagesChange(newImages);
+    toast({
+      title: 'Imagem principal alterada',
+      description: 'A imagem selecionada agora é a principal.',
+    });
   };
 
   return (
@@ -160,95 +289,66 @@ const ImageUploader = ({ images, onImagesChange, maxImages = 5 }: ImageUploaderP
           <div className="flex flex-col items-center gap-2">
             <Upload className="w-8 h-8 text-muted-foreground" />
             <p className="text-sm font-medium text-foreground">
-              Clique para fazer upload
+              Clique para fazer upload ou arraste arquivos
             </p>
             <p className="text-xs text-muted-foreground">
-              PNG, JPG ou WEBP (máx. 5MB cada)
+              PNG, JPG ou WEBP (máx. 5MB cada) • Até {maxImages} imagens
             </p>
           </div>
         )}
       </div>
 
-      {/* Image preview grid */}
-      {images.filter(Boolean).length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {images.filter(Boolean).map((image, index) => (
-            <div key={index} className="relative group aspect-square">
-              <div className="w-full h-full rounded-lg overflow-hidden bg-muted border border-border">
-                {image ? (
-                  <img
-                    src={image}
-                    alt={`Imagem ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => handleRemoveImage(index)}
-                disabled={uploadingIndex === index}
-                className="absolute -top-2 -right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-              >
-                {uploadingIndex === index ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <X className="w-3 h-3" />
-                )}
-              </button>
-              {index === 0 && (
-                <span className="absolute bottom-2 left-2 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                  Principal
-                </span>
-              )}
-            </div>
-          ))}
+      {/* Instructions */}
+      {validImages.length > 0 && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
+          <GripVertical className="w-4 h-4" />
+          <span>Arraste as imagens para reordenar. A primeira imagem será a principal do produto.</span>
         </div>
       )}
 
-      {/* URL inputs for external images */}
-      <div className="space-y-2">
-        <p className="text-xs text-muted-foreground">
-          Ou adicione URLs de imagens externas:
-        </p>
-        {images.map((image, index) => (
-          <div key={index} className="flex gap-2">
-            <input
-              type="text"
-              value={image}
-              onChange={(e) => handleUrlChange(index, e.target.value)}
-              placeholder="https://exemplo.com/imagem.jpg"
-              className="flex-1 px-3 py-2 text-sm rounded-lg border border-input bg-background"
-            />
-            {images.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemoveImage(index)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        ))}
-        {images.filter(Boolean).length < maxImages && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => onImagesChange([...images, ''])}
-          >
-            Adicionar URL
-          </Button>
-        )}
-      </div>
+      {/* Draggable image grid */}
+      {validImages.length > 0 && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={validImages} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {validImages.map((url, index) => (
+                <div key={url} className="relative">
+                  <SortableImageItem
+                    id={url}
+                    url={url}
+                    index={index}
+                    isMain={index === 0}
+                    onRemove={() => handleRemoveImage(index)}
+                    isRemoving={uploadingIndex === index}
+                  />
+                  {/* Set as main button - only show for non-main images */}
+                  {index !== 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setAsMainImage(index)}
+                      className="absolute bottom-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground transition-all flex items-center gap-1"
+                    >
+                      <Star className="w-3 h-3" />
+                      Tornar principal
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
+
+      {/* Empty state */}
+      {validImages.length === 0 && (
+        <div className="text-center py-4 text-sm text-muted-foreground">
+          Nenhuma imagem adicionada ainda.
+        </div>
+      )}
     </div>
   );
 };
