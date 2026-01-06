@@ -28,7 +28,10 @@ const menuItems = [
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
+  { icon: Tags, label: 'Tags', path: '/admin/tags' },
   { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
+  { icon: Home, label: 'Páginas', path: '/admin/paginas' },
+  { icon: Menu, label: 'Menus', path: '/admin/menus' },
   { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
 ];
