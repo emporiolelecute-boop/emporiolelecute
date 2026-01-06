@@ -106,9 +106,9 @@ export type Database = {
           address_city: string
           address_complement: string | null
           address_neighborhood: string | null
-          address_number: string
+          address_number: string | null
           address_state: string
-          address_street: string
+          address_street: string | null
           created_at: string
           customer_email: string
           customer_name: string
@@ -130,9 +130,9 @@ export type Database = {
           address_city: string
           address_complement?: string | null
           address_neighborhood?: string | null
-          address_number: string
+          address_number?: string | null
           address_state: string
-          address_street: string
+          address_street?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
@@ -154,9 +154,9 @@ export type Database = {
           address_city?: string
           address_complement?: string | null
           address_neighborhood?: string | null
-          address_number?: string
+          address_number?: string | null
           address_state?: string
-          address_street?: string
+          address_street?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
@@ -221,6 +221,9 @@ export type Database = {
           min_quantity: number | null
           name: string
           original_price: number | null
+          personalization_enabled: boolean | null
+          personalization_label: string | null
+          personalization_placeholder: string | null
           pix_discount: number | null
           price: number
           production_days: number | null
@@ -244,6 +247,9 @@ export type Database = {
           min_quantity?: number | null
           name: string
           original_price?: number | null
+          personalization_enabled?: boolean | null
+          personalization_label?: string | null
+          personalization_placeholder?: string | null
           pix_discount?: number | null
           price: number
           production_days?: number | null
@@ -267,6 +273,9 @@ export type Database = {
           min_quantity?: number | null
           name?: string
           original_price?: number | null
+          personalization_enabled?: boolean | null
+          personalization_label?: string | null
+          personalization_placeholder?: string | null
           pix_discount?: number | null
           price?: number
           production_days?: number | null

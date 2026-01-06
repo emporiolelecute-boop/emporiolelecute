@@ -15,6 +15,7 @@ import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
 import Depoimentos from "./pages/Depoimentos";
 import Ocasioes from "./pages/Ocasioes";
+import Orcamento from "./pages/Orcamento";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -61,6 +62,7 @@ const App = () => {
                 <Route path="/contato" element={<Contato />} />
                 <Route path="/depoimentos" element={<Depoimentos />} />
                 <Route path="/ocasioes" element={<Ocasioes />} />
+                <Route path="/orcamento" element={<Orcamento />} />
                 <Route path="/produtos" element={<Produtos />} />
                 <Route path="/produtos/:slug" element={<ProductPage />} />
                 <Route path="/carrinho" element={<Carrinho />} />

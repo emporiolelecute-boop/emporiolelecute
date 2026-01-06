@@ -6,7 +6,6 @@ import BestSellers from "@/components/BestSellers";
 import OccasionsSection from "@/components/OccasionsSection";
 import Testimonials from "@/components/Testimonials";
 import FAQSection from "@/components/FAQSection";
-import QuoteFormSection from "@/components/QuoteFormSection";
 import InstagramFeed from "@/components/InstagramFeed";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -26,7 +25,6 @@ const Index = () => {
         <OccasionsSection />
         <Testimonials />
         <FAQSection />
-        <QuoteFormSection />
         <InstagramFeed />
       </main>
       <Footer />

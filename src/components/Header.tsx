@@ -16,6 +16,7 @@ const Header = () => {
     { href: "/produtos", section: null, label: "Produtos" },
     { href: "/ocasioes", section: null, label: "Ocasiões" },
     { href: "/depoimentos", section: null, label: "Depoimentos" },
+    { href: "/orcamento", section: null, label: "Orçamento" },
     { href: "/contato", section: null, label: "Contato" },
   ];
 

@@ -1,29 +1,6 @@
-import { Heart, Award, Truck, MessageCircle, Sparkles, Star } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 
 const About = () => {
-  const features = [
-    {
-      icon: Heart,
-      title: "Feito com Amor",
-      description: "Cada peça é confeccionada artesanalmente pela Letícia com muito carinho e atenção aos detalhes.",
-    },
-    {
-      icon: Sparkles,
-      title: "100% Personalizado",
-      description: "Personalize cores, aromas, tags e embalagens de acordo com o tema da sua festa ou evento.",
-    },
-    {
-      icon: Award,
-      title: "Qualidade Premium",
-      description: "Utilizamos matéria-prima hipoalergênica e de alta qualidade em todos os nossos produtos.",
-    },
-    {
-      icon: Truck,
-      title: "Envio Nacional",
-      description: "Enviamos para todo o Brasil via PAC ou Sedex, com embalagens seguras e proteção especial.",
-    },
-  ];
-
   return (
     <section 
       id="sobre" 
@@ -121,22 +98,6 @@ const About = () => {
             </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <article 
-                key={feature.title}
-                className="bg-card rounded-xl p-6 shadow-card border border-border/50 hover:shadow-medium hover:-translate-y-1 transition-all duration-300 group"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                  <feature.icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
-                </div>
-                <h3 className="font-display text-lg text-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-              </article>
-            ))}
-          </div>
         </div>
       </div>
     </section>

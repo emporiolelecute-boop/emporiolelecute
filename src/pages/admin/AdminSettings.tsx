@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, Phone, Mail, MapPin, Instagram, Facebook, ShoppingBag, Truck, Loader2, CreditCard, Percent } from 'lucide-react';
+import { Settings, Save, Phone, Mail, MapPin, Instagram, Facebook, ShoppingBag, Truck, Loader2, CreditCard, Percent, Plus, X, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { FooterConfig, defaultFooterConfig } from '@/hooks/useStoreSettings';
 
 interface StoreSettings {
   homepage_config: {
@@ -41,6 +42,7 @@ interface StoreSettings {
       boleto: boolean;
     };
   };
+  footer_config: FooterConfig;
 }
 
 const AdminSettings = () => {
@@ -79,6 +81,7 @@ const AdminSettings = () => {
         boleto: false,
       },
     },
+    footer_config: defaultFooterConfig,
   });
 
   useEffect(() => {
@@ -634,6 +637,237 @@ const AdminSettings = () => {
                 <p className="text-xs text-muted-foreground text-center">
                   Este é um exemplo de como as informações aparecerão na página do produto
                 </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        {/* Footer Configuration */}
+        <Card className="border-0 shadow-lg lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Configuração do Rodapé
+            </CardTitle>
+            <CardDescription>Personalize o conteúdo do rodapé do site</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Descrição da Marca</Label>
+                  <Textarea 
+                    value={settings.footer_config.brand_description}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        brand_description: e.target.value
+                      }
+                    })}
+                    placeholder="Descrição exibida no rodapé..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Telefone de Contato</Label>
+                  <Input 
+                    value={settings.footer_config.contacts.phone}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        contacts: {
+                          ...settings.footer_config.contacts,
+                          phone: e.target.value
+                        }
+                      }
+                    })}
+                    placeholder="(41) 99999-9999"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Endereço</Label>
+                  <Textarea 
+                    value={settings.footer_config.contacts.address}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        contacts: {
+                          ...settings.footer_config.contacts,
+                          address: e.target.value
+                        }
+                      }
+                    })}
+                    placeholder="Cidade, Estado"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Texto do Copyright</Label>
+                  <Input 
+                    value={settings.footer_config.footer_text}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        footer_text: e.target.value
+                      }
+                    })}
+                    placeholder="© {year} Sua Empresa..."
+                  />
+                  <p className="text-xs text-muted-foreground">Use {'{year}'} para inserir o ano atual automaticamente</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Texto "Feito com Amor"</Label>
+                  <Input 
+                    value={settings.footer_config.made_with_love}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        made_with_love: e.target.value
+                      }
+                    })}
+                    placeholder="Feito com ❤️ em Cidade, Estado"
+                  />
+                </div>
+              </div>
+
+              {/* Right Column - Links */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Links Úteis</Label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {settings.footer_config.useful_links.map((link, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <Input 
+                          value={link.label}
+                          onChange={(e) => {
+                            const newLinks = [...settings.footer_config.useful_links];
+                            newLinks[index] = { ...newLinks[index], label: e.target.value };
+                            setSettings({
+                              ...settings,
+                              footer_config: { ...settings.footer_config, useful_links: newLinks }
+                            });
+                          }}
+                          placeholder="Texto"
+                          className="flex-1"
+                        />
+                        <Input 
+                          value={link.url}
+                          onChange={(e) => {
+                            const newLinks = [...settings.footer_config.useful_links];
+                            newLinks[index] = { ...newLinks[index], url: e.target.value };
+                            setSettings({
+                              ...settings,
+                              footer_config: { ...settings.footer_config, useful_links: newLinks }
+                            });
+                          }}
+                          placeholder="URL"
+                          className="flex-1"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => {
+                            const newLinks = settings.footer_config.useful_links.filter((_, i) => i !== index);
+                            setSettings({
+                              ...settings,
+                              footer_config: { ...settings.footer_config, useful_links: newLinks }
+                            });
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        useful_links: [...settings.footer_config.useful_links, { label: '', url: '' }]
+                      }
+                    })}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Adicionar Link
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Ocasiões</Label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {settings.footer_config.occasions.map((occasion, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <Input 
+                          value={occasion.label}
+                          onChange={(e) => {
+                            const newOccasions = [...settings.footer_config.occasions];
+                            newOccasions[index] = { ...newOccasions[index], label: e.target.value };
+                            setSettings({
+                              ...settings,
+                              footer_config: { ...settings.footer_config, occasions: newOccasions }
+                            });
+                          }}
+                          placeholder="Nome da ocasião"
+                          className="flex-1"
+                        />
+                        <Input 
+                          value={occasion.url}
+                          onChange={(e) => {
+                            const newOccasions = [...settings.footer_config.occasions];
+                            newOccasions[index] = { ...newOccasions[index], url: e.target.value };
+                            setSettings({
+                              ...settings,
+                              footer_config: { ...settings.footer_config, occasions: newOccasions }
+                            });
+                          }}
+                          placeholder="URL"
+                          className="flex-1"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => {
+                            const newOccasions = settings.footer_config.occasions.filter((_, i) => i !== index);
+                            setSettings({
+                              ...settings,
+                              footer_config: { ...settings.footer_config, occasions: newOccasions }
+                            });
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setSettings({
+                      ...settings,
+                      footer_config: {
+                        ...settings.footer_config,
+                        occasions: [...settings.footer_config.occasions, { label: '', url: '' }]
+                      }
+                    })}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Adicionar Ocasião
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
