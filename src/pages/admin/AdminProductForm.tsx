@@ -57,6 +57,10 @@ const AdminProductForm = () => {
     keywords: [''],
     elo7_link: '',
     is_active: true,
+    // Personalization fields
+    personalization_enabled: true,
+    personalization_label: 'Personalização',
+    personalization_placeholder: 'Digite o nome, data ou mensagem para personalização...',
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,6 +86,9 @@ const AdminProductForm = () => {
         keywords: existingProduct.keywords.length > 0 ? existingProduct.keywords : [''],
         elo7_link: existingProduct.elo7_link || '',
         is_active: existingProduct.is_active,
+        personalization_enabled: existingProduct.personalization_enabled ?? true,
+        personalization_label: existingProduct.personalization_label || 'Personalização',
+        personalization_placeholder: existingProduct.personalization_placeholder || 'Digite o nome, data ou mensagem para personalização...',
       });
 
       // Load product occasions
@@ -166,6 +173,9 @@ const AdminProductForm = () => {
         keywords: formData.keywords.filter(Boolean),
         elo7_link: formData.elo7_link || null,
         is_active: formData.is_active,
+        personalization_enabled: formData.personalization_enabled,
+        personalization_label: formData.personalization_label || null,
+        personalization_placeholder: formData.personalization_placeholder || null,
       };
 
       let productId: string;
@@ -290,6 +300,44 @@ const AdminProductForm = () => {
                     onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg font-display">Personalização</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="personalization_enabled">Habilitar campo de personalização</Label>
+                  <Switch
+                    id="personalization_enabled"
+                    checked={formData.personalization_enabled}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, personalization_enabled: checked }))}
+                  />
+                </div>
+                {formData.personalization_enabled && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="personalization_label">Título do campo</Label>
+                      <Input
+                        id="personalization_label"
+                        value={formData.personalization_label}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, personalization_label: e.target.value }))}
+                        placeholder="Ex: Qual a letra para a lembrancinha?"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="personalization_placeholder">Placeholder do campo</Label>
+                      <Input
+                        id="personalization_placeholder"
+                        value={formData.personalization_placeholder}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, personalization_placeholder: e.target.value }))}
+                        placeholder="Ex: Escreva o nome ou letra inicial..."
+                      />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

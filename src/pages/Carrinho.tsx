@@ -14,10 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface AddressData {
   cep: string;
-  street: string;
-  number: string;
-  complement: string;
-  neighborhood: string;
   city: string;
   state: string;
 }
@@ -50,10 +46,6 @@ const Carrinho = () => {
   
   const [address, setAddress] = useState<AddressData>({
     cep: '',
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
     city: '',
     state: '',
   });
@@ -76,8 +68,6 @@ const Carrinho = () => {
         if (!data.erro) {
           setAddress(prev => ({
             ...prev,
-            street: data.logradouro || '',
-            neighborhood: data.bairro || '',
             city: data.localidade || '',
             state: data.uf || '',
           }));
@@ -107,7 +97,7 @@ const Carrinho = () => {
       )
       .join('\n\n');
 
-    return `🛒 *NOVO PEDIDO - EMPÓRIO LELECUTE*\n\n📋 *Código do Pedido:* ${code}\n\n👤 *DADOS DO CLIENTE*\nNome: ${customer.name}\nTelefone: ${customer.phone}\nEmail: ${customer.email}\n\n📍 *ENDEREÇO DE ENTREGA*\nCEP: ${address.cep}\nEndereço: ${address.street} ${address.number}${address.complement ? `, ${address.complement}` : ''}\nBairro: ${address.neighborhood || '-'}\nCidade: ${address.city} - ${address.state}\n\n📦 *PRODUTOS*\n${itemsList}\n\n💰 *SUBTOTAL DOS PRODUTOS: R$ ${total.toFixed(2).replace('.', ',')}*\n\n🚚 *FRETE:* A calcular\n\n_Aguardando cálculo do frete e confirmação do pedido_`;
+    return `🛒 *NOVO PEDIDO - EMPÓRIO LELECUTE*\n\n📋 *Código do Pedido:* ${code}\n\n👤 *DADOS DO CLIENTE*\nNome: ${customer.name}\nTelefone: ${customer.phone}\nEmail: ${customer.email}\n\n📍 *DADOS DE ENTREGA/ENVIO*\nCEP: ${address.cep}\nCidade: ${address.city} - ${address.state}\n\n📦 *PRODUTOS*\n${itemsList}\n\n💰 *SUBTOTAL DOS PRODUTOS: R$ ${total.toFixed(2).replace('.', ',')}*\n\n🚚 *FRETE:* A calcular\n\n_Aguardando cálculo do frete e confirmação do pedido_`;
   };
 
   const handleSubmitOrder = async () => {
@@ -121,10 +111,10 @@ const Carrinho = () => {
       return;
     }
 
-    if (!address.cep || !address.street || !address.number || !address.city || !address.state) {
+    if (!address.cep || !address.city || !address.state) {
       toast({
-        title: "Endereço incompleto",
-        description: "Preencha o endereço completo",
+        title: "Dados incompletos",
+        description: "Preencha CEP, cidade e estado",
         variant: "destructive",
       });
       return;
@@ -144,10 +134,10 @@ const Carrinho = () => {
           customer_email: customer.email,
           customer_phone: customer.phone,
           address_cep: address.cep,
-          address_street: address.street,
-          address_number: address.number,
-          address_complement: address.complement || null,
-          address_neighborhood: address.neighborhood || null,
+          address_street: null,
+          address_number: null,
+          address_complement: null,
+          address_neighborhood: null,
           address_city: address.city,
           address_state: address.state,
           shipping_method: 'A calcular via WhatsApp',
@@ -451,7 +441,7 @@ const Carrinho = () => {
               <div className="bg-card rounded-xl border border-border p-4 md:p-6">
                 <h2 className="font-display text-xl text-foreground mb-4 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  Endereço de Entrega
+                  Dados de entrega/envio
                 </h2>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
@@ -468,46 +458,6 @@ const Carrinho = () => {
                         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
                       )}
                     </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="street">Rua *</Label>
-                    <Input
-                      id="street"
-                      placeholder="Nome da rua"
-                      value={address.street}
-                      onChange={(e) => setAddress(prev => ({ ...prev, street: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="number">Número *</Label>
-                    <Input
-                      id="number"
-                      placeholder="123"
-                      value={address.number}
-                      onChange={(e) => setAddress(prev => ({ ...prev, number: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="complement">Complemento</Label>
-                    <Input
-                      id="complement"
-                      placeholder="Apto, bloco..."
-                      value={address.complement}
-                      onChange={(e) => setAddress(prev => ({ ...prev, complement: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="neighborhood">Bairro</Label>
-                    <Input
-                      id="neighborhood"
-                      placeholder="Bairro"
-                      value={address.neighborhood}
-                      onChange={(e) => setAddress(prev => ({ ...prev, neighborhood: e.target.value }))}
-                      className="mt-1"
-                    />
                   </div>
                   <div>
                     <Label htmlFor="city">Cidade *</Label>

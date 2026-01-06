@@ -29,6 +29,28 @@ export interface SEOConfig {
   sitemap_notification_email: string;
 }
 
+export interface FooterLink {
+  icon?: string;
+  label: string;
+  url: string;
+}
+
+export interface FooterConfig {
+  brand_description: string;
+  useful_links: FooterLink[];
+  occasions: FooterLink[];
+  contacts: {
+    phone: string;
+    address: string;
+  };
+  social_links: {
+    instagram: string;
+    facebook: string;
+  };
+  footer_text: string;
+  made_with_love: string;
+}
+
 const defaultPaymentConfig: PaymentConfig = {
   pix_discount: 7,
   installments: 3,
@@ -53,6 +75,34 @@ const defaultSEOConfig: SEOConfig = {
   additional_meta_tags: '',
   structured_data_business: '',
   sitemap_notification_email: '',
+};
+
+export const defaultFooterConfig: FooterConfig = {
+  brand_description: 'Ateliê criativo de lembrancinhas artesanais personalizadas. Sabonetes, velas e presentes feitos com amor.',
+  useful_links: [
+    { icon: 'Package', label: 'Rastrear Pedido', url: '/rastrear' },
+    { icon: 'Heart', label: 'Orçamento Personalizado', url: '/orcamento' },
+    { icon: 'ExternalLink', label: 'Loja no Elo7', url: 'https://www.elo7.com.br/emporiolelecute' },
+    { icon: 'ExternalLink', label: 'Loja Virtual', url: 'https://emporiolelecute.com.br/loja/' },
+    { icon: 'ExternalLink', label: 'Pinterest', url: 'https://br.pinterest.com/emporiolelecute' },
+  ],
+  occasions: [
+    { label: 'Maternidade & Chá de Bebê', url: '/produtos?ocasiao=maternidade' },
+    { label: 'Batizado & Primeira Comunhão', url: '/produtos?ocasiao=batizado' },
+    { label: 'Casamento & Bodas', url: '/produtos?ocasiao=casamento' },
+    { label: 'Aniversário & Festas', url: '/produtos?ocasiao=aniversario' },
+    { label: 'Eventos Corporativos', url: '/produtos?ocasiao=corporativo' },
+  ],
+  contacts: {
+    phone: '(41) 99221-4299',
+    address: 'São José dos Pinhais, PR\nEnviamos para todo o Brasil',
+  },
+  social_links: {
+    instagram: 'https://www.instagram.com/emporiolelecute',
+    facebook: 'https://www.facebook.com/emporiolelecute',
+  },
+  footer_text: '© {year} Empório LeleCute. Todos os direitos reservados.',
+  made_with_love: 'Feito com ❤️ em São José dos Pinhais, PR',
 };
 
 export const usePaymentConfig = () => {
@@ -125,6 +175,40 @@ export const useSEOConfig = () => {
       }
 
       return defaultSEOConfig;
+    },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+};
+
+export const useFooterConfig = () => {
+  return useQuery({
+    queryKey: ['footer_config'],
+    queryFn: async (): Promise<FooterConfig> => {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('value')
+        .eq('key', 'footer_config')
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching footer config:', error);
+        return defaultFooterConfig;
+      }
+
+      if (data?.value && typeof data.value === 'object' && !Array.isArray(data.value)) {
+        const val = data.value as Record<string, unknown>;
+        return {
+          brand_description: typeof val.brand_description === 'string' ? val.brand_description : defaultFooterConfig.brand_description,
+          useful_links: Array.isArray(val.useful_links) ? val.useful_links : defaultFooterConfig.useful_links,
+          occasions: Array.isArray(val.occasions) ? val.occasions : defaultFooterConfig.occasions,
+          contacts: typeof val.contacts === 'object' ? val.contacts as FooterConfig['contacts'] : defaultFooterConfig.contacts,
+          social_links: typeof val.social_links === 'object' ? val.social_links as FooterConfig['social_links'] : defaultFooterConfig.social_links,
+          footer_text: typeof val.footer_text === 'string' ? val.footer_text : defaultFooterConfig.footer_text,
+          made_with_love: typeof val.made_with_love === 'string' ? val.made_with_love : defaultFooterConfig.made_with_love,
+        };
+      }
+
+      return defaultFooterConfig;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });

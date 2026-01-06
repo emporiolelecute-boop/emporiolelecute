@@ -23,6 +23,10 @@ export interface DbProduct {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Personalization fields
+  personalization_enabled: boolean | null;
+  personalization_label: string | null;
+  personalization_placeholder: string | null;
 }
 
 export interface DbCategory {
