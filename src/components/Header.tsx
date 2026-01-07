@@ -4,24 +4,36 @@ import { Menu, X, Heart, Instagram, Facebook, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
 import { useCart } from "@/contexts/CartContext";
+import { useMenuItems } from "@/hooks/useMenus";
 import logo from "@/assets/logo.jpg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { itemCount } = useCart();
   const navigate = useNavigate();
+  
+  // Fetch dynamic menu items from database
+  const { data: menuItems } = useMenuItems('header');
+  
+  // Filter visible items and sort by position
+  const navLinks = menuItems
+    ?.filter(item => item.is_visible)
+    .map(item => ({
+      href: item.url || '/',
+      label: item.label,
+      isExternal: item.is_external,
+    })) || [
+      // Fallback links if no menu items configured
+      { href: "/sobre", label: "Sobre", isExternal: false },
+      { href: "/produtos", label: "Produtos", isExternal: false },
+      { href: "/ocasioes", label: "Ocasiões", isExternal: false },
+      { href: "/depoimentos", label: "Depoimentos", isExternal: false },
+      { href: "/orcamento", label: "Orçamento", isExternal: false },
+      { href: "/contato", label: "Contato", isExternal: false },
+    ];
 
-  const navLinks = [
-    { href: "/sobre", section: null, label: "Sobre" },
-    { href: "/produtos", section: null, label: "Produtos" },
-    { href: "/ocasioes", section: null, label: "Ocasiões" },
-    { href: "/depoimentos", section: null, label: "Depoimentos" },
-    { href: "/orcamento", section: null, label: "Orçamento" },
-    { href: "/contato", section: null, label: "Contato" },
-  ];
-
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { href: string; section: string | null }) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { href: string; isExternal: boolean }) => {
+    if (link.isExternal) return; // Let external links behave normally
     e.preventDefault();
     setIsMenuOpen(false);
     navigate(link.href);
@@ -55,14 +67,25 @@ const Header = () => {
           <div className="hidden lg:flex items-center gap-8">
             <ul className="flex items-center gap-6">
               {navLinks.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link)}
-                    className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    {link.label}
-                  </a>
+                <li key={link.href + link.label}>
+                  {link.isExternal ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <a
+                      href={link.href}
+                      onClick={(e) => handleNavClick(e, link)}
+                      className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-200 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -131,14 +154,26 @@ const Header = () => {
           <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-medium animate-fade-in">
             <ul className="flex flex-col py-4">
               {navLinks.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="block px-6 py-3 text-foreground/80 hover:text-primary hover:bg-primary-light/50 transition-colors"
-                    onClick={(e) => handleNavClick(e, link)}
-                  >
-                    {link.label}
-                  </a>
+                <li key={link.href + link.label}>
+                  {link.isExternal ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block px-6 py-3 text-foreground/80 hover:text-primary hover:bg-primary-light/50 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <a
+                      href={link.href}
+                      className="block px-6 py-3 text-foreground/80 hover:text-primary hover:bg-primary-light/50 transition-colors"
+                      onClick={(e) => handleNavClick(e, link)}
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
               <li className="px-6 pt-4 flex items-center gap-4">

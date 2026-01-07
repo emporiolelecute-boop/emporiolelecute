@@ -2,10 +2,15 @@ import { Heart, Instagram, Facebook, MapPin, Phone, ExternalLink, Package } from
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 import { useFooterConfig, defaultFooterConfig } from "@/hooks/useStoreSettings";
+import { useMenuItems } from "@/hooks/useMenus";
 
 const Footer = () => {
   const { data: footerConfig } = useFooterConfig();
+  const { data: menuItems } = useMenuItems('footer');
   const config = footerConfig || defaultFooterConfig;
+
+  // Get visible footer menu items
+  const footerLinks = menuItems?.filter(item => item.is_visible) || [];
 
   const getIcon = (iconName?: string) => {
     switch (iconName) {
@@ -42,23 +47,48 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Links */}
+          {/* Links - Dynamic from menu_items table */}
           <div>
             <h3 className="font-display text-xl mb-4">Links Úteis</h3>
             <ul className="space-y-3 text-sm text-primary-foreground/80">
-              {config.useful_links.map((link, index) => (
-                <li key={index}>
-                  {isExternal(link.url) ? (
-                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center gap-2">
-                      {getIcon(link.icon)} {link.label} {isExternal(link.url) && <ExternalLink className="h-3 w-3" />}
-                    </a>
-                  ) : (
-                    <Link to={link.url} className="hover:text-primary transition-colors flex items-center gap-2">
-                      {getIcon(link.icon)} {link.label}
-                    </Link>
-                  )}
-                </li>
-              ))}
+              {footerLinks.length > 0 ? (
+                footerLinks.map((link) => (
+                  <li key={link.id}>
+                    {link.is_external || (link.url && isExternal(link.url)) ? (
+                      <a 
+                        href={link.url || '#'} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="hover:text-primary transition-colors flex items-center gap-2"
+                      >
+                        {link.label} <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <Link 
+                        to={link.url || '/'} 
+                        className="hover:text-primary transition-colors flex items-center gap-2"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))
+              ) : (
+                // Fallback to config if no menu items
+                config.useful_links.map((link, index) => (
+                  <li key={index}>
+                    {isExternal(link.url) ? (
+                      <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center gap-2">
+                        {getIcon(link.icon)} {link.label} <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <Link to={link.url} className="hover:text-primary transition-colors flex items-center gap-2">
+                        {getIcon(link.icon)} {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 

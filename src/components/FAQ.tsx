@@ -1,4 +1,4 @@
-import { HelpCircle, Clock, Truck, Palette, CreditCard, Gift } from "lucide-react";
+import { HelpCircle, Clock, Truck, Palette, CreditCard, Gift, ShoppingCart } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -26,17 +26,17 @@ const FAQ = () => {
     {
       icon: CreditCard,
       question: "Quais são as formas de pagamento aceitas?",
-      answer: "Aceitamos diversas formas de pagamento: PIX (com desconto especial), cartão de crédito (em até 12x pelo Mercado Pago), transferência bancária e boleto. Para pedidos maiores, podemos dividir o pagamento em parcelas mediante aprovação. O pagamento pode ser feito diretamente pelo Elo7 ou combinado via WhatsApp."
+      answer: "Aceitamos PIX com 7% de desconto e cartão de crédito em até 3x sem juros. Para pedidos maiores, podemos oferecer condições especiais de pagamento. Entre em contato pelo WhatsApp para combinar a melhor forma de pagamento para você."
     },
     {
       icon: Gift,
       question: "Qual é a quantidade mínima de pedido?",
-      answer: "Para lembrancinhas personalizadas, a quantidade mínima geralmente é de 20 unidades, mas isso pode variar de acordo com o produto. Para kits especiais ou itens premium, consulte-nos. Temos condições especiais para pedidos acima de 50 e 100 unidades. Entre em contato para saber mais sobre descontos progressivos!"
+      answer: "A quantidade mínima varia de acordo com cada produto e está informada na descrição de cada um. Para lembrancinhas personalizadas, geralmente trabalhamos com quantidades que variam conforme o modelo escolhido. Consulte a página do produto desejado ou entre em contato conosco para mais informações."
     },
     {
-      icon: HelpCircle,
-      question: "Como funciona o processo de encomenda?",
-      answer: "É muito simples! 1) Entre em contato pelo WhatsApp ou Elo7 informando o tipo de lembrancinha, quantidade e data do evento. 2) Enviamos um orçamento personalizado com todas as opções. 3) Após aprovação e pagamento de 50% de sinal, iniciamos a produção. 4) Enviamos fotos durante o processo para aprovação. 5) Ao finalizar, cobramos o restante e enviamos seu pedido."
+      icon: ShoppingCart,
+      question: "Como funciona o processo de compra?",
+      answer: "É simples! 1) Escolha o modelo que deseja encomendar. 2) Defina a quantidade desejada e adicione ao carrinho. 3) No carrinho, preencha os dados solicitados e clique em \"Finalizar no WhatsApp\". 4) Você será direcionado ao WhatsApp para cálculo de frete e pagamento do pedido. Pronto! Em poucos passos seu pedido estará confirmado."
     }
   ];
 
