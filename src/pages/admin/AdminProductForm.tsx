@@ -44,9 +44,8 @@ const AdminProductForm = () => {
     description: '',
     long_description: '',
     price: '',
-    original_price: '',
     min_quantity: '1',
-    pix_discount: '3',
+    pix_discount: '7',
     production_days: '7',
     weight: '',
     category_id: '',
@@ -54,7 +53,7 @@ const AdminProductForm = () => {
     rating: '5.0',
     images: [''],
     features: [''],
-    keywords: [''],
+    keywords: [] as string[],
     elo7_link: '',
     is_active: true,
     // Personalization fields
@@ -64,16 +63,17 @@ const AdminProductForm = () => {
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [keywordsInput, setKeywordsInput] = useState('');
 
   useEffect(() => {
     if (existingProduct && isEditing) {
+      const keywords = existingProduct.keywords || [];
       setFormData({
         name: existingProduct.name,
         slug: existingProduct.slug,
         description: existingProduct.description || '',
         long_description: existingProduct.long_description || '',
         price: existingProduct.price.toString(),
-        original_price: existingProduct.original_price?.toString() || '',
         min_quantity: existingProduct.min_quantity.toString(),
         pix_discount: existingProduct.pix_discount.toString(),
         production_days: existingProduct.production_days.toString(),
@@ -83,13 +83,14 @@ const AdminProductForm = () => {
         rating: existingProduct.rating.toString(),
         images: existingProduct.images.length > 0 ? existingProduct.images : [''],
         features: existingProduct.features.length > 0 ? existingProduct.features : [''],
-        keywords: existingProduct.keywords.length > 0 ? existingProduct.keywords : [''],
+        keywords: keywords,
         elo7_link: existingProduct.elo7_link || '',
         is_active: existingProduct.is_active,
         personalization_enabled: existingProduct.personalization_enabled ?? true,
         personalization_label: existingProduct.personalization_label || 'Personalização',
         personalization_placeholder: existingProduct.personalization_placeholder || 'Digite o nome, data ou mensagem para personalização...',
       });
+      setKeywordsInput(keywords.join(', '));
 
       // Load product occasions
       supabase
@@ -121,7 +122,7 @@ const AdminProductForm = () => {
     }));
   };
 
-  const handleArrayChange = (field: 'images' | 'features' | 'keywords', index: number, value: string) => {
+  const handleArrayChange = (field: 'images' | 'features', index: number, value: string) => {
     setFormData((prev) => {
       const arr = [...prev[field]];
       arr[index] = value;
@@ -129,18 +130,34 @@ const AdminProductForm = () => {
     });
   };
 
-  const addArrayItem = (field: 'images' | 'features' | 'keywords') => {
+  const addArrayItem = (field: 'images' | 'features') => {
     setFormData((prev) => ({
       ...prev,
       [field]: [...prev[field], ''],
     }));
   };
 
-  const removeArrayItem = (field: 'images' | 'features' | 'keywords', index: number) => {
+  const removeArrayItem = (field: 'images' | 'features', index: number) => {
     setFormData((prev) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
+  };
+
+  const handleKeywordsChange = (value: string) => {
+    setKeywordsInput(value);
+    // Parse keywords from comma-separated input
+    const keywords = value
+      .split(',')
+      .map(k => k.trim())
+      .filter(k => k.length > 0);
+    setFormData(prev => ({ ...prev, keywords }));
+  };
+
+  const removeKeyword = (keywordToRemove: string) => {
+    const newKeywords = formData.keywords.filter(k => k !== keywordToRemove);
+    setFormData(prev => ({ ...prev, keywords: newKeywords }));
+    setKeywordsInput(newKeywords.join(', '));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -160,9 +177,9 @@ const AdminProductForm = () => {
         description: formData.description || null,
         long_description: formData.long_description || null,
         price: parseFloat(formData.price),
-        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
+        original_price: null, // Removed from form
         min_quantity: parseInt(formData.min_quantity) || 1,
-        pix_discount: parseInt(formData.pix_discount) || 3,
+        pix_discount: parseInt(formData.pix_discount) || 7,
         production_days: parseInt(formData.production_days) || 7,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         category_id: formData.category_id || null,
@@ -170,7 +187,7 @@ const AdminProductForm = () => {
         rating: parseFloat(formData.rating) || 5.0,
         images: formData.images.filter(Boolean),
         features: formData.features.filter(Boolean),
-        keywords: formData.keywords.filter(Boolean),
+        keywords: formData.keywords,
         elo7_link: formData.elo7_link || null,
         is_active: formData.is_active,
         personalization_enabled: formData.personalization_enabled,
@@ -201,7 +218,10 @@ const AdminProductForm = () => {
       }
 
       toast({ title: isEditing ? 'Produto atualizado!' : 'Produto criado!' });
-      navigate('/admin/produtos');
+      // Stay on page after save when editing
+      if (!isEditing) {
+        navigate('/admin/produtos');
+      }
     } catch (error) {
       console.error('Error saving product:', error);
       toast({ title: 'Erro ao salvar produto', variant: 'destructive' });
@@ -399,7 +419,7 @@ const AdminProductForm = () => {
             <CardTitle className="text-lg font-display">Preços e Quantidades</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Preço *</Label>
                 <Input
@@ -410,17 +430,6 @@ const AdminProductForm = () => {
                   onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                   placeholder="0.00"
                   required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="original_price">Preço original</Label>
-                <Input
-                  id="original_price"
-                  type="number"
-                  step="0.01"
-                  value={formData.original_price}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, original_price: e.target.value }))}
-                  placeholder="0.00"
                 />
               </div>
               <div className="space-y-2">
@@ -440,7 +449,7 @@ const AdminProductForm = () => {
                   type="number"
                   value={formData.pix_discount}
                   onChange={(e) => setFormData((prev) => ({ ...prev, pix_discount: e.target.value }))}
-                  placeholder="3"
+                  placeholder="7"
                 />
               </div>
               <div className="space-y-2">
@@ -520,29 +529,38 @@ const AdminProductForm = () => {
               <CardTitle className="text-lg font-display">Palavras-chave (SEO)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {formData.keywords.map((keyword, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={keyword}
-                    onChange={(e) => handleArrayChange('keywords', index, e.target.value)}
-                    placeholder="Palavra-chave"
-                  />
-                  {formData.keywords.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeArrayItem('keywords', index)}
+              <div className="space-y-2">
+                <Textarea
+                  value={keywordsInput}
+                  onChange={(e) => handleKeywordsChange(e.target.value)}
+                  placeholder="Digite palavras-chave separadas por vírgula: lembrancinha, maternidade, bebê, chá de bebê"
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Separe as palavras-chave com vírgulas. Ex: lembrancinha, casamento, personalizado
+                </p>
+              </div>
+              
+              {/* Display current keywords as tags */}
+              {formData.keywords.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {formData.keywords.map((keyword, index) => (
+                    <span 
+                      key={index}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
                     >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
+                      {keyword}
+                      <button
+                        type="button"
+                        onClick={() => removeKeyword(keyword)}
+                        className="hover:text-destructive transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
                 </div>
-              ))}
-              <Button type="button" variant="outline" onClick={() => addArrayItem('keywords')}>
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar palavra-chave
-              </Button>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -589,11 +607,12 @@ const AdminProductForm = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-4">
+        {/* Save Button at bottom */}
+        <div className="flex justify-end gap-4 sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <Button type="button" variant="outline" onClick={() => navigate('/admin/produtos')}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} size="lg">
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -602,7 +621,7 @@ const AdminProductForm = () => {
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                {isEditing ? 'Atualizar' : 'Criar'} Produto
+                {isEditing ? 'Salvar Alterações' : 'Criar Produto'}
               </>
             )}
           </Button>

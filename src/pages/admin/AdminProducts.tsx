@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Search, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -117,7 +117,20 @@ const AdminProducts = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{product.name}</span>
+                          <a
+                            href={`/produtos/${product.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary transition-colors"
+                            title="Abrir produto em nova aba"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         R$ {product.price.toFixed(2).replace('.', ',')}
                       </TableCell>
