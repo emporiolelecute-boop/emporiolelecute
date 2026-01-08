@@ -27,6 +27,10 @@ export interface DbProduct {
   personalization_enabled: boolean | null;
   personalization_label: string | null;
   personalization_placeholder: string | null;
+  // Relations (populated by joins)
+  category?: DbCategory | null;
+  occasions?: DbOccasion[];
+  tags?: DbTag[];
 }
 
 export interface DbCategory {
@@ -43,35 +47,105 @@ export interface DbOccasion {
   created_at: string;
 }
 
-// Fetch all products
+export interface DbTag {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string | null;
+}
+
+// Fetch all products with relations
 export function useDbProducts() {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First fetch products with category
+      const { data: products, error } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          category:categories(*)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as DbProduct[];
+
+      // Fetch product_occasions relationships
+      const { data: productOccasions } = await supabase
+        .from('product_occasions')
+        .select('product_id, occasion:occasions(*)');
+
+      // Fetch product_tags relationships
+      const { data: productTags } = await supabase
+        .from('product_tags')
+        .select('product_id, tag:tags(*)');
+
+      // Map occasions and tags to products
+      const productsWithRelations = (products || []).map(product => {
+        const occasions = (productOccasions || [])
+          .filter(po => po.product_id === product.id)
+          .map(po => po.occasion)
+          .filter(Boolean) as DbOccasion[];
+
+        const tags = (productTags || [])
+          .filter(pt => pt.product_id === product.id)
+          .map(pt => pt.tag)
+          .filter(Boolean) as DbTag[];
+
+        return {
+          ...product,
+          occasions,
+          tags,
+        };
+      });
+
+      return productsWithRelations as DbProduct[];
     },
   });
 }
 
-// Fetch single product by slug
+// Fetch single product by slug with relations
 export function useDbProduct(slug: string) {
   return useQuery({
     queryKey: ['product', slug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: product, error } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          category:categories(*)
+        `)
         .eq('slug', slug)
         .maybeSingle();
 
       if (error) throw error;
-      return data as DbProduct | null;
+      if (!product) return null;
+
+      // Fetch occasions for this product
+      const { data: productOccasions } = await supabase
+        .from('product_occasions')
+        .select('occasion:occasions(*)')
+        .eq('product_id', product.id);
+
+      // Fetch tags for this product
+      const { data: productTags } = await supabase
+        .from('product_tags')
+        .select('tag:tags(*)')
+        .eq('product_id', product.id);
+
+      const occasions = (productOccasions || [])
+        .map(po => po.occasion)
+        .filter(Boolean) as DbOccasion[];
+
+      const tags = (productTags || [])
+        .map(pt => pt.tag)
+        .filter(Boolean) as DbTag[];
+
+      return {
+        ...product,
+        occasions,
+        tags,
+      } as DbProduct;
     },
     enabled: !!slug,
   });

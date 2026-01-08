@@ -17,7 +17,9 @@ import {
   Plus,
   MessageCircle,
   ShoppingCart,
-  Tag
+  Tag,
+  Layers,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -237,7 +239,7 @@ const ProductPage = () => {
             {/* Info Section - Reference Style */}
             <div className="flex flex-col">
               {/* Product Name & Rating */}
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4 mb-3">
                 <h1 className="font-display text-2xl md:text-3xl text-foreground leading-tight">
                   {product.name}
                 </h1>
@@ -245,6 +247,48 @@ const ProductPage = () => {
                   <Star className="h-4 w-4 fill-white" />
                   <span className="font-bold text-sm">{product.rating.toFixed(1)}</span>
                 </div>
+              </div>
+
+              {/* Category, Occasions & Tags */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {/* Category Badge */}
+                {dbProduct?.category && (
+                  <Link
+                    to={`/produtos?categoria=${dbProduct.category.id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 rounded-full text-sm font-medium text-primary transition-colors"
+                  >
+                    <Layers className="h-3.5 w-3.5" />
+                    {dbProduct.category.name}
+                  </Link>
+                )}
+                
+                {/* Occasion Badges */}
+                {dbProduct?.occasions && dbProduct.occasions.length > 0 && (
+                  dbProduct.occasions.map((occasion) => (
+                    <Link
+                      key={occasion.id}
+                      to={`/produtos?ocasiao=${occasion.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent/80 rounded-full text-sm font-medium text-accent-foreground transition-colors"
+                    >
+                      <Calendar className="h-3.5 w-3.5" />
+                      {occasion.name}
+                    </Link>
+                  ))
+                )}
+
+                {/* Tags */}
+                {dbProduct?.tags && dbProduct.tags.length > 0 && (
+                  dbProduct.tags.slice(0, 3).map((tag) => (
+                    <Link
+                      key={tag.id}
+                      to={`/produtos?search=${encodeURIComponent(tag.name)}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-full text-xs font-medium text-muted-foreground transition-colors"
+                    >
+                      <Tag className="h-3 w-3" />
+                      {tag.name}
+                    </Link>
+                  ))
+                )}
               </div>
 
               {/* Price Info Grid */}
