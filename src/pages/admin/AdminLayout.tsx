@@ -16,7 +16,8 @@ import {
   ShoppingCart,
   Users,
   Settings,
-  Search
+  Search,
+  HelpCircle
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -32,6 +33,7 @@ const menuItems = [
   { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
   { icon: Home, label: 'Páginas', path: '/admin/paginas' },
   { icon: Menu, label: 'Menus', path: '/admin/menus' },
+  { icon: HelpCircle, label: 'FAQs', path: '/admin/faqs' },
   { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
 ];

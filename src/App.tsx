@@ -41,6 +41,7 @@ const AdminSEOReport = lazy(() => import("./pages/admin/AdminSEOReport"));
 const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
 const AdminPageForm = lazy(() => import("./pages/admin/AdminPageForm"));
 const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
+const AdminFaqs = lazy(() => import("./pages/admin/AdminFaqs"));
 
 const queryClient = new QueryClient();
 
@@ -213,6 +214,11 @@ const App = () => {
                   <Route path="menus" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminMenus />
+                    </Suspense>
+                  } />
+                  <Route path="faqs" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminFaqs />
                     </Suspense>
                   } />
                   <Route path="configuracoes" element={
