@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, Grid, List, ShoppingBag, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,17 +14,59 @@ import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProdu
 import type { Product } from "@/data/products";
 
 const Produtos = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: dbProducts, isLoading: loadingProducts } = useDbProducts();
   const { data: dbCategories } = useDbCategories();
   const { data: dbOccasions } = useDbOccasions();
   
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+  const [search, setSearch] = useState(searchParams.get('search') || "");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('categoria') || null);
+  const [selectedOccasion, setSelectedOccasion] = useState<string | null>(searchParams.get('ocasiao') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Convert db products to Product format
-  const products: Product[] = useMemo(() => {
+  // Sync URL params with state
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    const urlCategoria = searchParams.get('categoria');
+    const urlOcasiao = searchParams.get('ocasiao');
+    
+    if (urlSearch !== null) setSearch(urlSearch);
+    if (urlCategoria !== null) setSelectedCategory(urlCategoria);
+    if (urlOcasiao !== null) setSelectedOccasion(urlOcasiao);
+  }, [searchParams]);
+
+  // Update URL when filters change
+  const handleCategoryChange = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    const newParams = new URLSearchParams(searchParams);
+    if (categoryId) {
+      newParams.set('categoria', categoryId);
+    } else {
+      newParams.delete('categoria');
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleOccasionChange = (occasionId: string | null) => {
+    setSelectedOccasion(occasionId);
+    const newParams = new URLSearchParams(searchParams);
+    if (occasionId) {
+      newParams.set('ocasiao', occasionId);
+    } else {
+      newParams.delete('ocasiao');
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setSelectedCategory(null);
+    setSelectedOccasion(null);
+    setSearchParams({});
+  };
+
+  // Convert db products to Product format with relations
+  const products: (Product & { categoryId?: string; occasionIds: string[] })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -42,7 +85,10 @@ const Produtos = () => {
         category: 'outros' as const,
         occasions: [],
         keywords: p.keywords,
-        categoryId: p.category_id,
+        categoryId: p.category_id || undefined,
+        categoryName: p.category?.name,
+        occasionIds: (p.occasions || []).map(o => o.id),
+        occasionNames: (p.occasions || []).map(o => o.name),
       }));
   }, [dbProducts]);
 
@@ -75,8 +121,8 @@ const Produtos = () => {
         product.description.toLowerCase().includes(search.toLowerCase()) ||
         product.keywords.some(k => k.toLowerCase().includes(search.toLowerCase()));
       
-      const matchesCategory = !selectedCategory || (product as any).categoryId === selectedCategory;
-      const matchesOccasion = !selectedOccasion; // TODO: filter by occasion when product_occasions is loaded
+      const matchesCategory = !selectedCategory || product.categoryId === selectedCategory;
+      const matchesOccasion = !selectedOccasion || product.occasionIds.includes(selectedOccasion);
       
       return matchesSearch && matchesCategory && matchesOccasion;
     });
@@ -152,7 +198,7 @@ const Produtos = () => {
               <Badge
                 variant={selectedCategory === null ? "default" : "outline"}
                 className="cursor-pointer px-4 py-2 text-sm"
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => handleCategoryChange(null)}
               >
                 Todos
               </Badge>
@@ -161,7 +207,7 @@ const Produtos = () => {
                   key={category.id}
                   variant={selectedCategory === category.id ? "default" : "outline"}
                   className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={() => handleCategoryChange(category.id)}
                 >
                   {category.icon} {category.name}
                 </Badge>
@@ -176,7 +222,7 @@ const Produtos = () => {
               <Badge
                 variant={selectedOccasion === null ? "default" : "outline"}
                 className="cursor-pointer px-4 py-2 text-sm"
-                onClick={() => setSelectedOccasion(null)}
+                onClick={() => handleOccasionChange(null)}
               >
                 Todas
               </Badge>
@@ -185,7 +231,7 @@ const Produtos = () => {
                   key={occasion.id}
                   variant={selectedOccasion === occasion.id ? "default" : "outline"}
                   className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => setSelectedOccasion(occasion.id)}
+                  onClick={() => handleOccasionChange(occasion.id)}
                 >
                   {occasion.icon} {occasion.name}
                 </Badge>
@@ -213,7 +259,7 @@ const Produtos = () => {
           ) : (
             <div className="text-center py-16">
               <p className="text-muted-foreground mb-4">Nenhum produto encontrado</p>
-              <Button onClick={() => { setSearch(""); setSelectedCategory(null); setSelectedOccasion(null); }}>
+              <Button onClick={handleClearFilters}>
                 Limpar filtros
               </Button>
             </div>
