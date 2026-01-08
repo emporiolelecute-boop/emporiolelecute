@@ -1,44 +1,35 @@
-import { HelpCircle, Clock, Truck, Palette, CreditCard, Gift, ShoppingCart } from "lucide-react";
+import { HelpCircle, MessageSquare } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useFaqs } from "@/hooks/useFaqs";
 
 const FAQ = () => {
-  const faqs = [
+  const { data: faqs, isLoading } = useFaqs();
+
+  // Fallback FAQs if database is empty
+  const defaultFaqs = [
     {
-      icon: Clock,
-      question: "Qual é o prazo de produção das lembrancinhas?",
-      answer: "O prazo de produção varia de acordo com a quantidade e complexidade do pedido. Em média, trabalhamos com 7 a 15 dias úteis para produção. Para pedidos maiores (acima de 100 unidades), recomendamos fazer o pedido com pelo menos 30 dias de antecedência. Entre em contato conosco via WhatsApp para confirmar o prazo para o seu evento específico."
+      id: '1',
+      question: "Quais são as formas de pagamento?",
+      answer: "Aceitamos PIX com 7% de desconto e cartão de crédito em até 3x sem juros.",
     },
     {
-      icon: Truck,
-      question: "Vocês enviam para todo o Brasil?",
-      answer: "Sim! Enviamos nossas lembrancinhas artesanais para todos os estados do Brasil através dos Correios ou transportadoras parceiras. O frete é calculado de acordo com o CEP de destino e o peso do pedido. Produtos são embalados com muito cuidado para garantir que cheguem perfeitos ao seu destino."
-    },
-    {
-      icon: Palette,
-      question: "Posso personalizar as cores e fragrâncias?",
-      answer: "Com certeza! Todas as nossas lembrancinhas podem ser totalmente personalizadas. Você pode escolher cores, fragrâncias, embalagens, tags e até mesmo o formato dos sabonetes e velas. Trabalhamos com uma ampla variedade de aromas hipoalergênicos e corantes especiais para criar a lembrancinha perfeita para o seu evento."
-    },
-    {
-      icon: CreditCard,
-      question: "Quais são as formas de pagamento aceitas?",
-      answer: "Aceitamos PIX com 7% de desconto e cartão de crédito em até 3x sem juros. Para pedidos maiores, podemos oferecer condições especiais de pagamento. Entre em contato pelo WhatsApp para combinar a melhor forma de pagamento para você."
-    },
-    {
-      icon: Gift,
+      id: '2',
       question: "Qual é a quantidade mínima de pedido?",
-      answer: "A quantidade mínima varia de acordo com cada produto e está informada na descrição de cada um. Para lembrancinhas personalizadas, geralmente trabalhamos com quantidades que variam conforme o modelo escolhido. Consulte a página do produto desejado ou entre em contato conosco para mais informações."
+      answer: "A quantidade mínima varia de acordo com cada produto e está informada na descrição de cada um.",
     },
     {
-      icon: ShoppingCart,
+      id: '3',
       question: "Como funciona o processo de compra?",
-      answer: "É simples! 1) Escolha o modelo que deseja encomendar. 2) Defina a quantidade desejada e adicione ao carrinho. 3) No carrinho, preencha os dados solicitados e clique em \"Finalizar no WhatsApp\". 4) Você será direcionado ao WhatsApp para cálculo de frete e pagamento do pedido. Pronto! Em poucos passos seu pedido estará confirmado."
-    }
+      answer: 'É simples! 1) Escolha o modelo que deseja encomendar. 2) Defina a quantidade desejada e adicione ao carrinho. 3) No carrinho, preencha os dados solicitados e clique em "Finalizar no WhatsApp". 4) Você será direcionado ao WhatsApp para cálculo de frete e pagamento do pedido.',
+    },
   ];
+
+  const displayFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
 
   return (
     <section 
@@ -67,31 +58,41 @@ const FAQ = () => {
           </div>
 
           {/* FAQ Accordion */}
-          <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem 
-                key={index} 
-                value={`item-${index}`}
-                className="bg-card border border-border/50 rounded-2xl px-6 shadow-soft overflow-hidden"
-              >
-                <AccordionTrigger className="hover:no-underline py-6">
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="w-12 h-12 bg-primary-light rounded-full flex items-center justify-center flex-shrink-0">
-                      <faq.icon className="h-5 w-5 text-primary" />
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-card border border-border/50 rounded-2xl p-6 animate-pulse">
+                  <div className="h-6 bg-muted rounded w-3/4" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="space-y-4">
+              {displayFaqs.map((faq, index) => (
+                <AccordionItem 
+                  key={faq.id} 
+                  value={`item-${faq.id}`}
+                  className="bg-card border border-border/50 rounded-2xl px-6 shadow-soft overflow-hidden"
+                >
+                  <AccordionTrigger className="hover:no-underline py-6">
+                    <div className="flex items-center gap-4 text-left">
+                      <div className="w-12 h-12 bg-primary-light rounded-full flex items-center justify-center flex-shrink-0">
+                        <MessageSquare className="h-5 w-5 text-primary" />
+                      </div>
+                      <span className="font-display text-lg md:text-xl text-foreground">
+                        {faq.question}
+                      </span>
                     </div>
-                    <span className="font-display text-lg md:text-xl text-foreground">
-                      {faq.question}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-6 pl-16 pr-4">
-                  <p className="text-muted-foreground leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-6 pl-16 pr-4">
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {faq.answer}
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
 
           {/* CTA */}
           <div className="text-center mt-12">
