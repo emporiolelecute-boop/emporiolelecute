@@ -117,16 +117,24 @@ const RastrearPedido = () => {
     setSearched(true);
 
     try {
-      // Fetch order
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("order_code", code.toUpperCase().trim())
-        .maybeSingle();
+      // Use secure edge function for order tracking
+      const { data, error } = await supabase.functions.invoke('track-order', {
+        body: { orderCode: code.trim() }
+      });
 
-      if (orderError) throw orderError;
+      if (error) {
+        console.error("Error tracking order:", error);
+        toast({
+          title: "Erro ao buscar pedido",
+          description: "Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+        setOrder(null);
+        setOrderItems([]);
+        return;
+      }
 
-      if (!orderData) {
+      if (!data.order) {
         setOrder(null);
         setOrderItems([]);
         toast({
@@ -137,17 +145,8 @@ const RastrearPedido = () => {
         return;
       }
 
-      setOrder(orderData);
-
-      // Fetch order items
-      const { data: itemsData, error: itemsError } = await supabase
-        .from("order_items")
-        .select("*")
-        .eq("order_id", orderData.id);
-
-      if (itemsError) throw itemsError;
-
-      setOrderItems(itemsData || []);
+      setOrder(data.order);
+      setOrderItems(data.items || []);
     } catch (error) {
       console.error("Error fetching order:", error);
       toast({
@@ -155,6 +154,8 @@ const RastrearPedido = () => {
         description: "Tente novamente mais tarde.",
         variant: "destructive",
       });
+      setOrder(null);
+      setOrderItems([]);
     } finally {
       setIsLoading(false);
     }
