@@ -31,6 +31,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
+import RelatedProducts from "@/components/RelatedProducts";
 import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";

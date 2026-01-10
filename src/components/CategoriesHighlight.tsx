@@ -1,37 +1,52 @@
 import { Link } from "react-router-dom";
+import { useHomepageBlocks } from "@/hooks/useHomepageBlocks";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const categories = [
-  {
-    name: "Sabonetes",
-    image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg",
-    slug: "sabonetes",
-  },
-  {
-    name: "Velas",
-    image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg",
-    slug: "velas",
-  },
-  {
-    name: "Kits Maternidade",
-    image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg",
-    slug: "kits",
-  },
-  {
-    name: "Lembrancinhas",
-    image: "https://img.elo7.com.br/product/685x685/5663EE8/lembrancinha-sabonete-brasao-2-letras.jpg",
-    slug: "lembrancinhas",
-  },
+const defaultCategories = [
+  { name: "Sabonetes", image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg", link: "/produtos?categoria=sabonetes" },
+  { name: "Velas", image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg", link: "/produtos?categoria=velas" },
+  { name: "Kits Maternidade", image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg", link: "/produtos?categoria=kits" },
+  { name: "Lembrancinhas", image: "https://img.elo7.com.br/product/685x685/5663EE8/lembrancinha-sabonete-brasao-2-letras.jpg", link: "/produtos?categoria=lembrancinhas" },
 ];
 
 const CategoriesHighlight = () => {
+  const { data: blocks, isLoading } = useHomepageBlocks('category');
+
+  const categories = blocks && blocks.length > 0
+    ? blocks.map(block => ({
+        name: block.title,
+        image: block.image_url || '',
+        link: block.link_url || '/produtos',
+        linkText: block.link_text || 'Comprar Agora',
+      }))
+    : defaultCategories.map(c => ({ ...c, linkText: 'Comprar Agora' }));
+
+  if (isLoading) {
+    return (
+      <section className="py-12 bg-background">
+        <div className="container mx-auto px-4">
+          <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <Skeleton key={i} className="aspect-square rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-12 bg-background">
       <div className="container mx-auto px-4">
+        {/* SEO H1 - visually hidden but present for search engines */}
+        <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <Link 
-              key={category.slug}
-              to={`/produtos?categoria=${category.slug}`}
+              key={index}
+              to={category.link}
               className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-medium transition-all duration-300 hover:-translate-y-1"
             >
               <img 
@@ -42,11 +57,11 @@ const CategoriesHighlight = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="font-display text-lg md:text-xl text-white mb-1">
+                <h2 className="font-display text-lg md:text-xl text-white mb-1">
                   {category.name}
-                </h3>
+                </h2>
                 <span className="text-primary-light text-sm font-medium group-hover:text-primary transition-colors">
-                  Comprar Agora
+                  {category.linkText}
                 </span>
               </div>
             </Link>

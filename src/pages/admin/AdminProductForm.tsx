@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, X, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, X, Save, Loader2, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ import {
   useUpdateProduct,
   DbProduct,
 } from '@/hooks/useProducts';
+import { useTags, useUpdateProductTags } from '@/hooks/useTags';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminProductForm = () => {
@@ -35,8 +37,10 @@ const AdminProductForm = () => {
   const { data: existingProduct, isLoading: loadingProduct } = useDbProductById(id || '');
   const { data: categories } = useDbCategories();
   const { data: occasions } = useDbOccasions();
+  const { data: tags } = useTags();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
+  const updateProductTags = useUpdateProductTags();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -62,6 +66,7 @@ const AdminProductForm = () => {
     personalization_placeholder: 'Digite o nome, data ou mensagem para personalização...',
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [keywordsInput, setKeywordsInput] = useState('');
 
@@ -100,6 +105,17 @@ const AdminProductForm = () => {
         .then(({ data }) => {
           if (data) {
             setSelectedOccasions(data.map((o) => o.occasion_id));
+          }
+        });
+
+      // Load product tags
+      supabase
+        .from('product_tags')
+        .select('tag_id')
+        .eq('product_id', existingProduct.id)
+        .then(({ data }) => {
+          if (data) {
+            setSelectedTags(data.map((t) => t.tag_id));
           }
         });
     }
@@ -216,6 +232,9 @@ const AdminProductForm = () => {
           }))
         );
       }
+
+      // Update product tags
+      await updateProductTags.mutateAsync({ productId, tagIds: selectedTags });
 
       toast({ title: isEditing ? 'Produto atualizado!' : 'Produto criado!' });
       // Stay on page after save when editing
@@ -389,24 +408,56 @@ const AdminProductForm = () => {
                 <CardTitle className="text-lg font-display">Ocasiões</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {occasions?.map((occ) => (
-                    <label key={occ.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
+                    <label key={occ.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1.5 rounded-md transition-colors">
+                      <Checkbox
                         checked={selectedOccasions.includes(occ.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
+                        onCheckedChange={(checked) => {
+                          if (checked) {
                             setSelectedOccasions((prev) => [...prev, occ.id]);
                           } else {
                             setSelectedOccasions((prev) => prev.filter((id) => id !== occ.id));
                           }
                         }}
-                        className="rounded border-border"
                       />
                       <span className="text-sm">{occ.name}</span>
                     </label>
                   ))}
+                  {!occasions?.length && (
+                    <p className="text-sm text-muted-foreground">Nenhuma ocasião cadastrada</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg font-display flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Tags
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {tags?.map((tag) => (
+                    <label key={tag.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1.5 rounded-md transition-colors">
+                      <Checkbox
+                        checked={selectedTags.includes(tag.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedTags((prev) => [...prev, tag.id]);
+                          } else {
+                            setSelectedTags((prev) => prev.filter((id) => id !== tag.id));
+                          }
+                        }}
+                      />
+                      <span className="text-sm">{tag.name}</span>
+                    </label>
+                  ))}
+                  {!tags?.length && (
+                    <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

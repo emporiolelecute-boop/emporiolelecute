@@ -65,6 +65,57 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_blocks: {
+        Row: {
+          block_key: string
+          block_type: string
+          content: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_visible: boolean | null
+          link_text: string | null
+          link_url: string | null
+          position: number | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          block_key: string
+          block_type?: string
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          position?: number | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          block_key?: string
+          block_type?: string
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          position?: number | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           created_at: string | null
