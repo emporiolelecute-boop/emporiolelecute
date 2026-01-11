@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Menu, Plus, Trash2, Loader2, GripVertical, ExternalLink, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Menu, Plus, Trash2, Loader2, ExternalLink, FileText, ChevronDown, ChevronUp, Check, X, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -59,6 +59,12 @@ const AdminMenus = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [linksOpen, setLinksOpen] = useState(false);
+  
+  // Inline editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  
   const [newItem, setNewItem] = useState({
     label: '',
     url: '',
@@ -119,24 +125,34 @@ const AdminMenus = () => {
     }
   };
 
-  const handleQuickAdd = async (link: { label: string; url: string }) => {
-    try {
-      const nextPosition = Math.max(...(menuItems.map(m => m.position) || [0]), 0) + 1;
-      
-      await createMenuItem.mutateAsync({
-        menu_location: activeLocation,
-        label: link.label.replace(/^(Categoria|Ocasião|Página): /, ''),
-        url: link.url,
-        page_id: null,
-        is_external: link.url.startsWith('http'),
-        is_visible: true,
-        position: nextPosition,
-        parent_id: null,
-      });
+  const handleStartEdit = (item: MenuItem) => {
+    setEditingId(item.id);
+    setEditLabel(item.label);
+    setEditUrl(item.url || '');
+  };
 
-      toast({ title: 'Item adicionado!' });
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditLabel('');
+    setEditUrl('');
+  };
+
+  const handleSaveEdit = async (item: MenuItem) => {
+    if (!editLabel.trim()) {
+      toast({ title: 'O label não pode estar vazio', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      await updateMenuItem.mutateAsync({
+        id: item.id,
+        label: editLabel,
+        url: item.page_id ? null : editUrl || null,
+      });
+      setEditingId(null);
+      toast({ title: 'Item atualizado!' });
     } catch (error) {
-      toast({ title: 'Erro ao adicionar item', variant: 'destructive' });
+      toast({ title: 'Erro ao atualizar item', variant: 'destructive' });
     }
   };
 
@@ -145,6 +161,17 @@ const AdminMenus = () => {
       await updateMenuItem.mutateAsync({
         id: item.id,
         is_visible: !item.is_visible,
+      });
+    } catch (error) {
+      toast({ title: 'Erro ao atualizar item', variant: 'destructive' });
+    }
+  };
+
+  const handleToggleExternal = async (item: MenuItem) => {
+    try {
+      await updateMenuItem.mutateAsync({
+        id: item.id,
+        is_external: !item.is_external,
       });
     } catch (error) {
       toast({ title: 'Erro ao atualizar item', variant: 'destructive' });
@@ -346,52 +373,125 @@ const AdminMenus = () => {
             <div className="space-y-2">
               {menuItems.sort((a, b) => a.position - b.position).map((item, index) => (
                 <Card key={item.id} className="group">
-                  <CardContent className="flex items-center gap-4 py-3">
-                    {/* Reorder Buttons */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleMoveUp(index)}
-                        disabled={index === 0}
-                        className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <ChevronUp className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleMoveDown(index)}
-                        disabled={index === menuItems.length - 1}
-                        className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-foreground">{item.label}</span>
-                        {item.is_external && <ExternalLink className="w-3 h-3 text-muted-foreground" />}
-                        {item.page_id && <FileText className="w-3 h-3 text-primary" />}
+                  <CardContent className="py-3">
+                    {editingId === item.id ? (
+                      // Inline Edit Mode
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs">Label</Label>
+                            <Input
+                              value={editLabel}
+                              onChange={(e) => setEditLabel(e.target.value)}
+                              placeholder="Texto do link"
+                              className="mt-1"
+                              autoFocus
+                            />
+                          </div>
+                          {!item.page_id && (
+                            <div>
+                              <Label className="text-xs">URL</Label>
+                              <Input
+                                value={editUrl}
+                                onChange={(e) => setEditUrl(e.target.value)}
+                                placeholder="/pagina ou https://..."
+                                className="mt-1"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={item.is_external}
+                                onCheckedChange={() => handleToggleExternal(item)}
+                                id={`external-${item.id}`}
+                              />
+                              <Label htmlFor={`external-${item.id}`} className="text-xs">Externo</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={item.is_visible}
+                                onCheckedChange={() => handleToggleVisibility(item)}
+                                id={`visible-${item.id}`}
+                              />
+                              <Label htmlFor={`visible-${item.id}`} className="text-xs">Visível</Label>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={handleCancelEdit}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Cancelar
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleSaveEdit(item)}
+                              disabled={updateMenuItem.isPending}
+                            >
+                              <Check className="w-4 h-4 mr-1" />
+                              Salvar
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {item.page_id ? `→ ${getPageByID(item.page_id)?.slug || 'página'}` : item.url}
-                      </p>
-                    </div>
+                    ) : (
+                      // Display Mode
+                      <div className="flex items-center gap-4">
+                        {/* Reorder Buttons */}
+                        <div className="flex flex-col gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveUp(index)}
+                            disabled={index === 0}
+                            className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveDown(index)}
+                            disabled={index === menuItems.length - 1}
+                            className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </div>
 
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={item.is_visible}
-                        onCheckedChange={() => handleToggleVisibility(item)}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(item.id)}
-                        className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                        <div className="flex-1 cursor-pointer" onClick={() => handleStartEdit(item)}>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-medium ${item.is_visible ? 'text-foreground' : 'text-muted-foreground line-through'}`}>
+                              {item.label}
+                            </span>
+                            {item.is_external && <ExternalLink className="w-3 h-3 text-muted-foreground" />}
+                            {item.page_id && <FileText className="w-3 h-3 text-primary" />}
+                            <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {item.page_id ? `→ /${getPageByID(item.page_id)?.slug || 'página'}` : item.url}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={item.is_visible}
+                            onCheckedChange={() => handleToggleVisibility(item)}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeleteId(item.id)}
+                            className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
