@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, Plus, Trash2, Loader2, GripVertical, ExternalLink, FileText } from 'lucide-react';
+import { Menu, Plus, Trash2, Loader2, GripVertical, ExternalLink, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,9 +7,11 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import { useMenuItems, useCreateMenuItem, useUpdateMenuItem, useDeleteMenuItem, MenuItem } from '@/hooks/useMenus';
+import { useMenuItems, useCreateMenuItem, useUpdateMenuItem, useDeleteMenuItem, useReorderMenuItems, MenuItem } from '@/hooks/useMenus';
 import { usePages } from '@/hooks/usePages';
+import { useDbCategories, useDbOccasions } from '@/hooks/useProducts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,17 +30,35 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
+// Predefined site links
+const staticLinks = [
+  { label: 'Início', url: '/' },
+  { label: 'Sobre', url: '/sobre' },
+  { label: 'Produtos', url: '/produtos' },
+  { label: 'Ocasiões', url: '/ocasioes' },
+  { label: 'Depoimentos', url: '/depoimentos' },
+  { label: 'Orçamento', url: '/orcamento' },
+  { label: 'Contato', url: '/contato' },
+  { label: 'Carrinho', url: '/carrinho' },
+  { label: 'Rastrear Pedido', url: '/rastrear' },
+  { label: 'Envio', url: '/envio' },
+];
+
 const AdminMenus = () => {
   const { data: allMenuItems, isLoading } = useMenuItems();
   const { data: pages } = usePages();
+  const { data: categories } = useDbCategories();
+  const { data: occasions } = useDbOccasions();
   const createMenuItem = useCreateMenuItem();
   const updateMenuItem = useUpdateMenuItem();
   const deleteMenuItem = useDeleteMenuItem();
+  const reorderMenuItems = useReorderMenuItems();
   const { toast } = useToast();
 
   const [activeLocation, setActiveLocation] = useState<'header' | 'footer'>('header');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [linksOpen, setLinksOpen] = useState(false);
   const [newItem, setNewItem] = useState({
     label: '',
     url: '',
@@ -47,6 +67,24 @@ const AdminMenus = () => {
   });
 
   const menuItems = allMenuItems?.filter(item => item.menu_location === activeLocation) || [];
+
+  // Generate dynamic links from categories and occasions
+  const categoryLinks = (categories || []).map(c => ({
+    label: `Categoria: ${c.name}`,
+    url: `/produtos?categoria=${c.slug}`,
+  }));
+
+  const occasionLinks = (occasions || []).map(o => ({
+    label: `Ocasião: ${o.name}`,
+    url: `/produtos?ocasiao=${o.slug}`,
+  }));
+
+  const pageLinks = (pages || []).filter(p => p.status === 'published').map(p => ({
+    label: `Página: ${p.title}`,
+    url: `/${p.slug}`,
+  }));
+
+  const allSuggestedLinks = [...staticLinks, ...categoryLinks, ...occasionLinks, ...pageLinks];
 
   const handleCreate = async () => {
     if (!newItem.label) {
@@ -81,6 +119,27 @@ const AdminMenus = () => {
     }
   };
 
+  const handleQuickAdd = async (link: { label: string; url: string }) => {
+    try {
+      const nextPosition = Math.max(...(menuItems.map(m => m.position) || [0]), 0) + 1;
+      
+      await createMenuItem.mutateAsync({
+        menu_location: activeLocation,
+        label: link.label.replace(/^(Categoria|Ocasião|Página): /, ''),
+        url: link.url,
+        page_id: null,
+        is_external: link.url.startsWith('http'),
+        is_visible: true,
+        position: nextPosition,
+        parent_id: null,
+      });
+
+      toast({ title: 'Item adicionado!' });
+    } catch (error) {
+      toast({ title: 'Erro ao adicionar item', variant: 'destructive' });
+    }
+  };
+
   const handleToggleVisibility = async (item: MenuItem) => {
     try {
       await updateMenuItem.mutateAsync({
@@ -89,6 +148,34 @@ const AdminMenus = () => {
       });
     } catch (error) {
       toast({ title: 'Erro ao atualizar item', variant: 'destructive' });
+    }
+  };
+
+  const handleMoveUp = async (index: number) => {
+    if (index === 0) return;
+    const sortedItems = [...menuItems].sort((a, b) => a.position - b.position);
+    const updates = [
+      { id: sortedItems[index].id, position: sortedItems[index - 1].position },
+      { id: sortedItems[index - 1].id, position: sortedItems[index].position },
+    ];
+    try {
+      await reorderMenuItems.mutateAsync(updates);
+    } catch (error) {
+      toast({ title: 'Erro ao reordenar', variant: 'destructive' });
+    }
+  };
+
+  const handleMoveDown = async (index: number) => {
+    const sortedItems = [...menuItems].sort((a, b) => a.position - b.position);
+    if (index >= sortedItems.length - 1) return;
+    const updates = [
+      { id: sortedItems[index].id, position: sortedItems[index + 1].position },
+      { id: sortedItems[index + 1].id, position: sortedItems[index].position },
+    ];
+    try {
+      await reorderMenuItems.mutateAsync(updates);
+    } catch (error) {
+      toast({ title: 'Erro ao reordenar', variant: 'destructive' });
     }
   };
 
@@ -127,11 +214,53 @@ const AdminMenus = () => {
               Novo Item
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Novo Item de Menu</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
+              {/* Quick Links Section */}
+              <Collapsible open={linksOpen} onOpenChange={setLinksOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    Links Sugeridos do Site
+                    {linksOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2">
+                  <div className="max-h-48 overflow-y-auto border rounded-md p-2 space-y-1">
+                    {allSuggestedLinks.map((link, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-sm rounded hover:bg-primary-light/50 transition-colors flex items-center justify-between group"
+                        onClick={() => {
+                          setNewItem({
+                            label: link.label.replace(/^(Categoria|Ocasião|Página): /, ''),
+                            url: link.url,
+                            page_id: '',
+                            is_external: link.url.startsWith('http'),
+                          });
+                          setLinksOpen(false);
+                        }}
+                      >
+                        <span>{link.label}</span>
+                        <span className="text-xs text-muted-foreground">{link.url}</span>
+                      </button>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou preencha manualmente</span>
+                </div>
+              </div>
+
               <div>
                 <Label>Label</Label>
                 <Input
@@ -215,11 +344,27 @@ const AdminMenus = () => {
             </Card>
           ) : (
             <div className="space-y-2">
-              {menuItems.sort((a, b) => a.position - b.position).map((item) => (
+              {menuItems.sort((a, b) => a.position - b.position).map((item, index) => (
                 <Card key={item.id} className="group">
                   <CardContent className="flex items-center gap-4 py-3">
-                    <div className="cursor-grab text-muted-foreground">
-                      <GripVertical className="w-5 h-5" />
+                    {/* Reorder Buttons */}
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveUp(index)}
+                        disabled={index === 0}
+                        className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveDown(index)}
+                        disabled={index === menuItems.length - 1}
+                        className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
 
                     <div className="flex-1">
