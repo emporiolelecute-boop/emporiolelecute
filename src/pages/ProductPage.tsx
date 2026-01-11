@@ -34,6 +34,8 @@ import ProductCard from "@/components/ProductCard";
 import RelatedProducts from "@/components/RelatedProducts";
 import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
+import DynamicSEO from "@/components/DynamicSEO";
+import ProductStructuredData from "@/components/ProductStructuredData";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
@@ -190,6 +192,24 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* SEO and Structured Data */}
+      <DynamicSEO
+        title={`${product.name} | Empório LeleCute`}
+        description={product.description || `Lembrancinha artesanal ${product.name}. Personalizada para ocasiões especiais.`}
+        image={product.images[0] || undefined}
+        url={`https://emporiolelecute.com.br/produto/${product.slug}`}
+        type="product"
+      />
+      <ProductStructuredData
+        name={product.name}
+        description={product.description || `Lembrancinha artesanal ${product.name}`}
+        price={product.price}
+        images={product.images}
+        slug={product.slug}
+        rating={product.rating}
+        productionDays={product.productionDays}
+        category={dbProduct?.category?.name}
+      />
       <Header />
       
       <main className="pt-24 pb-16">
@@ -252,10 +272,10 @@ const ProductPage = () => {
 
               {/* Category, Occasions & Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
-                {/* Category Badge */}
+                {/* Category Badge - using SLUG for friendly URLs */}
                 {dbProduct?.category && (
                   <Link
-                    to={`/produtos?categoria=${dbProduct.category.id}`}
+                    to={`/produtos?categoria=${dbProduct.category.slug}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 rounded-full text-sm font-medium text-primary transition-colors"
                   >
                     <Layers className="h-3.5 w-3.5" />
@@ -263,12 +283,12 @@ const ProductPage = () => {
                   </Link>
                 )}
                 
-                {/* Occasion Badges */}
+                {/* Occasion Badges - using SLUG for friendly URLs */}
                 {dbProduct?.occasions && dbProduct.occasions.length > 0 && (
                   dbProduct.occasions.map((occasion) => (
                     <Link
                       key={occasion.id}
-                      to={`/produtos?ocasiao=${occasion.id}`}
+                      to={`/produtos?ocasiao=${occasion.slug}`}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent/80 rounded-full text-sm font-medium text-accent-foreground transition-colors"
                     >
                       <Calendar className="h-3.5 w-3.5" />

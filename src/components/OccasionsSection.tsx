@@ -1,40 +1,59 @@
-import { Heart, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Heart, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDbOccasions } from "@/hooks/useProducts";
 
-const occasions = [
-  {
-    title: "Maternidade",
+// Static fallback occasions with images and descriptions
+const occasionDefaults: Record<string, { description: string; image: string }> = {
+  "maternidade": {
     description: "Lembrancinhas delicadas para celebrar a chegada do bebê. Sabonetes e velas personalizadas com o nome e tema do pequeno.",
     image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg",
   },
-  {
-    title: "Chá de Bebê",
+  "cha-bebe": {
     description: "Surpreenda os convidados do chá revelação ou chá de fraldas com lembrancinhas artesanais encantadoras e perfumadas.",
     image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg",
   },
-  {
-    title: "Batizado",
+  "batizado": {
     description: "Celebre a bênção do batismo com sabonetes em formato de anjo, pomba, terço e símbolos religiosos personalizados.",
     image: "https://img.elo7.com.br/product/685x685/5663EE8/lembrancinha-sabonete-brasao-2-letras.jpg",
   },
-  {
-    title: "Casamento",
+  "casamento": {
     description: "Lembrancinhas elegantes para o grande dia. Sabonetes com iniciais dos noivos, velas aromáticas e kits especiais.",
     image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg",
   },
-  {
-    title: "Aniversário",
+  "aniversario": {
     description: "Festas infantis ou adultas ficam mais especiais com lembrancinhas temáticas personalizadas com cores e aromas.",
     image: "https://img.elo7.com.br/product/685x685/548BDE7/lembrancinha-sabonete-fundo-do-mar-letra-mini-coracao.jpg",
   },
-  {
-    title: "Eventos Corporativos",
+  "corporativo": {
     description: "Kits presenteáveis personalizados para brindes corporativos, datas comemorativas e eventos empresariais.",
     image: "https://img.elo7.com.br/product/685x685/576D279/sabonete-lembrancinha-natal-presepio-sagrada-familia-natal-presepio.jpg",
   },
-];
+};
+
+const defaultImage = "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg";
 
 const OccasionsSection = () => {
+  const { data: dbOccasions } = useDbOccasions();
+
+  // Build occasions from database, with fallback defaults for description and image
+  const occasions = (dbOccasions || []).slice(0, 6).map(o => ({
+    title: o.name,
+    slug: o.slug,
+    description: occasionDefaults[o.slug]?.description || `Lembrancinhas personalizadas para ${o.name.toLowerCase()}.`,
+    image: occasionDefaults[o.slug]?.image || defaultImage,
+  }));
+
+  // Fallback if no occasions in database
+  const displayOccasions = occasions.length > 0 ? occasions : [
+    { title: "Maternidade", slug: "maternidade", ...occasionDefaults["maternidade"] },
+    { title: "Chá de Bebê", slug: "cha-bebe", ...occasionDefaults["cha-bebe"] },
+    { title: "Batizado", slug: "batizado", ...occasionDefaults["batizado"] },
+    { title: "Casamento", slug: "casamento", ...occasionDefaults["casamento"] },
+    { title: "Aniversário", slug: "aniversario", ...occasionDefaults["aniversario"] },
+    { title: "Corporativo", slug: "corporativo", ...occasionDefaults["corporativo"] },
+  ];
+
   return (
     <section 
       id="ocasioes" 
@@ -55,9 +74,9 @@ const OccasionsSection = () => {
 
           {/* Occasions Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {occasions.map((occasion, index) => (
+            {displayOccasions.map((occasion, index) => (
               <article 
-                key={occasion.title}
+                key={occasion.slug}
                 className="bg-card rounded-2xl overflow-hidden shadow-card border border-border/50 hover:shadow-medium hover:-translate-y-2 transition-all duration-300 group"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
@@ -80,16 +99,14 @@ const OccasionsSection = () => {
                     {occasion.description}
                   </p>
                   
-                  {/* CTA Button */}
-                  <a 
-                    href={`https://wa.me/5541992214299?text=Olá! Gostaria de um orçamento para lembrancinhas de ${occasion.title}.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  {/* CTA Button - Links to products page filtered by occasion */}
+                  <Link 
+                    to={`/produtos?ocasiao=${occasion.slug}`}
                     className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-primary text-primary rounded-full font-medium text-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                   >
-                    <MessageCircle className="h-4 w-4" />
-                    Solicitar Orçamento
-                  </a>
+                    <ArrowRight className="h-4 w-4" />
+                    Ver Produtos
+                  </Link>
                 </div>
               </article>
             ))}
@@ -101,21 +118,28 @@ const OccasionsSection = () => {
               Não encontrou a ocasião perfeita?
             </h3>
             <p className="text-primary-foreground/80 mb-6 max-w-xl mx-auto">
-              Criamos lembrancinhas para qualquer tipo de evento! Entre em contato e conte-nos sobre sua celebração especial.
+              Criamos lembrancinhas para qualquer tipo de evento! Explore todos os nossos produtos ou solicite um orçamento personalizado.
             </p>
-            <a
-              href="https://wa.me/5541992214299?text=Olá! Gostaria de criar uma lembrancinha personalizada para meu evento."
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button 
-                size="lg"
-                className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-8 py-6 text-lg shadow-lg"
-              >
-                <MessageCircle className="h-5 w-5 mr-2" />
-                Criar Lembrancinha Personalizada
-              </Button>
-            </a>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/produtos">
+                <Button 
+                  size="lg"
+                  className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-8 py-6 text-lg shadow-lg"
+                >
+                  <Heart className="h-5 w-5 mr-2" />
+                  Ver Todos os Produtos
+                </Button>
+              </Link>
+              <Link to="/orcamento">
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 rounded-full px-8 py-6 text-lg"
+                >
+                  Solicitar Orçamento
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

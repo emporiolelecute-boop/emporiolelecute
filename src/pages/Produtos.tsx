@@ -35,23 +35,38 @@ const Produtos = () => {
     if (urlOcasiao !== null) setSelectedOccasion(urlOcasiao);
   }, [searchParams]);
 
-  // Update URL when filters change
-  const handleCategoryChange = (categoryId: string | null) => {
-    setSelectedCategory(categoryId);
+  // Helper to find category/occasion by slug or ID
+  const findCategoryBySlugOrId = (value: string | null) => {
+    if (!value || !dbCategories) return null;
+    return dbCategories.find(c => c.slug === value || c.id === value) || null;
+  };
+
+  const findOccasionBySlugOrId = (value: string | null) => {
+    if (!value || !dbOccasions) return null;
+    return dbOccasions.find(o => o.slug === value || o.id === value) || null;
+  };
+
+  // Get resolved category/occasion from URL params (supports both slug and ID for backwards compatibility)
+  const resolvedCategory = findCategoryBySlugOrId(selectedCategory);
+  const resolvedOccasion = findOccasionBySlugOrId(selectedOccasion);
+
+  // Update URL when filters change - use SLUG for friendly URLs
+  const handleCategoryChange = (categorySlug: string | null) => {
+    setSelectedCategory(categorySlug);
     const newParams = new URLSearchParams(searchParams);
-    if (categoryId) {
-      newParams.set('categoria', categoryId);
+    if (categorySlug) {
+      newParams.set('categoria', categorySlug);
     } else {
       newParams.delete('categoria');
     }
     setSearchParams(newParams);
   };
 
-  const handleOccasionChange = (occasionId: string | null) => {
-    setSelectedOccasion(occasionId);
+  const handleOccasionChange = (occasionSlug: string | null) => {
+    setSelectedOccasion(occasionSlug);
     const newParams = new URLSearchParams(searchParams);
-    if (occasionId) {
-      newParams.set('ocasiao', occasionId);
+    if (occasionSlug) {
+      newParams.set('ocasiao', occasionSlug);
     } else {
       newParams.delete('ocasiao');
     }
@@ -92,27 +107,7 @@ const Produtos = () => {
       }));
   }, [dbProducts]);
 
-  // Categories with icons
-  const categories = useMemo(() => {
-    return (dbCategories || []).map(c => ({
-      id: c.id,
-      name: c.name,
-      icon: c.slug === 'sabonetes' ? '🧼' : c.slug === 'velas' ? '🕯️' : c.slug === 'kits' ? '🎁' : '✨'
-    }));
-  }, [dbCategories]);
-
-  // Occasions with icons
-  const occasions = useMemo(() => {
-    return (dbOccasions || []).map(o => ({
-      id: o.id,
-      name: o.name,
-      icon: o.slug === 'maternidade' ? '👶' : 
-            o.slug === 'cha-bebe' ? '🍼' : 
-            o.slug === 'batizado' ? '⛪' : 
-            o.slug === 'casamento' ? '💒' : 
-            o.slug === 'aniversario' ? '🎂' : '🏢'
-    }));
-  }, [dbOccasions]);
+  // Note: categories and occasions arrays removed - we use dbCategories and dbOccasions directly
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -121,12 +116,14 @@ const Produtos = () => {
         product.description.toLowerCase().includes(search.toLowerCase()) ||
         product.keywords.some(k => k.toLowerCase().includes(search.toLowerCase()));
       
-      const matchesCategory = !selectedCategory || product.categoryId === selectedCategory;
-      const matchesOccasion = !selectedOccasion || product.occasionIds.includes(selectedOccasion);
+      // Match by resolved category ID (since we resolved slug to category object)
+      const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
+      // Match by resolved occasion ID
+      const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
       
       return matchesSearch && matchesCategory && matchesOccasion;
     });
-  }, [products, search, selectedCategory, selectedOccasion]);
+  }, [products, search, resolvedCategory, resolvedOccasion]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -196,20 +193,20 @@ const Produtos = () => {
             <h3 className="text-sm font-medium text-foreground mb-3">Categorias</h3>
             <div className="flex flex-wrap gap-2">
               <Badge
-                variant={selectedCategory === null ? "default" : "outline"}
+                variant={!resolvedCategory ? "default" : "outline"}
                 className="cursor-pointer px-4 py-2 text-sm"
                 onClick={() => handleCategoryChange(null)}
               >
                 Todos
               </Badge>
-              {categories.map((category) => (
+              {(dbCategories || []).map((category) => (
                 <Badge
                   key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  variant={resolvedCategory?.id === category.id ? "default" : "outline"}
                   className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => handleCategoryChange(category.id)}
+                  onClick={() => handleCategoryChange(category.slug)}
                 >
-                  {category.icon} {category.name}
+                  {category.slug === 'sabonetes' ? '🧼' : category.slug === 'velas' ? '🕯️' : category.slug === 'kits' ? '🎁' : '✨'} {category.name}
                 </Badge>
               ))}
             </div>
@@ -220,20 +217,24 @@ const Produtos = () => {
             <h3 className="text-sm font-medium text-foreground mb-3">Ocasiões</h3>
             <div className="flex flex-wrap gap-2">
               <Badge
-                variant={selectedOccasion === null ? "default" : "outline"}
+                variant={!resolvedOccasion ? "default" : "outline"}
                 className="cursor-pointer px-4 py-2 text-sm"
                 onClick={() => handleOccasionChange(null)}
               >
                 Todas
               </Badge>
-              {occasions.map((occasion) => (
+              {(dbOccasions || []).map((occasion) => (
                 <Badge
                   key={occasion.id}
-                  variant={selectedOccasion === occasion.id ? "default" : "outline"}
+                  variant={resolvedOccasion?.id === occasion.id ? "default" : "outline"}
                   className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => handleOccasionChange(occasion.id)}
+                  onClick={() => handleOccasionChange(occasion.slug)}
                 >
-                  {occasion.icon} {occasion.name}
+                  {occasion.slug === 'maternidade' ? '👶' : 
+                   occasion.slug === 'cha-bebe' ? '🍼' : 
+                   occasion.slug === 'batizado' ? '⛪' : 
+                   occasion.slug === 'casamento' ? '💒' : 
+                   occasion.slug === 'aniversario' ? '🎂' : '🏢'} {occasion.name}
                 </Badge>
               ))}
             </div>
