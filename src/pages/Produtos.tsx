@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, Grid, List, ShoppingBag, Loader2 } from "lucide-react";
+import { Search, Grid, List, ShoppingBag, Loader2, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ import ProductCard from "@/components/ProductCard";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
+import { useTags } from "@/hooks/useTags";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { Product } from "@/data/products";
 
 const Produtos = () => {
@@ -18,24 +20,31 @@ const Produtos = () => {
   const { data: dbProducts, isLoading: loadingProducts } = useDbProducts();
   const { data: dbCategories } = useDbCategories();
   const { data: dbOccasions } = useDbOccasions();
+  const { data: dbTags } = useTags();
   
-  const [search, setSearch] = useState(searchParams.get('search') || "");
+  const [search, setSearch] = useState(searchParams.get('busca') || searchParams.get('search') || "");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('categoria') || null);
   const [selectedOccasion, setSelectedOccasion] = useState<string | null>(searchParams.get('ocasiao') || null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Debounce search for better performance
+  const debouncedSearch = useDebounce(search, 300);
 
   // Sync URL params with state
   useEffect(() => {
-    const urlSearch = searchParams.get('search');
+    const urlSearch = searchParams.get('busca') || searchParams.get('search');
     const urlCategoria = searchParams.get('categoria');
     const urlOcasiao = searchParams.get('ocasiao');
+    const urlTag = searchParams.get('tag');
     
     if (urlSearch !== null) setSearch(urlSearch);
     if (urlCategoria !== null) setSelectedCategory(urlCategoria);
     if (urlOcasiao !== null) setSelectedOccasion(urlOcasiao);
+    if (urlTag !== null) setSelectedTag(urlTag);
   }, [searchParams]);
 
-  // Helper to find category/occasion by slug or ID
+  // Helper to find category/occasion/tag by slug or ID
   const findCategoryBySlugOrId = (value: string | null) => {
     if (!value || !dbCategories) return null;
     return dbCategories.find(c => c.slug === value || c.id === value) || null;
@@ -46,9 +55,15 @@ const Produtos = () => {
     return dbOccasions.find(o => o.slug === value || o.id === value) || null;
   };
 
-  // Get resolved category/occasion from URL params (supports both slug and ID for backwards compatibility)
+  const findTagBySlugOrId = (value: string | null) => {
+    if (!value || !dbTags) return null;
+    return dbTags.find(t => t.slug === value || t.id === value) || null;
+  };
+
+  // Get resolved filters from URL params
   const resolvedCategory = findCategoryBySlugOrId(selectedCategory);
   const resolvedOccasion = findOccasionBySlugOrId(selectedOccasion);
+  const resolvedTag = findTagBySlugOrId(selectedTag);
 
   // Update URL when filters change - use SLUG for friendly URLs
   const handleCategoryChange = (categorySlug: string | null) => {
@@ -73,15 +88,30 @@ const Produtos = () => {
     setSearchParams(newParams);
   };
 
+  const handleTagChange = (tagSlug: string | null) => {
+    setSelectedTag(tagSlug);
+    const newParams = new URLSearchParams(searchParams);
+    if (tagSlug) {
+      newParams.set('tag', tagSlug);
+    } else {
+      newParams.delete('tag');
+    }
+    setSearchParams(newParams);
+  };
+
   const handleClearFilters = () => {
     setSearch("");
     setSelectedCategory(null);
     setSelectedOccasion(null);
+    setSelectedTag(null);
     setSearchParams({});
   };
 
+  // Count active filters
+  const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedTag, debouncedSearch].filter(Boolean).length;
+
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; occasionIds: string[] })[] = useMemo(() => {
+  const products: (Product & { categoryId?: string; occasionIds: string[]; tagIds: string[] })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -104,26 +134,26 @@ const Produtos = () => {
         categoryName: p.category?.name,
         occasionIds: (p.occasions || []).map(o => o.id),
         occasionNames: (p.occasions || []).map(o => o.name),
+        tagIds: (p.tags || []).map(t => t.id),
+        tagNames: (p.tags || []).map(t => t.name),
       }));
   }, [dbProducts]);
 
-  // Note: categories and occasions arrays removed - we use dbCategories and dbOccasions directly
-
+  // Filter products with debounced search
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const matchesSearch = 
-        product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.description.toLowerCase().includes(search.toLowerCase()) ||
-        product.keywords.some(k => k.toLowerCase().includes(search.toLowerCase()));
+      const matchesSearch = !debouncedSearch ||
+        product.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        product.description.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        product.keywords.some(k => k.toLowerCase().includes(debouncedSearch.toLowerCase()));
       
-      // Match by resolved category ID (since we resolved slug to category object)
       const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
-      // Match by resolved occasion ID
       const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
+      const matchesTag = !resolvedTag || product.tagIds.includes(resolvedTag.id);
       
-      return matchesSearch && matchesCategory && matchesOccasion;
+      return matchesSearch && matchesCategory && matchesOccasion && matchesTag;
     });
-  }, [products, search, resolvedCategory, resolvedOccasion]);
+  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedTag]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,6 +214,16 @@ const Produtos = () => {
                 >
                   <List className="h-4 w-4" />
                 </Button>
+                {activeFiltersCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearFilters}
+                    className="text-muted-foreground"
+                  >
+                    Limpar filtros ({activeFiltersCount})
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -197,7 +237,7 @@ const Produtos = () => {
                 className="cursor-pointer px-4 py-2 text-sm"
                 onClick={() => handleCategoryChange(null)}
               >
-                Todos
+                Todas
               </Badge>
               {(dbCategories || []).map((category) => (
                 <Badge
@@ -239,6 +279,35 @@ const Produtos = () => {
               ))}
             </div>
           </div>
+
+          {/* Tag Filters */}
+          {dbTags && dbTags.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Tags
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant={!resolvedTag ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 text-sm"
+                  onClick={() => handleTagChange(null)}
+                >
+                  Todas
+                </Badge>
+                {dbTags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant={resolvedTag?.id === tag.id ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 text-sm"
+                    onClick={() => handleTagChange(tag.slug)}
+                  >
+                    #{tag.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Products Grid */}
@@ -248,15 +317,20 @@ const Produtos = () => {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className={`grid gap-6 ${
-              viewMode === "grid" 
-                ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-                : "grid-cols-1 max-w-3xl mx-auto"
-            }`}>
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+              </p>
+              <div className={`grid gap-6 ${
+                viewMode === "grid" 
+                  ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                  : "grid-cols-1 max-w-3xl mx-auto"
+              }`}>
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="text-center py-16">
               <p className="text-muted-foreground mb-4">Nenhum produto encontrado</p>

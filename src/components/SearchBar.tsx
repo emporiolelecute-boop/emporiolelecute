@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Search, X, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDbProducts } from "@/hooks/useProducts";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
 
 const SearchBar = () => {
@@ -12,12 +13,19 @@ const SearchBar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // Debounce the search query for performance (300ms delay)
+  const debouncedQuery = useDebounce(query, 300);
+
   const { data: products = [], isLoading } = useDbProducts();
 
-  // Filter products based on query
-  const suggestions = query.length >= 2
-    ? products.filter((product) => {
-        const searchTerm = query.toLowerCase();
+  // Cache filtered suggestions using memoization
+  const suggestions = useMemo(() => {
+    if (debouncedQuery.length < 2) return [];
+    
+    const searchTerm = debouncedQuery.toLowerCase();
+    return products
+      .filter((product) => {
+        // Search across multiple fields for best results
         return (
           product.name.toLowerCase().includes(searchTerm) ||
           (product.description?.toLowerCase().includes(searchTerm)) ||
@@ -26,18 +34,21 @@ const SearchBar = () => {
           (product.tags?.some((t) => t.name.toLowerCase().includes(searchTerm))) ||
           (product.keywords?.some((k) => k.toLowerCase().includes(searchTerm)))
         );
-      }).slice(0, 6)
-    : [];
+      })
+      .slice(0, 6);
+  }, [debouncedQuery, products]);
 
+  // Show/hide dropdown based on debounced query
   useEffect(() => {
-    if (query.length >= 2) {
+    if (debouncedQuery.length >= 2) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
     }
     setSelectedIndex(-1);
-  }, [query]);
+  }, [debouncedQuery]);
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -80,6 +91,9 @@ const SearchBar = () => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
   };
 
+  // Show loading only while typing (not on initial load)
+  const isSearching = query.length >= 2 && query !== debouncedQuery;
+
   return (
     <div ref={containerRef} className="relative w-full max-w-xs">
       <div className="relative">
@@ -91,7 +105,7 @@ const SearchBar = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => query.length >= 2 && setIsOpen(true)}
+          onFocus={() => debouncedQuery.length >= 2 && setIsOpen(true)}
           className="pl-9 pr-8 h-9 rounded-full bg-secondary/50 border-border/50 focus:bg-background"
         />
         {query && (
@@ -106,9 +120,10 @@ const SearchBar = () => {
 
       {isOpen && (
         <div className="absolute top-full mt-2 w-full bg-background border border-border rounded-xl shadow-lg overflow-hidden z-50 animate-fade-in">
-          {isLoading ? (
+          {isSearching || isLoading ? (
             <div className="flex items-center justify-center py-6">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Buscando...</span>
             </div>
           ) : suggestions.length > 0 ? (
             <>
@@ -155,7 +170,7 @@ const SearchBar = () => {
           ) : (
             <div className="p-4">
               <p className="text-sm text-muted-foreground text-center">
-                Nenhum produto encontrado para "{query}"
+                Nenhum produto encontrado para "{debouncedQuery}"
               </p>
             </div>
           )}
