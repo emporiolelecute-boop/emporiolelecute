@@ -1,4 +1,4 @@
-import { HelpCircle, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useFaqs } from "@/hooks/useFaqs";
 import { Skeleton } from "@/components/ui/skeleton";
+import FAQStructuredData from "@/components/FAQStructuredData";
 
 const FAQSection = () => {
   const { data: faqs, isLoading } = useFaqs();
@@ -51,11 +52,15 @@ const FAQSection = () => {
   const displayFaqs = visibleFaqs.length > 0 ? visibleFaqs : defaultFaqs;
 
   return (
-    <section 
-      id="faq" 
-      className="py-16 md:py-24 bg-background relative overflow-hidden"
-      aria-labelledby="faq-heading"
-    >
+    <>
+      {/* Schema.org FAQPage Structured Data for SEO */}
+      <FAQStructuredData faqs={displayFaqs} />
+      
+      <section 
+        id="faq" 
+        className="py-16 md:py-24 bg-background relative overflow-hidden"
+        aria-labelledby="faq-heading"
+      >
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-hearts-pattern opacity-10" />
       
@@ -120,7 +125,8 @@ const FAQSection = () => {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 };
 
