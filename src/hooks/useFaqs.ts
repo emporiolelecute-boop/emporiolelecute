@@ -19,6 +19,7 @@ export const useFaqs = () => {
       const { data, error } = await supabase
         .from('faqs')
         .select('*')
+        .eq('is_visible', true)
         .order('position', { ascending: true });
       
       if (error) throw error;

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Nunito:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Quicksand:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 /* Empório LeleCute Design System
    Cores: Coral/Salmão (coração), Cinza (textos), Branco com pontos sutis
-   Tipografia: Cormorant Garamond (display), Nunito (body)
+   Tipografia: Quicksand (display), DM Sans (body)
    Estilo: Clean, feminino, delicado, artesanal
 */
 
@@ -139,12 +139,12 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'DM Sans', 'Roboto', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', serif;
-    @apply font-medium tracking-tight;
+    font-family: 'Quicksand', sans-serif;
+    @apply font-semibold tracking-tight;
   }
 }
 
@@ -238,9 +238,9 @@
   
   /* Script font for decorative text */
   .font-script {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Quicksand', sans-serif;
     font-style: italic;
-    @apply font-normal;
+    @apply font-medium;
   }
   
   /* Smooth scroll reveal */
