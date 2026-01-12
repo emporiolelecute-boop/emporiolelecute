@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Cormorant Garamond", "serif"],
-        body: ["Nunito", "sans-serif"],
+        display: ["Quicksand", "sans-serif"],
+        body: ["DM Sans", "Roboto", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
