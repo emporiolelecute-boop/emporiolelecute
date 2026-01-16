@@ -28,9 +28,10 @@ const ProductStructuredData = ({
   const baseUrl = "https://emporiolelecute.com.br";
   const productUrl = `${baseUrl}/produto/${slug}`;
   
-  // Calculate availability date based on production days
-  const availabilityDate = new Date();
-  availabilityDate.setDate(availabilityDate.getDate() + productionDays);
+  // Calculate priceValidUntil - one year from now in YYYY-MM-DD format
+  const priceValidUntil = new Date();
+  priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
+  const priceValidUntilStr = priceValidUntil.toISOString().split('T')[0];
 
   const structuredData = {
     "@context": "https://schema.org/",
@@ -50,20 +51,19 @@ const ProductStructuredData = ({
       "@type": "Offer",
       "url": productUrl,
       "priceCurrency": "BRL",
-      "price": price.toFixed(2),
-      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      "price": Number(price.toFixed(2)),
+      "priceValidUntil": priceValidUntilStr,
       "availability": "https://schema.org/InStock",
       "itemCondition": "https://schema.org/NewCondition",
       "seller": {
         "@type": "Organization",
         "name": brand
       },
-      // Fix: shippingDetails
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
           "@type": "MonetaryAmount",
-          "value": "0",
+          "value": 0,
           "currency": "BRL"
         },
         "shippingDestination": {
@@ -86,7 +86,6 @@ const ProductStructuredData = ({
           }
         }
       },
-      // Fix: hasMerchantReturnPolicy
       "hasMerchantReturnPolicy": {
         "@type": "MerchantReturnPolicy",
         "applicableCountry": "BR",
@@ -98,10 +97,10 @@ const ProductStructuredData = ({
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": rating.toFixed(1),
+      "ratingValue": Number(rating.toFixed(1)),
       "reviewCount": reviewCount,
-      "bestRating": "5",
-      "worstRating": "1"
+      "bestRating": 5,
+      "worstRating": 1
     }
   };
 

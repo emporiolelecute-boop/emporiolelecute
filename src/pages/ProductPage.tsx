@@ -36,6 +36,7 @@ import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import ProductStructuredData from "@/components/ProductStructuredData";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
@@ -209,6 +210,13 @@ const ProductPage = () => {
         rating={product.rating}
         productionDays={product.productionDays}
         category={dbProduct?.category?.name}
+      />
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+          { name: 'Produtos', url: 'https://emporiolelecute.com.br/produtos' },
+          { name: product.name, url: `https://emporiolelecute.com.br/produto/${product.slug}` },
+        ]}
       />
       <Header />
       

@@ -77,6 +77,27 @@ export const useDeleteTag = () => {
   });
 };
 
+export const useUpdateTag = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...tag }: { id: string; name?: string; slug?: string }) => {
+      const { data, error } = await supabase
+        .from('tags')
+        .update(tag)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+    },
+  });
+};
+
 export const useUpdateProductTags = () => {
   const queryClient = useQueryClient();
 

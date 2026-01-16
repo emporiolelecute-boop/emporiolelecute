@@ -340,3 +340,47 @@ export function useDeleteOccasion() {
     },
   });
 }
+
+// Update category
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...category }: { id: string; name?: string; slug?: string }) => {
+      const { data, error } = await supabase
+        .from('categories')
+        .update(category)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+}
+
+// Update occasion
+export function useUpdateOccasion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...occasion }: { id: string; name?: string; slug?: string }) => {
+      const { data, error } = await supabase
+        .from('occasions')
+        .update(occasion)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['occasions'] });
+    },
+  });
+}
