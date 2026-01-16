@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Search, Grid, List, ShoppingBag, Loader2, Tag } from "lucide-react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,10 +10,22 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
 import { useDebounce } from "@/hooks/useDebounce";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import type { Product } from "@/data/products";
+
+const PRODUCTS_PER_PAGE = 12;
 
 const Produtos = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +39,7 @@ const Produtos = () => {
   const [selectedOccasion, setSelectedOccasion] = useState<string | null>(searchParams.get('ocasiao') || null);
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('pagina')) || 1);
 
   // Debounce search for better performance
   const debouncedSearch = useDebounce(search, 300);
@@ -37,12 +50,19 @@ const Produtos = () => {
     const urlCategoria = searchParams.get('categoria');
     const urlOcasiao = searchParams.get('ocasiao');
     const urlTag = searchParams.get('tag');
+    const urlPage = searchParams.get('pagina');
     
     if (urlSearch !== null) setSearch(urlSearch);
     if (urlCategoria !== null) setSelectedCategory(urlCategoria);
     if (urlOcasiao !== null) setSelectedOccasion(urlOcasiao);
     if (urlTag !== null) setSelectedTag(urlTag);
+    if (urlPage !== null) setCurrentPage(Number(urlPage) || 1);
   }, [searchParams]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, selectedCategory, selectedOccasion, selectedTag]);
 
   // Helper to find category/occasion/tag by slug or ID
   const findCategoryBySlugOrId = (value: string | null) => {
@@ -74,6 +94,7 @@ const Produtos = () => {
     } else {
       newParams.delete('categoria');
     }
+    newParams.delete('pagina');
     setSearchParams(newParams);
   };
 
@@ -85,6 +106,7 @@ const Produtos = () => {
     } else {
       newParams.delete('ocasiao');
     }
+    newParams.delete('pagina');
     setSearchParams(newParams);
   };
 
@@ -96,7 +118,20 @@ const Produtos = () => {
     } else {
       newParams.delete('tag');
     }
+    newParams.delete('pagina');
     setSearchParams(newParams);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const newParams = new URLSearchParams(searchParams);
+    if (page > 1) {
+      newParams.set('pagina', String(page));
+    } else {
+      newParams.delete('pagina');
+    }
+    setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleClearFilters = () => {
@@ -104,6 +139,7 @@ const Produtos = () => {
     setSelectedCategory(null);
     setSelectedOccasion(null);
     setSelectedTag(null);
+    setCurrentPage(1);
     setSearchParams({});
   };
 
@@ -155,13 +191,68 @@ const Produtos = () => {
     });
   }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedTag]);
 
+  // Pagination
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  // Generate pagination numbers
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('ellipsis');
+      
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      
+      for (let i = start; i <= end; i++) pages.push(i);
+      
+      if (currentPage < totalPages - 2) pages.push('ellipsis');
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+
+  // Build breadcrumb items
+  const breadcrumbItems = useMemo(() => {
+    const items = [
+      { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+      { name: 'Produtos', url: 'https://emporiolelecute.com.br/produtos' },
+    ];
+    
+    if (resolvedCategory) {
+      items.push({ 
+        name: resolvedCategory.name, 
+        url: `https://emporiolelecute.com.br/produtos?categoria=${resolvedCategory.slug}` 
+      });
+    }
+    
+    if (resolvedOccasion) {
+      items.push({ 
+        name: resolvedOccasion.name, 
+        url: `https://emporiolelecute.com.br/produtos?ocasiao=${resolvedOccasion.slug}` 
+      });
+    }
+    
+    return items;
+  }, [resolvedCategory, resolvedOccasion]);
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
-        title="Produtos | Empório LeleCute"
+        title={resolvedCategory ? `${resolvedCategory.name} | Empório LeleCute` : "Produtos | Empório LeleCute"}
         description="Catálogo completo de lembrancinhas artesanais: sabonetes, velas perfumadas e kits personalizados para todas as ocasiões."
         url="https://emporiolelecute.com.br/produtos"
       />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       <Header />
       
       <main className="pt-24 pb-16">
@@ -182,6 +273,25 @@ const Produtos = () => {
             </p>
           </div>
         </section>
+
+        {/* Breadcrumbs */}
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+            <Link to="/" className="hover:text-primary transition-colors">Início</Link>
+            <ChevronRight className="h-4 w-4" />
+            {resolvedCategory || resolvedOccasion ? (
+              <>
+                <Link to="/produtos" className="hover:text-primary transition-colors">Produtos</Link>
+                <ChevronRight className="h-4 w-4" />
+                <span className="text-foreground">
+                  {resolvedCategory?.name || resolvedOccasion?.name}
+                </span>
+              </>
+            ) : (
+              <span className="text-foreground">Produtos</span>
+            )}
+          </nav>
+        </div>
 
         {/* Filters */}
         <div className="container mx-auto px-4 py-8">
@@ -320,16 +430,62 @@ const Produtos = () => {
             <>
               <p className="text-sm text-muted-foreground mb-4">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+                {totalPages > 1 && ` • Página ${currentPage} de ${totalPages}`}
               </p>
               <div className={`grid gap-6 ${
                 viewMode === "grid" 
                   ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
                   : "grid-cols-1 max-w-3xl mx-auto"
               }`}>
-                {filteredProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          <span>Anterior</span>
+                        </PaginationPrevious>
+                      </PaginationItem>
+
+                      {getPageNumbers().map((page, index) => (
+                        <PaginationItem key={index}>
+                          {page === 'ellipsis' ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <PaginationLink
+                              onClick={() => handlePageChange(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        >
+                          <span>Próxima</span>
+                          <ChevronRight className="h-4 w-4" />
+                        </PaginationNext>
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </>
           ) : (
             <div className="text-center py-16">

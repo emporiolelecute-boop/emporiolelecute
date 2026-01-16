@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Tag, Plus, Trash2, Loader2, Search } from 'lucide-react';
+import { Tag, Plus, Trash2, Loader2, Search, Edit, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useTags, useCreateTag, useDeleteTag } from '@/hooks/useTags';
+import { useTags, useCreateTag, useDeleteTag, useUpdateTag } from '@/hooks/useTags';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,11 +20,16 @@ const AdminTags = () => {
   const { data: tags, isLoading } = useTags();
   const createTag = useCreateTag();
   const deleteTag = useDeleteTag();
+  const updateTag = useUpdateTag();
   const { toast } = useToast();
 
   const [newTagName, setNewTagName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  
+  // Inline editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
 
   const generateSlug = (name: string) => {
     return name
@@ -59,6 +64,32 @@ const AdminTags = () => {
       toast({ title: 'Tag excluída com sucesso!' });
     } catch (error) {
       toast({ title: 'Erro ao excluir tag', variant: 'destructive' });
+    }
+  };
+
+  const handleStartEdit = (tag: { id: string; name: string }) => {
+    setEditingId(tag.id);
+    setEditName(tag.name);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditName('');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editName.trim()) return;
+    
+    try {
+      await updateTag.mutateAsync({
+        id: editingId,
+        name: editName.trim(),
+        slug: generateSlug(editName),
+      });
+      toast({ title: 'Tag atualizada com sucesso!' });
+      handleCancelEdit();
+    } catch {
+      toast({ title: 'Erro ao atualizar tag', variant: 'destructive' });
     }
   };
 
@@ -126,14 +157,52 @@ const AdminTags = () => {
               key={tag.id}
               className="flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2 group"
             >
-              <Tag className="w-4 h-4 text-primary" />
-              <span className="text-foreground">{tag.name}</span>
-              <button
-                onClick={() => setDeleteId(tag.id)}
-                className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
+              {editingId === tag.id ? (
+                <>
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+                    className="h-7 w-32 text-sm"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleSaveEdit}
+                    disabled={updateTag.isPending}
+                    className="p-1 rounded-full hover:bg-green-100 text-green-600 transition-colors"
+                  >
+                    <Check className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="p-1 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Tag className="w-4 h-4 text-primary" />
+                  <span 
+                    className="text-foreground cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => handleStartEdit(tag)}
+                  >
+                    {tag.name}
+                  </span>
+                  <button
+                    onClick={() => handleStartEdit(tag)}
+                    className="p-1 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Edit className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteId(tag.id)}
+                    className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </>
+              )}
             </div>
           ))}
         </div>

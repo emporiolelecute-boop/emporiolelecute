@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,17 +22,24 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useDbCategories, useCreateCategory, useDeleteCategory } from '@/hooks/useProducts';
+import { useDbCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/useProducts';
 
 const AdminCategories = () => {
   const { data: categories, isLoading } = useDbCategories();
   const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
+  const updateCategory = useUpdateCategory();
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', slug: '' });
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Inline editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editSlug, setEditSlug] = useState('');
 
   const generateSlug = (name: string) => {
     return name
@@ -73,6 +80,39 @@ const AdminCategories = () => {
     }
     setDeleteId(null);
   };
+
+  const handleStartEdit = (category: { id: string; name: string; slug: string }) => {
+    setEditingId(category.id);
+    setEditName(category.name);
+    setEditSlug(category.slug);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditName('');
+    setEditSlug('');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editName.trim() || !editSlug.trim()) return;
+    
+    try {
+      await updateCategory.mutateAsync({
+        id: editingId,
+        name: editName.trim(),
+        slug: editSlug.trim(),
+      });
+      toast({ title: 'Categoria atualizada com sucesso!' });
+      handleCancelEdit();
+    } catch {
+      toast({ title: 'Erro ao atualizar categoria', variant: 'destructive' });
+    }
+  };
+
+  const filteredCategories = categories?.filter(cat =>
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="p-6 lg:p-8">
@@ -119,40 +159,102 @@ const AdminCategories = () => {
         </Dialog>
       </div>
 
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar categorias..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 max-w-md"
+        />
+      </div>
+
       <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="text-lg font-display">Todas as Categorias</CardTitle>
+          <CardTitle className="text-lg font-display">Todas as Categorias ({filteredCategories?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
-          ) : categories && categories.length > 0 ? (
+          ) : filteredCategories && filteredCategories.length > 0 ? (
             <div className="space-y-3">
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50"
+                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                 >
-                  <div>
-                    <p className="font-medium text-foreground">{category.name}</p>
-                    <p className="text-sm text-muted-foreground">{category.slug}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => setDeleteId(category.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  {editingId === category.id ? (
+                    <div className="flex-1 flex items-center gap-3">
+                      <Input
+                        value={editName}
+                        onChange={(e) => {
+                          setEditName(e.target.value);
+                          setEditSlug(generateSlug(e.target.value));
+                        }}
+                        className="max-w-xs"
+                        placeholder="Nome"
+                      />
+                      <Input
+                        value={editSlug}
+                        onChange={(e) => setEditSlug(e.target.value)}
+                        className="max-w-xs"
+                        placeholder="Slug"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleSaveEdit}
+                        disabled={updateCategory.isPending}
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleCancelEdit}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="cursor-pointer" onClick={() => handleStartEdit(category)}>
+                        <p className="font-medium text-foreground">{category.name}</p>
+                        <p className="text-sm text-muted-foreground">{category.slug}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleStartEdit(category)}
+                          className="text-muted-foreground hover:text-primary"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(category.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Nenhuma categoria cadastrada</p>
+              <p className="text-muted-foreground">
+                {searchQuery ? 'Nenhuma categoria encontrada' : 'Nenhuma categoria cadastrada'}
+              </p>
             </div>
           )}
         </CardContent>
