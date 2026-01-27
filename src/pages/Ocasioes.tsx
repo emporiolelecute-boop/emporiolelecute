@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { Baby, Heart, Church, Cake, Users, Building2, Gift, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import QuoteFormSection from "@/components/QuoteFormSection";
+import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 
 const occasions = [
   {
@@ -22,7 +23,7 @@ const occasions = [
     description: "Presenteie seus convidados com lembrancinhas encantadoras. Opções temáticas para menino, menina ou tema neutro.",
     icon: Gift,
     color: "bg-blue-100 text-blue-600",
-    slug: "cha-de-bebe",
+    slug: "cha-bebe",
   },
   {
     id: "batizado",
@@ -54,17 +55,24 @@ const occasions = [
     description: "Brindes personalizados para sua empresa. Ideal para confraternizações, eventos e presentes para clientes.",
     icon: Building2,
     color: "bg-emerald-100 text-emerald-600",
-    slug: "eventos-corporativos",
+    slug: "corporativo",
   },
 ];
 
 const Ocasioes = () => {
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: 'Ocasiões', url: 'https://emporiolelecute.com.br/ocasioes' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Ocasiões | Empório LeleCute - Lembrancinhas para Cada Momento</title>
-        <meta name="description" content="Encontre a lembrancinha perfeita para cada ocasião: maternidade, chá de bebê, batizado, casamento, aniversário e eventos corporativos." />
-      </Helmet>
+      <DynamicSEO
+        title="Ocasiões | Empório LeleCute - Lembrancinhas para Cada Momento"
+        description="Encontre a lembrancinha perfeita para cada ocasião: maternidade, chá de bebê, batizado, casamento, aniversário e eventos corporativos."
+        url="https://emporiolelecute.com.br/ocasioes"
+      />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       
       <Header />
       

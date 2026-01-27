@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import DynamicSEO from '@/components/DynamicSEO';
+import BreadcrumbStructuredData from '@/components/BreadcrumbStructuredData';
 import { usePage } from '@/hooks/usePages';
 import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,6 +12,11 @@ import { Button } from '@/components/ui/button';
 const DynamicPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: page, isLoading, error } = usePage(slug || '');
+
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: page?.title || 'Página', url: `https://emporiolelecute.com.br/${slug}` },
+  ];
 
   if (isLoading) {
     return (
@@ -47,6 +53,7 @@ const DynamicPage = () => {
         description={page.seo_description || undefined}
         url={page.seo_canonical || `https://emporiolelecute.com.br/${page.slug}`}
       />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       <Header />
       
       <main className="pt-24 pb-16">

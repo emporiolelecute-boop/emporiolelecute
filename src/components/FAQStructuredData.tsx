@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { useFaqs } from "@/hooks/useFaqs";
 
 interface FAQ {
@@ -32,10 +33,11 @@ const FAQStructuredData = ({ faqs: propFaqs }: FAQStructuredDataProps) => {
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
+    </Helmet>
   );
 };
 
