@@ -4,10 +4,24 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { states } from "@/data/products";
+import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 
 const Envio = () => {
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: 'Envio', url: 'https://emporiolelecute.com.br/envio' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
+      <DynamicSEO
+        title="Envio para Todo Brasil | Empório LeleCute"
+        description="Enviamos lembrancinhas artesanais para todo o Brasil com embalagem segura e rastreamento. Confira nossas opções de frete."
+        url="https://emporiolelecute.com.br/envio"
+      />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
+      
       <Header />
       
       <main className="pt-24 pb-16">

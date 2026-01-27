@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 
 interface OrderItem {
   id: string;
@@ -95,6 +97,11 @@ const RastrearPedido = () => {
   const [searched, setSearched] = useState(false);
   const { toast } = useToast();
 
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: 'Rastrear Pedido', url: 'https://emporiolelecute.com.br/rastrear' },
+  ];
+
   // Auto-search if code is in URL
   useEffect(() => {
     if (initialCode) {
@@ -176,6 +183,12 @@ const RastrearPedido = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <DynamicSEO
+        title="Rastrear Pedido | Empório LeleCute"
+        description="Acompanhe o status do seu pedido de lembrancinhas artesanais. Digite o código do pedido para rastrear."
+        url="https://emporiolelecute.com.br/rastrear"
+      />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       <Header />
       
       <main className="pt-24 pb-16">

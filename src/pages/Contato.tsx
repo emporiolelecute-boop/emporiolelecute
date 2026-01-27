@@ -5,8 +5,14 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import QuoteFormSection from "@/components/QuoteFormSection";
 import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 
 const Contato = () => {
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: 'Contato', url: 'https://emporiolelecute.com.br/contato' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
@@ -14,6 +20,7 @@ const Contato = () => {
         description="Entre em contato com o Empório LeleCute. Atendimento personalizado via WhatsApp para orçamentos de lembrancinhas artesanais."
         url="https://emporiolelecute.com.br/contato"
       />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       
       <Header />
       

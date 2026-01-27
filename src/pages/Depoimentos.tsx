@@ -1,9 +1,11 @@
-import { Helmet } from "react-helmet";
 import { Star, Quote, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
+import { Helmet } from "react-helmet";
 
 const testimonials = [
   {
@@ -88,11 +90,53 @@ const stats = [
 ];
 
 const Depoimentos = () => {
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: 'Depoimentos', url: 'https://emporiolelecute.com.br/depoimentos' },
+  ];
+
+  // Review structured data
+  const reviewStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://emporiolelecute.com.br/#localbusiness",
+    "name": "Empório LeleCute",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": 4.9,
+      "reviewCount": 5000,
+      "bestRating": 5,
+      "worstRating": 1
+    },
+    "review": testimonials.slice(0, 5).map((t) => ({
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": t.name
+      },
+      "datePublished": "2024-01-01",
+      "reviewBody": t.text,
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": t.rating,
+        "bestRating": 5,
+        "worstRating": 1
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <DynamicSEO
+        title="Depoimentos | Empório LeleCute - O que nossos clientes dizem"
+        description="Veja o que nossos clientes dizem sobre as lembrancinhas do Empório LeleCute. Mais de 50 mil clientes satisfeitos com avaliação 4.9 estrelas."
+        url="https://emporiolelecute.com.br/depoimentos"
+      />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       <Helmet>
-        <title>Depoimentos | Empório LeleCute - O que nossos clientes dizem</title>
-        <meta name="description" content="Veja o que nossos clientes dizem sobre as lembrancinhas do Empório LeleCute. Mais de 50 mil clientes satisfeitos com avaliação 4.9 estrelas." />
+        <script type="application/ld+json">
+          {JSON.stringify(reviewStructuredData)}
+        </script>
       </Helmet>
       
       <Header />

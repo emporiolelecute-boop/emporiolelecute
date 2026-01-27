@@ -3,8 +3,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import DynamicSEO from "@/components/DynamicSEO";
+import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 
 const Sobre = () => {
+  const breadcrumbItems = [
+    { name: 'Início', url: 'https://emporiolelecute.com.br/' },
+    { name: 'Sobre', url: 'https://emporiolelecute.com.br/sobre' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
@@ -12,6 +18,7 @@ const Sobre = () => {
         description="Conheça a história do Empório LeleCute. Há mais de 10 anos criando lembrancinhas artesanais com amor e dedicação."
         url="https://emporiolelecute.com.br/sobre"
       />
+      <BreadcrumbStructuredData items={breadcrumbItems} />
       
       <Header />
       

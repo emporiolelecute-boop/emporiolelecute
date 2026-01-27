@@ -11,11 +11,17 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
+import OrganizationStructuredData from "@/components/OrganizationStructuredData";
+import WebSiteStructuredData from "@/components/WebSiteStructuredData";
+import LocalBusinessStructuredData from "@/components/LocalBusinessStructuredData";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO />
+      <OrganizationStructuredData />
+      <WebSiteStructuredData />
+      <LocalBusinessStructuredData />
       <Header />
       <main>
         <HeroSlider />
