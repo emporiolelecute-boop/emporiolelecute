@@ -17,7 +17,8 @@ import {
   Users,
   Settings,
   Search,
-  HelpCircle
+  HelpCircle,
+  Rss
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ const menuItems = [
   { icon: Menu, label: 'Menus', path: '/admin/menus' },
   { icon: HelpCircle, label: 'FAQs', path: '/admin/faqs' },
   { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
+  { icon: Rss, label: 'Feed Merchant', path: '/admin/merchant-feed' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
 ];
 
