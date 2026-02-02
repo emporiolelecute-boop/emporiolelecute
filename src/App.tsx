@@ -43,6 +43,7 @@ const AdminPageForm = lazy(() => import("./pages/admin/AdminPageForm"));
 const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
 const AdminFaqs = lazy(() => import("./pages/admin/AdminFaqs"));
 const AdminHomepageBlocks = lazy(() => import("./pages/admin/AdminHomepageBlocks"));
+const AdminMerchantFeed = lazy(() => import("./pages/admin/AdminMerchantFeed"));
 
 const queryClient = new QueryClient();
 
@@ -240,6 +241,11 @@ const App = () => {
                   <Route path="seo/relatorio" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSEOReport />
+                    </Suspense>
+                  } />
+                  <Route path="merchant-feed" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminMerchantFeed />
                     </Suspense>
                   } />
                 </Route>

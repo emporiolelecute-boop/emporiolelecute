@@ -8,9 +8,14 @@ const corsHeaders = {
 const SITE_URL = 'https://emporiolelecute.com.br'
 const BRAND = 'Empório LeleCute'
 
-// Google Product Category mappings for handmade/artisan products
-const GOOGLE_CATEGORY = 'Arts & Entertainment > Party & Celebration > Gift Giving > Party Favors'
-const GOOGLE_CATEGORY_ID = '5709'
+// Default Google Product Category for handmade/artisan products
+const DEFAULT_GOOGLE_CATEGORY = 'Arts & Entertainment > Party & Celebration > Gift Giving > Party Favors'
+const DEFAULT_GOOGLE_CATEGORY_ID = '5709'
+
+interface Category {
+  name: string
+  slug: string
+}
 
 interface Product {
   id: string
@@ -26,10 +31,29 @@ interface Product {
   production_days: number | null
   weight: number | null
   updated_at: string
-  categories?: {
-    name: string
-    slug: string
-  }[] | null
+  categories?: Category | Category[] | null
+}
+
+interface MerchantFeedConfig {
+  google_product_category: string
+  google_product_category_id: string
+  shipping_country: string
+  shipping_price: number
+  shipping_service: string
+  currency: string
+  language: string
+  tax_included: boolean
+}
+
+const defaultFeedConfig: MerchantFeedConfig = {
+  google_product_category: DEFAULT_GOOGLE_CATEGORY,
+  google_product_category_id: DEFAULT_GOOGLE_CATEGORY_ID,
+  shipping_country: 'BR',
+  shipping_price: 0, // 0 means calculated separately
+  shipping_service: 'Standard',
+  currency: 'BRL',
+  language: 'pt-BR',
+  tax_included: true,
 }
 
 Deno.serve(async (req) => {
@@ -47,6 +71,28 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Fetch feed configuration from store_settings
+    const { data: feedConfigData } = await supabase
+      .from('store_settings')
+      .select('value')
+      .eq('key', 'merchant_feed_config')
+      .single()
+    
+    const feedConfig: MerchantFeedConfig = {
+      ...defaultFeedConfig,
+      ...(feedConfigData?.value as Partial<MerchantFeedConfig> || {}),
+    }
+    
+    // Fetch SEO settings for canonical URL
+    const { data: seoData } = await supabase
+      .from('store_settings')
+      .select('value')
+      .eq('key', 'seo_config')
+      .single()
+    
+    const seoConfig = seoData?.value as { canonical_url?: string } | null
+    const siteUrl = seoConfig?.canonical_url || SITE_URL
     
     // Fetch all active products with category
     const { data: products, error: productsError } = await supabase
@@ -93,7 +139,7 @@ Deno.serve(async (req) => {
 
     // Generate feed based on format
     if (format === 'json') {
-      const jsonFeed = generateJsonFeed(products as Product[])
+      const jsonFeed = generateJsonFeed(products as Product[], feedConfig, siteUrl)
       return new Response(JSON.stringify(jsonFeed, null, 2), {
         headers: {
           ...corsHeaders,
@@ -102,7 +148,7 @@ Deno.serve(async (req) => {
         },
       })
     } else {
-      const xmlFeed = generateXmlFeed(products as Product[])
+      const xmlFeed = generateXmlFeed(products as Product[], feedConfig, siteUrl)
       return new Response(xmlFeed, {
         headers: {
           ...corsHeaders,
@@ -125,36 +171,36 @@ Deno.serve(async (req) => {
   }
 })
 
-function generateJsonFeed(products: Product[]): object {
+function generateJsonFeed(products: Product[], config: MerchantFeedConfig, siteUrl: string): object {
   return {
     feed_info: {
       title: `${BRAND} - Google Merchant Feed`,
-      link: SITE_URL,
+      link: siteUrl,
       description: 'Lembrancinhas personalizadas artesanais para todas as ocasiões especiais',
-      language: 'pt-BR',
-      currency: 'BRL',
-      country: 'BR',
+      language: config.language,
+      currency: config.currency,
+      country: config.shipping_country,
       generated_at: new Date().toISOString(),
       total_items: products.length,
     },
-    products: products.map((product) => formatProductForFeed(product)),
+    products: products.map((product) => formatProductForFeed(product, config, siteUrl)),
   }
 }
 
-function generateXmlFeed(products: Product[]): string {
+function generateXmlFeed(products: Product[], config: MerchantFeedConfig, siteUrl: string): string {
   const today = new Date().toISOString()
   
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>
     <title>${escapeXml(BRAND)} - Google Merchant Feed</title>
-    <link>${SITE_URL}</link>
+    <link>${siteUrl}</link>
     <description>Lembrancinhas personalizadas artesanais para todas as ocasiões especiais</description>
     <lastBuildDate>${today}</lastBuildDate>
 `
 
   for (const product of products) {
-    const formattedProduct = formatProductForFeed(product)
+    const formattedProduct = formatProductForFeed(product, config, siteUrl)
     
     xml += `    <item>
       <g:id>${escapeXml(formattedProduct.id)}</g:id>
@@ -164,9 +210,9 @@ function generateXmlFeed(products: Product[]): string {
       <g:image_link>${escapeXml(formattedProduct.image_link)}</g:image_link>
 `
     
-    // Add additional images
+    // Add additional images (up to 10)
     if (formattedProduct.additional_image_links && formattedProduct.additional_image_links.length > 0) {
-      for (const additionalImage of formattedProduct.additional_image_links) {
+      for (const additionalImage of formattedProduct.additional_image_links.slice(0, 10)) {
         xml += `      <g:additional_image_link>${escapeXml(additionalImage)}</g:additional_image_link>
 `
       }
@@ -186,11 +232,38 @@ function generateXmlFeed(products: Product[]): string {
       <g:google_product_category>${escapeXml(formattedProduct.google_product_category)}</g:google_product_category>
       <g:product_type>${escapeXml(formattedProduct.product_type)}</g:product_type>
       <g:identifier_exists>no</g:identifier_exists>
-      <g:custom_label_0>${escapeXml(formattedProduct.custom_label_0 || '')}</g:custom_label_0>
 `
     
+    // Add MPN (using product slug as unique identifier)
+    xml += `      <g:mpn>${escapeXml(formattedProduct.mpn)}</g:mpn>
+`
+    
+    // Add custom labels for Performance Max segmentation
+    xml += `      <g:custom_label_0>${escapeXml(formattedProduct.custom_label_0 || '')}</g:custom_label_0>
+`
+    
+    // Add shipping information
+    if (config.shipping_price > 0) {
+      xml += `      <g:shipping>
+        <g:country>${config.shipping_country}</g:country>
+        <g:service>${config.shipping_service}</g:service>
+        <g:price>${config.shipping_price.toFixed(2)} ${config.currency}</g:price>
+      </g:shipping>
+`
+    }
+    
+    // Add shipping weight
     if (formattedProduct.shipping_weight) {
       xml += `      <g:shipping_weight>${formattedProduct.shipping_weight}</g:shipping_weight>
+`
+    }
+    
+    // Add tax info (taxes included in price for Brazil)
+    if (config.tax_included) {
+      xml += `      <g:tax>
+        <g:country>${config.shipping_country}</g:country>
+        <g:tax_ship>no</g:tax_ship>
+      </g:tax>
 `
     }
     
@@ -204,7 +277,7 @@ function generateXmlFeed(products: Product[]): string {
   return xml
 }
 
-function formatProductForFeed(product: Product): {
+function formatProductForFeed(product: Product, config: MerchantFeedConfig, siteUrl: string): {
   id: string
   title: string
   description: string
@@ -220,6 +293,7 @@ function formatProductForFeed(product: Product): {
   product_type: string
   custom_label_0: string
   shipping_weight?: string
+  mpn: string
 } {
   // Clean and prepare title (max 150 chars for Google)
   const title = cleanText(product.name).substring(0, 150)
@@ -242,15 +316,15 @@ function formatProductForFeed(product: Product): {
   
   // Get images
   const images = product.images || []
-  const mainImage = images.length > 0 ? images[0] : `${SITE_URL}/placeholder.svg`
-  const additionalImages = images.slice(1, 10) // Google accepts up to 10 additional images
+  const mainImage = images.length > 0 ? images[0] : `${siteUrl}/placeholder.svg`
+  const additionalImages = images.slice(1, 11) // Google accepts up to 10 additional images
   
   // Calculate prices
   const price = Number(product.price)
   const originalPrice = product.original_price ? Number(product.original_price) : null
   
   // Format prices for Google (with currency)
-  const formattedPrice = `${price.toFixed(2)} BRL`
+  const formattedPrice = `${price.toFixed(2)} ${config.currency}`
   let salePrice: string | undefined
   
   // If original_price exists and is higher than current price, current price is the sale price
@@ -259,7 +333,10 @@ function formatProductForFeed(product: Product): {
   }
   
   // Get category name for product_type
-  const categoryName = product.categories?.[0]?.name || 'Lembrancinhas'
+  const categories = product.categories
+  const categoryName = Array.isArray(categories) 
+    ? (categories[0]?.name || 'Lembrancinhas')
+    : (categories?.name || 'Lembrancinhas')
   const productType = `Lembrancinhas Personalizadas > ${categoryName}`
   
   // Shipping weight (if available)
@@ -268,22 +345,26 @@ function formatProductForFeed(product: Product): {
     shippingWeight = `${(product.weight / 1000).toFixed(2)} kg`
   }
   
+  // Generate MPN from slug (unique product identifier)
+  const mpn = `ELC-${product.slug.substring(0, 50).toUpperCase().replace(/[^A-Z0-9]/g, '-')}`
+  
   return {
     id: product.id,
     title,
     description,
-    link: `${SITE_URL}/produto/${product.slug}`,
+    link: `${siteUrl}/produto/${product.slug}`,
     image_link: mainImage,
     additional_image_links: additionalImages,
     availability: 'in_stock',
-    price: originalPrice && originalPrice > price ? `${originalPrice.toFixed(2)} BRL` : formattedPrice,
+    price: originalPrice && originalPrice > price ? `${originalPrice.toFixed(2)} ${config.currency}` : formattedPrice,
     sale_price: salePrice,
     condition: 'new',
     brand: BRAND,
-    google_product_category: GOOGLE_CATEGORY,
+    google_product_category: config.google_product_category,
     product_type: productType,
     custom_label_0: categoryName,
     shipping_weight: shippingWeight,
+    mpn,
   }
 }
 
