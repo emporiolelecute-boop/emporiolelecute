@@ -476,6 +476,7 @@ export type Database = {
           description: string | null
           elo7_link: string | null
           features: string[] | null
+          google_product_category: string | null
           id: string
           images: string[] | null
           is_active: boolean | null
@@ -502,6 +503,7 @@ export type Database = {
           description?: string | null
           elo7_link?: string | null
           features?: string[] | null
+          google_product_category?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -528,6 +530,7 @@ export type Database = {
           description?: string | null
           elo7_link?: string | null
           features?: string[] | null
+          google_product_category?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
