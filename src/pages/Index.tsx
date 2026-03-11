@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoriesHighlight from "@/components/CategoriesHighlight";
-import About from "@/components/About";
+
 import BestSellers from "@/components/BestSellers";
 import OccasionsSection from "@/components/OccasionsSection";
 import Testimonials from "@/components/Testimonials";
