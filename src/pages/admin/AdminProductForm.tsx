@@ -211,7 +211,8 @@ const AdminProductForm = () => {
         personalization_enabled: formData.personalization_enabled,
         personalization_label: formData.personalization_label || null,
         personalization_placeholder: formData.personalization_placeholder || null,
-      };
+        google_product_category: formData.google_product_category || null,
+      } as any;
 
       let productId: string;
 
