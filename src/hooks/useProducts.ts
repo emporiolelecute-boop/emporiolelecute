@@ -27,6 +27,7 @@ export interface DbProduct {
   personalization_enabled: boolean | null;
   personalization_label: string | null;
   personalization_placeholder: string | null;
+  google_product_category: string | null;
   // Relations (populated by joins)
   category?: DbCategory | null;
   occasions?: DbOccasion[];

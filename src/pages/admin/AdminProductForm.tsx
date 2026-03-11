@@ -657,6 +657,21 @@ const AdminProductForm = () => {
                   placeholder="https://www.elo7.com.br/..."
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="google_product_category">Categoria Google (Merchant Center)</Label>
+                <Input
+                  id="google_product_category"
+                  value={formData.google_product_category}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, google_product_category: e.target.value }))}
+                  placeholder="Ex: Arts & Entertainment > Party & Celebration > Party Favors"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Categoria específica do Google para este produto. Se vazio, usa a categoria global do Merchant Feed.{' '}
+                  <a href="https://support.google.com/merchants/answer/6324436" target="_blank" rel="noopener noreferrer" className="underline text-primary">
+                    Ver taxonomia Google
+                  </a>
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
