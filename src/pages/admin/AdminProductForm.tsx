@@ -64,6 +64,7 @@ const AdminProductForm = () => {
     personalization_enabled: true,
     personalization_label: 'Personalização',
     personalization_placeholder: 'Digite o nome, data ou mensagem para personalização...',
+    google_product_category: '',
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
