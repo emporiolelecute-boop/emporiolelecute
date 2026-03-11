@@ -22,6 +22,7 @@ const Depoimentos = lazy(() => import("./pages/Depoimentos"));
 const Ocasioes = lazy(() => import("./pages/Ocasioes"));
 const Orcamento = lazy(() => import("./pages/Orcamento"));
 const DynamicPage = lazy(() => import("./pages/DynamicPage"));
+const Loja = lazy(() => import("./pages/Loja"));
 
 // Admin pages - lazy loaded
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
