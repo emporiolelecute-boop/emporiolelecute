@@ -191,7 +191,7 @@ const Loja = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full px-8 text-lg gap-2 w-full sm:w-auto font-semibold">
+                <Button size="lg" className="bg-background text-primary hover:bg-background/90 rounded-full px-8 text-lg gap-2 w-full sm:w-auto font-semibold">
                   <MessageCircle className="h-5 w-5" />
                   Peça seu Orçamento
                 </Button>
