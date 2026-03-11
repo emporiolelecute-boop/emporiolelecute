@@ -241,7 +241,7 @@ Deno.serve(async (req) => {
   
 </urlset>`
     
-    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + 10
+    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + (dynamicPages?.length || 0) + 9
     console.log('Sitemap generated successfully')
     console.log(`Total URLs: ${totalUrls}`)
     
