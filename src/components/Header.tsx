@@ -57,9 +57,9 @@ const Header = () => {
             <img 
               src={logo} 
               alt="Logo Empório LeleCute - Ateliê Criativo de Lembrancinhas Artesanais" 
-              className="h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              width="80"
-              height="80"
+              className="h-28 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              width="112"
+              height="112"
             />
           </Link>
 
