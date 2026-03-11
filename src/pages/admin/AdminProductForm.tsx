@@ -95,6 +95,7 @@ const AdminProductForm = () => {
         personalization_enabled: existingProduct.personalization_enabled ?? true,
         personalization_label: existingProduct.personalization_label || 'Personalização',
         personalization_placeholder: existingProduct.personalization_placeholder || 'Digite o nome, data ou mensagem para personalização...',
+        google_product_category: (existingProduct as any).google_product_category || '',
       });
       setKeywordsInput(keywords.join(', '));
 
