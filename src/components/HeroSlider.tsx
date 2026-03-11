@@ -76,32 +76,6 @@ const HeroSlider = () => {
               </p>
             </div>
             
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">
-              <Link to="/produtos">
-                <Button 
-                  size="lg" 
-                  className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-8 py-6 text-lg shadow-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
-                >
-                  Comprar Agora
-                  <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              
-              <a
-                href="https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de fazer um orçamento personalizado."
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="border-2 border-primary text-primary hover:bg-primary-light rounded-full px-8 py-6 text-lg transition-all duration-300 hover:-translate-y-1"
-                >
-                  Orçamento via WhatsApp
-                </Button>
-              </a>
-            </div>
             
             {/* Slide Dots */}
             <div className="flex items-center gap-3">
