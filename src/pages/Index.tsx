@@ -26,7 +26,7 @@ const Index = () => {
       <main>
         <HeroSlider />
         <CategoriesHighlight />
-        <About />
+        
         <BestSellers />
         <OccasionsSection />
         <Testimonials />
