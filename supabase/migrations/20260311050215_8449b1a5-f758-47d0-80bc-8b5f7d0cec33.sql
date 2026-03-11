@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN google_product_category text DEFAULT NULL;

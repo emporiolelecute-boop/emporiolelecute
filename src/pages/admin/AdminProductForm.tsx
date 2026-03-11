@@ -64,6 +64,7 @@ const AdminProductForm = () => {
     personalization_enabled: true,
     personalization_label: 'Personalização',
     personalization_placeholder: 'Digite o nome, data ou mensagem para personalização...',
+    google_product_category: '',
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -94,6 +95,7 @@ const AdminProductForm = () => {
         personalization_enabled: existingProduct.personalization_enabled ?? true,
         personalization_label: existingProduct.personalization_label || 'Personalização',
         personalization_placeholder: existingProduct.personalization_placeholder || 'Digite o nome, data ou mensagem para personalização...',
+        google_product_category: (existingProduct as any).google_product_category || '',
       });
       setKeywordsInput(keywords.join(', '));
 
@@ -209,7 +211,8 @@ const AdminProductForm = () => {
         personalization_enabled: formData.personalization_enabled,
         personalization_label: formData.personalization_label || null,
         personalization_placeholder: formData.personalization_placeholder || null,
-      };
+        google_product_category: formData.google_product_category || null,
+      } as any;
 
       let productId: string;
 
@@ -653,6 +656,21 @@ const AdminProductForm = () => {
                   onChange={(e) => setFormData((prev) => ({ ...prev, elo7_link: e.target.value }))}
                   placeholder="https://www.elo7.com.br/..."
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="google_product_category">Categoria Google (Merchant Center)</Label>
+                <Input
+                  id="google_product_category"
+                  value={formData.google_product_category}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, google_product_category: e.target.value }))}
+                  placeholder="Ex: Arts & Entertainment > Party & Celebration > Party Favors"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Categoria específica do Google para este produto. Se vazio, usa a categoria global do Merchant Feed.{' '}
+                  <a href="https://support.google.com/merchants/answer/6324436" target="_blank" rel="noopener noreferrer" className="underline text-primary">
+                    Ver taxonomia Google
+                  </a>
+                </p>
               </div>
             </div>
           </CardContent>
