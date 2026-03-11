@@ -184,6 +184,13 @@ Deno.serve(async (req) => {
     sitemap += `
   <!-- Static Pages -->
   <url>
+    <loc>${siteUrl}/loja</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
     <loc>${siteUrl}/envio</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
@@ -234,7 +241,7 @@ Deno.serve(async (req) => {
   
 </urlset>`
     
-    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + 10
+    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + (dynamicPages?.length || 0) + 9
     console.log('Sitemap generated successfully')
     console.log(`Total URLs: ${totalUrls}`)
     
