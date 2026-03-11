@@ -184,6 +184,13 @@ Deno.serve(async (req) => {
     sitemap += `
   <!-- Static Pages -->
   <url>
+    <loc>${siteUrl}/loja</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
     <loc>${siteUrl}/envio</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
