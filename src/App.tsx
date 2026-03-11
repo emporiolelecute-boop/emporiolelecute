@@ -251,6 +251,13 @@ const App = () => {
                   } />
                 </Route>
                 
+                {/* Landing Page for Google Ads */}
+                <Route path="/loja" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Loja />
+                  </Suspense>
+                } />
+                
                 {/* Dynamic Pages - must be after other routes */}
                 <Route path="/:slug" element={
                   <Suspense fallback={<PageSkeleton />}>
