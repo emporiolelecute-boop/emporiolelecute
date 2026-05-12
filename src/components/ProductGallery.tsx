@@ -222,7 +222,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                 )}
               >
                 <img
-                  src={image}
+                  src={optimizeImage(image, { width: 160 })}
                   alt={`${productName} - Miniatura ${index + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
