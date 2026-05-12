@@ -1,8 +1,8 @@
 import { Instagram, Heart, ExternalLink } from "lucide-react";
-import sabonetesImg from "@/assets/category-sabonetes.jpg";
-import velasImg from "@/assets/category-velas.jpg";
-import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
-import kitsImg from "@/assets/category-kits.jpg";
+import sabonetesImg from "@/assets/category-sabonetes.webp";
+import velasImg from "@/assets/category-velas.webp";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
+import kitsImg from "@/assets/category-kits.webp";
 
 const InstagramFeed = () => {
   const posts = [

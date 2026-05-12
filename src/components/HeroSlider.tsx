@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Heart, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import sabonetesImg from "@/assets/category-sabonetes.jpg";
-import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
-import kitsImg from "@/assets/category-kits.jpg";
+import sabonetesImg from "@/assets/category-sabonetes.webp";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
+import kitsImg from "@/assets/category-kits.webp";
 
 const slides = [
   {
