@@ -114,6 +114,11 @@ const HeroSlider = () => {
                 alt="Lembrancinhas Artesanais Empório LeleCute"
                 className="w-full h-auto object-cover aspect-square"
                 loading="eager"
+                decoding="async"
+                // @ts-expect-error fetchpriority is valid HTML
+                fetchpriority="high"
+                width="600"
+                height="600"
               />
             </div>
             
