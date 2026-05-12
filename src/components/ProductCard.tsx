@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/data/products";
+import { optimizeImage, buildSrcSet } from "@/lib/image";
 
 interface ProductCardProps {
   product: Product;
@@ -85,10 +86,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Product Image */}
       <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden">
         <img 
-          src={product.image}
+          src={optimizeImage(product.image, { width: 600 })}
+          srcSet={buildSrcSet(product.image, [300, 450, 600, 800])}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
           alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
+          decoding="async"
           itemProp="image"
           width="685"
           height="685"
