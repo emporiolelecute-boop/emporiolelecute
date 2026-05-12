@@ -1,13 +1,17 @@
 import { Instagram, Heart, ExternalLink } from "lucide-react";
+import sabonetesImg from "@/assets/category-sabonetes.jpg";
+import velasImg from "@/assets/category-velas.jpg";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
+import kitsImg from "@/assets/category-kits.jpg";
 
 const InstagramFeed = () => {
   const posts = [
-    { id: 1, image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg", alt: "Sabonete margarida artesanal" },
-    { id: 2, image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg", alt: "Vela margarida perfumada" },
-    { id: 3, image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg", alt: "Sabonete borboleta personalizado" },
-    { id: 4, image: "https://img.elo7.com.br/product/685x685/5663EE8/lembrancinha-sabonete-brasao-2-letras.jpg", alt: "Sabonete brasão com letras" },
-    { id: 5, image: "https://img.elo7.com.br/product/685x685/548BDE7/lembrancinha-sabonete-fundo-do-mar-letra-mini-coracao.jpg", alt: "Sabonete fundo do mar" },
-    { id: 6, image: "https://img.elo7.com.br/product/685x685/576D279/sabonete-lembrancinha-natal-presepio-sagrada-familia-natal-presepio.jpg", alt: "Sabonete presépio natal" },
+    { id: 1, image: sabonetesImg, alt: "Sabonetes artesanais decorados" },
+    { id: 2, image: velasImg, alt: "Velas perfumadas personalizadas" },
+    { id: 3, image: lembrancinhasImg, alt: "Lembrancinhas em caixinhas delicadas" },
+    { id: 4, image: kitsImg, alt: "Kit lembrancinha maternidade" },
+    { id: 5, image: sabonetesImg, alt: "Sabonetes florais artesanais" },
+    { id: 6, image: velasImg, alt: "Velas aromáticas em potinhos" },
   ];
 
   return (

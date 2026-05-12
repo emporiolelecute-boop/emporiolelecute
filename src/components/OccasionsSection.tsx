@@ -2,36 +2,40 @@ import { Link } from "react-router-dom";
 import { Heart, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDbOccasions } from "@/hooks/useProducts";
+import sabonetesImg from "@/assets/category-sabonetes.jpg";
+import velasImg from "@/assets/category-velas.jpg";
+import kitsImg from "@/assets/category-kits.jpg";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
 
 // Static fallback occasions with images and descriptions
 const occasionDefaults: Record<string, { description: string; image: string }> = {
   "maternidade": {
     description: "Lembrancinhas delicadas para celebrar a chegada do bebê. Sabonetes e velas personalizadas com o nome e tema do pequeno.",
-    image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg",
+    image: kitsImg,
   },
   "cha-bebe": {
     description: "Surpreenda os convidados do chá revelação ou chá de fraldas com lembrancinhas artesanais encantadoras e perfumadas.",
-    image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg",
+    image: lembrancinhasImg,
   },
   "batizado": {
     description: "Celebre a bênção do batismo com sabonetes em formato de anjo, pomba, terço e símbolos religiosos personalizados.",
-    image: "https://img.elo7.com.br/product/685x685/5663EE8/lembrancinha-sabonete-brasao-2-letras.jpg",
+    image: sabonetesImg,
   },
   "casamento": {
     description: "Lembrancinhas elegantes para o grande dia. Sabonetes com iniciais dos noivos, velas aromáticas e kits especiais.",
-    image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg",
+    image: velasImg,
   },
   "aniversario": {
     description: "Festas infantis ou adultas ficam mais especiais com lembrancinhas temáticas personalizadas com cores e aromas.",
-    image: "https://img.elo7.com.br/product/685x685/548BDE7/lembrancinha-sabonete-fundo-do-mar-letra-mini-coracao.jpg",
+    image: lembrancinhasImg,
   },
   "corporativo": {
     description: "Kits presenteáveis personalizados para brindes corporativos, datas comemorativas e eventos empresariais.",
-    image: "https://img.elo7.com.br/product/685x685/576D279/sabonete-lembrancinha-natal-presepio-sagrada-familia-natal-presepio.jpg",
+    image: velasImg,
   },
 };
 
-const defaultImage = "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg";
+const defaultImage = sabonetesImg;
 
 const OccasionsSection = () => {
   const { data: dbOccasions } = useDbOccasions();

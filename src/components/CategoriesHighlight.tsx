@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
 import { useHomepageBlocks } from "@/hooks/useHomepageBlocks";
 import { Skeleton } from "@/components/ui/skeleton";
+import sabonetesImg from "@/assets/category-sabonetes.jpg";
+import velasImg from "@/assets/category-velas.jpg";
+import kitsImg from "@/assets/category-kits.jpg";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
 
 const defaultCategories = [
-  { name: "Sabonetes", image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg", link: "/produtos?categoria=sabonetes" },
-  { name: "Velas", image: "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg", link: "/produtos?categoria=velas" },
-  { name: "Kits Maternidade", image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg", link: "/produtos?categoria=kits" },
-  { name: "Lembrancinhas", image: "https://img.elo7.com.br/product/685x685/5663EE8/lembrancinha-sabonete-brasao-2-letras.jpg", link: "/produtos?categoria=lembrancinhas" },
+  { name: "Sabonetes", image: sabonetesImg, link: "/produtos?categoria=sabonetes" },
+  { name: "Velas", image: velasImg, link: "/produtos?categoria=velas" },
+  { name: "Kits Maternidade", image: kitsImg, link: "/produtos?categoria=kits" },
+  { name: "Lembrancinhas", image: lembrancinhasImg, link: "/produtos?categoria=lembrancinhas" },
 ];
 
 const CategoriesHighlight = () => {

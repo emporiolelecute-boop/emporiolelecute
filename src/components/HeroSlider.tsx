@@ -2,25 +2,28 @@ import { useState, useEffect } from "react";
 import { Heart, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import sabonetesImg from "@/assets/category-sabonetes.jpg";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
+import kitsImg from "@/assets/category-kits.jpg";
 
 const slides = [
   {
     tagline: "Para qualquer idade e ocasião",
     title: "Lembrancinhas de qualidade premium",
     subtitle: "Cada produto é feito sob encomenda com ingredientes naturais e embalagem especial.",
-    image: "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg",
+    image: sabonetesImg,
   },
   {
     tagline: "Ateliê Criativo",
     title: "Lembrancinhas Artesanais que Perfumam seus Momentos",
     subtitle: "Sabonetes artesanais, velas perfumadas e presentes personalizados feitos com amor e carinho.",
-    image: "https://img.elo7.com.br/product/685x685/548B92C/lembrancinha-sabonete-borboleta-letra-coracao.jpg",
+    image: lembrancinhasImg,
   },
   {
     tagline: "100% Personalizado",
     title: "Sua celebração com um toque especial",
     subtitle: "Cores, aromas, embalagens e tags personalizadas para seu evento perfeito.",
-    image: "https://img.elo7.com.br/product/685x685/576D279/sabonete-lembrancinha-natal-presepio-sagrada-familia-natal-presepio.jpg",
+    image: kitsImg,
   },
 ];
 
