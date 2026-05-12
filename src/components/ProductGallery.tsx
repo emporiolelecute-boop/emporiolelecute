@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ZoomIn, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { optimizeImage } from "@/lib/image";
 
 interface ProductGalleryProps {
   images: string[];
@@ -86,7 +87,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               )}
             >
               <img
-                src={image}
+                src={optimizeImage(image, { width: 160 })}
                 alt={`${productName} - Miniatura ${index + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -121,7 +122,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
             {images.map((image, index) => (
               <img
                 key={index}
-                src={image}
+                src={optimizeImage(image, { width: 800 })}
                 alt={`${productName} - Imagem ${index + 1}`}
                 className={cn(
                   "absolute inset-0 w-full h-full object-cover transition-all duration-500",
@@ -261,7 +262,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               onTouchEnd={handleTouchEnd}
             >
               <img
-                src={images[currentIndex]}
+                src={optimizeImage(images[currentIndex], { width: 1600, quality: 85 })}
                 alt={`${productName} - Imagem ampliada`}
                 className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
                 loading="eager"
@@ -307,7 +308,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                     )}
                   >
                     <img
-                      src={image}
+                      src={optimizeImage(image, { width: 128 })}
                       alt={`Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
