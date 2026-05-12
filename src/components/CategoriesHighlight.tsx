@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useHomepageBlocks } from "@/hooks/useHomepageBlocks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { optimizeImage, buildSrcSet } from "@/lib/image";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
 import velasImg from "@/assets/category-velas.webp";
 import kitsImg from "@/assets/category-kits.webp";
