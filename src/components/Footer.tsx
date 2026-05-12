@@ -1,6 +1,6 @@
 import { Heart, Instagram, Facebook, MapPin, Phone, ExternalLink, Package } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.webp";
 import { useFooterConfig, defaultFooterConfig } from "@/hooks/useStoreSettings";
 import { useMenuItems } from "@/hooks/useMenus";
 

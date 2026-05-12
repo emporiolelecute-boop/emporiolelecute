@@ -1,8 +1,8 @@
 import { Heart, Sparkles, Gift, ArrowRight, Instagram, Facebook, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import banner from "@/assets/banner.jpg";
-import logo from "@/assets/logo.jpg";
+import banner from "@/assets/banner.webp";
+import logo from "@/assets/logo.webp";
 import { useParallax, useCountUp } from "@/hooks/use-scroll-animation";
 
 const Hero = () => {

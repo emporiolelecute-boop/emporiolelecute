@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { Heart, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDbOccasions } from "@/hooks/useProducts";
-import sabonetesImg from "@/assets/category-sabonetes.jpg";
-import velasImg from "@/assets/category-velas.jpg";
-import kitsImg from "@/assets/category-kits.jpg";
-import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
+import sabonetesImg from "@/assets/category-sabonetes.webp";
+import velasImg from "@/assets/category-velas.webp";
+import kitsImg from "@/assets/category-kits.webp";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
 
 // Static fallback occasions with images and descriptions
 const occasionDefaults: Record<string, { description: string; image: string }> = {

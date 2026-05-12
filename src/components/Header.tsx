@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
 import { useCart } from "@/contexts/CartContext";
 import { useMenuItems } from "@/hooks/useMenus";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.webp";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

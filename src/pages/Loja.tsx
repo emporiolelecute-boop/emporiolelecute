@@ -9,7 +9,7 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
 import { useDbProducts } from "@/hooks/useProducts";
-import logoImg from "@/assets/logo.jpg";
+import logoImg from "@/assets/logo.webp";
 
 const WHATSAPP_URL = "https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas.";
 

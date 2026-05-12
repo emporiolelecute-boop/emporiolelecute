@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useHomepageBlocks } from "@/hooks/useHomepageBlocks";
 import { Skeleton } from "@/components/ui/skeleton";
-import sabonetesImg from "@/assets/category-sabonetes.jpg";
-import velasImg from "@/assets/category-velas.jpg";
-import kitsImg from "@/assets/category-kits.jpg";
-import lembrancinhasImg from "@/assets/category-lembrancinhas.jpg";
+import { optimizeImage, buildSrcSet } from "@/lib/image";
+import sabonetesImg from "@/assets/category-sabonetes.webp";
+import velasImg from "@/assets/category-velas.webp";
+import kitsImg from "@/assets/category-kits.webp";
+import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
 
 const defaultCategories = [
   { name: "Sabonetes", image: sabonetesImg, link: "/produtos?categoria=sabonetes" },
@@ -54,10 +55,15 @@ const CategoriesHighlight = () => {
               className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-medium transition-all duration-300 hover:-translate-y-1"
             >
               <img 
-                src={category.image}
+                src={optimizeImage(category.image, { width: 500 })}
+                srcSet={buildSrcSet(category.image, [300, 500, 800])}
+                sizes="(max-width: 768px) 50vw, 25vw"
                 alt={category.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 loading="lazy"
+                decoding="async"
+                width="500"
+                height="500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
