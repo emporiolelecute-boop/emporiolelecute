@@ -132,6 +132,10 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                 )}
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding="async"
+                // @ts-expect-error fetchpriority is valid HTML
+                fetchpriority={index === 0 ? "high" : "auto"}
+                width="800"
+                height="800"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/placeholder.svg';
                 }}
