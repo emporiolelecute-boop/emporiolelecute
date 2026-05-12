@@ -85,12 +85,15 @@ const OccasionsSection = () => {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Image */}
-                <div className="aspect-video overflow-hidden">
+                <div className="aspect-video overflow-hidden bg-muted/30">
                   <img 
                     src={occasion.image}
                     alt={occasion.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     loading="lazy"
+                    decoding="async"
+                    width="600"
+                    height="338"
                   />
                 </div>
                 
