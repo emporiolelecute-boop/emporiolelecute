@@ -30,8 +30,16 @@ const InstagramFeed = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {posts.map((post) => (
-            <a key={post.id} href="https://www.instagram.com/emporiolelecute" target="_blank" rel="noopener noreferrer" className="relative aspect-square overflow-hidden rounded-xl group">
-              <img src={post.image} alt={post.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+            <a key={post.id} href="https://www.instagram.com/emporiolelecute" target="_blank" rel="noopener noreferrer" className="relative aspect-square overflow-hidden rounded-xl group bg-muted/30">
+              <img
+                src={post.image}
+                alt={post.alt}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+                decoding="async"
+                width="400"
+                height="400"
+              />
               <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Heart className="h-8 w-8 text-primary-foreground" />
               </div>
