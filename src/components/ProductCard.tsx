@@ -84,18 +84,20 @@ const ProductCard = ({ product }: ProductCardProps) => {
       itemType="https://schema.org/Product"
     >
       {/* Product Image */}
-      <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden">
+      <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden bg-muted/30">
         <img 
           src={optimizeImage(product.image, { width: 600 })}
           srcSet={buildSrcSet(product.image, [300, 450, 600, 800])}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
           alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-0 [&.loaded]:opacity-100 transition-opacity"
           loading="lazy"
           decoding="async"
           itemProp="image"
           width="685"
           height="685"
+          onLoad={(e) => e.currentTarget.classList.add('loaded')}
+          style={{ transition: 'opacity 400ms ease, transform 500ms ease' }}
         />
         
         {/* Badge */}
