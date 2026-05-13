@@ -105,19 +105,7 @@ export const usePublishedOccasionLandings = () => {
     },
   });
 };
-  return useQuery({
-    queryKey: ["occasion-landings", "published"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from(TABLE)
-        .select("*")
-        .eq("is_published", true)
-        .order("position", { ascending: true });
-      if (error) throw error;
-      return (data || []).map(normalize);
-    },
-  });
-};
+
 
 /** Admin — all landings (published + drafts) */
 export const useAdminOccasionLandings = () => {
