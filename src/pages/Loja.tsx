@@ -43,6 +43,7 @@ const Loja = () => {
       category: "outros" as const,
       occasions: [] as never[],
       keywords: p.keywords || [],
+      min_quantity: p.min_quantity || undefined,
     }));
 
   const itemListProducts = featuredProducts.map(p => ({
@@ -133,13 +134,13 @@ const Loja = () => {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="bg-muted animate-pulse rounded-2xl aspect-[3/4]" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {featuredProducts.map((product, idx) => (
                   <ProductCard key={product.id} product={product} priority={idx < 2} />
                 ))}

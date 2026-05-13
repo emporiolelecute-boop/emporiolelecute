@@ -14,6 +14,7 @@ export interface Product {
   category: "sabonetes" | "velas" | "kits" | "outros";
   occasions: ("maternidade" | "cha-bebe" | "batizado" | "casamento" | "aniversario" | "corporativo")[];
   keywords: string[];
+  min_quantity?: number;
 }
 
 export const products: Product[] = [

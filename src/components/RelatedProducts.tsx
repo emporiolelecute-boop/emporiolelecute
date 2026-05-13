@@ -62,6 +62,7 @@ const RelatedProducts = ({ currentProduct, maxProducts = 4 }: RelatedProductsPro
     category: 'outros' as const,
     occasions: [],
     keywords: p.keywords || [],
+    min_quantity: p.min_quantity || undefined,
   }));
 
   if (displayProducts.length === 0) return null;

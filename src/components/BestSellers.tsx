@@ -35,6 +35,7 @@ const BestSellers = () => {
       category: 'outros' as const,
       occasions: [],
       keywords: p.keywords || [],
+      min_quantity: p.min_quantity || undefined,
     }));
 
   return (
@@ -65,7 +66,7 @@ const BestSellers = () => {
               <p className="text-muted-foreground">Nenhum produto disponível no momento.</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-12">
               {products.map((product, index) => (
                 <div 
                   key={product.id}
