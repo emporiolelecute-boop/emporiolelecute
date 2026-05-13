@@ -170,6 +170,33 @@ const BlogPost = () => {
                 </p>
               </Link>
             </div>
+
+            {related.length > 0 && (
+              <div className="mt-12">
+                <h2 className="font-display text-2xl text-foreground mb-6 text-center">
+                  Continue lendo
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {related.map((rp) => (
+                    <Link
+                      key={rp.slug}
+                      to={`/blog/${rp.slug}`}
+                      className="group block bg-card rounded-2xl p-5 border border-border/40 hover:border-primary/40 hover:shadow-md transition-all"
+                    >
+                      <span className="text-xs uppercase tracking-wide text-primary font-medium">
+                        {rp.category}
+                      </span>
+                      <h3 className="font-display text-base text-foreground mt-1 group-hover:text-primary transition-colors line-clamp-2">
+                        {rp.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {rp.excerpt}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </main>
