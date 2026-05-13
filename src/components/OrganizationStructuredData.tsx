@@ -10,25 +10,17 @@ const OrganizationStructuredData = () => {
     "url": "https://emporiolelecute.com.br",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://img.elo7.com.br/users/banner/12A517D.jpg",
-      "width": 600,
-      "height": 60
+      "url": "https://emporiolelecute.com.br/og-image.webp"
     },
-    "image": "https://img.elo7.com.br/users/banner/12A517D.jpg",
+    "image": "https://emporiolelecute.com.br/og-image.webp",
     "description": "Ateliê criativo de lembrancinhas artesanais personalizadas. Sabonetes, velas perfumadas e presentes únicos para maternidade, chá de bebê, batizado, casamento e aniversário.",
-    "email": "contato@emporiolelecute.com.br",
+    "email": "emporiolelecute@gmail.com",
     "telephone": "+55-41-99221-4299",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "São José dos Pinhais",
       "addressRegion": "PR",
-      "postalCode": "83010-000",
       "addressCountry": "BR"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": -25.5314,
-      "longitude": -49.2063
     },
     "areaServed": {
       "@type": "Country",
@@ -40,29 +32,11 @@ const OrganizationStructuredData = () => {
       "https://www.elo7.com.br/emporiolelecute",
       "https://br.pinterest.com/emporiolelecute"
     ],
-    "foundingDate": "2014",
-    "numberOfEmployees": {
-      "@type": "QuantitativeValue",
-      "value": 5
-    },
     "contactPoint": [
       {
         "@type": "ContactPoint",
         "telephone": "+55-41-99221-4299",
         "contactType": "customer service",
-        "areaServed": "BR",
-        "availableLanguage": "Portuguese",
-        "hoursAvailable": {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "09:00",
-          "closes": "18:00"
-        }
-      },
-      {
-        "@type": "ContactPoint",
-        "telephone": "+55-41-99221-4299",
-        "contactType": "sales",
         "areaServed": "BR",
         "availableLanguage": "Portuguese"
       }

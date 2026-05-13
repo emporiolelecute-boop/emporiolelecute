@@ -6,17 +6,15 @@ const LocalBusinessStructuredData = () => {
     "@type": "LocalBusiness",
     "@id": "https://emporiolelecute.com.br/#localbusiness",
     "name": "Empório LeleCute",
-    "image": "https://img.elo7.com.br/users/banner/12A517D.jpg",
+    "image": "https://emporiolelecute.com.br/og-image.webp",
     "description": "Ateliê criativo de lembrancinhas artesanais personalizadas. Sabonetes, velas perfumadas e presentes únicos para maternidade, chá de bebê, batizado, casamento e aniversário.",
     "url": "https://emporiolelecute.com.br",
     "telephone": "+55-41-99221-4299",
-    "email": "contato@emporiolelecute.com.br",
+    "email": "emporiolelecute@gmail.com",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Rua do Ateliê",
       "addressLocality": "São José dos Pinhais",
       "addressRegion": "PR",
-      "postalCode": "83010-000",
       "addressCountry": "BR"
     },
     "geo": {
@@ -43,14 +41,9 @@ const LocalBusinessStructuredData = () => {
       "https://www.instagram.com/emporiolelecute",
       "https://www.facebook.com/emporiolelecute",
       "https://www.elo7.com.br/emporiolelecute"
-    ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": 4.9,
-      "reviewCount": 5000,
-      "bestRating": 5,
-      "worstRating": 1
-    }
+    ]
+    // NOTE: aggregateRating removido — só pode ser adicionado quando houver reviews reais
+    // exibidos na página (diretrizes Google), caso contrário gera manual action.
   };
 
   return (
