@@ -11,9 +11,10 @@ import { optimizeImage, buildSrcSet } from "@/lib/image";
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, priority = false }: ProductCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -91,8 +92,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
           alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-0 [&.loaded]:opacity-100 transition-opacity"
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
+          // @ts-expect-error fetchpriority is a valid HTML attribute
+          fetchpriority={priority ? "high" : "auto"}
           itemProp="image"
           width="685"
           height="685"
