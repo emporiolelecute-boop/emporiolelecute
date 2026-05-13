@@ -19,8 +19,8 @@ const ProductStructuredData = ({
   price,
   images,
   slug,
-  rating = 5,
-  reviewCount = 10,
+  rating,
+  reviewCount,
   productionDays = 7,
   category = "Lembrancinhas Artesanais",
   brand = "Empório LeleCute",
@@ -95,13 +95,18 @@ const ProductStructuredData = ({
         "returnFees": "https://schema.org/FreeReturn"
       }
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": Number(rating.toFixed(1)),
-      "reviewCount": reviewCount,
-      "bestRating": 5,
-      "worstRating": 1
-    }
+    // aggregateRating só é incluído quando reviews reais existem (evita penalidade Google).
+    ...(rating && reviewCount && reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(rating.toFixed(1)),
+            reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 
   return (
