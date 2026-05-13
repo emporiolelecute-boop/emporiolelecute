@@ -7,7 +7,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { Button } from "@/components/ui/button";
-import { getPostBySlug } from "@/data/blog";
+import { getPostBySlug, getRelatedPosts } from "@/data/blog";
 
 const SITE = "https://emporiolelecute.com.br";
 
