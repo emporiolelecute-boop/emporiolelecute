@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet';
+import { useLocation } from 'react-router-dom';
 import { useSEOConfig } from '@/hooks/useStoreSettings';
 
 interface DynamicSEOProps {
@@ -9,8 +10,19 @@ interface DynamicSEOProps {
   type?: string;
 }
 
+const SITE_ORIGIN = 'https://emporiolelecute.com.br';
+
+const buildCanonical = (pathname: string) => {
+  // Strip trailing slash (except root) to enforce single preferred URL — no query/hash
+  const clean = pathname.length > 1 && pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
+  return `${SITE_ORIGIN}${clean}`;
+};
+
 const DynamicSEO = ({ title, description, image, url, type = 'website' }: DynamicSEOProps) => {
   const { data: seoConfig, isLoading } = useSEOConfig();
+  const location = useLocation();
 
   if (isLoading || !seoConfig) {
     return null;
@@ -19,7 +31,7 @@ const DynamicSEO = ({ title, description, image, url, type = 'website' }: Dynami
   const pageTitle = title || seoConfig.site_title;
   const pageDescription = description || seoConfig.site_description;
   const pageImage = image || seoConfig.og_image;
-  const pageUrl = url || seoConfig.canonical_url;
+  const pageUrl = url || buildCanonical(location.pathname);
 
   return (
     <Helmet>
