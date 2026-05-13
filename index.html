@@ -86,7 +86,7 @@
           "https://br.pinterest.com/emporiolelecute"
         ],
         "priceRange": "$$",
-        "image": "https://img.elo7.com.br/users/banner/12A517D.jpg",
+        "image": "https://emporiolelecute.com.br/og-image.webp",
         "openingHoursSpecification": {
           "@type": "OpeningHoursSpecification",
           "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -96,47 +96,8 @@
       }
     </script>
 
-    <!-- Product Structured Data -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "item": {
-              "@type": "Product",
-              "name": "Sabonete Margarida na Caixinha",
-              "description": "Sabonetes artesanais em formato de margarida, decorados e embalados em caixinhas elegantes. Perfeitos como lembrancinhas personalizadas de chá de bebê, maternidade ou aniversário.",
-              "image": "https://img.elo7.com.br/product/685x685/50E237C/lembrancinha-margarida-na-caixinha-lembrancinha-sabonete-maternidade.jpg",
-              "offers": {
-                "@type": "Offer",
-                "priceCurrency": "BRL",
-                "price": "4.60",
-                "availability": "https://schema.org/InStock"
-              }
-            }
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "item": {
-              "@type": "Product",
-              "name": "Vela Margarida Perfumada",
-              "description": "Mini vela perfumada em formato de margarida com cartão personalizado. Produzida com cera vegetal e pavio de algodão.",
-              "image": "https://img.elo7.com.br/product/685x685/54800D6/lembrancinha-sabonete-margarida-na-caixinha-margarida.jpg",
-              "offers": {
-                "@type": "Offer",
-                "priceCurrency": "BRL",
-                "price": "7.60",
-                "availability": "https://schema.org/InStock"
-              }
-            }
-          }
-        ]
-      }
-    </script>
+    <!-- Product JSON-LD removido — agora é injetado dinamicamente em cada página de produto
+         via <ProductStructuredData/>, evitando dados desatualizados ou imagens de terceiros. -->
 
     <!-- FAQ Structured Data -->
     <script type="application/ld+json">
