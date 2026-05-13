@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Sparkles, ChevronLeft, ChevronRight, Truck, Percent, Headset, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BlurImage } from "@/components/BlurImage";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
@@ -141,24 +141,34 @@ const HeroSlider = () => {
       {/* Trust Badges */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-cream/80 to-transparent py-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-6 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm">Envio para todo Brasil</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-foreground">
+            <div className="flex items-center gap-3">
+              <Truck className="h-7 w-7 text-primary shrink-0" strokeWidth={1.5} />
+              <div className="leading-tight">
+                <div className="text-sm font-semibold">Envio para</div>
+                <div className="text-xs text-muted-foreground">Todo o Brasil</div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm">Produtos Hipoalergênicos</span>
+            <div className="flex items-center gap-3">
+              <Percent className="h-7 w-7 text-primary shrink-0" strokeWidth={1.5} />
+              <div className="leading-tight">
+                <div className="text-sm font-semibold">Descontos</div>
+                <div className="text-xs text-muted-foreground">3% PIX</div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm">Personalização Completa</span>
+            <div className="flex items-center gap-3">
+              <Headset className="h-7 w-7 text-primary shrink-0" strokeWidth={1.5} />
+              <div className="leading-tight">
+                <div className="text-sm font-semibold">Atendimento</div>
+                <div className="text-xs text-muted-foreground">Personalizado</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-7 w-7 text-primary shrink-0" strokeWidth={1.5} />
+              <div className="leading-tight">
+                <div className="text-sm font-semibold">Pague com Cartão</div>
+                <div className="text-xs text-muted-foreground">Até 3x sem juros</div>
+              </div>
             </div>
           </div>
         </div>
