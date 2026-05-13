@@ -113,6 +113,43 @@ const Blog = () => {
                 ))}
               </div>
             )}
+
+            {/* INTERLINK — Lembrancinhas em destaque */}
+            <div className="mt-16 pt-12 border-t border-border/40">
+              <h2 className="font-display text-2xl md:text-3xl text-center text-foreground mb-2">
+                Pronto para encomendar?
+              </h2>
+              <p className="text-center text-muted-foreground mb-8">
+                Veja nossas lembrancinhas mais procuradas, prontas para personalizar.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { slug: "maternidade", title: "Lembrancinhas de Maternidade", desc: "Kits perfumados para receber as visitas do bebê." },
+                  { slug: "cha-de-bebe", title: "Lembrancinhas para Chá de Bebê", desc: "Sabonetes e velas personalizados." },
+                  { slug: "batizado", title: "Lembrancinhas para Batizado", desc: "Lembranças delicadas para o sacramento." },
+                ].map((item) => (
+                  <Link
+                    key={item.slug}
+                    to={`/lembrancinhas-${item.slug}`}
+                    className="group block bg-card rounded-2xl p-5 border border-border/40 hover:border-primary/40 hover:shadow-md transition-all"
+                  >
+                    <h3 className="font-display text-base text-foreground group-hover:text-primary transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.desc}</p>
+                    <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3 group-hover:gap-2 transition-all">
+                      Ver modelos
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Link to="/produtos" className="text-sm text-primary hover:underline">
+                  Ver catálogo completo de sabonetes personalizados →
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       </main>
