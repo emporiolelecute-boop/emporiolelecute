@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2 } from "lucide-react";
+import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2, Star, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Header from "@/components/Header";
@@ -136,7 +136,49 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
           </div>
         </section>
 
-        {/* PRODUTOS */}
+        {/* PROVA SOCIAL — STATS */}
+        {config.socialProofStats && config.socialProofStats.length > 0 && (
+          <section className="container mx-auto px-4 py-12">
+            <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {config.socialProofStats.map((stat) => (
+                <div key={stat.label} className="bg-card rounded-2xl p-6 border border-border/40">
+                  <p className="font-display text-2xl md:text-3xl text-primary">{stat.value}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* GALERIA DE FOTOS REAIS */}
+        {config.gallery && config.gallery.length > 0 && (
+          <section className="container mx-auto px-4 py-12">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-8">
+                <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wide text-primary font-medium">
+                  <Camera className="h-4 w-4" />
+                  Fotos reais de clientes
+                </span>
+                <h2 className="font-display text-3xl md:text-4xl text-foreground mt-2">
+                  Veja nossas entregas
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {config.gallery.map((src, i) => (
+                  <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
+                    <img
+                      src={src}
+                      alt={`${config.heroBadge} — foto real ${i + 1}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section id="produtos" className="container mx-auto px-4 py-16">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10">
@@ -179,6 +221,37 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
             )}
           </div>
         </section>
+
+        {/* PROVA SOCIAL — DEPOIMENTOS */}
+        {config.testimonials && config.testimonials.length > 0 && (
+          <section className="container mx-auto px-4 py-16">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="font-display text-3xl md:text-4xl text-center text-foreground mb-10">
+                O que as mamães dizem
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {config.testimonials.map((t, i) => (
+                  <div key={i} className="bg-card rounded-2xl p-6 border border-border/40 flex flex-col">
+                    <div className="flex gap-0.5 mb-3">
+                      {Array.from({ length: t.rating ?? 5 }).map((_, idx) => (
+                        <Star key={idx} className="h-4 w-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground italic flex-1 leading-relaxed">
+                      "{t.text}"
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-border/40">
+                      <p className="font-display text-sm text-foreground">{t.name}</p>
+                      {t.location && (
+                        <p className="text-xs text-muted-foreground">{t.location}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* COMO FUNCIONA */}
         <section className="bg-muted/30 py-16">

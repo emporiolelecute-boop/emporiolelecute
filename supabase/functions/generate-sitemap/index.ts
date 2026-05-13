@@ -258,7 +258,14 @@ Deno.serve(async (req) => {
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  
+
+  <url>
+    <loc>${siteUrl}/blog</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>`
     
     const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + (dynamicPages?.length || 0) + 9

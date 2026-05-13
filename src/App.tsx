@@ -24,6 +24,8 @@ const Orcamento = lazy(() => import("./pages/Orcamento"));
 const DynamicPage = lazy(() => import("./pages/DynamicPage"));
 const Loja = lazy(() => import("./pages/Loja"));
 const LembrancinhasLanding = lazy(() => import("./pages/LembrancinhasLanding"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 
 // Admin pages - lazy loaded
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -159,7 +161,19 @@ const App = () => {
                     }
                   />
                 ))}
-                
+
+                {/* Blog — Horizonte 2 Fase 2 */}
+                <Route path="/blog" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Blog />
+                  </Suspense>
+                } />
+                <Route path="/blog/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <BlogPost />
+                  </Suspense>
+                } />
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <Suspense fallback={<AdminSkeleton />}>

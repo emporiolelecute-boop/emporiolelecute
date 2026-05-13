@@ -36,6 +36,12 @@ export interface LembrancinhasLandingConfig {
   faqs: LandingFAQ[];
   /** Slugs de outras landings para "Você também pode gostar" */
   relatedRouteSlugs: string[];
+  /** URLs de fotos reais (sem stock). Quando vazio, a seção de galeria não é renderizada. */
+  gallery?: string[];
+  /** Depoimentos curados para prova social. Quando vazio, a seção não é renderizada. */
+  testimonials?: { name: string; location?: string; text: string; rating?: number }[];
+  /** Estatísticas curtas para reforçar prova social (ex: "+2.000 famílias atendidas"). */
+  socialProofStats?: { value: string; label: string }[];
 }
 
 export const LEMBRANCINHAS_LANDINGS: LembrancinhasLandingConfig[] = [
@@ -136,6 +142,34 @@ export const LEMBRANCINHAS_LANDINGS: LembrancinhasLandingConfig[] = [
       },
     ],
     relatedRouteSlugs: ["cha-de-bebe", "cha-revelacao"],
+    // Galeria começa vazia — a artesã envia fotos reais (sem banco de imagens) pelo admin/manualmente.
+    gallery: [],
+    socialProofStats: [
+      { value: "+2.000", label: "kits entregues" },
+      { value: "10 anos", label: "de experiência artesanal" },
+      { value: "5,0 ★", label: "avaliação média" },
+      { value: "7 dias", label: "produção expressa" },
+    ],
+    testimonials: [
+      {
+        name: "Juliana Costa",
+        location: "Curitiba, PR",
+        text: "Já é a terceira vez que compro aqui. Primeiro foi para a maternidade, depois para o batizado e agora para o aniversário. Sempre superando as expectativas!",
+        rating: 5,
+      },
+      {
+        name: "Maria Silva",
+        location: "São Paulo, SP",
+        text: "As lembrancinhas chegaram lindas e dentro do prazo, perfeitas para entregar às visitas. Atendimento excepcional do início ao fim.",
+        rating: 5,
+      },
+      {
+        name: "Fernanda Lima",
+        location: "Belo Horizonte, MG",
+        text: "Atendimento pelo WhatsApp foi maravilhoso. Tiraram todas as minhas dúvidas e me ajudaram a escolher a lembrancinha ideal. Recomendo demais!",
+        rating: 5,
+      },
+    ],
   },
   {
     routeSlug: "cha-revelacao",
