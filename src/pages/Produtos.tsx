@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft } from "lucide-react";
+import { Helmet } from "react-helmet";
+import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft, MessageCircle, Sparkles, Heart, Truck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -245,16 +246,69 @@ const Produtos = () => {
     return items;
   }, [resolvedCategory, resolvedOccasion]);
 
+  // FAQ otimizada para keyword "sabonete personalizado lembrancinha"
+  const faqItems = [
+    {
+      q: "Quanto custa um sabonete personalizado para lembrancinha?",
+      a: "Nossos sabonetes personalizados para lembrancinha começam a partir de R$ 4,60 a unidade, dependendo do modelo, tamanho da embalagem e quantidade pedida. Quanto maior a quantidade, melhor o preço por unidade. Faça uma simulação no WhatsApp.",
+    },
+    {
+      q: "Qual o pedido mínimo de sabonetes personalizados?",
+      a: "Cada modelo tem um pedido mínimo (geralmente entre 10 e 30 unidades), informado na página do produto. Esse mínimo garante que conseguimos manter a qualidade artesanal e os preços acessíveis.",
+    },
+    {
+      q: "Posso personalizar a embalagem com o nome do bebê ou tema da festa?",
+      a: "Sim! Toda lembrancinha de sabonete pode ser personalizada com nome, data, cor da fita, aroma e tema (chá de bebê, maternidade, batizado, casamento, aniversário). Você envia as informações no checkout ou pelo WhatsApp.",
+    },
+    {
+      q: "Qual o prazo de produção e envio das lembrancinhas?",
+      a: "O prazo de produção é de 10 a 25 dias úteis após a confirmação do pagamento, dependendo da quantidade. O envio é feito pelos Correios (PAC ou Sedex) para todo o Brasil — você escolhe o frete no checkout.",
+    },
+    {
+      q: "Os sabonetes artesanais usam ingredientes naturais?",
+      a: "Sim. Trabalhamos com bases glicerinadas vegetais, essências importadas e corantes próprios para sabonetes. São produtos seguros para a pele, ideais para presentear convidados de qualquer idade.",
+    },
+    {
+      q: "Vocês enviam para todo o Brasil?",
+      a: "Sim, enviamos para todos os estados do Brasil. O cálculo do frete é feito automaticamente pelo CEP no momento do checkout, com opções de PAC e Sedex.",
+    },
+  ];
+
+  // SEO copy otimizada (visível, indexável)
+  const seoCopyVisible = !resolvedCategory && !resolvedOccasion && !resolvedTag && !debouncedSearch;
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
-        title={resolvedCategory ? `${resolvedCategory.name} | Empório LeleCute` : "Produtos | Empório LeleCute"}
-        description="Catálogo completo de lembrancinhas artesanais: sabonetes, velas perfumadas e kits personalizados para todas as ocasiões."
+        title={
+          resolvedCategory
+            ? `${resolvedCategory.name} | Empório LeleCute`
+            : "Sabonete Personalizado Lembrancinha | Artesanal e Sob Medida — Empório LeleCute"
+        }
+        description="Sabonete personalizado lembrancinha artesanal: chá de bebê, maternidade, batizado, casamento. Mais de 100 modelos exclusivos com nome, tema e cores à sua escolha. Envio para todo o Brasil."
         url="https://emporiolelecute.com.br/produtos"
       />
       <BreadcrumbStructuredData items={breadcrumbItems} />
+
+      {/* FAQPage JSON-LD para rich snippet no Google */}
+      {seoCopyVisible && (
+        <Helmet>
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faqItems.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            })}
+          </script>
+        </Helmet>
+      )}
+
       <Header />
-      
+
       <main className="pt-24 pb-16">
         {/* Hero Banner */}
         <section className="bg-gradient-to-r from-primary-light via-cream to-primary-light py-16 relative overflow-hidden">
@@ -262,14 +316,19 @@ const Produtos = () => {
           <div className="container mx-auto px-4 relative z-10 text-center">
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
               <ShoppingBag className="h-4 w-4" />
-              Catálogo Completo
+              {resolvedCategory ? resolvedCategory.name : "Catálogo Completo"}
             </span>
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground mb-4">
-              Nossas <span className="text-primary">Lembrancinhas</span>
+              {resolvedCategory ? (
+                <>{resolvedCategory.name} <span className="text-primary">Artesanais</span></>
+              ) : (
+                <>Sabonete Personalizado <span className="text-primary">Lembrancinha</span></>
+              )}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore nossa coleção completa de sabonetes artesanais, velas perfumadas 
-              e kits personalizados para todas as ocasiões especiais.
+              {resolvedCategory
+                ? `Explore nossa coleção de ${resolvedCategory.name.toLowerCase()} artesanais, feitos à mão e personalizados para a sua ocasião.`
+                : "Lembrancinhas artesanais com sabonetes, velas perfumadas e kits sob medida. Personalize com nome, tema e cores para chá de bebê, maternidade, batizado, casamento e aniversário."}
             </p>
           </div>
         </section>
@@ -497,28 +556,110 @@ const Produtos = () => {
           )}
         </div>
 
-        {/* WhatsApp CTA */}
-        <div className="container mx-auto px-4 mt-16">
-          <div className="bg-gradient-to-r from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-center text-primary-foreground">
-            <h2 className="font-display text-3xl md:text-4xl mb-4">
-              Não encontrou o que procura?
-            </h2>
-            <p className="text-primary-foreground/80 mb-6 max-w-xl mx-auto">
-              Criamos lembrancinhas personalizadas para qualquer ocasião. 
-              Entre em contato pelo WhatsApp e conte-nos sua ideia!
-            </p>
-            <a
-              href="https://wa.me/5541992214299?text=Olá! Gostaria de um orçamento personalizado"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button 
-                size="lg" 
-                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full"
+        {/* SEO Copy + FAQ — só na visão padrão (sem filtros) para evitar conteúdo duplicado */}
+        {seoCopyVisible && (
+          <>
+            <section className="container mx-auto px-4 mt-20">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="font-display text-3xl md:text-4xl text-foreground mb-6 text-center">
+                  Por que escolher um sabonete personalizado como lembrancinha?
+                </h2>
+                <div className="prose prose-lg max-w-none text-muted-foreground space-y-4">
+                  <p>
+                    O <strong>sabonete personalizado lembrancinha</strong> se tornou um dos
+                    presentes mais queridos por mães, noivas e anfitriãs que buscam algo
+                    além do óbvio. Útil, perfumado e com embalagem feita à mão, ele
+                    transforma uma simples lembrança em um detalhe que os convidados
+                    levam para casa e realmente usam.
+                  </p>
+                  <p>
+                    No Empório LeleCute, cada sabonete é produzido artesanalmente com
+                    base glicerinada vegetal, essências importadas e moldes exclusivos
+                    em formatos como margarida, balão, fundo do mar, ursinho e muitos
+                    outros. Você escolhe o aroma, a cor da fita, o texto da tag e o tema
+                    da embalagem — perfeito para <em>chá de bebê</em>, <em>maternidade</em>,
+                    <em> batizado</em>, <em>casamento</em> e <em>aniversário</em>.
+                  </p>
+
+                  <div className="grid md:grid-cols-3 gap-6 not-prose mt-10">
+                    <div className="text-center p-6 rounded-2xl bg-cream/50">
+                      <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
+                      <h3 className="font-display text-lg text-foreground mb-2">100% Personalizado</h3>
+                      <p className="text-sm text-muted-foreground">Nome, tema, cor e aroma escolhidos por você.</p>
+                    </div>
+                    <div className="text-center p-6 rounded-2xl bg-cream/50">
+                      <Heart className="h-8 w-8 text-primary mx-auto mb-3" />
+                      <h3 className="font-display text-lg text-foreground mb-2">Feito à mão</h3>
+                      <p className="text-sm text-muted-foreground">Cada peça produzida com carinho no nosso ateliê.</p>
+                    </div>
+                    <div className="text-center p-6 rounded-2xl bg-cream/50">
+                      <Truck className="h-8 w-8 text-primary mx-auto mb-3" />
+                      <h3 className="font-display text-lg text-foreground mb-2">Envio Brasil</h3>
+                      <p className="text-sm text-muted-foreground">PAC e Sedex para todos os estados.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="container mx-auto px-4 mt-20">
+              <div className="max-w-3xl mx-auto">
+                <h2 className="font-display text-3xl md:text-4xl text-foreground mb-8 text-center">
+                  Perguntas frequentes sobre sabonetes personalizados
+                </h2>
+                <div className="space-y-4">
+                  {faqItems.map((f, i) => (
+                    <details
+                      key={i}
+                      className="group bg-card border border-border rounded-2xl p-5 transition-all hover:border-primary/40"
+                    >
+                      <summary className="flex items-center justify-between cursor-pointer list-none font-medium text-foreground">
+                        <span className="pr-4">{f.q}</span>
+                        <ChevronRight className="h-5 w-5 text-primary shrink-0 transition-transform group-open:rotate-90" />
+                      </summary>
+                      <p className="mt-4 text-muted-foreground leading-relaxed">{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* WhatsApp CTA — otimizado para conversão */}
+        <div className="container mx-auto px-4 mt-20">
+          <div className="bg-gradient-to-r from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-center text-primary-foreground relative overflow-hidden">
+            <div className="absolute inset-0 bg-dotted-pattern opacity-10" />
+            <div className="relative z-10">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/15 rounded-full text-primary-foreground text-sm font-medium mb-4">
+                <MessageCircle className="h-4 w-4" />
+                Atendimento direto com a artesã
+              </span>
+              <h2 className="font-display text-3xl md:text-4xl mb-4">
+                Quer um sabonete personalizado lembrancinha do seu jeito?
+              </h2>
+              <p className="text-primary-foreground/85 mb-8 max-w-xl mx-auto text-lg">
+                Tema exclusivo, cor da fita, aroma especial ou quantidade fora do padrão —
+                fale agora pelo WhatsApp e receba seu orçamento em minutos.
+              </p>
+              <a
+                href="https://wa.me/5541992214299?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20sabonete%20personalizado%20lembrancinha."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
               >
-                Falar no WhatsApp
-              </Button>
-            </a>
+                <Button
+                  size="lg"
+                  className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full text-base font-semibold px-8 h-12 shadow-lg"
+                >
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  Falar no WhatsApp agora
+                </Button>
+              </a>
+              <p className="text-primary-foreground/70 text-sm mt-4">
+                Resposta em até 1 hora • Seg a Sex, 9h–18h
+              </p>
+            </div>
           </div>
         </div>
       </main>
