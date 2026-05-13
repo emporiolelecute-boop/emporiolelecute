@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft } from "lucide-react";
+import { Helmet } from "react-helmet";
+import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft, MessageCircle, Sparkles, Heart, Truck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -245,16 +246,69 @@ const Produtos = () => {
     return items;
   }, [resolvedCategory, resolvedOccasion]);
 
+  // FAQ otimizada para keyword "sabonete personalizado lembrancinha"
+  const faqItems = [
+    {
+      q: "Quanto custa um sabonete personalizado para lembrancinha?",
+      a: "Nossos sabonetes personalizados para lembrancinha começam a partir de R$ 4,60 a unidade, dependendo do modelo, tamanho da embalagem e quantidade pedida. Quanto maior a quantidade, melhor o preço por unidade. Faça uma simulação no WhatsApp.",
+    },
+    {
+      q: "Qual o pedido mínimo de sabonetes personalizados?",
+      a: "Cada modelo tem um pedido mínimo (geralmente entre 10 e 30 unidades), informado na página do produto. Esse mínimo garante que conseguimos manter a qualidade artesanal e os preços acessíveis.",
+    },
+    {
+      q: "Posso personalizar a embalagem com o nome do bebê ou tema da festa?",
+      a: "Sim! Toda lembrancinha de sabonete pode ser personalizada com nome, data, cor da fita, aroma e tema (chá de bebê, maternidade, batizado, casamento, aniversário). Você envia as informações no checkout ou pelo WhatsApp.",
+    },
+    {
+      q: "Qual o prazo de produção e envio das lembrancinhas?",
+      a: "O prazo de produção é de 10 a 25 dias úteis após a confirmação do pagamento, dependendo da quantidade. O envio é feito pelos Correios (PAC ou Sedex) para todo o Brasil — você escolhe o frete no checkout.",
+    },
+    {
+      q: "Os sabonetes artesanais usam ingredientes naturais?",
+      a: "Sim. Trabalhamos com bases glicerinadas vegetais, essências importadas e corantes próprios para sabonetes. São produtos seguros para a pele, ideais para presentear convidados de qualquer idade.",
+    },
+    {
+      q: "Vocês enviam para todo o Brasil?",
+      a: "Sim, enviamos para todos os estados do Brasil. O cálculo do frete é feito automaticamente pelo CEP no momento do checkout, com opções de PAC e Sedex.",
+    },
+  ];
+
+  // SEO copy otimizada (visível, indexável)
+  const seoCopyVisible = !resolvedCategory && !resolvedOccasion && !resolvedTag && !debouncedSearch;
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
-        title={resolvedCategory ? `${resolvedCategory.name} | Empório LeleCute` : "Produtos | Empório LeleCute"}
-        description="Catálogo completo de lembrancinhas artesanais: sabonetes, velas perfumadas e kits personalizados para todas as ocasiões."
+        title={
+          resolvedCategory
+            ? `${resolvedCategory.name} | Empório LeleCute`
+            : "Sabonete Personalizado Lembrancinha | Artesanal e Sob Medida — Empório LeleCute"
+        }
+        description="Sabonete personalizado lembrancinha artesanal: chá de bebê, maternidade, batizado, casamento. Mais de 100 modelos exclusivos com nome, tema e cores à sua escolha. Envio para todo o Brasil."
         url="https://emporiolelecute.com.br/produtos"
       />
       <BreadcrumbStructuredData items={breadcrumbItems} />
+
+      {/* FAQPage JSON-LD para rich snippet no Google */}
+      {seoCopyVisible && (
+        <Helmet>
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faqItems.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            })}
+          </script>
+        </Helmet>
+      )}
+
       <Header />
-      
+
       <main className="pt-24 pb-16">
         {/* Hero Banner */}
         <section className="bg-gradient-to-r from-primary-light via-cream to-primary-light py-16 relative overflow-hidden">
@@ -262,14 +316,19 @@ const Produtos = () => {
           <div className="container mx-auto px-4 relative z-10 text-center">
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
               <ShoppingBag className="h-4 w-4" />
-              Catálogo Completo
+              {resolvedCategory ? resolvedCategory.name : "Catálogo Completo"}
             </span>
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground mb-4">
-              Nossas <span className="text-primary">Lembrancinhas</span>
+              {resolvedCategory ? (
+                <>{resolvedCategory.name} <span className="text-primary">Artesanais</span></>
+              ) : (
+                <>Sabonete Personalizado <span className="text-primary">Lembrancinha</span></>
+              )}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore nossa coleção completa de sabonetes artesanais, velas perfumadas 
-              e kits personalizados para todas as ocasiões especiais.
+              {resolvedCategory
+                ? `Explore nossa coleção de ${resolvedCategory.name.toLowerCase()} artesanais, feitos à mão e personalizados para a sua ocasião.`
+                : "Lembrancinhas artesanais com sabonetes, velas perfumadas e kits sob medida. Personalize com nome, tema e cores para chá de bebê, maternidade, batizado, casamento e aniversário."}
             </p>
           </div>
         </section>
