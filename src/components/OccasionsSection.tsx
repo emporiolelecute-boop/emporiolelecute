@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Heart, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDbOccasions } from "@/hooks/useProducts";
+import { BlurImage } from "@/components/BlurImage";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
 import velasImg from "@/assets/category-velas.webp";
 import kitsImg from "@/assets/category-kits.webp";
@@ -86,14 +87,13 @@ const OccasionsSection = () => {
               >
                 {/* Image */}
                 <div className="aspect-video overflow-hidden bg-muted/30">
-                  <img 
+                  <BlurImage
                     src={occasion.image}
                     alt={occasion.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
-                    decoding="async"
-                    width="600"
-                    height="338"
+                    width={600}
+                    responsiveWidths={[400, 600, 800]}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 

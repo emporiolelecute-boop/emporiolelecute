@@ -18,7 +18,8 @@ import {
   Settings,
   Search,
   HelpCircle,
-  Rss
+  Rss,
+  Instagram
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ const menuItems = [
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
   { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
   { icon: Home, label: 'Blocos Homepage', path: '/admin/blocos' },
+  { icon: Instagram, label: 'Instagram', path: '/admin/instagram' },
   { icon: Home, label: 'Páginas', path: '/admin/paginas' },
   { icon: Menu, label: 'Menus', path: '/admin/menus' },
   { icon: HelpCircle, label: 'FAQs', path: '/admin/faqs' },

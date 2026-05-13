@@ -437,8 +437,8 @@ const Produtos = () => {
                   ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
                   : "grid-cols-1 max-w-3xl mx-auto"
               }`}>
-                {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {paginatedProducts.map((product, idx) => (
+                  <ProductCard key={product.id} product={product} priority={idx < 2} />
                 ))}
               </div>
 

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, ZoomIn, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { optimizeImage } from "@/lib/image";
+import { BlurImage } from "@/components/BlurImage";
 
 interface ProductGalleryProps {
   images: string[];
@@ -120,26 +121,22 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
           {/* Image with fade transition */}
           <div className="relative w-full h-full">
             {images.map((image, index) => (
-              <img
+              <div
                 key={index}
-                src={optimizeImage(image, { width: 800 })}
-                alt={`${productName} - Imagem ${index + 1}`}
                 className={cn(
-                  "absolute inset-0 w-full h-full object-cover transition-all duration-500",
-                  index === currentIndex 
-                    ? "opacity-100 scale-100" 
-                    : "opacity-0 scale-105"
+                  "absolute inset-0 transition-all duration-500",
+                  index === currentIndex ? "opacity-100 scale-100" : "opacity-0 scale-105"
                 )}
-                loading={index === 0 ? "eager" : "lazy"}
-                decoding="async"
-                // @ts-expect-error fetchpriority is valid HTML
-                fetchpriority={index === 0 ? "high" : "auto"}
-                width="800"
-                height="800"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder.svg';
-                }}
-              />
+              >
+                <BlurImage
+                  src={image}
+                  alt={`${productName} - Imagem ${index + 1}`}
+                  width={800}
+                  responsiveWidths={[400, 600, 800, 1200]}
+                  priority={index === 0}
+                  sizes="(max-width: 1024px) 100vw, 600px"
+                />
+              </div>
             ))}
           </div>
 

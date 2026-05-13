@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Heart, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BlurImage } from "@/components/BlurImage";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
 import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
 import kitsImg from "@/assets/category-kits.webp";
@@ -109,16 +109,13 @@ const HeroSlider = () => {
               key={currentSlide}
               className="relative rounded-3xl overflow-hidden shadow-2xl animate-scale-in max-w-md lg:max-w-lg"
             >
-              <img 
+              <BlurImage
                 src={slides[currentSlide].image}
                 alt="Lembrancinhas Artesanais Empório LeleCute"
-                className="w-full h-auto object-cover aspect-square"
-                loading="eager"
-                decoding="async"
-                // @ts-expect-error fetchpriority is valid HTML
-                fetchpriority="high"
-                width="600"
-                height="600"
+                width={600}
+                priority={currentSlide === 0}
+                aspect="aspect-square"
+                sizes="(max-width: 1024px) 90vw, 500px"
               />
             </div>
             
