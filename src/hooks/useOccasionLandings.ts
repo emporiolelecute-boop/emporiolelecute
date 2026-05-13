@@ -70,6 +70,26 @@ export const useOccasionLanding = (routeSlug: string) => {
   });
 };
 
+/**
+ * Admin preview — fetches the landing INCLUDING drafts (no `is_published` filter).
+ * Only succeeds when the requester is an admin (RLS).
+ */
+export const usePreviewOccasionLanding = (routeSlug: string, enabled = true) => {
+  return useQuery({
+    queryKey: ["occasion-landing", "preview", routeSlug],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("*")
+        .eq("route_slug", routeSlug)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? normalize(data) : null;
+    },
+  });
+};
+
 /** Public — list all published landings (for related/silo links) */
 export const usePublishedOccasionLandings = () => {
   return useQuery({
@@ -85,6 +105,7 @@ export const usePublishedOccasionLandings = () => {
     },
   });
 };
+
 
 /** Admin — all landings (published + drafts) */
 export const useAdminOccasionLandings = () => {

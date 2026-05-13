@@ -116,6 +116,24 @@ export const trackFormSubmission = (formType: string) => {
   });
 };
 
+/**
+ * Track internal navigation between key SEO surfaces (catalog ↔ landings ↔ blog).
+ * Used to measure silo effectiveness and which interlinks drive engagement.
+ */
+export const trackInternalLink = (params: {
+  from: string;       // origin route, e.g. "/produtos"
+  to: string;         // destination route, e.g. "/lembrancinhas-maternidade"
+  label: string;      // human-readable link label
+  position?: string;  // optional location on the page (e.g. "silo_grid", "reading_route_step_2")
+}) => {
+  event("internal_link_click", {
+    link_from: params.from,
+    link_to: params.to,
+    link_label: params.label,
+    link_position: params.position || "default",
+  });
+};
+
 // Hook to track page views
 export const usePageTracking = () => {
   const location = useLocation();

@@ -180,26 +180,29 @@ Deno.serve(async (req) => {
       }
     }
     
-    // SEO Landing Pages — Horizonte 2 (high priority for ranking)
-    const lembrancinhasLandings = [
-      'cha-de-bebe',
-      'maternidade',
-      'cha-revelacao',
-      'batizado',
-      'aniversario-infantil',
-      'formatura',
-    ]
-    sitemap += `\n  <!-- SEO Landing Pages -->\n`
-    for (const slug of lembrancinhasLandings) {
-      sitemap += `  <url>
-    <loc>${siteUrl}/lembrancinhas-${slug}</loc>
-    <lastmod>${today}</lastmod>
+    // SEO Landing Pages — DB-driven (occasion_landings, only published)
+    const { data: occasionLandings } = await supabase
+      .from('occasion_landings')
+      .select('route_slug, updated_at')
+      .eq('is_published', true)
+      .order('position', { ascending: true })
+
+    sitemap += `\n  <!-- SEO Landing Pages (CMS) -->\n`
+    if (occasionLandings && occasionLandings.length > 0) {
+      for (const landing of occasionLandings) {
+        const lastmod = landing.updated_at
+          ? new Date(landing.updated_at).toISOString().split('T')[0]
+          : today
+        sitemap += `  <url>
+    <loc>${siteUrl}/lembrancinhas-${landing.route_slug}</loc>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 `
+      }
     }
-    
+
     // Add static pages (removed anchor URLs which Google doesn't index)
     sitemap += `
   <!-- Static Pages -->

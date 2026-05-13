@@ -179,8 +179,12 @@ const AdminOccasionLandings = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <a href={`/lembrancinhas-${l.route_slug}`} target="_blank" rel="noopener noreferrer"
-                     className="p-2 rounded-lg text-muted-foreground hover:bg-muted" title="Abrir">
+                     className="p-2 rounded-lg text-muted-foreground hover:bg-muted" title="Abrir página pública">
                     <ExternalLink className="w-4 h-4" />
+                  </a>
+                  <a href={`/lembrancinhas-${l.route_slug}?preview=true`} target="_blank" rel="noopener noreferrer"
+                     className="p-2 rounded-lg text-amber-600 hover:bg-amber-500/10" title="Pré-visualizar (inclui rascunhos)">
+                    👁️
                   </a>
                   <button onClick={() => togglePublish(l)}
                     className="p-2 rounded-lg text-muted-foreground hover:bg-muted"

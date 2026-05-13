@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2, Star, Camera } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2, Star, Camera, BookOpen, ShoppingBag, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Header from "@/components/Header";
@@ -10,10 +11,12 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import FAQStructuredData from "@/components/FAQStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
+import OrganizationStructuredData from "@/components/OrganizationStructuredData";
 import ProductCard from "@/components/ProductCard";
+import { trackInternalLink } from "@/lib/analytics";
 import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
-import { useOccasionLanding, usePublishedOccasionLandings, type OccasionLanding } from "@/hooks/useOccasionLandings";
+import { useOccasionLanding, usePublishedOccasionLandings, usePreviewOccasionLanding, type OccasionLanding } from "@/hooks/useOccasionLandings";
 import type { Product } from "@/data/products";
 
 interface Props {
@@ -60,12 +63,26 @@ const dbToProduct = (p: DbProduct): Product => ({
 });
 
 const LembrancinhasLanding = ({ configKey }: Props) => {
-  // 1) DB-first (CMS) → 2) hardcoded fallback (data file).
+  // Preview mode (?preview=true) lets admins inspect drafts without publishing.
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get("preview") === "true";
+
+  // 1) Preview (drafts incluídos, requer admin via RLS) ou DB-first (publicadas) → 2) hardcoded fallback.
   const { data: dbLanding } = useOccasionLanding(configKey);
+  const { data: previewLanding } = usePreviewOccasionLanding(configKey, isPreview);
   const { data: publishedLandings } = usePublishedOccasionLandings();
-  const fallback = getLandingByRouteSlug(configKey);
-  const config = (dbLanding ? dbToConfig(dbLanding) : fallback) as LembrancinhasLandingConfig;
   const { data: dbProducts, isLoading } = useDbProducts();
+
+  const source = isPreview ? previewLanding : dbLanding;
+  const fallback = getLandingByRouteSlug(configKey);
+  const config = (source ? dbToConfig(source) : fallback) as LembrancinhasLandingConfig | undefined;
+
+  const filteredProducts = useMemo(() => {
+    if (!dbProducts || !config) return [];
+    return dbProducts.filter((p) =>
+      (p.occasions || []).some((o) => o.slug === config.occasionSlug)
+    );
+  }, [dbProducts, config?.occasionSlug]);
 
   if (!config) {
     return (
@@ -75,19 +92,13 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
     );
   }
 
-  const filteredProducts = useMemo(() => {
-    if (!dbProducts) return [];
-    return dbProducts.filter((p) =>
-      (p.occasions || []).some((o) => o.slug === config.occasionSlug)
-    );
-  }, [dbProducts, config.occasionSlug]);
-
   const productsForCard = filteredProducts.map(dbToProduct);
+  const pageUrl = `${SITE}/lembrancinhas-${config.routeSlug}`;
 
   const breadcrumbItems = [
     { name: "Início", url: `${SITE}/` },
     { name: "Lembrancinhas", url: `${SITE}/ocasioes` },
-    { name: config.heroBadge, url: `${SITE}/lembrancinhas-${config.routeSlug}` },
+    { name: config.heroBadge, url: pageUrl },
   ];
 
   const itemListProducts = productsForCard.slice(0, 12).map((p) => ({
@@ -108,22 +119,37 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
     })
     .filter(Boolean) as LembrancinhasLandingConfig[];
 
+  const isMaternidade = config.routeSlug === "maternidade";
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
         title={config.seoTitle}
         description={config.seoDescription}
-        url={`${SITE}/lembrancinhas-${config.routeSlug}`}
+        url={pageUrl}
       />
+      {isPreview && (
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+      )}
       <BreadcrumbStructuredData items={breadcrumbItems} />
       <FAQStructuredData faqs={config.faqs.map((f, i) => ({ id: String(i), ...f }))} />
+      <OrganizationStructuredData />
       {itemListProducts.length > 0 && (
         <ItemListStructuredData products={itemListProducts} listName={config.h1} />
       )}
 
       <Header />
 
-      <main className="pt-24 pb-16">
+      {isPreview && (
+        <div className="fixed top-0 inset-x-0 z-[60] bg-amber-500 text-amber-950 text-sm font-medium py-2 px-4 text-center shadow-md">
+          🔍 Pré-visualização — {source ? (source.is_published ? "página publicada" : "RASCUNHO") : "não encontrada no banco"}. Não indexável.
+        </div>
+      )}
+
+      <main className={`pt-24 pb-16 ${isPreview ? "mt-8" : ""}`}>
+
         {/* HERO */}
         <section className={`bg-gradient-to-br ${config.themeAccent}`}>
           <div className="container mx-auto px-4 py-16 md:py-24">
@@ -366,6 +392,113 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
           </div>
         </section>
 
+        {/* ROTA DE LEITURA — exclusiva da Maternidade (silo prioritário) */}
+        {isMaternidade && (
+          <section className="container mx-auto px-4 py-16 bg-gradient-to-br from-primary-light/30 to-cream/40 rounded-3xl my-8 mx-4 md:mx-auto max-w-6xl">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-10">
+                <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wide text-primary font-medium">
+                  <MapPin className="h-4 w-4" />
+                  Rota de leitura sugerida
+                </span>
+                <h2 className="font-display text-2xl md:text-3xl text-foreground mt-2">
+                  Sem pressa? Conheça antes, encomende depois
+                </h2>
+                <p className="text-sm text-muted-foreground mt-3 max-w-xl mx-auto">
+                  Selecionamos a ordem ideal para você se inspirar, comparar modelos e fechar o pedido com segurança.
+                </p>
+              </div>
+              <ol className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[
+                  {
+                    step: "1",
+                    icon: BookOpen,
+                    label: "Inspire-se",
+                    title: "12 ideias de lembrancinhas de maternidade",
+                    to: "/blog/lembrancinhas-maternidade-ideias-criativas",
+                    pos: "reading_route_step_1",
+                  },
+                  {
+                    step: "2",
+                    icon: BookOpen,
+                    label: "Entenda a técnica",
+                    title: "Como fazer sabonete artesanal — guia completo",
+                    to: "/blog/como-fazer-sabonete-artesanal-para-lembrancinhas",
+                    pos: "reading_route_step_2",
+                  },
+                  {
+                    step: "3",
+                    icon: ShoppingBag,
+                    label: "Veja modelos",
+                    title: "Catálogo completo de sabonetes personalizados",
+                    to: "/produtos",
+                    pos: "reading_route_step_3",
+                  },
+                  {
+                    step: "4",
+                    icon: MessageCircle,
+                    label: "Encomende",
+                    title: "Falar com a artesã pelo WhatsApp",
+                    to: whatsappHref,
+                    external: true,
+                    pos: "reading_route_step_4",
+                  },
+                ].map((item) => {
+                  const onClick = () =>
+                    trackInternalLink({
+                      from: pageUrl,
+                      to: item.to,
+                      label: item.title,
+                      position: item.pos,
+                    });
+                  const Icon = item.icon;
+                  const card = (
+                    <div className="h-full bg-card rounded-2xl p-5 border border-border/40 hover:border-primary/40 hover:shadow-md transition-all flex flex-col">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-display text-sm">
+                          {item.step}
+                        </span>
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <span className="text-xs uppercase tracking-wide text-primary font-medium">
+                        {item.label}
+                      </span>
+                      <p className="font-display text-sm text-foreground mt-1 flex-1">
+                        {item.title}
+                      </p>
+                      <span className="inline-flex items-center gap-1 text-primary text-xs font-medium mt-3">
+                        Acessar
+                        <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  );
+                  return item.external ? (
+                    <a
+                      key={item.step}
+                      href={item.to}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={onClick}
+                      className="block group"
+                    >
+                      {card}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.step}
+                      to={item.to}
+                      onClick={onClick}
+                      className="block group"
+                    >
+                      {card}
+                    </Link>
+                  );
+                })}
+              </ol>
+            </div>
+          </section>
+        )}
+
         {/* VOCÊ TAMBÉM PODE GOSTAR — INTERLINK SILO */}
         {relatedLandings.length > 0 && (
           <section className="container mx-auto px-4 py-16">
@@ -374,36 +507,59 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                 Você também pode gostar
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {relatedLandings.map((rel) => (
-                  <Link
-                    key={rel.routeSlug}
-                    to={`/lembrancinhas-${rel.routeSlug}`}
-                    className="group block bg-card rounded-2xl p-6 border border-border/50 hover:border-primary/30 hover:shadow-md transition-all"
-                  >
-                    <span className="text-xs text-primary font-medium uppercase tracking-wide">
-                      {rel.heroBadge}
-                    </span>
-                    <h3 className="font-display text-lg text-foreground mt-2 mb-2 group-hover:text-primary transition-colors">
-                      {rel.h1}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {rel.heroSubtitle}
-                    </p>
-                    <div className="flex items-center gap-2 text-primary font-medium text-sm mt-4 group-hover:gap-3 transition-all">
-                      Ver lembrancinhas
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
+                {relatedLandings.map((rel) => {
+                  const to = `/lembrancinhas-${rel.routeSlug}`;
+                  return (
+                    <Link
+                      key={rel.routeSlug}
+                      to={to}
+                      onClick={() =>
+                        trackInternalLink({
+                          from: pageUrl,
+                          to,
+                          label: rel.h1,
+                          position: "related_landings_grid",
+                        })
+                      }
+                      className="group block bg-card rounded-2xl p-6 border border-border/50 hover:border-primary/30 hover:shadow-md transition-all"
+                    >
+                      <span className="text-xs text-primary font-medium uppercase tracking-wide">
+                        {rel.heroBadge}
+                      </span>
+                      <h3 className="font-display text-lg text-foreground mt-2 mb-2 group-hover:text-primary transition-colors">
+                        {rel.h1}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {rel.heroSubtitle}
+                      </p>
+                      <div className="flex items-center gap-2 text-primary font-medium text-sm mt-4 group-hover:gap-3 transition-all">
+                        Ver lembrancinhas
+                        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
               <div className="text-center mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-                <Link to="/ocasioes" className="text-primary hover:underline">
+                <Link
+                  to="/ocasioes"
+                  onClick={() => trackInternalLink({ from: pageUrl, to: "/ocasioes", label: "Ver todas as ocasiões", position: "footer_silo" })}
+                  className="text-primary hover:underline"
+                >
                   Ver todas as ocasiões →
                 </Link>
-                <Link to="/produtos" className="text-primary hover:underline">
+                <Link
+                  to="/produtos"
+                  onClick={() => trackInternalLink({ from: pageUrl, to: "/produtos", label: "Catálogo completo", position: "footer_silo" })}
+                  className="text-primary hover:underline"
+                >
                   Catálogo completo →
                 </Link>
-                <Link to="/blog" className="text-primary hover:underline">
+                <Link
+                  to="/blog"
+                  onClick={() => trackInternalLink({ from: pageUrl, to: "/blog", label: "Dicas e tutoriais no blog", position: "footer_silo" })}
+                  className="text-primary hover:underline"
+                >
                   Dicas e tutoriais no blog →
                 </Link>
               </div>
