@@ -180,6 +180,26 @@ Deno.serve(async (req) => {
       }
     }
     
+    // SEO Landing Pages — Horizonte 2 (high priority for ranking)
+    const lembrancinhasLandings = [
+      'cha-de-bebe',
+      'maternidade',
+      'cha-revelacao',
+      'batizado',
+      'aniversario-infantil',
+      'formatura',
+    ]
+    sitemap += `\n  <!-- SEO Landing Pages -->\n`
+    for (const slug of lembrancinhasLandings) {
+      sitemap += `  <url>
+    <loc>${siteUrl}/lembrancinhas-${slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+`
+    }
+    
     // Add static pages (removed anchor URLs which Google doesn't index)
     sitemap += `
   <!-- Static Pages -->

@@ -23,6 +23,7 @@ const Ocasioes = lazy(() => import("./pages/Ocasioes"));
 const Orcamento = lazy(() => import("./pages/Orcamento"));
 const DynamicPage = lazy(() => import("./pages/DynamicPage"));
 const Loja = lazy(() => import("./pages/Loja"));
+const LembrancinhasLanding = lazy(() => import("./pages/LembrancinhasLanding"));
 
 // Admin pages - lazy loaded
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -138,6 +139,26 @@ const App = () => {
                     <RastrearPedido />
                   </Suspense>
                 } />
+                
+                {/* SEO Landing Pages — Horizonte 2 */}
+                {[
+                  "cha-de-bebe",
+                  "maternidade",
+                  "cha-revelacao",
+                  "batizado",
+                  "aniversario-infantil",
+                  "formatura",
+                ].map((slug) => (
+                  <Route
+                    key={slug}
+                    path={`/lembrancinhas-${slug}`}
+                    element={
+                      <Suspense fallback={<PageSkeleton />}>
+                        <LembrancinhasLanding configKey={slug} />
+                      </Suspense>
+                    }
+                  />
+                ))}
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
