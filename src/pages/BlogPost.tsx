@@ -14,6 +14,7 @@ const SITE = "https://emporiolelecute.com.br";
 const BlogPost = () => {
   const { slug = "" } = useParams();
   const post = getPostBySlug(slug);
+  const related = getRelatedPosts(slug);
 
   if (!post) {
     return <Navigate to="/blog" replace />;
