@@ -126,17 +126,30 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
       <DynamicSEO
         title={config.seoTitle}
         description={config.seoDescription}
-        url={`${SITE}/lembrancinhas-${config.routeSlug}`}
+        url={pageUrl}
       />
+      {isPreview && (
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+      )}
       <BreadcrumbStructuredData items={breadcrumbItems} />
       <FAQStructuredData faqs={config.faqs.map((f, i) => ({ id: String(i), ...f }))} />
+      <OrganizationStructuredData />
       {itemListProducts.length > 0 && (
         <ItemListStructuredData products={itemListProducts} listName={config.h1} />
       )}
 
       <Header />
 
-      <main className="pt-24 pb-16">
+      {isPreview && (
+        <div className="fixed top-0 inset-x-0 z-[60] bg-amber-500 text-amber-950 text-sm font-medium py-2 px-4 text-center shadow-md">
+          🔍 Pré-visualização — {source ? (source.is_published ? "página publicada" : "RASCUNHO") : "não encontrada no banco"}. Não indexável.
+        </div>
+      )}
+
+      <main className={`pt-24 pb-16 ${isPreview ? "mt-8" : ""}`}>
+
         {/* HERO */}
         <section className={`bg-gradient-to-br ${config.themeAccent}`}>
           <div className="container mx-auto px-4 py-16 md:py-24">
