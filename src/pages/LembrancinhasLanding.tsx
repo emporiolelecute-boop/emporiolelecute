@@ -13,6 +13,7 @@ import ItemListStructuredData from "@/components/ItemListStructuredData";
 import ProductCard from "@/components/ProductCard";
 import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
+import { useOccasionLanding, usePublishedOccasionLandings, type OccasionLanding } from "@/hooks/useOccasionLandings";
 import type { Product } from "@/data/products";
 
 interface Props {
@@ -20,6 +21,25 @@ interface Props {
 }
 
 const SITE = "https://emporiolelecute.com.br";
+
+/** Maps a DB row into the same shape the template expects (mirrors LembrancinhasLandingConfig). */
+const dbToConfig = (row: OccasionLanding): LembrancinhasLandingConfig => ({
+  routeSlug: row.route_slug,
+  occasionSlug: row.occasion_slug,
+  seoTitle: row.seo_title,
+  seoDescription: row.seo_description,
+  h1: row.h1,
+  heroSubtitle: row.hero_subtitle,
+  heroBadge: row.hero_badge,
+  themeAccent: row.theme_accent,
+  seoCopy: row.seo_copy,
+  whatsappMessage: row.whatsapp_message,
+  faqs: row.faqs,
+  relatedRouteSlugs: row.related_route_slugs,
+  gallery: row.gallery,
+  testimonials: row.testimonials,
+  socialProofStats: row.social_proof_stats,
+});
 
 const dbToProduct = (p: DbProduct): Product => ({
   id: p.id,
@@ -40,8 +60,20 @@ const dbToProduct = (p: DbProduct): Product => ({
 });
 
 const LembrancinhasLanding = ({ configKey }: Props) => {
-  const config = getLandingByRouteSlug(configKey) as LembrancinhasLandingConfig;
+  // 1) DB-first (CMS) → 2) hardcoded fallback (data file).
+  const { data: dbLanding } = useOccasionLanding(configKey);
+  const { data: publishedLandings } = usePublishedOccasionLandings();
+  const fallback = getLandingByRouteSlug(configKey);
+  const config = (dbLanding ? dbToConfig(dbLanding) : fallback) as LembrancinhasLandingConfig;
   const { data: dbProducts, isLoading } = useDbProducts();
+
+  if (!config) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Página não encontrada.</p>
+      </div>
+    );
+  }
 
   const filteredProducts = useMemo(() => {
     if (!dbProducts) return [];
@@ -67,8 +99,13 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
   }));
 
   const whatsappHref = `https://wa.me/5541992214299?text=${encodeURIComponent(config.whatsappMessage)}`;
+  // Related landings: prefer DB-published landings, fallback to hardcoded config.
   const relatedLandings = config.relatedRouteSlugs
-    .map((s) => LEMBRANCINHAS_LANDINGS.find((l) => l.routeSlug === s))
+    .map((s) => {
+      const fromDb = publishedLandings?.find((l) => l.route_slug === s);
+      if (fromDb) return dbToConfig(fromDb);
+      return LEMBRANCINHAS_LANDINGS.find((l) => l.routeSlug === s);
+    })
     .filter(Boolean) as LembrancinhasLandingConfig[];
 
   return (
