@@ -167,6 +167,7 @@ const Produtos = () => {
         category: 'outros' as const,
         occasions: [],
         keywords: p.keywords,
+        min_quantity: p.min_quantity || undefined,
         categoryId: p.category_id || undefined,
         categoryName: p.category?.name,
         occasionIds: (p.occasions || []).map(o => o.id),
@@ -491,9 +492,9 @@ const Produtos = () => {
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
                 {totalPages > 1 && ` • Página ${currentPage} de ${totalPages}`}
               </p>
-              <div className={`grid gap-6 ${
+              <div className={`grid gap-3 sm:gap-4 md:gap-6 ${
                 viewMode === "grid" 
-                  ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                  ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
                   : "grid-cols-1 max-w-3xl mx-auto"
               }`}>
                 {paginatedProducts.map((product, idx) => (
