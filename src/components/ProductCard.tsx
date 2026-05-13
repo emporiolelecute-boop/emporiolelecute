@@ -129,109 +129,81 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
       </Link>
       
       {/* Product Info */}
-      <div className="p-6">
+      <div className="p-3 md:p-5">
         {/* Rating */}
-        <div className="flex items-center gap-1 mb-3" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+        <div className="flex items-center gap-1 mb-2" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
           <meta itemProp="ratingValue" content={String(product.rating)} />
           <meta itemProp="ratingCount" content="1" />
           <meta itemProp="reviewCount" content="1" />
           <meta itemProp="bestRating" content="5" />
           {[...Array(product.rating)].map((_, i) => (
-            <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
+            <Star key={i} className="h-3 w-3 md:h-4 md:w-4 text-amber-400 fill-amber-400" />
           ))}
-          <span className="text-xs text-muted-foreground ml-2">{product.rating}.0</span>
+          <span className="text-[10px] md:text-xs text-muted-foreground ml-1">{product.rating}.0</span>
         </div>
-        
+
         {/* Name */}
         <Link to={`/produtos/${product.slug}`}>
-          <h3 className="font-display text-xl text-foreground mb-2 group-hover:text-primary transition-colors" itemProp="name">
+          <h3 className="font-display text-sm md:text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors" itemProp="name">
             {product.name}
           </h3>
         </Link>
-        
-        {/* Description */}
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-3" itemProp="description">
-          {product.description}
-        </p>
-        
+
         {/* Price */}
-        <div className="flex items-center gap-3 mb-4" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-          <span className="text-2xl font-display font-semibold text-primary" itemProp="price">{product.price}</span>
+        <div className="flex flex-wrap items-baseline gap-2 mb-1" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+          <span className="text-lg md:text-2xl font-display font-semibold text-primary" itemProp="price">{product.price}</span>
           {product.originalPrice && (
-            <span className="text-sm text-muted-foreground line-through">{product.originalPrice}</span>
+            <span className="text-xs md:text-sm text-muted-foreground line-through">{product.originalPrice}</span>
           )}
           <meta itemProp="priceCurrency" content="BRL" />
           <meta itemProp="availability" content="https://schema.org/InStock" />
         </div>
-        
-        {/* CTA Buttons */}
-        <div className="flex gap-2">
-          <Link to={`/produtos/${product.slug}`} className="flex-1">
-            <Button 
-              variant="outline" 
-              className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-full transition-all duration-300"
-            >
-              Ver Detalhes
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
-          
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full">
-                <Send className="h-4 w-4" />
+
+        {/* Min Quantity */}
+        {product.min_quantity && product.min_quantity > 1 && (
+          <p className="text-[11px] md:text-xs text-muted-foreground mb-3">
+            Pedido mínimo: {product.min_quantity} un.
+          </p>
+        )}
+
+        {/* CTA */}
+        <Link to={`/produtos/${product.slug}`} className="block mt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-full transition-all duration-300 text-xs md:text-sm h-9 md:h-10"
+          >
+            Ver Detalhes
+            <ArrowRight className="h-3 w-3 md:h-4 md:w-4 ml-1" />
+          </Button>
+        </Link>
+
+        {/* Hidden order dialog (kept for backward compat, triggered elsewhere) */}
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display text-2xl">Encomendar {product.name}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Nome completo</label>
+                <Input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Seu nome" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Email</label>
+                <Input required type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="seu@email.com" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">WhatsApp</label>
+                <Input required value={formData.whatsapp} onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })} placeholder="(41) 99999-9999" className="mt-1" />
+              </div>
+              <Button type="submit" className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-full" disabled={isLoading}>
+                {isLoading ? "Enviando..." : "Enviar Pedido"}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="font-display text-2xl">Encomendar {product.name}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground">Nome completo</label>
-                  <Input
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Seu nome"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground">Email</label>
-                  <Input
-                    required
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="seu@email.com"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground">WhatsApp</label>
-                  <Input
-                    required
-                    value={formData.whatsapp}
-                    onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                    placeholder="(41) 99999-9999"
-                    className="mt-1"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Enviando..." : "Enviar Pedido"}
-                </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  Entraremos em contato para confirmar os detalhes
-                </p>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <p className="text-xs text-muted-foreground text-center">Entraremos em contato para confirmar os detalhes</p>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </article>
   );
