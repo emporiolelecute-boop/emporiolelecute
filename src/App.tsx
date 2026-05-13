@@ -45,6 +45,7 @@ const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
 const AdminFaqs = lazy(() => import("./pages/admin/AdminFaqs"));
 const AdminHomepageBlocks = lazy(() => import("./pages/admin/AdminHomepageBlocks"));
 const AdminMerchantFeed = lazy(() => import("./pages/admin/AdminMerchantFeed"));
+const AdminInstagram = lazy(() => import("./pages/admin/AdminInstagram"));
 
 const queryClient = new QueryClient();
 
@@ -247,6 +248,11 @@ const App = () => {
                   <Route path="merchant-feed" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminMerchantFeed />
+                    </Suspense>
+                  } />
+                  <Route path="instagram" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminInstagram />
                     </Suspense>
                   } />
                 </Route>
