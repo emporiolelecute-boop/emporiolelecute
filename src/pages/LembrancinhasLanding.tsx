@@ -222,6 +222,37 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
           </div>
         </section>
 
+        {/* PROVA SOCIAL — DEPOIMENTOS */}
+        {config.testimonials && config.testimonials.length > 0 && (
+          <section className="container mx-auto px-4 py-16">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="font-display text-3xl md:text-4xl text-center text-foreground mb-10">
+                O que as mamães dizem
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {config.testimonials.map((t, i) => (
+                  <div key={i} className="bg-card rounded-2xl p-6 border border-border/40 flex flex-col">
+                    <div className="flex gap-0.5 mb-3">
+                      {Array.from({ length: t.rating ?? 5 }).map((_, idx) => (
+                        <Star key={idx} className="h-4 w-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground italic flex-1 leading-relaxed">
+                      "{t.text}"
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-border/40">
+                      <p className="font-display text-sm text-foreground">{t.name}</p>
+                      {t.location && (
+                        <p className="text-xs text-muted-foreground">{t.location}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* COMO FUNCIONA */}
         <section className="bg-muted/30 py-16">
           <div className="container mx-auto px-4">
