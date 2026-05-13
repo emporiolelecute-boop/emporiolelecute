@@ -1,0 +1,36 @@
+# Empório Lelecute
+
+> Lembrancinhas artesanais — sabonetes e velas personalizados para maternidade, chá de bebê, chá revelação, batizado, aniversário infantil, formatura e eventos. Produção artesanal sob encomenda, envio para todo o Brasil e retirada rápida em mãos em São José dos Pinhais e Curitiba.
+
+Empório Lelecute é uma marca artesanal especializada em lembrancinhas personalizadas. Trabalhamos com matéria-prima hipoalergênica, personalização de tags, laços e cores conforme o tema do evento, pedido mínimo de 10 unidades por modelo e prazo de produção de até 7 dias úteis. Pagamento via WhatsApp com 7% de desconto no PIX e parcelamento em até 3x sem juros.
+
+## Páginas principais
+
+- [Início](/): Apresentação da marca e destaques de produtos.
+- [Loja](/loja): Catálogo otimizado para descoberta rápida de lembrancinhas.
+- [Produtos](/produtos): Catálogo completo com busca, filtros por categoria, ocasião e tags.
+- [Ocasiões](/ocasioes): Lembrancinhas organizadas por tipo de evento.
+- [Sobre](/sobre): História da marca e proposta artesanal.
+- [Depoimentos](/depoimentos): Avaliações reais de clientes.
+- [Contato](/contato): WhatsApp (41) 99221-4299 e e-mail emporiolelecute@gmail.com.
+- [Orçamento personalizado](/orcamento): Solicitação de kits sob medida.
+- [Envio e prazos](/envio): Política de envio para todo o Brasil e retirada local.
+- [Rastrear pedido](/rastrear-pedido): Acompanhamento por código LC+6.
+
+## Landing pages por ocasião
+
+- [Lembrancinhas de Maternidade](/lembrancinhas-maternidade): Sabonetes e velas para a chegada do bebê.
+- [Lembrancinhas de Chá de Bebê](/lembrancinhas-cha-de-bebe): Kits temáticos para chá de bebê.
+- [Lembrancinhas de Chá Revelação](/lembrancinhas-cha-revelacao): Modelos azul/rosa para a revelação.
+- [Lembrancinhas de Batizado](/lembrancinhas-batizado): Sabonetes delicados com terço, anjo e cruz.
+- [Lembrancinhas de Aniversário Infantil](/lembrancinhas-aniversario-infantil): Temas personalizados para festas.
+- [Lembrancinhas de Formatura](/lembrancinhas-formatura): Kits elegantes para formandos.
+
+## Blog
+
+- [Blog](/blog): Conteúdos para mães e organizadores de eventos sobre lembrancinhas artesanais.
+- [Como fazer sabonete artesanal para lembrancinhas](/blog/como-fazer-sabonete-artesanal-para-lembrancinhas): Passo a passo, materiais e dicas de acabamento.
+
+## Optional
+
+- [Carrinho](/carrinho): Carrinho de compras antes do checkout via WhatsApp.
