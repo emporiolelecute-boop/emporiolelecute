@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2, Star, Camera } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2, Star, Camera, BookOpen, ShoppingBag, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Header from "@/components/Header";
@@ -10,10 +11,12 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import FAQStructuredData from "@/components/FAQStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
+import OrganizationStructuredData from "@/components/OrganizationStructuredData";
 import ProductCard from "@/components/ProductCard";
+import { trackInternalLink } from "@/lib/analytics";
 import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
-import { useOccasionLanding, usePublishedOccasionLandings, type OccasionLanding } from "@/hooks/useOccasionLandings";
+import { useOccasionLanding, usePublishedOccasionLandings, usePreviewOccasionLanding, type OccasionLanding } from "@/hooks/useOccasionLandings";
 import type { Product } from "@/data/products";
 
 interface Props {
