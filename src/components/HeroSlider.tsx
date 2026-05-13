@@ -141,7 +141,7 @@ const HeroSlider = () => {
       {/* Trust Badges */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-cream/80 to-transparent py-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-x-20 lg:gap-x-28 gap-y-6 text-foreground">
             <div className="flex items-center gap-3">
               <Truck className="h-7 w-7 text-primary shrink-0" strokeWidth={1.5} />
               <div className="leading-tight">
