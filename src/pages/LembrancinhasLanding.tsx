@@ -136,7 +136,49 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
           </div>
         </section>
 
-        {/* PRODUTOS */}
+        {/* PROVA SOCIAL — STATS */}
+        {config.socialProofStats && config.socialProofStats.length > 0 && (
+          <section className="container mx-auto px-4 py-12">
+            <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {config.socialProofStats.map((stat) => (
+                <div key={stat.label} className="bg-card rounded-2xl p-6 border border-border/40">
+                  <p className="font-display text-2xl md:text-3xl text-primary">{stat.value}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* GALERIA DE FOTOS REAIS */}
+        {config.gallery && config.gallery.length > 0 && (
+          <section className="container mx-auto px-4 py-12">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-8">
+                <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wide text-primary font-medium">
+                  <Camera className="h-4 w-4" />
+                  Fotos reais de clientes
+                </span>
+                <h2 className="font-display text-3xl md:text-4xl text-foreground mt-2">
+                  Veja nossas entregas
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {config.gallery.map((src, i) => (
+                  <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
+                    <img
+                      src={src}
+                      alt={`${config.heroBadge} — foto real ${i + 1}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section id="produtos" className="container mx-auto px-4 py-16">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10">
