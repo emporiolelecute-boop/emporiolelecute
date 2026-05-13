@@ -161,7 +161,19 @@ const App = () => {
                     }
                   />
                 ))}
-                
+
+                {/* Blog — Horizonte 2 Fase 2 */}
+                <Route path="/blog" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Blog />
+                  </Suspense>
+                } />
+                <Route path="/blog/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <BlogPost />
+                  </Suspense>
+                } />
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <Suspense fallback={<AdminSkeleton />}>
