@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2 } from "lucide-react";
+import { ArrowRight, MessageCircle, Sparkles, Truck, Heart, CheckCircle2, Star, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Header from "@/components/Header";
