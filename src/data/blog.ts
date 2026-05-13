@@ -42,14 +42,14 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "como-fazer-sabonete-artesanal-para-lembrancinhas",
     title: "Como fazer sabonete artesanal para lembrancinhas: guia completo",
     excerpt:
-      "Passo a passo para produzir sabonetes artesanais perfeitos para lembrancinhas: materiais, técnicas, aromas, formas e dicas de embalagem personalizada.",
+      "Aprenda, com calma e cuidado, o passo a passo para produzir sabonetes artesanais delicados para suas lembrancinhas — materiais, técnica, fragrâncias, formas e acabamento de presente.",
     seoTitle: "Como Fazer Sabonete Artesanal para Lembrancinhas | Passo a Passo",
     seoDescription:
-      "Guia completo: aprenda como fazer sabonete artesanal para lembrancinhas — materiais, processo, fragrâncias, formas e embalagem personalizada.",
+      "Guia artesanal: materiais, técnica, aromas, formas e embalagem para fazer sabonetes em casa para lembrancinhas com cuidado e acabamento profissional.",
     publishedAt: "2026-05-13",
     readingMinutes: 9,
     category: "Tutoriais",
-    tags: ["sabonete artesanal", "lembrancinhas", "DIY", "passo a passo"],
+    tags: ["sabonete artesanal", "lembrancinhas", "passo a passo", "feito à mão"],
     author: AUTHOR,
     published: true,
     relatedSlugs: [
@@ -58,49 +58,87 @@ export const BLOG_POSTS: BlogPost[] = [
       "lembrancinhas-batizado-aniversario-formatura",
     ],
     contentHtml: `
-      <p>O sabonete artesanal é uma das lembrancinhas mais queridas — combina utilidade, estética e a possibilidade de personalização total. Neste guia mostramos o passo a passo que usamos no <strong>Empório LeleCute</strong> para produzir sabonetes para <a href="/lembrancinhas-maternidade">maternidade</a>, <a href="/lembrancinhas-cha-de-bebe">chá de bebê</a>, <a href="/lembrancinhas-batizado">batizado</a> e outras celebrações.</p>
+      <p>Fazer sabonete artesanal é, antes de tudo, um exercício de presença. Cada peça que sai das nossas mãos carrega tempo, escolha de fragrância, ajuste de cor e uma intenção — celebrar alguém. Este guia foi escrito para quem quer entrar nesse universo por amor à arte e produzir lembrancinhas com a mesma delicadeza que oferecemos no <strong>Empório LeleCute</strong> há mais de 10 anos.</p>
 
-      <h2>1. Materiais que você vai precisar</h2>
+      <p>Se a sua celebração se aproxima, ele também serve como referência para entender o trabalho por trás de cada sabonete que você verá nas nossas páginas de <a href="/lembrancinhas-maternidade">maternidade</a>, <a href="/lembrancinhas-cha-de-bebe">chá de bebê</a> e <a href="/lembrancinhas-cha-revelacao">chá revelação</a>.</p>
+
+      <h2>Materiais Necessários</h2>
+      <p>Trabalhamos com matérias-primas cosméticas hipoalergênicas. Para um lote pequeno (cerca de 10 a 15 sabonetes), você vai precisar de:</p>
       <ul>
-        <li><strong>Base de glicerina</strong> (transparente ou branca) — 500g rendem cerca de 10 a 15 sabonetes pequenos.</li>
-        <li><strong>Essências cosméticas</strong> hidrossolúveis (lavanda, baunilha, talco, algodão).</li>
-        <li><strong>Corantes líquidos</strong> próprios para sabonete.</li>
-        <li><strong>Formas de silicone</strong> no formato desejado (coração, ursinho, flor, cruz).</li>
-        <li>Álcool 70% em borrifador (para eliminar bolhas).</li>
-        <li>Recipiente de vidro, colher e luvas.</li>
+        <li><strong>500 g de base de glicerina</strong> de boa procedência (transparente, branca leitosa ou de leite de cabra).</li>
+        <li><strong>Essências cosméticas hidrossolúveis</strong> em fragrâncias suaves (lavanda, baunilha, talco, algodão, flor de cerejeira).</li>
+        <li><strong>Corantes líquidos</strong> próprios para sabonete — invista em pigmentos de qualidade, eles fazem toda a diferença na elegância da peça.</li>
+        <li><strong>Formas de silicone</strong> nos formatos da sua ocasião (coração, ursinho, flor, pezinho, cruz, capelo).</li>
+        <li><strong>Álcool 70% em borrifador</strong> para eliminar bolhas da superfície.</li>
+        <li><strong>Recipiente de vidro refratário</strong>, colher de inox e luvas.</li>
+        <li><strong>Embalagens delicadas</strong>: saquinhos de organza, celofane fosco, caixinhas kraft ou de acrílico.</li>
+        <li><strong>Tags personalizadas</strong> com cordão de juta, fita de cetim ou ilhós dourado.</li>
       </ul>
 
-      <h2>2. Passo a passo</h2>
-      <ol>
-        <li><strong>Derreta</strong> a base de glicerina em banho-maria ou micro-ondas (intervalos de 30s, mexendo).</li>
-        <li><strong>Adicione</strong> 1 colher de chá de essência e 2–3 gotas de corante para cada 100g de base.</li>
-        <li><strong>Despeje</strong> nas formas com cuidado e borrife álcool 70% por cima para tirar bolhas.</li>
-        <li><strong>Espere</strong> de 30 a 60 minutos até endurecer e desenforme com delicadeza.</li>
-        <li><strong>Embale</strong> em saquinhos de celofane, organza ou caixinhas com tag personalizada.</li>
-      </ol>
+      <h2>Passo a Passo</h2>
 
-      <h2>3. Dicas para um acabamento profissional</h2>
+      <h3>1. Prepare o ambiente</h3>
+      <p>Trabalhe em uma bancada limpa, com boa iluminação e sem correntes de ar. Higienize as formas com álcool 70% e tenha tudo à mão antes de começar a derreter a base — o tempo de manuseio é curto.</p>
+
+      <h3>2. Derreta a base com cuidado</h3>
+      <p>Pique a base em cubos pequenos e derreta em banho-maria ou no micro-ondas, em intervalos curtos de 30 segundos, mexendo entre eles. A base não pode ferver — ela perde transparência e a fragrância evapora.</p>
+
+      <h3>3. Adicione cor e aroma</h3>
+      <p>Para cada 100 g de base derretida, use:</p>
       <ul>
-        <li>Use <strong>essências leves</strong> (talco, algodão, lavanda) para lembrancinhas de bebê — agradam todos os públicos.</li>
-        <li>Combine cores em <strong>paletas suaves</strong> (rosa-bebê, azul-céu, off-white) para um visual mais elegante.</li>
-        <li>Para <strong>chá revelação</strong>, faça metade rosa e metade azul e finalize com tag "menino ou menina?".</li>
-        <li>Adicione uma <strong>tag personalizada</strong> com nome do bebê / homenageado e a data — é o detalhe que mais encanta.</li>
+        <li><strong>1 colher de chá de essência</strong> (3 a 5% do peso). Misture devagar para não criar bolhas.</li>
+        <li><strong>2 a 3 gotas de corante</strong> — comece com pouco, é mais fácil intensificar do que clarear.</li>
       </ul>
 
-      <h2>4. Quando vale a pena fazer e quando vale a pena encomendar</h2>
-      <p>Fazer em casa funciona muito bem para <strong>quantidades pequenas</strong> (até 20 unidades) e quando a anfitriã tem tempo para experimentar. Para volumes maiores, prazos curtos ou acabamento profissional com tags, embalagens e testes de fragrância, é mais econômico e seguro <a href="/produtos">encomendar lembrancinhas prontas</a> com a artesã.</p>
+      <h3>3. Despeje nas formas</h3>
+      <p>Verta a base em fio fino, sem pressa. Logo em seguida, borrife álcool 70% sobre a superfície para estourar as bolhas e garantir um acabamento espelhado.</p>
 
-      <h2>5. Inspirações por ocasião</h2>
+      <h3>4. Espere o tempo necessário</h3>
+      <p>O endurecimento leva de 30 a 60 minutos em temperatura ambiente. Resista à tentação de levar à geladeira — o choque térmico pode rachar a peça e deixar marcas brancas.</p>
+
+      <h3>5. Desenforme com delicadeza</h3>
+      <p>Com a forma de ponta-cabeça, pressione o silicone com as duas mãos. Se o sabonete resistir, espere mais 10 minutos. Manuseie com luvas para não deixar marcas de dedo na superfície brilhante.</p>
+
+      <h2>Dicas para um Acabamento Profissional</h2>
       <ul>
-        <li><a href="/lembrancinhas-maternidade">Lembrancinhas de Maternidade</a> — kits perfumados para receber as visitas do bebê.</li>
-        <li><a href="/lembrancinhas-cha-de-bebe">Chá de Bebê</a> — sabonetes em formato de ursinho, mamadeira e coração.</li>
-        <li><a href="/lembrancinhas-cha-revelacao">Chá Revelação</a> — combinações rosa e azul até o grande momento.</li>
-        <li><a href="/lembrancinhas-batizado">Batizado</a> — sabonetes em formato de cruz, anjo e terço.</li>
+        <li>Prefira <strong>fragrâncias leves</strong> (talco, algodão, lavanda) para celebrações de bebê — agradam todos os públicos e não disputam atenção com o evento.</li>
+        <li>Construa <strong>paletas suaves e harmônicas</strong> (rosa-bebê, azul-céu, off-white, dourado) em vez de cores saturadas — o efeito é instantaneamente mais elegante.</li>
+        <li>Use <strong>moldes de silicone com bom relevo</strong>; o detalhe da forma é o que transforma um sabonete em um pequeno objeto de afeto.</li>
+        <li>Faça um <strong>teste piloto</strong> de 2 a 3 unidades antes do lote grande, para calibrar quantidade de essência e cor.</li>
+        <li>Reserve as peças em local seco, longe da luz direta — sabonete artesanal é sensível a calor e umidade.</li>
+      </ul>
+
+      <h2>Dicas de Embalagem</h2>
+      <p>A embalagem é a primeira leitura emocional da lembrancinha. Algumas combinações que valorizam o trabalho:</p>
+      <ul>
+        <li><strong>Organza + tag artesanal</strong> com fio de juta — clima rústico-elegante para chá de bebê e maternidade.</li>
+        <li><strong>Caixinha kraft + selo redondo</strong> com nome do bebê — minimalista e contemporâneo.</li>
+        <li><strong>Saquinho de celofane fosco + fita de cetim</strong> na cor do tema — leve e delicado.</li>
+        <li><strong>Caixa de acrílico transparente</strong> com fundo de papel decorativo — para revelar o formato do sabonete.</li>
+      </ul>
+      <p>Em todos os casos, a tag personalizada com nome, data e mensagem curta ("Obrigada por celebrar conosco") é o detalhe que faz a peça parar nas mãos do convidado.</p>
+
+      <h2>Inspirações por Ocasião</h2>
+      <ul>
+        <li><a href="/lembrancinhas-maternidade">Lembrancinhas de Maternidade</a> — kits perfumados com tag para receber as visitas do bebê.</li>
+        <li><a href="/lembrancinhas-cha-de-bebe">Chá de Bebê</a> — formatos de ursinho, mamadeira, pezinho e coração.</li>
+        <li><a href="/lembrancinhas-cha-revelacao">Chá Revelação</a> — composições rosa e azul que mantêm o suspense.</li>
+        <li><a href="/lembrancinhas-batizado">Batizado</a> — cruz, anjo e terço em paleta branca e dourada.</li>
         <li><a href="/lembrancinhas-aniversario-infantil">Aniversário Infantil</a> — temas e personagens favoritos da criança.</li>
         <li><a href="/lembrancinhas-formatura">Formatura</a> — capelo, diploma e cores da turma.</li>
       </ul>
 
-      <p><em>Quer pular a parte da produção e focar só em receber elogios? Veja nosso <a href="/produtos">catálogo completo de sabonetes personalizados</a> ou fale direto com a artesã pelo WhatsApp.</em></p>
+      <h2>Sem tempo para fazer? Nós ajudamos</h2>
+      <p>Produzir em casa é um gesto lindo — quando há tempo, espaço e disposição para experimentar. Para quem prefere garantir um <strong>resultado profissional impecável</strong>, com fragrâncias testadas, embalagem refinada e tag artesanal pronta, o Empório LeleCute produz <strong>kits sob encomenda, feitos à mão</strong>, com a personalização do nome do homenageado e da data da celebração.</p>
+      <ul>
+        <li><strong>Enviamos para todo o Brasil</strong> via Correios ou transportadora, com cálculo de frete pelo CEP.</li>
+        <li><strong>Retirada rápida em mãos em São José dos Pinhais e Curitiba</strong> — a opção ideal para quem precisa de uma lembrancinha de última hora com a mesma qualidade de quem encomendou com semanas de antecedência.</li>
+        <li>Arte da personalização enviada para sua aprovação antes da produção.</li>
+      </ul>
+      <p><strong><a href="https://wa.me/5541992214299?text=${encodeURIComponent(
+        "Olá! Vim do blog e gostaria de um orçamento de lembrancinhas artesanais.",
+      )}" target="_blank" rel="noopener noreferrer">Falar agora com a artesã pelo WhatsApp →</a></strong></p>
+      <p>Você também pode explorar o <a href="/produtos">catálogo completo</a> ou começar pela página da sua ocasião acima.</p>
     `,
   },
 
