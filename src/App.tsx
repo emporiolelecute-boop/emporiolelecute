@@ -140,6 +140,26 @@ const App = () => {
                   </Suspense>
                 } />
                 
+                {/* SEO Landing Pages — Horizonte 2 */}
+                {[
+                  "cha-de-bebe",
+                  "maternidade",
+                  "cha-revelacao",
+                  "batizado",
+                  "aniversario-infantil",
+                  "formatura",
+                ].map((slug) => (
+                  <Route
+                    key={slug}
+                    path={`/lembrancinhas-${slug}`}
+                    element={
+                      <Suspense fallback={<PageSkeleton />}>
+                        <LembrancinhasLanding configKey={slug} />
+                      </Suspense>
+                    }
+                  />
+                ))}
+                
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <Suspense fallback={<AdminSkeleton />}>
