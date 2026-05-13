@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight, Truck, Percent, Headset, CreditCard, MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+
 import { BlurImage } from "@/components/BlurImage";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
 import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
