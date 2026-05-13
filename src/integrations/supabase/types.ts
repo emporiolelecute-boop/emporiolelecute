@@ -203,6 +203,75 @@ export type Database = {
           },
         ]
       }
+      occasion_landings: {
+        Row: {
+          created_at: string
+          faqs: Json
+          gallery: Json
+          h1: string
+          hero_badge: string
+          hero_subtitle: string
+          id: string
+          is_published: boolean
+          occasion_slug: string
+          position: number
+          related_route_slugs: string[]
+          route_slug: string
+          seo_copy: string
+          seo_description: string
+          seo_title: string
+          social_proof_stats: Json
+          testimonials: Json
+          theme_accent: string
+          updated_at: string
+          whatsapp_message: string
+        }
+        Insert: {
+          created_at?: string
+          faqs?: Json
+          gallery?: Json
+          h1: string
+          hero_badge: string
+          hero_subtitle: string
+          id?: string
+          is_published?: boolean
+          occasion_slug: string
+          position?: number
+          related_route_slugs?: string[]
+          route_slug: string
+          seo_copy: string
+          seo_description: string
+          seo_title: string
+          social_proof_stats?: Json
+          testimonials?: Json
+          theme_accent?: string
+          updated_at?: string
+          whatsapp_message: string
+        }
+        Update: {
+          created_at?: string
+          faqs?: Json
+          gallery?: Json
+          h1?: string
+          hero_badge?: string
+          hero_subtitle?: string
+          id?: string
+          is_published?: boolean
+          occasion_slug?: string
+          position?: number
+          related_route_slugs?: string[]
+          route_slug?: string
+          seo_copy?: string
+          seo_description?: string
+          seo_title?: string
+          social_proof_stats?: Json
+          testimonials?: Json
+          theme_accent?: string
+          updated_at?: string
+          whatsapp_message?: string
+        }
+        Relationships: []
+      }
       occasions: {
         Row: {
           created_at: string
