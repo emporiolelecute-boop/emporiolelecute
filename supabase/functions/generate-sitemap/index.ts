@@ -265,6 +265,17 @@ Deno.serve(async (req) => {
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+${[
+  'como-fazer-sabonete-artesanal-para-lembrancinhas',
+  'lembrancinhas-maternidade-ideias-criativas',
+  'cha-de-bebe-e-cha-revelacao-lembrancinhas',
+  'lembrancinhas-batizado-aniversario-formatura',
+].map((s) => `  <url>
+    <loc>${siteUrl}/blog/${s}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`).join('\n')}
 
 </urlset>`
     
