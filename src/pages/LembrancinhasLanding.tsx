@@ -119,6 +119,8 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
     })
     .filter(Boolean) as LembrancinhasLandingConfig[];
 
+  const isMaternidade = config.routeSlug === "maternidade";
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO
