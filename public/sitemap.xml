@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://emporiolelecute.com.br/sitemap2.xml</loc>
-    <lastmod>2026-01-06</lastmod>
-  </sitemap>
-
+  <!--
+    Fonte única de verdade: Edge Function `generate-sitemap`.
+    Gera dinamicamente todas as URLs públicas (home, /loja, /produtos,
+    /produtos/:slug, /ocasioes, /lembrancinhas-*, /blog, /blog/:slug,
+    institucionais e páginas dinâmicas) com lastmod atualizado a partir do banco.
+    O antigo sitemap2.xml estático foi descontinuado para evitar duplicação
+    com lastmod desatualizados.
+  -->
   <sitemap>
     <loc>https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/generate-sitemap</loc>
-    <lastmod>2026-01-06</lastmod>
   </sitemap>
 </sitemapindex>
