@@ -11,7 +11,7 @@ import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import FAQStructuredData from "@/components/FAQStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
 import ProductCard from "@/components/ProductCard";
-import { useDbProducts } from "@/hooks/useProducts";
+import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
 import type { Product } from "@/data/products";
 
@@ -21,7 +21,7 @@ interface Props {
 
 const SITE = "https://emporiolelecute.com.br";
 
-const dbToProduct = (p: ReturnType<typeof useDbProducts>["data"] extends (infer U)[] | undefined ? U : never): Product => ({
+const dbToProduct = (p: DbProduct): Product => ({
   id: p.id,
   slug: p.slug,
   name: p.name,
