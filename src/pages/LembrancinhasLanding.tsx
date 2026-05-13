@@ -63,12 +63,26 @@ const dbToProduct = (p: DbProduct): Product => ({
 });
 
 const LembrancinhasLanding = ({ configKey }: Props) => {
-  // 1) DB-first (CMS) → 2) hardcoded fallback (data file).
+  // Preview mode (?preview=true) lets admins inspect drafts without publishing.
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get("preview") === "true";
+
+  // 1) Preview (drafts incluídos, requer admin via RLS) ou DB-first (publicadas) → 2) hardcoded fallback.
   const { data: dbLanding } = useOccasionLanding(configKey);
+  const { data: previewLanding } = usePreviewOccasionLanding(configKey, isPreview);
   const { data: publishedLandings } = usePublishedOccasionLandings();
-  const fallback = getLandingByRouteSlug(configKey);
-  const config = (dbLanding ? dbToConfig(dbLanding) : fallback) as LembrancinhasLandingConfig;
   const { data: dbProducts, isLoading } = useDbProducts();
+
+  const source = isPreview ? previewLanding : dbLanding;
+  const fallback = getLandingByRouteSlug(configKey);
+  const config = (source ? dbToConfig(source) : fallback) as LembrancinhasLandingConfig | undefined;
+
+  const filteredProducts = useMemo(() => {
+    if (!dbProducts || !config) return [];
+    return dbProducts.filter((p) =>
+      (p.occasions || []).some((o) => o.slug === config.occasionSlug)
+    );
+  }, [dbProducts, config?.occasionSlug]);
 
   if (!config) {
     return (
@@ -78,19 +92,13 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
     );
   }
 
-  const filteredProducts = useMemo(() => {
-    if (!dbProducts) return [];
-    return dbProducts.filter((p) =>
-      (p.occasions || []).some((o) => o.slug === config.occasionSlug)
-    );
-  }, [dbProducts, config.occasionSlug]);
-
   const productsForCard = filteredProducts.map(dbToProduct);
+  const pageUrl = `${SITE}/lembrancinhas-${config.routeSlug}`;
 
   const breadcrumbItems = [
     { name: "Início", url: `${SITE}/` },
     { name: "Lembrancinhas", url: `${SITE}/ocasioes` },
-    { name: config.heroBadge, url: `${SITE}/lembrancinhas-${config.routeSlug}` },
+    { name: config.heroBadge, url: pageUrl },
   ];
 
   const itemListProducts = productsForCard.slice(0, 12).map((p) => ({
