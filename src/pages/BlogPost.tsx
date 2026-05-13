@@ -136,6 +136,41 @@ const BlogPost = () => {
             )}
           </div>
         </article>
+
+        {/* INTERLINK — Veja também landings */}
+        <section className="container mx-auto px-4 py-10 border-t border-border/40">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-display text-2xl text-foreground mb-6 text-center">
+              Veja também
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                to="/lembrancinhas-maternidade"
+                className="group block bg-card rounded-2xl p-5 border border-border/40 hover:border-primary/40 hover:shadow-md transition-all"
+              >
+                <span className="text-xs uppercase tracking-wide text-primary font-medium">Landing</span>
+                <h3 className="font-display text-base text-foreground mt-1 group-hover:text-primary transition-colors">
+                  Lembrancinhas de Maternidade
+                </h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Kits artesanais para receber as visitas do bebê.
+                </p>
+              </Link>
+              <Link
+                to="/produtos"
+                className="group block bg-card rounded-2xl p-5 border border-border/40 hover:border-primary/40 hover:shadow-md transition-all"
+              >
+                <span className="text-xs uppercase tracking-wide text-primary font-medium">Catálogo</span>
+                <h3 className="font-display text-base text-foreground mt-1 group-hover:text-primary transition-colors">
+                  Todos os sabonetes personalizados
+                </h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Explore mais de 100 modelos artesanais.
+                </p>
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

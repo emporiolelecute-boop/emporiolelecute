@@ -359,9 +359,15 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                   </Link>
                 ))}
               </div>
-              <div className="text-center mt-8">
-                <Link to="/ocasioes" className="text-sm text-primary hover:underline">
+              <div className="text-center mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+                <Link to="/ocasioes" className="text-primary hover:underline">
                   Ver todas as ocasiões →
+                </Link>
+                <Link to="/produtos" className="text-primary hover:underline">
+                  Catálogo completo →
+                </Link>
+                <Link to="/blog" className="text-primary hover:underline">
+                  Dicas e tutoriais no blog →
                 </Link>
               </div>
             </div>

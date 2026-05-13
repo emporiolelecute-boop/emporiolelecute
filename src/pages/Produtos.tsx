@@ -626,6 +626,53 @@ const Produtos = () => {
           </>
         )}
 
+        {/* INTERLINK SILO — Explore por ocasião */}
+        {seoCopyVisible && (
+          <section className="container mx-auto px-4 mt-20">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="font-display text-3xl md:text-4xl text-foreground mb-3 text-center">
+                Explore lembrancinhas por ocasião
+              </h2>
+              <p className="text-center text-muted-foreground mb-10">
+                Páginas dedicadas com modelos, dicas e prazos por evento.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { slug: "maternidade", title: "Maternidade", desc: "Kits para visitas ao bebê" },
+                  { slug: "cha-de-bebe", title: "Chá de Bebê", desc: "Sabonetes personalizados" },
+                  { slug: "cha-revelacao", title: "Chá Revelação", desc: "Azul, rosa ou neutro" },
+                  { slug: "batizado", title: "Batizado", desc: "Lembranças religiosas" },
+                  { slug: "aniversario-infantil", title: "Aniversário Infantil", desc: "Por tema da festa" },
+                  { slug: "formatura", title: "Formatura", desc: "Kits elegantes" },
+                ].map((item) => (
+                  <Link
+                    key={item.slug}
+                    to={`/lembrancinhas-${item.slug}`}
+                    className="group block bg-card rounded-2xl p-5 border border-border/50 hover:border-primary/40 hover:shadow-md transition-all"
+                  >
+                    <h3 className="font-display text-base text-foreground group-hover:text-primary transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                    <span className="inline-flex items-center gap-1 text-primary text-xs font-medium mt-3 group-hover:gap-2 transition-all">
+                      Ver página
+                      <ChevronRight className="h-3 w-3" />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-center mt-8">
+                <Link
+                  to="/blog"
+                  className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  Leia também tutoriais e dicas no blog →
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* WhatsApp CTA — otimizado para conversão */}
         <div className="container mx-auto px-4 mt-20">
           <div className="bg-gradient-to-r from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-center text-primary-foreground relative overflow-hidden">
