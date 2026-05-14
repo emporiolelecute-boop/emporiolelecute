@@ -51,6 +51,19 @@ export interface FooterConfig {
   made_with_love: string;
 }
 
+export interface TrustBadgeItem {
+  icon: 'Truck' | 'Percent' | 'Headset' | 'CreditCard' | 'Shield' | 'Heart' | 'Sparkles' | 'Package' | 'Clock' | 'Star';
+  title: string;
+  subtitle: string;
+}
+
+export interface TrustBadgesConfig {
+  items: TrustBadgeItem[];
+  whatsapp_label: string;
+  whatsapp_message: string;
+  show_whatsapp: boolean;
+}
+
 const defaultPaymentConfig: PaymentConfig = {
   pix_discount: 7,
   installments: 3,
@@ -59,6 +72,18 @@ const defaultPaymentConfig: PaymentConfig = {
     credit_card: true,
     boleto: false,
   },
+};
+
+export const defaultTrustBadgesConfig: TrustBadgesConfig = {
+  items: [
+    { icon: 'Truck', title: 'Envio para', subtitle: 'Todo o Brasil' },
+    { icon: 'Percent', title: 'Descontos', subtitle: '3% PIX' },
+    { icon: 'Headset', title: 'Atendimento', subtitle: 'Personalizado' },
+    { icon: 'CreditCard', title: 'Pague com Cartão', subtitle: 'Até 3x sem juros' },
+  ],
+  whatsapp_label: 'Atendimento no WhatsApp',
+  whatsapp_message: 'Olá! Gostaria de um atendimento personalizado do Empório LeleCute.',
+  show_whatsapp: true,
 };
 
 const defaultSEOConfig: SEOConfig = {
@@ -211,5 +236,48 @@ export const useFooterConfig = () => {
       return defaultFooterConfig;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+};
+
+const VALID_ICONS = new Set<TrustBadgeItem['icon']>(['Truck','Percent','Headset','CreditCard','Shield','Heart','Sparkles','Package','Clock','Star']);
+
+export const useTrustBadgesConfig = () => {
+  return useQuery({
+    queryKey: ['trust_badges_config'],
+    queryFn: async (): Promise<TrustBadgesConfig> => {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('value')
+        .eq('key', 'trust_badges_config')
+        .maybeSingle();
+
+      if (error || !data?.value || typeof data.value !== 'object' || Array.isArray(data.value)) {
+        return defaultTrustBadgesConfig;
+      }
+
+      const val = data.value as Record<string, unknown>;
+      const rawItems = Array.isArray(val.items) ? val.items : [];
+      const items: TrustBadgeItem[] = rawItems
+        .map((it) => {
+          const item = it as Record<string, unknown>;
+          const icon = (typeof item.icon === 'string' && VALID_ICONS.has(item.icon as TrustBadgeItem['icon']))
+            ? (item.icon as TrustBadgeItem['icon'])
+            : 'Truck';
+          return {
+            icon,
+            title: typeof item.title === 'string' ? item.title : '',
+            subtitle: typeof item.subtitle === 'string' ? item.subtitle : '',
+          };
+        })
+        .filter((it) => it.title || it.subtitle);
+
+      return {
+        items: items.length > 0 ? items : defaultTrustBadgesConfig.items,
+        whatsapp_label: typeof val.whatsapp_label === 'string' ? val.whatsapp_label : defaultTrustBadgesConfig.whatsapp_label,
+        whatsapp_message: typeof val.whatsapp_message === 'string' ? val.whatsapp_message : defaultTrustBadgesConfig.whatsapp_message,
+        show_whatsapp: typeof val.show_whatsapp === 'boolean' ? val.show_whatsapp : defaultTrustBadgesConfig.show_whatsapp,
+      };
+    },
+    staleTime: 1000 * 60 * 5,
   });
 };

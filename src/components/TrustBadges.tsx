@@ -1,11 +1,9 @@
-import { Truck, Percent, Headset, CreditCard, MessageCircle, type LucideIcon } from "lucide-react";
+import { Truck, Percent, Headset, CreditCard, MessageCircle, Shield, Heart, Sparkles, Package, Clock, Star, type LucideIcon } from "lucide-react";
+import { useTrustBadgesConfig, type TrustBadgeItem } from "@/hooks/useStoreSettings";
 
-const items: { Icon: LucideIcon; title: string; subtitle: string; aria: string }[] = [
-  { Icon: Truck, title: "Envio para", subtitle: "Todo o Brasil", aria: "Envio para todo o Brasil" },
-  { Icon: Percent, title: "Descontos", subtitle: "3% PIX", aria: "Descontos de 3% no PIX" },
-  { Icon: Headset, title: "Atendimento", subtitle: "Personalizado", aria: "Atendimento personalizado" },
-  { Icon: CreditCard, title: "Pague com Cartão", subtitle: "Até 3x sem juros", aria: "Pague com cartão em até 3x sem juros" },
-];
+const ICON_MAP: Record<TrustBadgeItem['icon'], LucideIcon> = {
+  Truck, Percent, Headset, CreditCard, Shield, Heart, Sparkles, Package, Clock, Star,
+};
 
 interface TrustBadgesProps {
   showWhatsApp?: boolean;
@@ -13,6 +11,13 @@ interface TrustBadgesProps {
 }
 
 const TrustBadges = ({ showWhatsApp = true, className = "" }: TrustBadgesProps) => {
+  const { data: config } = useTrustBadgesConfig();
+
+  if (!config) return null;
+
+  const renderWhatsApp = showWhatsApp && config.show_whatsapp;
+  const waHref = `https://wa.me/5541992214299?text=${encodeURIComponent(config.whatsapp_message)}`;
+
   return (
     <aside
       aria-label="Informações de envio, pagamento e atendimento"
@@ -23,33 +28,37 @@ const TrustBadges = ({ showWhatsApp = true, className = "" }: TrustBadgesProps) 
           role="list"
           className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 md:gap-x-8 lg:gap-x-12 items-start"
         >
-          {items.map(({ Icon, title, subtitle, aria }, i) => (
-            <li
-              key={title}
-              aria-label={aria}
-              className="flex items-center justify-center md:justify-start gap-3 text-foreground animate-fade-in"
-              style={{ animationDelay: `${i * 90}ms`, animationFillMode: "backwards" }}
-            >
-              <Icon className="h-7 w-7 md:h-8 md:w-8 text-primary shrink-0" strokeWidth={1.5} aria-hidden="true" />
-              <div className="leading-tight">
-                <div className="text-sm md:text-base font-semibold">{title}</div>
-                <div className="text-xs md:text-sm text-muted-foreground">{subtitle}</div>
-              </div>
-            </li>
-          ))}
+          {config.items.map((item, i) => {
+            const Icon = ICON_MAP[item.icon] ?? Truck;
+            const aria = `${item.title} ${item.subtitle}`.trim();
+            return (
+              <li
+                key={`${item.title}-${i}`}
+                aria-label={aria}
+                className="flex items-center justify-center md:justify-start gap-3 text-foreground animate-fade-in"
+                style={{ animationDelay: `${i * 90}ms`, animationFillMode: "backwards" }}
+              >
+                <Icon className="h-7 w-7 md:h-8 md:w-8 text-primary shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                <div className="leading-tight">
+                  <div className="text-sm md:text-base font-semibold">{item.title}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">{item.subtitle}</div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
 
-        {showWhatsApp && (
+        {renderWhatsApp && (
           <div className="mt-6 flex justify-center">
             <a
-              href="https://wa.me/5541992214299?text=Ol%C3%A1!%20Gostaria%20de%20um%20atendimento%20personalizado%20do%20Emp%C3%B3rio%20LeleCute."
+              href={waHref}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Falar no WhatsApp para atendimento personalizado"
+              aria-label={config.whatsapp_label}
               className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#25D366] text-white text-sm font-semibold shadow-md hover:scale-105 transition-transform"
             >
               <MessageCircle className="h-5 w-5" aria-hidden="true" />
-              Atendimento no WhatsApp
+              {config.whatsapp_label}
             </a>
           </div>
         )}

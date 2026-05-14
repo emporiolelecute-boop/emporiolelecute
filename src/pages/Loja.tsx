@@ -8,6 +8,8 @@ import ProductCard from "@/components/ProductCard";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
+import TrustBadges from "@/components/TrustBadges";
+import FAQSection from "@/components/FAQSection";
 import { useDbProducts } from "@/hooks/useProducts";
 import logoImg from "@/assets/logo.webp";
 
@@ -205,6 +207,9 @@ const Loja = () => {
             </div>
           </div>
         </section>
+
+        <TrustBadges />
+        <FAQSection />
       </main>
 
       <Footer />

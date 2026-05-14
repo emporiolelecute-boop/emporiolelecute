@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { FooterConfig, defaultFooterConfig } from '@/hooks/useStoreSettings';
+import { FooterConfig, defaultFooterConfig, defaultTrustBadgesConfig, TrustBadgesConfig, TrustBadgeItem } from '@/hooks/useStoreSettings';
 
 interface StoreSettings {
   homepage_config: {
@@ -43,6 +43,7 @@ interface StoreSettings {
     };
   };
   footer_config: FooterConfig;
+  trust_badges_config: TrustBadgesConfig;
 }
 
 const AdminSettings = () => {
@@ -82,6 +83,7 @@ const AdminSettings = () => {
       },
     },
     footer_config: defaultFooterConfig,
+    trust_badges_config: defaultTrustBadgesConfig,
   });
 
   useEffect(() => {
@@ -868,6 +870,114 @@ const AdminSettings = () => {
                     <Plus className="w-4 h-4 mr-1" /> Adicionar Ocasião
                   </Button>
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Trust Badges */}
+        <Card className="border-0 shadow-lg lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-primary" />
+              Selos de Confiança (Trust Badges)
+            </CardTitle>
+            <CardDescription>
+              Edite os 4 selos exibidos em todas as páginas (Home, Loja, Produto, Carrinho, Landings).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              {settings.trust_badges_config.items.map((item, index) => (
+                <div key={index} className="grid md:grid-cols-[180px_1fr_1fr_auto] gap-2 items-center">
+                  <Select
+                    value={item.icon}
+                    onValueChange={(v) => {
+                      const items = [...settings.trust_badges_config.items];
+                      items[index] = { ...items[index], icon: v as TrustBadgeItem['icon'] };
+                      setSettings({ ...settings, trust_badges_config: { ...settings.trust_badges_config, items } });
+                    }}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {(['Truck','Percent','Headset','CreditCard','Shield','Heart','Sparkles','Package','Clock','Star'] as const).map(ic => (
+                        <SelectItem key={ic} value={ic}>{ic}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    value={item.title}
+                    placeholder="Título (ex: Envio para)"
+                    onChange={(e) => {
+                      const items = [...settings.trust_badges_config.items];
+                      items[index] = { ...items[index], title: e.target.value };
+                      setSettings({ ...settings, trust_badges_config: { ...settings.trust_badges_config, items } });
+                    }}
+                  />
+                  <Input
+                    value={item.subtitle}
+                    placeholder="Subtítulo (ex: Todo o Brasil)"
+                    onChange={(e) => {
+                      const items = [...settings.trust_badges_config.items];
+                      items[index] = { ...items[index], subtitle: e.target.value };
+                      setSettings({ ...settings, trust_badges_config: { ...settings.trust_badges_config, items } });
+                    }}
+                  />
+                  <Button
+                    type="button" variant="ghost" size="icon"
+                    onClick={() => {
+                      const items = settings.trust_badges_config.items.filter((_, i) => i !== index);
+                      setSettings({ ...settings, trust_badges_config: { ...settings.trust_badges_config, items } });
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button" variant="outline" size="sm"
+                onClick={() => setSettings({
+                  ...settings,
+                  trust_badges_config: {
+                    ...settings.trust_badges_config,
+                    items: [...settings.trust_badges_config.items, { icon: 'Truck', title: '', subtitle: '' }],
+                  },
+                })}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Adicionar Selo
+              </Button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 pt-4 border-t">
+              <div className="space-y-2">
+                <Label>Texto do botão WhatsApp</Label>
+                <Input
+                  value={settings.trust_badges_config.whatsapp_label}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    trust_badges_config: { ...settings.trust_badges_config, whatsapp_label: e.target.value },
+                  })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Mensagem pré-preenchida no WhatsApp</Label>
+                <Input
+                  value={settings.trust_badges_config.whatsapp_message}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    trust_badges_config: { ...settings.trust_badges_config, whatsapp_message: e.target.value },
+                  })}
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={settings.trust_badges_config.show_whatsapp}
+                  onCheckedChange={(checked) => setSettings({
+                    ...settings,
+                    trust_badges_config: { ...settings.trust_badges_config, show_whatsapp: checked },
+                  })}
+                />
+                <Label>Exibir botão WhatsApp abaixo dos selos</Label>
               </div>
             </div>
           </CardContent>

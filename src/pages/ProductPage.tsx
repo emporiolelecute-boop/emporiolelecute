@@ -37,6 +37,8 @@ import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import ProductStructuredData from "@/components/ProductStructuredData";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
+import TrustBadges from "@/components/TrustBadges";
+import FAQSection from "@/components/FAQSection";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry } from "@/lib/analytics";
@@ -613,7 +615,10 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
           )}
         </div>
       </main>
-      
+
+      <TrustBadges />
+      <FAQSection />
+
       <Footer />
       <WhatsAppButton />
       <Chatbot />

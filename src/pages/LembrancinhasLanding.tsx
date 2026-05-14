@@ -13,6 +13,7 @@ import FAQStructuredData from "@/components/FAQStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
 import OrganizationStructuredData from "@/components/OrganizationStructuredData";
 import ProductCard from "@/components/ProductCard";
+import TrustBadges from "@/components/TrustBadges";
 import { trackInternalLink } from "@/lib/analytics";
 import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
@@ -567,6 +568,8 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
           </section>
         )}
       </main>
+
+      <TrustBadges />
 
       <Footer />
       <WhatsAppButton />
