@@ -12,6 +12,7 @@ import TrustBadges from "@/components/TrustBadges";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { validateCoupon, type ValidCoupon } from "@/hooks/useCoupons";
 
 interface AddressData {
   cep: string;
@@ -55,6 +56,26 @@ const Carrinho = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderCode, setOrderCode] = useState('');
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState<ValidCoupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const discount = coupon?.discount_applied ?? 0;
+  const totalWithDiscount = Math.max(0, total - discount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    const r = await validateCoupon(couponInput, total);
+    setCouponLoading(false);
+    if (r.valid) {
+      setCoupon(r);
+      toast({ title: 'Cupom aplicado', description: `Desconto de R$ ${r.discount_applied.toFixed(2).replace('.', ',')}` });
+    } else {
+      setCoupon(null);
+      toast({ title: 'Cupom inválido', description: r.error, variant: 'destructive' });
+    }
+  };
 
   const handleCepChange = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, '').slice(0, 8);
