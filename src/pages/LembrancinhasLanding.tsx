@@ -111,7 +111,19 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
     slug: p.slug,
   }));
 
-  const whatsappHref = `https://wa.me/5541992214299?text=${encodeURIComponent(config.whatsappMessage)}`;
+  const { whatsappNumber } = useContactInfo();
+  const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
+  const utmCampaign = `landing_${config.routeSlug}`;
+  const whatsappHref = buildWhatsAppUrl({
+    phone,
+    message: config.whatsappMessage,
+    utm_source: "landing",
+    utm_medium: "cta",
+    utm_campaign: utmCampaign,
+    utm_content: config.routeSlug,
+  });
+  const handleWaClick = (position: string) => () =>
+    trackWhatsAppClick({ source: "landing", context: config.routeSlug, utm_campaign: utmCampaign });
   // Related landings: prefer DB-published landings, fallback to hardcoded config.
   const relatedLandings = config.relatedRouteSlugs
     .map((s) => {
