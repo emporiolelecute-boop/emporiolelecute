@@ -161,6 +161,8 @@ const Carrinho = () => {
           shipping_price: 0,
           subtotal: total,
           total: totalWithDiscount,
+          coupon_code: coupon?.code ?? null,
+          discount_amount: discount,
           notes: coupon ? `Cupom aplicado: ${coupon.code} (-R$ ${coupon.discount_applied.toFixed(2)})` : null,
           status: 'pending',
         },

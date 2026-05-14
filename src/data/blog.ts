@@ -9,6 +9,11 @@
  * /lembrancinhas-* e para /produtos, formando o silo SEO.
  */
 
+export interface BlogFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -28,6 +33,8 @@ export interface BlogPost {
   seoDescription?: string;
   /** Slugs de outros posts relacionados (sugestões de leitura) */
   relatedSlugs?: string[];
+  /** FAQs renderizadas no artigo + JSON-LD FAQPage */
+  faqs?: BlogFAQ[];
   /** Se false, o post não é renderizado nem incluído no sitemap */
   published: boolean;
 }
@@ -140,6 +147,33 @@ export const BLOG_POSTS: BlogPost[] = [
       )}" target="_blank" rel="noopener noreferrer">Falar agora com a artesã pelo WhatsApp →</a></strong></p>
       <p>Você também pode explorar o <a href="/produtos">catálogo completo</a> ou começar pela página da sua ocasião acima.</p>
     `,
+    faqs: [
+      {
+        question: "Posso usar a base de glicerina vencida para fazer sabonete artesanal?",
+        answer:
+          "Não recomendamos. A base de glicerina vencida perde transparência, libera odor e pode irritar a pele do convidado. Sempre verifique o lote e use bases dentro do prazo, armazenadas longe da luz solar direta.",
+      },
+      {
+        question: "Quantos sabonetes consigo fazer com 500 g de base de glicerina?",
+        answer:
+          "Em média, 10 a 15 sabonetes pequenos (35–50 g cada), tamanho ideal para lembrancinha. Para peças menores em forma de coração ou pezinho de bebê, o rendimento sobe para 18–20 unidades.",
+      },
+      {
+        question: "Qual fragrância é mais indicada para lembrancinhas de chá de bebê e maternidade?",
+        answer:
+          "Aromas suaves como talco, algodão, lavanda, baunilha e leite & mel funcionam melhor para bebês e ambientes da maternidade. Evite fragrâncias amadeiradas ou cítricas fortes nesses contextos.",
+      },
+      {
+        question: "Por quanto tempo o sabonete artesanal dura depois de pronto?",
+        answer:
+          "Sabonetes em base glicerinada duram em média 6 meses se armazenados em local seco e arejado. Embalagens em celofane ou organza preservam a fragrância por mais tempo.",
+      },
+      {
+        question: "Vale mais a pena fazer em casa ou encomendar lembrancinhas prontas?",
+        answer:
+          "Para até 10 unidades e quando há tempo de testar, o DIY é prazeroso. Acima disso — e principalmente quando o evento se aproxima — encomendar com uma artesã experiente garante padrão visual, embalagem profissional e prazo cumprido. No Empório LeleCute trabalhamos com produção em 7 dias úteis e entrega para todo o Brasil.",
+      },
+    ],
   },
 
   // ────────────────────────────────────────────────────────────────
@@ -315,6 +349,170 @@ export const BLOG_POSTS: BlogPost[] = [
       <p>Para encomendas acima de 50 unidades, recomendamos iniciar o pedido com pelo menos <strong>3 semanas de antecedência</strong> — assim sobra tempo para escolher essência, ajustar tags e revisar a embalagem.</p>
 
       <p>Pronto para encomendar? Fale com a artesã pelo WhatsApp ou explore nosso <a href="/produtos">catálogo completo de sabonetes personalizados</a>. Quer fazer você mesma? Veja o <a href="/blog/como-fazer-sabonete-artesanal-para-lembrancinhas">guia passo a passo</a>.</p>
+    `,
+  },
+
+  // ────────────────────────────────────────────────────────────────
+  // POST 5 — BATIZADO (apoia /lembrancinhas-batizado)
+  // ────────────────────────────────────────────────────────────────
+  {
+    slug: "lembrancinhas-de-batizado-tradicao-e-elegancia",
+    title: "Lembrancinhas de Batizado: como escolher com tradição e elegância",
+    excerpt:
+      "Símbolos cristãos, cores litúrgicas, formatos clássicos e dicas práticas para escolher uma lembrancinha de batizado que emocione padrinhos e convidados.",
+    seoTitle: "Lembrancinhas de Batizado: Guia para Escolher com Elegância",
+    seoDescription:
+      "Como escolher lembrancinhas de batizado: símbolos, cores, quantidade ideal, personalização com nome do bebê e dicas para padrinhos e convidados.",
+    publishedAt: "2026-05-14",
+    readingMinutes: 7,
+    category: "Inspiração",
+    tags: ["batizado", "lembrancinhas", "tradição", "padrinhos"],
+    author: AUTHOR,
+    published: true,
+    relatedSlugs: [
+      "como-fazer-sabonete-artesanal-para-lembrancinhas",
+      "lembrancinhas-maternidade-ideias-criativas",
+      "lembrancinhas-de-aniversario-infantil-tematizadas",
+    ],
+    contentHtml: `
+      <p>O batizado é um dos rituais mais delicados da vida em família — celebra fé, pertencimento e o início simbólico de uma jornada espiritual. A lembrancinha entregue aos convidados nesse dia precisa <strong>traduzir reverência sem perder a doçura</strong> que envolve a ocasião. Este guia reúne tudo o que aprendemos atendendo famílias católicas, evangélicas e ecumênicas no <a href="/lembrancinhas-batizado">Empório LeleCute</a>.</p>
+
+      <h2>Símbolos clássicos que nunca saem de moda</h2>
+      <ul>
+        <li><strong>Cruz</strong> — em formato delicado, fica linda em sabonete branco com tag dourada.</li>
+        <li><strong>Anjo de guarda</strong> — perfeito para padrinhos e madrinhas mais próximos.</li>
+        <li><strong>Pomba do Espírito Santo</strong> — discreta, branca, simboliza paz.</li>
+        <li><strong>Concha</strong> — referência direta ao gesto do batismo, especialmente na tradição católica.</li>
+        <li><strong>Terço miniatura</strong> — combina bem com sabonete em forma de coração.</li>
+      </ul>
+
+      <h2>Paleta de cores: o que funciona</h2>
+      <p>Branco e dourado seguem como a dupla mais elegante e atemporal. Para batizados de meninas, tons pastel de rosa antigo ou lilás suavizam. Para meninos, azul céu ou verde menta evitam o azul royal, que costuma ser pesado em peças pequenas. Beges e off-whites combinam com qualquer paleta da cerimônia.</p>
+
+      <h2>Quantidade ideal</h2>
+      <p>Calcule <strong>1 lembrancinha por adulto convidado</strong> + 10% de margem para imprevistos. Para crianças, considere uma lembrancinha extra temática (mini sabonete em formato de bichinho, por exemplo) — costuma ser bem recebida.</p>
+
+      <h2>Personalização que toca</h2>
+      <p>Tags com o nome do bebê, data do batizado e um versículo curto (Salmos 91:11 é um clássico) elevam a peça. Evite excesso de informação na tag — três linhas é o ideal para manter a delicadeza visual.</p>
+
+      <h2>Embalagem: o detalhe que faz a diferença</h2>
+      <p>Saquinhos de organza branca ou marfim com cordão de cetim funcionam para qualquer estilo. Para batizados mais formais, caixinhas kraft com selo personalizado dão o toque premium. Fitas de juta combinam com decoração rústica ou ao ar livre.</p>
+
+      <h2>Quando encomendar</h2>
+      <p>Para batizados com até 50 convidados, encomende com <strong>15 dias de antecedência</strong>. Acima disso, 3 semanas. No Empório LeleCute, produzimos sob encomenda em 7 dias úteis e enviamos para todo o Brasil — você recebe a arte da personalização para aprovar antes da produção.</p>
+
+      <p>Veja modelos prontos com símbolos cristãos na nossa <a href="/lembrancinhas-batizado">página de lembrancinhas de batizado</a> ou explore o <a href="/produtos">catálogo completo</a>. Para entender o processo artesanal, leia nosso <a href="/blog/como-fazer-sabonete-artesanal-para-lembrancinhas">guia de sabonete passo a passo</a>.</p>
+    `,
+  },
+
+  // ────────────────────────────────────────────────────────────────
+  // POST 6 — ANIVERSÁRIO INFANTIL (apoia /lembrancinhas-aniversario-infantil)
+  // ────────────────────────────────────────────────────────────────
+  {
+    slug: "lembrancinhas-de-aniversario-infantil-tematizadas",
+    title: "Lembrancinhas de Aniversário Infantil: 10 temas que encantam",
+    excerpt:
+      "Safari, jardim encantado, fundo do mar, princesas, dinossauros — 10 temas testados de lembrancinhas de aniversário infantil com dicas de personalização.",
+    seoTitle: "Lembrancinhas de Aniversário Infantil Tematizadas: 10 Ideias",
+    seoDescription:
+      "10 temas de lembrancinhas de aniversário infantil personalizadas: safari, jardim, fundo do mar, princesas, dinossauros e mais. Modelos artesanais.",
+    publishedAt: "2026-05-14",
+    readingMinutes: 6,
+    category: "Inspiração",
+    tags: ["aniversário", "infantil", "lembrancinhas", "festas"],
+    author: AUTHOR,
+    published: true,
+    relatedSlugs: [
+      "lembrancinhas-de-batizado-tradicao-e-elegancia",
+      "lembrancinhas-maternidade-ideias-criativas",
+      "lembrancinhas-de-formatura-ideias-elegantes",
+    ],
+    contentHtml: `
+      <p>Lembrancinha de aniversário infantil que dá certo é aquela que <strong>conversa com o tema da festa</strong> e cabe na sacolinha sem sobrar nem faltar. Reunimos 10 temas que mais saem no <a href="/lembrancinhas-aniversario-infantil">Empório LeleCute</a> e o que faz cada um funcionar.</p>
+
+      <h2>1. Safári</h2>
+      <p>Sabonetes em formato de leão, girafa, elefante e zebra. Tons terrosos com tag em corda de juta. Combina com decoração folhagem.</p>
+
+      <h2>2. Jardim Encantado</h2>
+      <p>Borboletas, joaninhas, flores e cogumelos. Cores pastel e tag em cartonagem texturizada. Funciona para meninos e meninas.</p>
+
+      <h2>3. Fundo do Mar</h2>
+      <p>Conchas, estrelas-do-mar, peixinhos e cavalos-marinhos. Aromas de algas ou brisa marinha. Embalagem em saquinho azul claro.</p>
+
+      <h2>4. Princesas e Castelos</h2>
+      <p>Coroas, varinhas mágicas e sapatinhos. Rosa antigo + dourado. Tag manuscrita com letra cursiva.</p>
+
+      <h2>5. Dinossauros</h2>
+      <p>T-rex, brontossauro e ovos. Verde musgo e cinza vulcânico. Embalagem rústica em papel kraft com pegadas estampadas.</p>
+
+      <h2>6. Espacial / Astronauta</h2>
+      <p>Foguetes, planetas, estrelas e luas. Glitter discreto na base do sabonete. Tag preta com letras prata.</p>
+
+      <h2>7. Circo</h2>
+      <p>Palhacinhos, balões, pipoca e ursinhos. Vermelho e branco listrados. Funciona muito bem para festas de 1 ano.</p>
+
+      <h2>8. Unicórnios</h2>
+      <p>Sabonetes em formato de unicórnio com cores degradê (rosa → lilás → azul). Glitter holográfico. Hit absoluto entre 4 e 8 anos.</p>
+
+      <h2>9. Super-Heróis</h2>
+      <p>Capa, escudo, raio. Cores primárias vibrantes. Tag em formato de estrela.</p>
+
+      <h2>10. Bichinhos da Fazenda</h2>
+      <p>Vaquinha, porquinho, galinha e ovelha. Carinho garantido para festas de 1 e 2 anos. Embalagem em xadrez vichy.</p>
+
+      <h2>Dica de quantidade</h2>
+      <p>Para festas infantis, calcule <strong>1 lembrancinha por criança convidada</strong> + 5 a 10 extras. Adultos costumam não levar — mas vale ter algumas peças "para os tios" se a festa for em casa.</p>
+
+      <p>Encontre todos esses modelos na <a href="/lembrancinhas-aniversario-infantil">página de aniversário infantil</a> ou explore o <a href="/produtos">catálogo completo</a> do Empório LeleCute. Cada peça é personalizada com o nome e idade do aniversariante.</p>
+    `,
+  },
+
+  // ────────────────────────────────────────────────────────────────
+  // POST 7 — FORMATURA (apoia /lembrancinhas-formatura)
+  // ────────────────────────────────────────────────────────────────
+  {
+    slug: "lembrancinhas-de-formatura-ideias-elegantes",
+    title: "Lembrancinhas de Formatura: ideias elegantes para celebrar a conquista",
+    excerpt:
+      "Capelos, diplomas, cores institucionais e personalização com o nome do formando — guia completo para escolher lembrancinhas de formatura memoráveis.",
+    seoTitle: "Lembrancinhas de Formatura: Ideias Elegantes e Personalizadas",
+    seoDescription:
+      "Lembrancinhas de formatura artesanais: capelos, diplomas, cores institucionais e dicas de personalização para celebrar a conquista do formando.",
+    publishedAt: "2026-05-14",
+    readingMinutes: 5,
+    category: "Inspiração",
+    tags: ["formatura", "lembrancinhas", "graduação"],
+    author: AUTHOR,
+    published: true,
+    relatedSlugs: [
+      "lembrancinhas-de-aniversario-infantil-tematizadas",
+      "lembrancinhas-de-batizado-tradicao-e-elegancia",
+      "como-fazer-sabonete-artesanal-para-lembrancinhas",
+    ],
+    contentHtml: `
+      <p>Formatura marca o fim de um ciclo — cinco, sete, dez anos de dedicação. A lembrancinha desse dia precisa <strong>celebrar a conquista com a sobriedade que ela merece</strong>, mas sem perder o carinho de quem entrega. No <a href="/lembrancinhas-formatura">Empório LeleCute</a> atendemos turmas de medicina, direito, pedagogia, infantil ao ensino médio — cada uma com sua linguagem visual.</p>
+
+      <h2>Símbolos clássicos da formatura</h2>
+      <ul>
+        <li><strong>Capelo</strong> (chapéu acadêmico) — o ícone universal, funciona em qualquer curso.</li>
+        <li><strong>Diploma enrolado</strong> com fita — elegante, combina com cores institucionais.</li>
+        <li><strong>Símbolos do curso</strong> — caduceu (medicina), balança (direito), engrenagem (engenharia), pincel (artes).</li>
+        <li><strong>Letra inicial</strong> da turma ou do nome do formando.</li>
+      </ul>
+
+      <h2>Cores institucionais</h2>
+      <p>Quase todo curso tem uma cor oficial. Vale conferir com a comissão de formatura antes de fechar a paleta. Combinações tradicionais: preto + dourado (formatura clássica), bordô + cinza (medicina), azul marinho + prata (engenharia), verde + dourado (farmácia), roxo + dourado (matemática).</p>
+
+      <h2>Personalização</h2>
+      <p>Tag com nome do formando, ano de formatura e instituição funciona melhor que frases longas. Para turmas grandes, algumas comissões pedem versão "genérica" com nome da turma ("Turma 2026 — Direito UFPR") + nome individual em cada peça.</p>
+
+      <h2>Quantidade e quem recebe</h2>
+      <p>Pais, irmãos, padrinhos da formatura, professores homenageados, paraninfo, colegas de turma e familiares próximos. Em média, formandos pedem entre <strong>30 e 80 lembrancinhas</strong>. Vale combinar com a turma uma compra coletiva — diluindo o custo e padronizando o visual.</p>
+
+      <h2>Quando encomendar</h2>
+      <p>Para entregas individuais, 2 semanas antes da colação de grau. Para compra coletiva da turma (acima de 200 unidades), planeje com 4 semanas. Produzimos em 7 dias úteis e enviamos para todo o Brasil.</p>
+
+      <p>Conheça nossos modelos para formandos na <a href="/lembrancinhas-formatura">página de formatura</a> ou explore o <a href="/produtos">catálogo completo</a>. Quer entender como fazemos cada peça? Leia o <a href="/blog/como-fazer-sabonete-artesanal-para-lembrancinhas">guia do processo artesanal</a>.</p>
     `,
   },
 ];

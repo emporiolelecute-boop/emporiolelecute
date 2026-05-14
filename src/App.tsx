@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
 import { CartProvider } from "./contexts/CartContext";
-import { initGA, initFBPixel, usePageTracking } from "./lib/analytics";
+import { usePageTracking } from "./lib/analytics";
 import { PageSkeleton, AdminSkeleton } from "./components/ui/skeleton-loading";
 
 // Lazy load pages for better performance
@@ -69,12 +69,8 @@ const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  // Initialize analytics on mount
-  useEffect(() => {
-    // Uncomment these when you have real tracking IDs
-    // initGA();
-    // initFBPixel();
-  }, []);
+  // Analytics carregadas dinamicamente em <TrackingScripts /> via tracking_config.
+  useEffect(() => {}, []);
 
   return (
     <QueryClientProvider client={queryClient}>
