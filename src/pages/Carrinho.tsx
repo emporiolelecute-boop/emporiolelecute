@@ -160,7 +160,8 @@ const Carrinho = () => {
           shipping_method: 'A calcular via WhatsApp',
           shipping_price: 0,
           subtotal: total,
-          total: total,
+          total: totalWithDiscount,
+          notes: coupon ? `Cupom aplicado: ${coupon.code} (-R$ ${coupon.discount_applied.toFixed(2)})` : null,
           status: 'pending',
         },
         _items: items.map(item => ({
@@ -194,7 +195,8 @@ const Carrinho = () => {
           })),
           subtotal: total,
           shippingPrice: 0,
-          total: total,
+          total: totalWithDiscount,
+          coupon: coupon ? { code: coupon.code, discount: coupon.discount_applied } : null,
         },
       });
 
