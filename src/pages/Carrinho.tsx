@@ -515,9 +515,38 @@ const Carrinho = () => {
                     <span className="text-muted-foreground">Subtotal ({items.length} {items.length === 1 ? 'item' : 'itens'})</span>
                     <span className="text-foreground">R$ {total.toFixed(2).replace('.', ',')}</span>
                   </div>
+                  {coupon && (
+                    <div className="flex justify-between text-green-700">
+                      <span>Cupom {coupon.code}</span>
+                      <span>- R$ {discount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Frete</span>
                     <span className="text-foreground text-primary font-medium">A calcular</span>
+                  </div>
+                </div>
+
+                {/* Coupon */}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Label className="text-xs">Cupom de desconto</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      placeholder="Código"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="font-mono uppercase"
+                      disabled={!!coupon}
+                    />
+                    {coupon ? (
+                      <Button variant="outline" size="sm" onClick={() => { setCoupon(null); setCouponInput(''); }}>
+                        Remover
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={handleApplyCoupon} disabled={couponLoading || !couponInput}>
+                        {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -526,7 +555,7 @@ const Carrinho = () => {
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-foreground">Subtotal</span>
                   <span className="text-2xl font-bold text-primary">
-                    R$ {total.toFixed(2).replace('.', ',')}
+                    R$ {totalWithDiscount.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground text-center mb-6">
