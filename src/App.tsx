@@ -52,6 +52,13 @@ const AdminInstagram = lazy(() => import("./pages/admin/AdminInstagram"));
 const AdminOccasionLandings = lazy(() => import("./pages/admin/AdminOccasionLandings"));
 const AdminHeroSlides = lazy(() => import("./pages/admin/AdminHeroSlides"));
 const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminRedirects = lazy(() => import("./pages/admin/AdminRedirects"));
+const AdminRobots = lazy(() => import("./pages/admin/AdminRobots"));
+const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
+
+import RedirectHandler from "./components/RedirectHandler";
+import TrackingScripts from "./components/TrackingScripts";
 
 const queryClient = new QueryClient();
 
