@@ -50,6 +50,8 @@ const AdminHomepageBlocks = lazy(() => import("./pages/admin/AdminHomepageBlocks
 const AdminMerchantFeed = lazy(() => import("./pages/admin/AdminMerchantFeed"));
 const AdminInstagram = lazy(() => import("./pages/admin/AdminInstagram"));
 const AdminOccasionLandings = lazy(() => import("./pages/admin/AdminOccasionLandings"));
+const AdminHeroSlides = lazy(() => import("./pages/admin/AdminHeroSlides"));
+const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
 
 const queryClient = new QueryClient();
 
@@ -294,6 +296,16 @@ const App = () => {
                   <Route path="landings" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminOccasionLandings />
+                    </Suspense>
+                  } />
+                  <Route path="hero-slides" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminHeroSlides />
+                    </Suspense>
+                  } />
+                  <Route path="depoimentos" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminTestimonials />
                     </Suspense>
                   } />
                 </Route>

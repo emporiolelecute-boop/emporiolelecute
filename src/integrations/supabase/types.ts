@@ -65,6 +65,48 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          id: string
+          image_url: string | null
+          is_visible: boolean
+          position: number
+          subtitle: string | null
+          tagline: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          position?: number
+          subtitle?: string | null
+          tagline?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          position?: number
+          subtitle?: string | null
+          tagline?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homepage_blocks: {
         Row: {
           block_key: string
@@ -728,6 +770,48 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          created_at: string
+          customer_name: string
+          customer_text: string
+          id: string
+          is_visible: boolean
+          occasion: string | null
+          position: number
+          product_name: string | null
+          rating: number
+          testimonial_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          customer_text: string
+          id?: string
+          is_visible?: boolean
+          occasion?: string | null
+          position?: number
+          product_name?: string | null
+          rating?: number
+          testimonial_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          customer_text?: string
+          id?: string
+          is_visible?: boolean
+          occasion?: string | null
+          position?: number
+          product_name?: string | null
+          rating?: number
+          testimonial_date?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
