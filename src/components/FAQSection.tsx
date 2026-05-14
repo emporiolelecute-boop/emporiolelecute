@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { useFaqs } from "@/hooks/useFaqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import FAQStructuredData from "@/components/FAQStructuredData";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 const FAQSection = () => {
   const { data: faqs, isLoading } = useFaqs();
+  const { buildWhatsappUrl } = useContactInfo();
 
   // Fallback FAQs if database is empty
   const defaultFaqs = [
@@ -110,7 +112,7 @@ const FAQSection = () => {
               Não encontrou sua dúvida? Fale conosco!
             </p>
             <a
-              href="https://wa.me/5541992214299?text=Olá! Tenho uma dúvida sobre as lembrancinhas."
+              href={buildWhatsappUrl('Olá! Tenho uma dúvida sobre as lembrancinhas.')}
               target="_blank"
               rel="noopener noreferrer"
             >
