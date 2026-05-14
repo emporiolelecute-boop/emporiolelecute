@@ -207,6 +207,9 @@ const Loja = () => {
             </div>
           </div>
         </section>
+
+        <TrustBadges />
+        <FAQSection />
       </main>
 
       <Footer />
