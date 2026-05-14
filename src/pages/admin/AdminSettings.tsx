@@ -43,6 +43,7 @@ interface StoreSettings {
     };
   };
   footer_config: FooterConfig;
+  trust_badges_config: TrustBadgesConfig;
 }
 
 const AdminSettings = () => {
