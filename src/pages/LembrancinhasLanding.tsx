@@ -569,6 +569,8 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
         )}
       </main>
 
+      <TrustBadges />
+
       <Footer />
       <WhatsAppButton />
     </div>
