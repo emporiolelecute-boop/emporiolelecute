@@ -17,7 +17,6 @@ export const RedirectHandler = () => {
     const match = redirects.find((r) => r.from_path === location.pathname);
     if (!match) return;
     // Fire-and-forget hit counter
-    supabase.rpc("increment" as any).catch(() => {});
     supabase
       .from("redirects")
       .select("id, hits")
