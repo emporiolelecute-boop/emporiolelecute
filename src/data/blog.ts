@@ -147,6 +147,33 @@ export const BLOG_POSTS: BlogPost[] = [
       )}" target="_blank" rel="noopener noreferrer">Falar agora com a artesã pelo WhatsApp →</a></strong></p>
       <p>Você também pode explorar o <a href="/produtos">catálogo completo</a> ou começar pela página da sua ocasião acima.</p>
     `,
+    faqs: [
+      {
+        question: "Posso usar a base de glicerina vencida para fazer sabonete artesanal?",
+        answer:
+          "Não recomendamos. A base de glicerina vencida perde transparência, libera odor e pode irritar a pele do convidado. Sempre verifique o lote e use bases dentro do prazo, armazenadas longe da luz solar direta.",
+      },
+      {
+        question: "Quantos sabonetes consigo fazer com 500 g de base de glicerina?",
+        answer:
+          "Em média, 10 a 15 sabonetes pequenos (35–50 g cada), tamanho ideal para lembrancinha. Para peças menores em forma de coração ou pezinho de bebê, o rendimento sobe para 18–20 unidades.",
+      },
+      {
+        question: "Qual fragrância é mais indicada para lembrancinhas de chá de bebê e maternidade?",
+        answer:
+          "Aromas suaves como talco, algodão, lavanda, baunilha e leite & mel funcionam melhor para bebês e ambientes da maternidade. Evite fragrâncias amadeiradas ou cítricas fortes nesses contextos.",
+      },
+      {
+        question: "Por quanto tempo o sabonete artesanal dura depois de pronto?",
+        answer:
+          "Sabonetes em base glicerinada duram em média 6 meses se armazenados em local seco e arejado. Embalagens em celofane ou organza preservam a fragrância por mais tempo.",
+      },
+      {
+        question: "Vale mais a pena fazer em casa ou encomendar lembrancinhas prontas?",
+        answer:
+          "Para até 10 unidades e quando há tempo de testar, o DIY é prazeroso. Acima disso — e principalmente quando o evento se aproxima — encomendar com uma artesã experiente garante padrão visual, embalagem profissional e prazo cumprido. No Empório LeleCute trabalhamos com produção em 7 dias úteis e entrega para todo o Brasil.",
+      },
+    ],
   },
 
   // ────────────────────────────────────────────────────────────────
