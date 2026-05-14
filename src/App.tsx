@@ -317,6 +317,26 @@ const App = () => {
                       <AdminTestimonials />
                     </Suspense>
                   } />
+                  <Route path="cupons" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCoupons />
+                    </Suspense>
+                  } />
+                  <Route path="redirects" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminRedirects />
+                    </Suspense>
+                  } />
+                  <Route path="robots" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminRobots />
+                    </Suspense>
+                  } />
+                  <Route path="tracking" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminTracking />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
