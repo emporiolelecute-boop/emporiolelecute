@@ -52,6 +52,13 @@ const AdminInstagram = lazy(() => import("./pages/admin/AdminInstagram"));
 const AdminOccasionLandings = lazy(() => import("./pages/admin/AdminOccasionLandings"));
 const AdminHeroSlides = lazy(() => import("./pages/admin/AdminHeroSlides"));
 const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminRedirects = lazy(() => import("./pages/admin/AdminRedirects"));
+const AdminRobots = lazy(() => import("./pages/admin/AdminRobots"));
+const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
+
+import RedirectHandler from "./components/RedirectHandler";
+import TrackingScripts from "./components/TrackingScripts";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +84,8 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AnalyticsWrapper>
+              <RedirectHandler />
+              <TrackingScripts />
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={
@@ -306,6 +315,26 @@ const App = () => {
                   <Route path="depoimentos" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminTestimonials />
+                    </Suspense>
+                  } />
+                  <Route path="cupons" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCoupons />
+                    </Suspense>
+                  } />
+                  <Route path="redirects" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminRedirects />
+                    </Suspense>
+                  } />
+                  <Route path="robots" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminRobots />
+                    </Suspense>
+                  } />
+                  <Route path="tracking" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminTracking />
                     </Suspense>
                   } />
                 </Route>

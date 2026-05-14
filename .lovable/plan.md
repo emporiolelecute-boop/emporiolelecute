@@ -1,67 +1,62 @@
-## Status atual
+## Escopo
 
-Após a auditoria, **a maior parte do que você pediu já está implementada**:
-
-- **CRUD de FAQ no admin** → `Admin → FAQs` (`AdminFaqs.tsx`) já permite criar, editar, reordenar, ocultar e excluir perguntas/respostas. Tudo é lido por `FAQSection` e cai num fallback de 6 perguntas se a tabela estiver vazia.
-- **WhatsApp reforçado** → `FAQSection` (com botão verde "Falar no WhatsApp") já está montado em `Index.tsx` (Home), `Loja.tsx` e `ProductPage.tsx`.
-- **Schema.org** → `FAQStructuredData` (FAQPage) renderiza junto da seção de FAQ; `ProductStructuredData` (Product + Offer + AggregateRating) renderiza em cada página de produto.
-- **Sitemap + GSC** → `generate-sitemap` regenerado agora (152 URLs) e reenviado ao Google Search Console na propriedade de domínio `sc-domain:emporiolelecute.com.br` → resposta `HTTP 204` (aceito, isPending: true).
-
-Não há código novo a escrever para o pedido literal — está tudo em produção. O que falta é avançar com a próxima onda de gestão pelo painel administrativo.
+Implementar 4 módulos administrativos + entregar relatório técnico de arquitetura.
 
 ---
 
-## Plano: o que ainda NÃO é gerenciável pelo painel
+### 1. Robots.txt Dinâmico
+- Edge Function pública `robots-txt` que lê de `store_settings.robots_config`
+- Admin: `AdminRobots.tsx` com:
+  - Toggle global "permitir indexação"
+  - Lista de paths a bloquear (`Disallow`)
+  - Toggle por categoria (bloqueia `/categoria/{slug}`)
+  - Toggle por produto individual (campo `seo_noindex` em `products`)
+- Atualiza `public/robots.txt` estático como fallback + serve dinâmico via função
 
-Itens hoje hardcoded ou parcialmente gerenciáveis, em ordem de impacto:
+### 2. Redirects 301
+- Nova tabela `redirects` (from_path, to_path, status_code, is_active, hits)
+- Componente `<RedirectHandler />` no `App.tsx` que consulta tabela e faz `<Navigate replace>`
+- Admin: `AdminRedirects.tsx` com CRUD + contador de hits
+- Detecção automática: quando admin altera slug de produto/categoria, oferecer criar redirect
 
-### Tier 1 — alto impacto na conversão (recomendo fazer já)
+### 3. Cupons Globais
+- Nova tabela `coupons` (code, type: percent|fixed, value, min_subtotal, valid_from, valid_until, max_uses, used_count, is_active)
+- Tabela `coupon_uses` (coupon_id, order_id) para auditoria
+- Admin: `AdminCoupons.tsx` CRUD
+- Função RPC `validate_coupon(code, subtotal)` retornando desconto calculado
+- UI no `Carrinho.tsx`: campo "Cupom", aplica desconto, persiste no order
 
-1. **HeroSlider (slides do topo da Home)** — slides, títulos, subtítulos, imagens, CTAs e ordem ainda vivem em `HeroSlider.tsx`.
-   → Nova tabela `hero_slides` + `Admin → Hero Slides` (CRUD com upload de imagem, drag-and-drop de ordem, toggle de visibilidade, agendamento opcional).
-2. **Depoimentos (`Testimonials.tsx`)** — nomes, fotos, avaliações e textos hardcoded.
-   → Nova tabela `testimonials` + `Admin → Depoimentos`.
-3. **Seção "Sobre" (`About.tsx`)** — texto institucional, imagem e bullets fixos.
-   → Reaproveitar `pages` (slug `sobre`) já existente, ou expor um bloco no `Admin → Homepage Blocks`.
-4. **WhatsApp/contato global** — número `(41) 99221-4299` repetido em ~10 arquivos.
-   → Ler tudo de `store_settings.contact_info` (já existe no DB) e remover hardcodes; expor mensagens padrão do WhatsApp por contexto (FAQ, produto, carrinho, orçamento) no `Admin → Configurações`.
+### 4. Analytics & Ads IDs
+- `store_settings.tracking_config` com: `ga4_id`, `gtm_id`, `meta_pixel_id`, `google_ads_id`, `enabled_routes` (regex/lista)
+- Admin: `AdminTracking.tsx` formulário
+- Componente `<TrackingScripts />` no `App.tsx` que injeta scripts condicionalmente por rota
+- Remove IDs hardcoded existentes
 
-### Tier 2 — operacional / SEO
+### 5. Relatório Técnico (Markdown)
+Gerado em `/mnt/documents/auditoria-emporiolelecute.md` cobrindo:
+- Modelo de dados (todas as tabelas + relacionamentos)
+- Funcionalidades do admin
+- Páginas públicas
+- Fluxo de carrinho/personalização
+- Integrações (Resend, GSC, WhatsApp, Merchant Center)
+- Design system (cores, fontes, shadcn)
+- TODOs / pendências / áreas com mock
 
-5. **Botão flutuante WhatsApp (`WhatsAppButton.tsx`)** — texto e visibilidade.
-6. **QuoteForm (formulário de orçamento)** — campos, e-mail destino e mensagens fixos.
-7. **Chatbot (`Chatbot.tsx`)** — mensagens de boas-vindas, respostas rápidas e prompts.
-8. **Robots.txt dinâmico** — hoje é estático em `public/robots.txt`. Migrar para edge function que monte a partir de `store_settings.seo_config` (incluir/excluir paths, modo "site privado", liberar/bloquear bots).
-9. **Redirects 301** — nova tabela `redirects` (de → para → status) + edge function de rewrite, para gerir mudanças de URL sem perder ranking.
-10. **Cupons / promoções globais** — banner topo, código de cupom, percentual.
-11. **Política de frete e prazos** — texto exibido em produto/checkout.
-
-### Tier 3 — marca e tema
-
-12. **Tema (cores, fontes, logo, favicon)** — hoje em `index.css`, `tailwind.config.ts` e `public/`. Mover paleta principal para `store_settings.theme_config` lido em runtime via CSS vars; upload de logo/favicon pelo admin.
-13. **Meta-tags por rota** — ampliar `DynamicSEO` para ler título/descrição/OG por rota numa nova tabela `route_seo`.
-14. **Tracking IDs (GA4, Meta Pixel, GSC)** — mover do código para `Admin → Configurações → Tracking`.
-
-### Tier 4 — qualidade de vida
-
-15. **Blog/Notícias** — tabela `posts` + admin (gera autoridade SEO).
-16. **Cupons por cliente / leads capturados** — captura de e-mail no popup/footer.
-17. **Auditoria de admin** — log de quem alterou o quê (tabela `admin_audit_log`).
-
----
-
-## Validação Rich Results (a fazer manualmente)
-
-Os schemas já estão no HTML, mas o Google só valida páginas publicadas. Após a publicação:
-
-- Home: https://search.google.com/test/rich-results?url=https://emporiolelecute.com.br/ → deve detectar `Organization`, `WebSite`, `LocalBusiness`, `FAQPage`.
-- Produto exemplo: testar uma URL de `/produto/{slug}` → deve detectar `Product` + `Offer` + `BreadcrumbList`.
-- Loja: https://search.google.com/test/rich-results?url=https://emporiolelecute.com.br/loja → `ItemList` + `FAQPage`.
-
-Se algum item aparecer com aviso, eu corrijo o componente correspondente.
+Entregue como `<presentation-artifact>`.
 
 ---
 
-## O que peço de você para seguir
+## Ordem de execução
 
-Diga **quais itens dos Tiers 1–4 você quer que eu implemente agora** (pode escolher por número, ex.: "Tier 1 inteiro", ou "1, 4, 8, 12"). Por padrão eu sugiro começar pelo **Tier 1 completo**, que é o que mais altera percepção do cliente e ainda envolve conteúdo que muda com frequência.
+1. Migrations (redirects, coupons, coupon_uses, products.seo_noindex, store_settings keys)
+2. Edge Function robots-txt
+3. Hooks (`useRedirects`, `useCoupon`, `useTracking`)
+4. Telas admin (4 novas)
+5. Integração frontend (RedirectHandler, TrackingScripts, cupom no carrinho)
+6. Relatório de auditoria
+
+---
+
+## Confirmação
+
+Confirma este escopo? Algum ponto a ajustar antes de começar (ex.: tipos de cupons, formato de redirects, providers de tracking adicionais)?

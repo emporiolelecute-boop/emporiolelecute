@@ -22,7 +22,11 @@ import {
   Instagram,
   MapPin,
   Image,
-  MessageSquare
+  MessageSquare,
+  Tag,
+  ArrowRightLeft,
+  BarChart3,
+  Bot
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -35,6 +39,7 @@ const menuItems = [
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
+  { icon: Tag, label: 'Cupons', path: '/admin/cupons' },
   { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
   { icon: Image, label: 'Slides do Hero', path: '/admin/hero-slides' },
   { icon: MessageSquare, label: 'Depoimentos', path: '/admin/depoimentos' },
@@ -44,6 +49,9 @@ const menuItems = [
   { icon: Home, label: 'Páginas', path: '/admin/paginas' },
   { icon: Menu, label: 'Menus', path: '/admin/menus' },
   { icon: HelpCircle, label: 'FAQs', path: '/admin/faqs' },
+  { icon: ArrowRightLeft, label: 'Redirects 301', path: '/admin/redirects' },
+  { icon: Bot, label: 'Robots.txt', path: '/admin/robots' },
+  { icon: BarChart3, label: 'Analytics & Ads', path: '/admin/tracking' },
   { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   { icon: Rss, label: 'Feed Merchant', path: '/admin/merchant-feed' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },

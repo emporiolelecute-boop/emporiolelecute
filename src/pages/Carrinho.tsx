@@ -12,6 +12,7 @@ import TrustBadges from "@/components/TrustBadges";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { validateCoupon, type ValidCoupon } from "@/hooks/useCoupons";
 
 interface AddressData {
   cep: string;
@@ -55,6 +56,26 @@ const Carrinho = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderCode, setOrderCode] = useState('');
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState<ValidCoupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const discount = coupon?.discount_applied ?? 0;
+  const totalWithDiscount = Math.max(0, total - discount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    const r = await validateCoupon(couponInput, total);
+    setCouponLoading(false);
+    if (r.valid) {
+      setCoupon(r);
+      toast({ title: 'Cupom aplicado', description: `Desconto de R$ ${r.discount_applied.toFixed(2).replace('.', ',')}` });
+    } else {
+      setCoupon(null);
+      toast({ title: 'Cupom inválido', description: (r as { error: string }).error, variant: 'destructive' });
+    }
+  };
 
   const handleCepChange = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, '').slice(0, 8);
@@ -139,7 +160,8 @@ const Carrinho = () => {
           shipping_method: 'A calcular via WhatsApp',
           shipping_price: 0,
           subtotal: total,
-          total: total,
+          total: totalWithDiscount,
+          notes: coupon ? `Cupom aplicado: ${coupon.code} (-R$ ${coupon.discount_applied.toFixed(2)})` : null,
           status: 'pending',
         },
         _items: items.map(item => ({
@@ -173,7 +195,8 @@ const Carrinho = () => {
           })),
           subtotal: total,
           shippingPrice: 0,
-          total: total,
+          total: totalWithDiscount,
+          coupon: coupon ? { code: coupon.code, discount: coupon.discount_applied } : null,
         },
       });
 
@@ -492,9 +515,38 @@ const Carrinho = () => {
                     <span className="text-muted-foreground">Subtotal ({items.length} {items.length === 1 ? 'item' : 'itens'})</span>
                     <span className="text-foreground">R$ {total.toFixed(2).replace('.', ',')}</span>
                   </div>
+                  {coupon && (
+                    <div className="flex justify-between text-green-700">
+                      <span>Cupom {coupon.code}</span>
+                      <span>- R$ {discount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Frete</span>
                     <span className="text-foreground text-primary font-medium">A calcular</span>
+                  </div>
+                </div>
+
+                {/* Coupon */}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Label className="text-xs">Cupom de desconto</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      placeholder="Código"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="font-mono uppercase"
+                      disabled={!!coupon}
+                    />
+                    {coupon ? (
+                      <Button variant="outline" size="sm" onClick={() => { setCoupon(null); setCouponInput(''); }}>
+                        Remover
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={handleApplyCoupon} disabled={couponLoading || !couponInput}>
+                        {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -503,7 +555,7 @@ const Carrinho = () => {
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-foreground">Subtotal</span>
                   <span className="text-2xl font-bold text-primary">
-                    R$ {total.toFixed(2).replace('.', ',')}
+                    R$ {totalWithDiscount.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground text-center mb-6">
