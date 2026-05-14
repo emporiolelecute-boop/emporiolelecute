@@ -51,6 +51,19 @@ export interface FooterConfig {
   made_with_love: string;
 }
 
+export interface TrustBadgeItem {
+  icon: 'Truck' | 'Percent' | 'Headset' | 'CreditCard' | 'Shield' | 'Heart' | 'Sparkles' | 'Package' | 'Clock' | 'Star';
+  title: string;
+  subtitle: string;
+}
+
+export interface TrustBadgesConfig {
+  items: TrustBadgeItem[];
+  whatsapp_label: string;
+  whatsapp_message: string;
+  show_whatsapp: boolean;
+}
+
 const defaultPaymentConfig: PaymentConfig = {
   pix_discount: 7,
   installments: 3,
@@ -59,6 +72,18 @@ const defaultPaymentConfig: PaymentConfig = {
     credit_card: true,
     boleto: false,
   },
+};
+
+export const defaultTrustBadgesConfig: TrustBadgesConfig = {
+  items: [
+    { icon: 'Truck', title: 'Envio para', subtitle: 'Todo o Brasil' },
+    { icon: 'Percent', title: 'Descontos', subtitle: '3% PIX' },
+    { icon: 'Headset', title: 'Atendimento', subtitle: 'Personalizado' },
+    { icon: 'CreditCard', title: 'Pague com Cartão', subtitle: 'Até 3x sem juros' },
+  ],
+  whatsapp_label: 'Atendimento no WhatsApp',
+  whatsapp_message: 'Olá! Gostaria de um atendimento personalizado do Empório LeleCute.',
+  show_whatsapp: true,
 };
 
 const defaultSEOConfig: SEOConfig = {
