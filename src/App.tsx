@@ -84,6 +84,8 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AnalyticsWrapper>
+              <RedirectHandler />
+              <TrackingScripts />
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={
