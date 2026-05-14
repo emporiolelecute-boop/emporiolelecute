@@ -83,6 +83,7 @@ const AdminSettings = () => {
       },
     },
     footer_config: defaultFooterConfig,
+    trust_badges_config: defaultTrustBadgesConfig,
   });
 
   useEffect(() => {
