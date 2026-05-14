@@ -178,7 +178,7 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                 {config.heroSubtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={handleWaClick("hero")}>
                   <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground gap-2">
                     <MessageCircle className="h-5 w-5" />
                     Orçamento via WhatsApp
@@ -274,7 +274,7 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                 <p className="text-muted-foreground mb-4">
                   Nosso catálogo para esta ocasião está em atualização.
                 </p>
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={handleWaClick("hero")}>
                   <Button>Falar com a artesã pelo WhatsApp</Button>
                 </a>
               </div>
@@ -397,7 +397,7 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
             <p className="text-muted-foreground mb-8">
               Atendimento direto com a artesã pelo WhatsApp. Resposta em até 2 horas em horário comercial.
             </p>
-            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={handleWaClick("hero")}>
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground gap-2">
                 <MessageCircle className="h-5 w-5" />
                 Solicitar orçamento agora
