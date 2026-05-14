@@ -48,6 +48,8 @@ import type { Product } from "@/data/products";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { whatsappNumber } = useContactInfo();
+  const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
   const navigate = useNavigate();
   const { data: dbProduct, isLoading } = useDbProduct(slug || "");
   const { data: allProducts } = useDbProducts();
