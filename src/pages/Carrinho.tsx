@@ -73,7 +73,7 @@ const Carrinho = () => {
       toast({ title: 'Cupom aplicado', description: `Desconto de R$ ${r.discount_applied.toFixed(2).replace('.', ',')}` });
     } else {
       setCoupon(null);
-      toast({ title: 'Cupom inválido', description: r.error, variant: 'destructive' });
+      toast({ title: 'Cupom inválido', description: (r as { error: string }).error, variant: 'destructive' });
     }
   };
 
