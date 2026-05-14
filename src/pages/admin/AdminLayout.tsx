@@ -20,7 +20,9 @@ import {
   HelpCircle,
   Rss,
   Instagram,
-  MapPin
+  MapPin,
+  Image,
+  MessageSquare
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -34,6 +36,8 @@ const menuItems = [
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
   { icon: Upload, label: 'Importar Elo7', path: '/admin/importar' },
+  { icon: Image, label: 'Slides do Hero', path: '/admin/hero-slides' },
+  { icon: MessageSquare, label: 'Depoimentos', path: '/admin/depoimentos' },
   { icon: Home, label: 'Blocos Homepage', path: '/admin/blocos' },
   { icon: Instagram, label: 'Instagram', path: '/admin/instagram' },
   { icon: MapPin, label: 'Landings SEO', path: '/admin/landings' },
