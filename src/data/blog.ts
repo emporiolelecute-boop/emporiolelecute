@@ -9,6 +9,11 @@
  * /lembrancinhas-* e para /produtos, formando o silo SEO.
  */
 
+export interface BlogFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -28,6 +33,8 @@ export interface BlogPost {
   seoDescription?: string;
   /** Slugs de outros posts relacionados (sugestões de leitura) */
   relatedSlugs?: string[];
+  /** FAQs renderizadas no artigo + JSON-LD FAQPage */
+  faqs?: BlogFAQ[];
   /** Se false, o post não é renderizado nem incluído no sitemap */
   published: boolean;
 }
