@@ -18,8 +18,8 @@ const BlogPost = () => {
   const { slug = "" } = useParams();
   const post = getPostBySlug(slug);
   const related = getRelatedPosts(slug);
-  const { whatsapp } = useContactInfo();
-  const phone = (whatsapp || "5541992214299").replace(/\D/g, "");
+  const { whatsappNumber } = useContactInfo();
+  const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
 
   if (!post) {
     return <Navigate to="/blog" replace />;
