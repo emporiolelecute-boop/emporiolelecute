@@ -1,9 +1,12 @@
 import { MessageCircle } from "lucide-react";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 const WhatsAppButton = () => {
+  const { buildWhatsappUrl } = useContactInfo();
+  const href = buildWhatsappUrl('Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas.');
   return (
     <a
-      href="https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas."
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       className="whatsapp-float"
