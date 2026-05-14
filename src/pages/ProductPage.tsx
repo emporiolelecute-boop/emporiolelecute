@@ -615,7 +615,10 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
           )}
         </div>
       </main>
-      
+
+      <TrustBadges />
+      <FAQSection />
+
       <Footer />
       <WhatsAppButton />
       <Chatbot />
