@@ -69,12 +69,8 @@ const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  // Initialize analytics on mount
-  useEffect(() => {
-    // Uncomment these when you have real tracking IDs
-    // initGA();
-    // initFBPixel();
-  }, []);
+  // Analytics carregadas dinamicamente em <TrackingScripts /> via tracking_config.
+  useEffect(() => {}, []);
 
   return (
     <QueryClientProvider client={queryClient}>
