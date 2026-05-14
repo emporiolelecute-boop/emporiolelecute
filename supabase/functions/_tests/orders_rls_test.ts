@@ -16,21 +16,21 @@ const anon = () => createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const randomCode = () => "LCT" + Math.random().toString(36).slice(2, 7).toUpperCase();
 
-Deno.test("anon cannot SELECT orders directly", async () => {
+Deno.test({ name: "anon cannot SELECT orders directly", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { data, error } = await anon().from("orders").select("id").limit(1);
   // Either RLS hides everything (data === []) or returns an explicit error.
   // What must NEVER happen: returning rows.
   assertEquals(error, null);
   assertEquals(data?.length ?? 0, 0);
-});
+} });
 
-Deno.test("anon cannot SELECT order_items directly", async () => {
+Deno.test({ name: "anon cannot SELECT order_items directly", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { data, error } = await anon().from("order_items").select("id").limit(1);
   assertEquals(error, null);
   assertEquals(data?.length ?? 0, 0);
-});
+} });
 
-Deno.test("anon cannot INSERT directly into orders", async () => {
+Deno.test({ name: "anon cannot INSERT directly into orders", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { error } = await anon().from("orders").insert({
     order_code: randomCode(),
     customer_name: "Hacker",
@@ -44,9 +44,9 @@ Deno.test("anon cannot INSERT directly into orders", async () => {
     total: 1,
   });
   assert(error !== null, "Expected RLS to block direct INSERT into orders");
-});
+} });
 
-Deno.test("anon cannot INSERT directly into order_items (no orphan/forged items)", async () => {
+Deno.test({ name: "anon cannot INSERT directly into order_items (no orphan/forged items)", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   // Try attaching items to a random/forged order_id.
   const { error } = await anon().from("order_items").insert({
     order_id: "00000000-0000-0000-0000-000000000000",
@@ -55,9 +55,9 @@ Deno.test("anon cannot INSERT directly into order_items (no orphan/forged items)
     unit_price: 1,
   });
   assert(error !== null, "Expected RLS to block direct INSERT into order_items");
-});
+} });
 
-Deno.test("RPC create_order_with_items rejects empty items", async () => {
+Deno.test({ name: "RPC create_order_with_items rejects empty items", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { error } = await anon().rpc("create_order_with_items", {
     _order: {
       order_code: randomCode(),
@@ -68,17 +68,17 @@ Deno.test("RPC create_order_with_items rejects empty items", async () => {
     _items: [],
   });
   assert(error !== null, "Expected RPC to reject empty items array");
-});
+} });
 
-Deno.test("RPC create_order_with_items rejects missing required customer fields", async () => {
+Deno.test({ name: "RPC create_order_with_items rejects missing required customer fields", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { error } = await anon().rpc("create_order_with_items", {
     _order: { order_code: randomCode() }, // missing name + email
     _items: [{ product_name: "X", quantity: 1, unit_price: 1 }],
   });
   assert(error !== null, "Expected RPC to reject missing customer fields");
-});
+} });
 
-Deno.test("RPC create_order_with_items succeeds with valid payload", async () => {
+Deno.test({ name: "RPC create_order_with_items succeeds with valid payload", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const code = randomCode();
   const { data, error } = await anon().rpc("create_order_with_items", {
     _order: {
@@ -101,4 +101,4 @@ Deno.test("RPC create_order_with_items succeeds with valid payload", async () =>
   // Anon still cannot read the row back.
   const { data: readback } = await anon().from("orders").select("id").eq("order_code", code);
   assertEquals(readback?.length ?? 0, 0);
-});
+} });
