@@ -1,19 +1,4 @@
 project_id = "xfqffqxqiuqauefrrcxn"
 
-[functions.send-order-email]
-verify_jwt = false
-
-[functions.chat]
-verify_jwt = false
-
-[functions.scrape-elo7]
-verify_jwt = true
-
-[functions.generate-sitemap]
-verify_jwt = false
-
-[functions.submit-sitemap]
-verify_jwt = false
-
-[functions.merchant-feed]
+[functions.robots-txt]
 verify_jwt = false
