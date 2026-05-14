@@ -41,7 +41,8 @@ import TrustBadges from "@/components/TrustBadges";
 import FAQSection from "@/components/FAQSection";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
-import { trackProductView, trackInquiry } from "@/lib/analytics";
+import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
+import { useContactInfo } from "@/hooks/useContactInfo";
 import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@/data/products";
 
