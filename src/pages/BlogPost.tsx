@@ -1,13 +1,16 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { ArrowLeft, Calendar, Clock, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MessageCircle, HelpCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { getPostBySlug, getRelatedPosts } from "@/data/blog";
+import { useContactInfo } from "@/hooks/useContactInfo";
+import { buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
 
 const SITE = "https://emporiolelecute.com.br";
 
@@ -15,12 +18,24 @@ const BlogPost = () => {
   const { slug = "" } = useParams();
   const post = getPostBySlug(slug);
   const related = getRelatedPosts(slug);
+  const { whatsapp } = useContactInfo();
+  const phone = (whatsapp || "5541992214299").replace(/\D/g, "");
 
   if (!post) {
     return <Navigate to="/blog" replace />;
   }
 
   const url = `${SITE}/blog/${post.slug}`;
+  const utmCampaign = `blog_${post.slug}`;
+  const waUrl = buildWhatsAppUrl({
+    phone,
+    message: `Olá! Vim do artigo "${post.title}" no blog do Empório LeleCute e gostaria de um orçamento.`,
+    utm_source: "blog",
+    utm_medium: "post_cta",
+    utm_campaign: utmCampaign,
+    utm_content: post.slug,
+  });
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -36,6 +51,24 @@ const BlogPost = () => {
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    articleSection: post.category,
+    keywords: post.tags?.join(", "),
+  };
+
+  const faqSchema = post.faqs && post.faqs.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: post.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      }
+    : null;
+
+  const handleWaClick = () => {
+    trackWhatsAppClick({ source: "blog_post", context: post.slug, utm_campaign: utmCampaign });
   };
 
   return (
@@ -55,6 +88,9 @@ const BlogPost = () => {
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        {faqSchema && (
+          <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+        )}
       </Helmet>
 
       <Header />
@@ -102,6 +138,28 @@ const BlogPost = () => {
               dangerouslySetInnerHTML={{ __html: post.contentHtml }}
             />
 
+            {/* FAQ */}
+            {post.faqs && post.faqs.length > 0 && (
+              <section className="mt-12">
+                <div className="flex items-center gap-2 mb-4">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  <h2 className="font-display text-2xl text-foreground m-0">
+                    Perguntas frequentes
+                  </h2>
+                </div>
+                <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/40 px-4">
+                  {post.faqs.map((f, idx) => (
+                    <AccordionItem key={idx} value={`faq-${idx}`}>
+                      <AccordionTrigger className="text-left font-medium">{f.question}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground leading-relaxed">
+                        {f.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </section>
+            )}
+
             {/* CTA pós-conteúdo */}
             <div className="mt-12 p-6 bg-gradient-to-br from-primary-light to-cream rounded-2xl text-center">
               <h2 className="font-display text-xl text-foreground mb-2">
@@ -110,11 +168,7 @@ const BlogPost = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Atendimento direto com a artesã pelo WhatsApp.
               </p>
-              <a
-                href="https://wa.me/5541992214299?text=Ol%C3%A1!%20Vim%20pelo%20blog%20do%20Emp%C3%B3rio%20LeleCute."
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={waUrl} target="_blank" rel="noopener noreferrer" onClick={handleWaClick}>
                 <Button className="gap-2">
                   <MessageCircle className="h-4 w-4" />
                   Falar no WhatsApp
