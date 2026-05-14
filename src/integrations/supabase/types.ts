@@ -478,10 +478,12 @@ export type Database = {
           address_number: string | null
           address_state: string
           address_street: string | null
+          coupon_code: string | null
           created_at: string
           customer_email: string
           customer_name: string
           customer_phone: string
+          discount_amount: number
           id: string
           notes: string | null
           order_code: string
@@ -502,10 +504,12 @@ export type Database = {
           address_number?: string | null
           address_state: string
           address_street?: string | null
+          coupon_code?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
           customer_phone: string
+          discount_amount?: number
           id?: string
           notes?: string | null
           order_code: string
@@ -526,10 +530,12 @@ export type Database = {
           address_number?: string | null
           address_state?: string
           address_street?: string | null
+          coupon_code?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          discount_amount?: number
           id?: string
           notes?: string | null
           order_code?: string
