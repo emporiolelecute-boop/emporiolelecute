@@ -556,6 +556,8 @@ const Carrinho = () => {
         </div>
       </main>
 
+      <TrustBadges showWhatsApp={false} />
+
       <Footer />
       <WhatsAppButton />
     </div>
