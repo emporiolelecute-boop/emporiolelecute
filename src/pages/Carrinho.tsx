@@ -125,56 +125,35 @@ const Carrinho = () => {
     setOrderCode(code);
 
     try {
-      // Save order to database
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
+      // Save order via secure server-side RPC (validates and inserts atomically)
+      const { error: orderError } = await supabase.rpc('create_order_with_items', {
+        _order: {
           order_code: code,
           customer_name: customer.name,
           customer_email: customer.email,
           customer_phone: customer.phone,
           address_cep: address.cep,
-          address_street: null,
-          address_number: null,
-          address_complement: null,
-          address_neighborhood: null,
           address_city: address.city,
           address_state: address.state,
           shipping_method: 'A calcular via WhatsApp',
-          shipping_company: null,
-          shipping_days: null,
           shipping_price: 0,
           subtotal: total,
           total: total,
           status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error('Order save error:', orderError);
-        throw orderError;
-      }
-
-      // Save order items
-      if (orderData) {
-        const orderItems = items.map(item => ({
-          order_id: orderData.id,
+        },
+        _items: items.map(item => ({
           product_name: item.name,
           product_slug: item.slug,
           product_image: item.image,
           quantity: item.quantity,
           unit_price: item.price,
           personalization: item.personalization || null,
-        }));
+        })),
+      });
 
-        const { error: itemsError } = await supabase
-          .from('order_items')
-          .insert(orderItems);
-
-        if (itemsError) {
-          console.error('Order items save error:', itemsError);
-        }
+      if (orderError) {
+        console.error('Order save error:', orderError);
+        throw orderError;
       }
 
       // Send email to store
