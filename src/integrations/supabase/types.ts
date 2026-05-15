@@ -1303,6 +1303,57 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_email_log: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          new_status: string | null
+          order_code: string
+          order_id: string
+          recipient_email: string | null
+          status: string
+          tracking_carrier: string | null
+          tracking_code: string | null
+          tracking_url: string | null
+          triggered_by: string | null
+          triggered_by_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          new_status?: string | null
+          order_code: string
+          order_id: string
+          recipient_email?: string | null
+          status?: string
+          tracking_carrier?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
+          triggered_by?: string | null
+          triggered_by_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          new_status?: string | null
+          order_code?: string
+          order_id?: string
+          recipient_email?: string | null
+          status?: string
+          tracking_carrier?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
+          triggered_by?: string | null
+          triggered_by_email?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
