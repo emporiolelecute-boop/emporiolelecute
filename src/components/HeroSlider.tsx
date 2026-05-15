@@ -208,8 +208,23 @@ function SlideBannerDesktop({
 
 const HeroSlider = () => {
   const { data: dbSlides } = useHeroSlides();
-  const slides: HeroSlide[] =
+  const isMobile = useIsMobile();
+  const allSlides: HeroSlide[] =
     dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
+
+  // Filtra slides de acordo com o dispositivo:
+  // - banner_mobile só aparece em mobile
+  // - banner_desktop só aparece em desktop
+  // - text_image aparece em ambos
+  const slides = useMemo(
+    () =>
+      allSlides.filter((s) => {
+        if (s.display_mode === "banner_mobile") return isMobile;
+        if (s.display_mode === "banner_desktop") return !isMobile;
+        return true;
+      }),
+    [allSlides, isMobile],
+  );
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
