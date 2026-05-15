@@ -1540,6 +1540,7 @@ export type Database = {
         Args: { _order_id: string }
         Returns: Json
       }
+      cleanup_seo_url_status: { Args: never; Returns: undefined }
       cleanup_stale_bundle_logs: { Args: never; Returns: Json }
       create_order_with_items: {
         Args: { _items: Json; _order: Json }
@@ -1565,6 +1566,31 @@ export type Database = {
           _to?: string
         }
         Returns: Json
+      }
+      list_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobid: number
+          jobname: string
+          schedule: string
+        }[]
+      }
+      list_cron_runs: {
+        Args: { p_limit?: number }
+        Returns: {
+          command: string
+          database: string
+          end_time: string
+          job_pid: number
+          jobid: number
+          return_message: string
+          runid: number
+          start_time: string
+          status: string
+          username: string
+        }[]
       }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
       refresh_admin_audit_timeline: { Args: never; Returns: Json }
