@@ -9,11 +9,21 @@ import logo from "@/assets/logo.webp";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const navRef = useRef<HTMLElement | null>(null);
 
   const { data: menuItems } = useMenuItems('header');
+
+  // Track scroll for "shrink header" effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = menuItems
     ?.filter(item => item.is_visible)
@@ -62,8 +72,14 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-soft">
-      <nav ref={navRef} className="container mx-auto px-4 py-3" aria-label="Navegação principal">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? "bg-background/80 backdrop-blur-lg border-b border-border/50 shadow-medium py-1" 
+          : "bg-background/95 backdrop-blur-md border-b border-border/30 py-3"
+      }`}
+    >
+      <nav ref={navRef} className="container mx-auto px-4" aria-label="Navegação principal">
         <div className="flex items-center justify-between">
           <Link
             to="/"
@@ -73,7 +89,9 @@ const Header = () => {
             <img
               src={logo}
               alt="Logo Empório LeleCute - Ateliê Criativo de Lembrancinhas Artesanais"
-              className="h-28 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className={`w-auto object-contain transition-all duration-500 group-hover:scale-105 ${
+                isScrolled ? "h-16 md:h-20" : "h-24 md:h-28"
+              }`}
               width="112"
               height="112"
             />
@@ -126,12 +144,12 @@ const Header = () => {
 
             <Link
               to="/carrinho"
-              className="relative p-2 text-foreground/80 hover:text-primary transition-colors"
+              className="relative p-2 text-foreground/80 hover:text-primary transition-colors group/cart"
               aria-label="Carrinho de compras"
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-5 w-5 transition-transform group-hover/cart:scale-110" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in zoom-in duration-300">
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
               )}
