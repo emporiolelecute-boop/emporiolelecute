@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,19 +8,64 @@ import { ProductGridSkeleton } from "@/components/ProductSkeleton";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
 
+const STORAGE_KEY = "bestsellers:selection:v1";
+const TTL_MS = 1000 * 60 * 60 * 24; // 24h — same selection across reloads / sessions
+
+type Cached = { ids: string[]; ts: number };
+
+const readCache = (): Cached | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Cached;
+    if (!parsed?.ids || Date.now() - parsed.ts > TTL_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (ids: string[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ids, ts: Date.now() } satisfies Cached));
+  } catch {
+    /* ignore */
+  }
+};
+
+const shuffle = <T,>(arr: T[]): T[] => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
 const BestSellers = () => {
   const { data: dbProducts, isLoading } = useDbProducts();
 
-  // Random selection of active products as "best sellers", keeping desktop parity (multiples of 4)
-  const products: Product[] = useMemo(() => {
+  const { products, totalActive } = useMemo(() => {
     const active = (dbProducts || []).filter(p => p.is_active);
-    const shuffled = [...active].sort(() => Math.random() - 0.5);
-    const desiredMax = 8; // up to 2 rows of 4 on desktop
-    const count = Math.min(
-      shuffled.length >= 4 ? Math.floor(shuffled.length / 4) * 4 : shuffled.length,
+    const desiredMax = 8; // up to 2 rows of 4 on desktop, parity-aligned
+    const targetCount = Math.min(
+      active.length >= 4 ? Math.floor(active.length / 4) * 4 : active.length,
       desiredMax
     );
-    return shuffled.slice(0, count).map(p => ({
+
+    let chosen: typeof active = [];
+    const cached = readCache();
+    if (cached) {
+      const byId = new Map(active.map(p => [p.id, p]));
+      chosen = cached.ids.map(id => byId.get(id)).filter(Boolean) as typeof active;
+    }
+
+    if (chosen.length !== targetCount) {
+      chosen = shuffle(active).slice(0, targetCount);
+      if (chosen.length > 0) writeCache(chosen.map(p => p.id));
+    }
+
+    const mapped: Product[] = chosen.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -37,30 +83,61 @@ const BestSellers = () => {
       keywords: p.keywords || [],
       min_quantity: p.min_quantity || undefined,
     }));
+
+    return { products: mapped, totalActive: active.length };
   }, [dbProducts]);
 
+  // ItemList JSON-LD (SEO)
+  const itemListJsonLd = useMemo(() => {
+    if (products.length === 0) return null;
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://emporiolelecute.com.br";
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Mais vendidos — Empório LeleCute",
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      numberOfItems: products.length,
+      itemListElement: products.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${origin}/produto/${p.slug}`,
+        name: p.name,
+      })),
+    };
+  }, [products]);
+
   return (
-    <section 
-      id="mais-vendidos" 
+    <section
+      id="mais-vendidos"
       className="py-16 md:py-24 bg-background relative overflow-hidden"
       aria-labelledby="mais-vendidos-heading"
     >
+      {itemListJsonLd && (
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify(itemListJsonLd)}</script>
+        </Helmet>
+      )}
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-12">
+          <header className="text-center mb-12">
             <span className="text-sm text-muted-foreground uppercase tracking-widest mb-2 block">
               Nossos Favoritos
             </span>
             <h2 id="mais-vendidos-heading" className="font-display text-3xl md:text-4xl text-foreground">
               Mais vendidos
             </h2>
-          </div>
+            {!isLoading && products.length > 0 && (
+              <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
+                Exibindo <strong>{products.length}</strong> de <strong>{totalActive}</strong> produtos ativos
+              </p>
+            )}
+          </header>
 
           {/* Products Grid */}
           {isLoading ? (
             <div className="mb-12">
-              <ProductGridSkeleton count={3} />
+              <ProductGridSkeleton count={4} />
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">
@@ -69,7 +146,7 @@ const BestSellers = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-12">
               {products.map((product, index) => (
-                <div 
+                <div
                   key={product.id}
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
@@ -81,14 +158,14 @@ const BestSellers = () => {
           )}
 
           {/* View All CTA */}
-          <div className="text-center">
+          <div className="text-center flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/produtos">
-              <Button 
+              <Button
                 size="lg"
                 className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-10 py-6 text-lg shadow-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
               >
                 <ShoppingBag className="h-5 w-5 mr-2" />
-                Ver Todos os Produtos
+                Ver mais produtos
                 <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
