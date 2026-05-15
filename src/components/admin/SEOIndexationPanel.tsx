@@ -187,6 +187,8 @@ export default function SEOIndexationPanel() {
         </CardContent>
       </Card>
 
+      <CoverageFunnel rows={rows} onFilterIssues={() => setFilter('issues')} />
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
@@ -271,5 +273,100 @@ export default function SEOIndexationPanel() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Coverage Funnel — agrega URLs por estado de cobertura/indexação
+// ---------------------------------------------------------------------------
+function CoverageFunnel({
+  rows,
+  onFilterIssues,
+}: {
+  rows: StatusRow[];
+  onFilterIssues: () => void;
+}) {
+  const total = rows.length;
+
+  const buckets = useMemo(() => {
+    const indexed: StatusRow[] = [];
+    const discovered: StatusRow[] = [];
+    const excluded: StatusRow[] = [];
+    const error: StatusRow[] = [];
+    const unknown: StatusRow[] = [];
+
+    for (const r of rows) {
+      const cov = (r.coverage_state ?? '').toLowerCase();
+      const idx = (r.indexing_state ?? '').toLowerCase();
+      if (idx.includes('indexing_allowed') && !r.has_issue && cov.includes('submitted and indexed')) {
+        indexed.push(r);
+      } else if (cov.includes('discovered') || cov.includes('crawled')) {
+        discovered.push(r);
+      } else if (cov.includes('excluded') || cov.includes('duplicate') || cov.includes('alternate')) {
+        excluded.push(r);
+      } else if (r.has_issue || cov.includes('error') || cov.includes('not found') || cov.includes('soft 404')) {
+        error.push(r);
+      } else {
+        unknown.push(r);
+      }
+    }
+    return { indexed, discovered, excluded, error, unknown };
+  }, [rows]);
+
+  const items = [
+    { key: 'indexed', label: 'Indexadas', color: 'bg-green-500', list: buckets.indexed, hint: 'Enviadas e indexadas pelo Google.' },
+    { key: 'discovered', label: 'Descobertas / Rastreadas', color: 'bg-blue-500', list: buckets.discovered, hint: 'Conhecidas mas ainda não indexadas.' },
+    { key: 'excluded', label: 'Excluídas', color: 'bg-yellow-500', list: buckets.excluded, hint: 'Duplicadas, canônicas alternativas ou propositalmente excluídas.' },
+    { key: 'error', label: 'Erros', color: 'bg-red-500', list: buckets.error, hint: 'Problemas que impedem a indexação.' },
+    { key: 'unknown', label: 'Sem dados', color: 'bg-muted', list: buckets.unknown, hint: 'Sem estado de cobertura conhecido ainda.' },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <ListChecks className="w-4 h-4" /> Funil de cobertura GSC
+        </CardTitle>
+        <CardDescription>
+          Distribuição das {total} URLs monitoradas pelo estado reportado pelo Google Search Console.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {total === 0 ? (
+          <p className="text-sm text-muted-foreground py-6 text-center">
+            Sem dados para agregar. Rode "Verificar agora" para popular.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {items.map((it) => {
+              const pct = total > 0 ? (it.list.length / total) * 100 : 0;
+              const clickable = it.key === 'error' && it.list.length > 0;
+              return (
+                <div
+                  key={it.key}
+                  className={`group ${clickable ? 'cursor-pointer' : ''}`}
+                  onClick={clickable ? onFilterIssues : undefined}
+                  title={it.hint}
+                >
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="font-medium flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${it.color}`} />
+                      {it.label}
+                      {clickable && <span className="text-xs text-primary group-hover:underline">(filtrar)</span>}
+                    </span>
+                    <span className="tabular-nums text-muted-foreground">
+                      {it.list.length} <span className="text-xs">({pct.toFixed(1)}%)</span>
+                    </span>
+                  </div>
+                  <div className="h-2 rounded bg-muted overflow-hidden">
+                    <div className={`h-full ${it.color} transition-all`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
