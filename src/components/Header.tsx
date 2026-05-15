@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Heart, Instagram, Facebook, ShoppingCart } from "lucide-react";
+import { Menu, X, Instagram, Facebook, ShoppingCart, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
 import { useCart } from "@/contexts/CartContext";
@@ -11,11 +11,10 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { itemCount } = useCart();
   const navigate = useNavigate();
-  
-  // Fetch dynamic menu items from database
+  const navRef = useRef<HTMLElement | null>(null);
+
   const { data: menuItems } = useMenuItems('header');
-  
-  // Filter visible items and sort by position
+
   const navLinks = menuItems
     ?.filter(item => item.is_visible)
     .map(item => ({
@@ -23,7 +22,6 @@ const Header = () => {
       label: item.label,
       isExternal: item.is_external,
     })) || [
-      // Fallback links if no menu items configured
       { href: "/sobre", label: "Sobre", isExternal: false },
       { href: "/produtos", label: "Produtos", isExternal: false },
       { href: "/ocasioes", label: "Ocasiões", isExternal: false },
@@ -33,11 +31,30 @@ const Header = () => {
     ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { href: string; isExternal: boolean }) => {
-    if (link.isExternal) return; // Let external links behave normally
+    if (link.isExternal) return;
     e.preventDefault();
     setIsMenuOpen(false);
     navigate(link.href);
   };
+
+  // Auto-close on outside click + ESC
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [isMenuOpen]);
 
   const socialLinks = [
     { href: "https://www.instagram.com/emporiolelecute", icon: Instagram, label: "Instagram" },
@@ -46,24 +63,22 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-soft">
-      <nav className="container mx-auto px-4 py-3" aria-label="Navegação principal">
+      <nav ref={navRef} className="container mx-auto px-4 py-3" aria-label="Navegação principal">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link 
+          <Link
             to="/"
             className="flex items-center gap-2 group"
             aria-label="Empório LeleCute - Página inicial"
           >
-            <img 
-              src={logo} 
-              alt="Logo Empório LeleCute - Ateliê Criativo de Lembrancinhas Artesanais" 
+            <img
+              src={logo}
+              alt="Logo Empório LeleCute - Ateliê Criativo de Lembrancinhas Artesanais"
               className="h-28 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               width="112"
               height="112"
             />
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
             <ul className="flex items-center gap-6">
               {navLinks.map((link) => (
@@ -90,12 +105,10 @@ const Header = () => {
               ))}
             </ul>
 
-            {/* Search Bar */}
             <div className="border-l border-border pl-6">
               <SearchBar />
             </div>
 
-            {/* Social Links */}
             <div className="flex items-center gap-3">
               {socialLinks.map((link) => (
                 <a
@@ -111,9 +124,8 @@ const Header = () => {
               ))}
             </div>
 
-            {/* Cart Icon */}
-            <Link 
-              to="/carrinho" 
+            <Link
+              to="/carrinho"
               className="relative p-2 text-foreground/80 hover:text-primary transition-colors"
               aria-label="Carrinho de compras"
             >
@@ -125,20 +137,19 @@ const Header = () => {
               )}
             </Link>
 
-            {/* CTA Button */}
-            <a
-              href="https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas."
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="default" size="sm" className="bg-primary hover:bg-primary-dark text-primary-foreground rounded-full px-6 shadow-soft transition-all duration-300 hover:shadow-medium hover:-translate-y-0.5">
-                <Heart className="h-4 w-4 mr-2" />
-                Fazer Orçamento
+            {/* Conectar (login) */}
+            <Link to="/admin/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full px-5 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Conectar
               </Button>
-            </a>
+            </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -149,7 +160,6 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-medium animate-fade-in">
             <ul className="flex flex-col py-4">
@@ -189,8 +199,8 @@ const Header = () => {
                     <link.icon className="h-5 w-5" />
                   </a>
                 ))}
-                <Link 
-                  to="/carrinho" 
+                <Link
+                  to="/carrinho"
                   className="relative p-2 text-foreground/80 hover:text-primary transition-colors ml-auto"
                   aria-label="Carrinho de compras"
                   onClick={() => setIsMenuOpen(false)}
@@ -204,17 +214,12 @@ const Header = () => {
                 </Link>
               </li>
               <li className="px-6 pt-4">
-                <a
-                  href="https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full"
-                >
-                  <Button variant="default" className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-full">
-                    <Heart className="h-4 w-4 mr-2" />
-                    Fazer Orçamento
+                <Link to="/admin/login" onClick={() => setIsMenuOpen(false)} className="w-full">
+                  <Button variant="outline" className="w-full rounded-full border-primary/30 text-primary hover:bg-primary/10">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Conectar
                   </Button>
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
