@@ -129,7 +129,7 @@ const AdminLayout = () => {
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border/50">
+        <div className="flex items-center justify-between p-5 border-b border-border/50 shrink-0">
           <Link to="/admin" className="flex items-center gap-3 group">
             <div className="w-14 h-14 rounded-full bg-white shadow-md ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all flex items-center justify-center overflow-hidden shrink-0">
               <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-1" />
