@@ -179,10 +179,18 @@ export default function AdminSEODashboard() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard SEO</h1>
-        <p className="text-sm text-muted-foreground">Monitoramento agregado: Google Search Console, Semrush e checks de saúde técnica.</p>
+    <div className="space-y-6 print:space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard SEO</h1>
+          <p className="text-sm text-muted-foreground">Monitoramento agregado: Google Search Console, Semrush e checks de saúde técnica.</p>
+        </div>
+        <div className="flex flex-wrap gap-2 print:hidden">
+          <Button size="sm" variant="outline" onClick={exportSemrushCsv}><Download className="h-4 w-4 mr-1"/>CSV Semrush</Button>
+          <Button size="sm" variant="outline" onClick={exportGscCsv}><Download className="h-4 w-4 mr-1"/>CSV GSC</Button>
+          <Button size="sm" variant="outline" onClick={exportRunsCsv}><Download className="h-4 w-4 mr-1"/>CSV Checks</Button>
+          <Button size="sm" variant="outline" onClick={exportPdf}><Download className="h-4 w-4 mr-1"/>PDF (imprimir)</Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview">
