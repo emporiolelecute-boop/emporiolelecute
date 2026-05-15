@@ -63,8 +63,15 @@ export default function AdminSEODashboard() {
   const [loadingGsc, setLoadingGsc] = useState(false);
   const [loadingChecks, setLoadingChecks] = useState(false);
   const [runs, setRuns] = useState<CheckRun[]>([]);
-  const [alertCfg, setAlertCfg] = useState<{ email: string; webhook_url: string; enabled: boolean }>({ email: '', webhook_url: '', enabled: true });
+  const [alertCfg, setAlertCfg] = useState<{ email: string; webhook_url: string; enabled: boolean; severities: string[] }>({ email: '', webhook_url: '', enabled: true, severities: ['error'] });
   const [savingCfg, setSavingCfg] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+  // Filtros do histórico
+  const [filterSource, setFilterSource] = useState<'all'|'cron'|'manual'|'cron-daily'>('all');
+  const [filterFrom, setFilterFrom] = useState<string>('');
+  const [filterTo, setFilterTo] = useState<string>('');
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
   const loadSnapshots = useCallback(async () => {
     const { data } = await supabase.from('seo_snapshots')
