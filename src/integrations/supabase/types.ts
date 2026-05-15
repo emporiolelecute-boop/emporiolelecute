@@ -1024,6 +1024,42 @@ export type Database = {
         }
         Relationships: []
       }
+      role_promotion_audit: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          promoted_by: string | null
+          promoted_by_email: string | null
+          role: string
+          status: string
+          target_email: string
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          promoted_by?: string | null
+          promoted_by_email?: string | null
+          role: string
+          status: string
+          target_email: string
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          promoted_by?: string | null
+          promoted_by_email?: string | null
+          role?: string
+          status?: string
+          target_email?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       seo_check_runs: {
         Row: {
           alert_error: string | null
@@ -1274,6 +1310,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_user_to_admin: { Args: { _email: string }; Returns: Json }
       validate_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: Json
