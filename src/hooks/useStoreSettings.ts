@@ -65,7 +65,7 @@ export interface TrustBadgesConfig {
 }
 
 const defaultPaymentConfig: PaymentConfig = {
-  pix_discount: 7,
+  pix_discount: 5,
   installments: 3,
   accepted_methods: {
     pix: true,
