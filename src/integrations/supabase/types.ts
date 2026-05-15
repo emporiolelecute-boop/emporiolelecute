@@ -1567,6 +1567,31 @@ export type Database = {
         }
         Returns: Json
       }
+      list_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobid: number
+          jobname: string
+          schedule: string
+        }[]
+      }
+      list_cron_runs: {
+        Args: { p_limit?: number }
+        Returns: {
+          command: string
+          database: string
+          end_time: string
+          job_pid: number
+          jobid: number
+          return_message: string
+          runid: number
+          start_time: string
+          status: string
+          username: string
+        }[]
+      }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
       refresh_admin_audit_timeline: { Args: never; Returns: Json }
       reject_admin_request: {
