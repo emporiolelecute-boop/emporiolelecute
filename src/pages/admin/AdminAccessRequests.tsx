@@ -106,6 +106,32 @@ const AdminAccessRequests = () => {
     }
   };
 
+  const reject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (reason.length < 3) {
+      toast({ title: 'Motivo obrigatório', description: 'Informe ao menos 3 caracteres.', variant: 'destructive' });
+      return;
+    }
+    setActing(rejectTarget.id);
+    try {
+      const { error } = await (supabase as any).rpc('reject_admin_request', {
+        _user_id: rejectTarget.id,
+        _reason: reason,
+      });
+      if (error) throw error;
+      toast({ title: 'Solicitação reprovada', description: rejectTarget.email });
+      setRows((prev) => prev.filter((r) => r.id !== rejectTarget.id));
+      if (selected?.id === rejectTarget.id) setSelected(null);
+      setRejectTarget(null);
+      setRejectReason('');
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, variant: 'destructive' });
+    } finally {
+      setActing(null);
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = q
