@@ -92,12 +92,18 @@ const AdminProducts = () => {
           <h1 className="text-3xl font-display font-semibold text-foreground">Produtos</h1>
           <p className="text-muted-foreground mt-1">Gerencie todos os produtos da loja</p>
         </div>
-        <Button asChild>
-          <Link to="/admin/produtos/novo">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Produto
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={() => setBackfillOpen(true)}>
+            <Scale className="w-4 h-4 mr-2" />
+            Backfill peso{productsWithoutWeight > 0 ? ` (${productsWithoutWeight})` : ''}
+          </Button>
+          <Button asChild>
+            <Link to="/admin/produtos/novo">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Produto
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-card">
