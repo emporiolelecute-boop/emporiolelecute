@@ -63,8 +63,6 @@ const AdminAccessRequestDetail = () => {
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
   const [rejecting, setRejecting] = useState(false);
