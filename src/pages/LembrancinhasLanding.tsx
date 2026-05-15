@@ -153,6 +153,39 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
       {itemListProducts.length > 0 && (
         <ItemListStructuredData products={itemListProducts} listName={config.h1} />
       )}
+      {config.testimonials && config.testimonials.length > 0 && (() => {
+        const ratings = config.testimonials!.map((t) => t.rating ?? 5);
+        const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+        const aggregate = {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: config.h1,
+          description: config.seoDescription,
+          url: pageUrl,
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: avg.toFixed(1),
+            reviewCount: ratings.length,
+            bestRating: "5",
+            worstRating: "1",
+          },
+          review: config.testimonials!.map((t) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: t.name },
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: String(t.rating ?? 5),
+              bestRating: "5",
+            },
+            reviewBody: t.text,
+          })),
+        };
+        return (
+          <Helmet>
+            <script type="application/ld+json">{JSON.stringify(aggregate)}</script>
+          </Helmet>
+        );
+      })()}
 
       <Header />
 
