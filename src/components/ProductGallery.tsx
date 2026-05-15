@@ -113,7 +113,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
       {/* Main Image Container */}
       <div className="flex-1">
         <div 
-          className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg group cursor-zoom-in"
+          className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg group cursor-pointer"
           onClick={() => setIsZoomed(true)}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
