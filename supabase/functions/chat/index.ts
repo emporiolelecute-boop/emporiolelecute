@@ -27,8 +27,7 @@ ${productList}
 
 CONTATO:
 - WhatsApp: (41) 99221-4299
-- Loja Elo7: www.elo7.com.br/lelecute
-- Site: emporiolelecute.lovable.app
+- Site: emporiolelecute.com.br
 
 INSTRUÇÕES:
 - Seja simpática, acolhedora e use emojis ocasionalmente
