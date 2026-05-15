@@ -70,6 +70,7 @@ const AdminAccessRequestDetail = () => {
   const [reason, setReason] = useState('');
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [resendReason, setResendReason] = useState('');
 
   const COOLDOWN_SECONDS = 60;
   const cooldownKey = id ? `notify_resend_cooldown:${id}` : '';
