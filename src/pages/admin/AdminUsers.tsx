@@ -25,6 +25,8 @@ interface AuditRow {
 const AdminUsers = () => {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterText, setFilterText] = useState("");
 
   const { data: audit = [], isLoading } = useQuery({
     queryKey: ["role_promotion_audit"],
