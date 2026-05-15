@@ -26,6 +26,8 @@ interface Payload {
   email?: string;
   requested_at?: string;
   source?: string;
+  reason?: string | null;
+  request_id?: string | null;
 }
 
 Deno.serve(async (req) => {
