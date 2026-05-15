@@ -23,6 +23,7 @@ import {
   type InstagramFeedEmbed,
 } from "@/hooks/useInstagramFeedEmbeds";
 import { useInstagramFeedConfig, useSaveInstagramFeedConfig } from "@/hooks/useInstagramFeedConfig";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,6 +120,7 @@ const AdminFeedInstagram = () => {
   const save = useSaveInstagramFeedEmbed();
   const del = useDeleteInstagramFeedEmbed();
   const saveConfig = useSaveInstagramFeedConfig();
+  const qc = useQueryClient();
 
   const [draftUrl, setDraftUrl] = useState("");
   const [draftCaption, setDraftCaption] = useState("");
