@@ -1,16 +1,26 @@
 import { MessageCircle } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
 
-const WhatsAppButton = () => {
+interface Props {
+  /** Mensagem pré-preenchida no WhatsApp. Se omitida, usa a padrão genérica. */
+  message?: string;
+  /** Texto curto exibido como tooltip/aria-label. */
+  ariaLabel?: string;
+}
+
+const DEFAULT_MESSAGE =
+  "Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas.";
+
+const WhatsAppButton = ({ message, ariaLabel }: Props = {}) => {
   const { buildWhatsappUrl } = useContactInfo();
-  const href = buildWhatsappUrl('Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas.');
+  const href = buildWhatsappUrl(message || DEFAULT_MESSAGE);
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       className="whatsapp-float"
-      aria-label="Contato via WhatsApp"
+      aria-label={ariaLabel || "Contato via WhatsApp"}
     >
       <div className="w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
         <MessageCircle className="h-8 w-8 text-white" />
