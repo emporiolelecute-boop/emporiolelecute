@@ -319,9 +319,9 @@ const AdminAccessRequests = () => {
               <Button variant="destructive" onClick={() => { setRejectTarget(selected); setRejectReason(''); }} disabled={acting === selected.id}>
                 <X className="w-4 h-4 mr-1" /> Reprovar
               </Button>
-              <Button onClick={() => approve(selected.email, selected.id)} disabled={acting === selected.id}>
+              <Button onClick={() => approve(selected.email, selected.id)} disabled={acting === selected.id || roleRefreshing}>
                 <Check className="w-4 h-4 mr-1" />
-                {acting === selected.id ? 'Aprovando...' : 'Aprovar acesso administrativo'}
+                {acting === selected.id || roleRefreshing ? 'Aprovando...' : 'Aprovar acesso administrativo'}
               </Button>
             </div>
           </CardContent>
