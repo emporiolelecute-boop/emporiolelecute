@@ -8,6 +8,10 @@ export interface InstagramPost {
   post_url: string | null;
   position: number;
   is_visible: boolean;
+  shortcode?: string | null;
+  extraction_status?: string | null;
+  extraction_error?: string | null;
+  last_extracted_at?: string | null;
 }
 
 export const useInstagramPosts = () =>
