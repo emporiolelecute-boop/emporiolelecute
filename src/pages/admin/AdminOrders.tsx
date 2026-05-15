@@ -134,16 +134,32 @@ const AdminOrders = () => {
 
   // Update order status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
+    mutationFn: async ({
+      orderId,
+      newStatus,
+      tracking,
+    }: {
+      orderId: string;
+      newStatus: string;
+      tracking?: { code: string; carrier?: string; url?: string };
+    }) => {
+      const update: Record<string, unknown> = { status: newStatus };
+      if (newStatus === 'shipped' && tracking?.code) {
+        update.tracking_code = tracking.code;
+        update.tracking_carrier = tracking.carrier || null;
+        update.tracking_url = tracking.url || null;
+        update.shipped_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update(update)
         .eq('id', orderId);
-      
+
       if (error) throw error;
 
-      // Send status update email
-      const order = orders?.find(o => o.id === orderId);
+      // Send status update email (with tracking info when shipped)
+      const order = orders?.find((o) => o.id === orderId);
       if (order) {
         await supabase.functions.invoke('send-order-email', {
           body: {
@@ -153,21 +169,32 @@ const AdminOrders = () => {
             customerName: order.customer_name,
             newStatus,
             statusLabel: getStatusInfo(newStatus).label,
+            ...(newStatus === 'shipped' && tracking?.code
+              ? {
+                  trackingCode: tracking.code,
+                  trackingCarrier: tracking.carrier,
+                  trackingUrl: tracking.url,
+                }
+              : {}),
           },
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       toast({
-        title: 'Status atualizado',
-        description: 'O cliente será notificado por email.',
+        title: vars.newStatus === 'shipped' ? 'Pedido marcado como enviado' : 'Status atualizado',
+        description:
+          vars.newStatus === 'shipped'
+            ? 'Código de rastreio salvo e e-mail enviado ao cliente.'
+            : 'O cliente será notificado por email.',
       });
+      setTrackingDialog(null);
     },
-    onError: () => {
+    onError: (e: any) => {
       toast({
         title: 'Erro ao atualizar',
-        description: 'Tente novamente.',
+        description: e?.message || 'Tente novamente.',
         variant: 'destructive',
       });
     },
@@ -180,6 +207,18 @@ const AdminOrders = () => {
   };
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
+    if (newStatus === 'shipped') {
+      const order = orders?.find((o) => o.id === orderId);
+      if (order) {
+        setTrackingDialog({
+          order,
+          code: order.tracking_code || '',
+          carrier: order.tracking_carrier || order.shipping_company || '',
+          url: order.tracking_url || '',
+        });
+        return;
+      }
+    }
     updateStatusMutation.mutate({ orderId, newStatus });
   };
 
