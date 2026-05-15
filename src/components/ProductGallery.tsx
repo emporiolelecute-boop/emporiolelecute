@@ -280,7 +280,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <>
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-all hover:scale-110 shadow-lg"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
                   aria-label="Imagem anterior"
                 >
                   <ChevronLeft className="h-6 w-6" />
