@@ -61,7 +61,10 @@ const FAQSection = () => {
 
   // Filter only visible FAQs from database
   const visibleFaqs = faqs?.filter(faq => faq.is_visible !== false) || [];
-  const displayFaqs = visibleFaqs.length > 0 ? visibleFaqs : defaultFaqs;
+  const displayFaqs = (visibleFaqs.length > 0 ? visibleFaqs : defaultFaqs).map((f) => ({
+    ...f,
+    answer: interpolate(f.answer),
+  }));
 
   return (
     <>
