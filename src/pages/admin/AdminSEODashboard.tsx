@@ -78,20 +78,9 @@ export default function AdminSEODashboard() {
   const loadGsc = async (days = 28, dim: 'query'|'page' = 'query') => {
     setLoadingGsc(true);
     try {
-      const { data, error } = await supabase.functions.invoke('seo-gsc-analytics', {
-        body: null,
-        headers: {},
-      } as never);
-      // invoke não passa query string; chamamos via URL diretamente
-      let payload = data as GscData | null;
-      if (!payload) {
-        const projectId = (import.meta as { env: Record<string,string> }).env.VITE_SUPABASE_PROJECT_ID;
-        const url = `https://${projectId}.functions.supabase.co/seo-gsc-analytics?days=${days}&dim=${dim}`;
-        const r = await fetch(url, { headers: { Authorization: `Bearer ${(import.meta as { env: Record<string,string> }).env.VITE_SUPABASE_PUBLISHABLE_KEY}` } });
-        payload = await r.json();
-      }
+      const { data, error } = await supabase.functions.invoke('seo-gsc-analytics', { body: { days, dim } });
       if (error) throw error;
-      setGsc(payload);
+      setGsc(data as GscData);
     } catch (e) {
       toast.error('Falha ao carregar GSC', { description: String(e instanceof Error ? e.message : e) });
     } finally { setLoadingGsc(false); }
