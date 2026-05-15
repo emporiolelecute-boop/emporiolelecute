@@ -267,10 +267,12 @@ const AdminAudit = () => {
     doc.setFontSize(9);
     doc.setTextColor(120);
     doc.text(
-      `Gerado em ${today} • página ${currentPage} (${rows.length} de ${total} eventos)` +
+      `Gerado em ${today} • escopo=${exportScope === 'page' ? `página ${currentPage}` : `tudo (${data.length} de ${total})`}` +
       (status !== 'all' ? ` • status=${status}` : '') +
       (source !== 'all' ? ` • origem=${source}` : '') +
+      (debouncedQuery ? ` • busca="${debouncedQuery}"` : '') +
       (from ? ` • de ${from}` : '') + (to ? ` até ${to}` : '') +
+      ` • ordem=${sortKey} ${sortDir}` +
       (maskPii ? ' • PII mascarada (LGPD)' : ''),
       40, 56,
     );
@@ -279,7 +281,7 @@ const AdminAudit = () => {
     autoTable(doc, {
       startY: 72,
       head: [['Data', 'Origem', 'Status', 'Alvo', 'Por', 'Detalhes']],
-      body: rows.map((r) => [
+      body: data.map((r) => [
         new Date(r.created_at).toLocaleString('pt-BR'),
         r.source,
         r.status,
