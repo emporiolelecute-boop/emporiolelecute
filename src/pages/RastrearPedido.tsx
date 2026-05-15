@@ -326,6 +326,49 @@ const RastrearPedido = () => {
                   </div>
                 </div>
 
+                {/* Tracking info */}
+                {(order.tracking_code || order.tracking_carrier || order.tracking_url || order.shipped_at) && (
+                  <div className="bg-card rounded-xl border-2 border-primary/40 p-6">
+                    <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                      <Truck className="h-5 w-5 text-primary" />
+                      Rastreamento da Entrega
+                    </h3>
+                    <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                      {order.tracking_code && (
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase">Código de rastreio</p>
+                          <p className="font-mono font-bold text-primary text-base break-all">{order.tracking_code}</p>
+                        </div>
+                      )}
+                      {order.tracking_carrier && (
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase">Transportadora</p>
+                          <p className="font-medium">{order.tracking_carrier}</p>
+                        </div>
+                      )}
+                      {order.shipped_at && (
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase">Despachado em</p>
+                          <p className="font-medium">{formatDate(order.shipped_at)}</p>
+                        </div>
+                      )}
+                    </div>
+                    {order.tracking_url && (
+                      <a
+                        href={order.tracking_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex"
+                      >
+                        <Button className="bg-primary hover:bg-primary/90">
+                          <Truck className="h-4 w-4 mr-2" />
+                          Acompanhar entrega
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                )}
+
                 {/* Products */}
                 <div className="bg-card rounded-xl border border-border p-6">
                   <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">

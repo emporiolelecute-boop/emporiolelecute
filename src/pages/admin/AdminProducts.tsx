@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Search, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Eye, EyeOff, ExternalLink, Scale, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,6 +33,33 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [backfillOpen, setBackfillOpen] = useState(false);
+  const [backfillKg, setBackfillKg] = useState('0.150');
+  const [backfilling, setBackfilling] = useState(false);
+
+  const productsWithoutWeight = products?.filter((p: any) => !p.weight || p.weight <= 0).length || 0;
+
+  const runBackfill = async () => {
+    const kg = parseFloat(backfillKg.replace(',', '.'));
+    if (!kg || kg <= 0 || kg > 30) {
+      toast({ title: 'Peso inválido', description: 'Use um valor entre 0.001 e 30 kg', variant: 'destructive' });
+      return;
+    }
+    setBackfilling(true);
+    try {
+      const { data, error } = await (supabase as any).rpc('apply_default_weight', { _default_kg: kg });
+      if (error) throw error;
+      toast({
+        title: 'Backfill concluído',
+        description: `${data?.updated ?? 0} produto(s) atualizado(s) com ${kg} kg.`,
+      });
+      setBackfillOpen(false);
+    } catch (e: any) {
+      toast({ title: 'Erro no backfill', description: e?.message || 'Tente novamente', variant: 'destructive' });
+    } finally {
+      setBackfilling(false);
+    }
+  };
 
   const filteredProducts = products?.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -64,12 +92,18 @@ const AdminProducts = () => {
           <h1 className="text-3xl font-display font-semibold text-foreground">Produtos</h1>
           <p className="text-muted-foreground mt-1">Gerencie todos os produtos da loja</p>
         </div>
-        <Button asChild>
-          <Link to="/admin/produtos/novo">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Produto
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={() => setBackfillOpen(true)}>
+            <Scale className="w-4 h-4 mr-2" />
+            Backfill peso{productsWithoutWeight > 0 ? ` (${productsWithoutWeight})` : ''}
+          </Button>
+          <Button asChild>
+            <Link to="/admin/produtos/novo">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Produto
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-card">
@@ -229,6 +263,39 @@ const AdminProducts = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={backfillOpen} onOpenChange={(o) => !backfilling && setBackfillOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Scale className="w-5 h-5 text-primary" /> Backfill de peso padrão
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Aplica o peso informado a todos os produtos ativos sem peso (atualmente{' '}
+              <strong>{productsWithoutWeight}</strong>). Use para evitar erros no cálculo de frete.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <label className="text-sm font-medium">Peso padrão (kg)</label>
+            <Input
+              type="number"
+              step="0.001"
+              min="0.001"
+              max="30"
+              value={backfillKg}
+              onChange={(e) => setBackfillKg(e.target.value)}
+              disabled={backfilling}
+            />
+            <p className="text-xs text-muted-foreground">Sugerido: 0.150 kg para sabonetes pequenos.</p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={backfilling}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); runBackfill(); }} disabled={backfilling}>
+              {backfilling ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Aplicando...</> : 'Aplicar peso'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

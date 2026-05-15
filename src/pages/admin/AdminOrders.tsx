@@ -17,6 +17,7 @@ import {
   MapPin,
   Calendar,
   RefreshCw,
+  Send,
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -200,6 +201,50 @@ const AdminOrders = () => {
     },
   });
 
+  // Resend status email mutation
+  const resendEmailMutation = useMutation({
+    mutationFn: async (order: Order) => {
+      const payload: Record<string, unknown> = {
+        type: 'status_update',
+        orderCode: order.order_code,
+        customerEmail: order.customer_email,
+        customerName: order.customer_name,
+        newStatus: order.status,
+        statusLabel: getStatusInfo(order.status).label,
+      };
+      if (order.tracking_code) {
+        payload.trackingCode = order.tracking_code;
+        payload.trackingCarrier = order.tracking_carrier;
+        payload.trackingUrl = order.tracking_url;
+      }
+      const { error: invokeErr } = await supabase.functions.invoke('send-order-email', { body: payload });
+
+      // Audit attempt
+      await supabase.from('tracking_email_log').insert({
+        order_id: order.id,
+        order_code: order.order_code,
+        recipient_email: order.customer_email,
+        email_type: 'resend_status',
+        new_status: order.status,
+        tracking_code: order.tracking_code || null,
+        tracking_carrier: order.tracking_carrier || null,
+        tracking_url: order.tracking_url || null,
+        status: invokeErr ? 'failed' : 'sent',
+        error_message: invokeErr ? String(invokeErr.message || invokeErr) : null,
+      });
+
+      if (invokeErr) throw invokeErr;
+    },
+    onSuccess: () =>
+      toast({ title: 'E-mail reenviado', description: 'O cliente recebeu uma nova notificação.' }),
+    onError: (e: any) =>
+      toast({
+        title: 'Falha ao reenviar e-mail',
+        description: e?.message || 'Tente novamente.',
+        variant: 'destructive',
+      }),
+  });
+
   const handleViewOrder = async (order: Order) => {
     setSelectedOrder(order);
     const items = await fetchOrderItems(order.id);
@@ -374,14 +419,25 @@ const AdminOrders = () => {
                         <span className="text-sm text-muted-foreground">{formatDate(order.created_at)}</span>
                       </td>
                       <td className="p-4 text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewOrder(order)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => resendEmailMutation.mutate(order)}
+                            disabled={resendEmailMutation.isPending}
+                            title="Reenviar e-mail de status"
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewOrder(order)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );

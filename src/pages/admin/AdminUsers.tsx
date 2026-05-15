@@ -140,6 +140,87 @@ const AdminUsers = () => {
     toast.success("PDF exportado.");
   };
 
+  const buildSummary = () => {
+    const counts: Record<string, number> = {};
+    for (const r of audit) counts[r.status] = (counts[r.status] || 0) + 1;
+    return counts;
+  };
+
+  const exportConsolidatedCSV = () => {
+    if (!audit.length) return toast.info("Nada para exportar.");
+    const summary = buildSummary();
+    const escape = (v: any) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines: string[] = [];
+    lines.push("# Relatório consolidado de promoções e solicitações de acesso");
+    lines.push(`# Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`);
+    lines.push(`# Total de eventos: ${audit.length}`);
+    Object.entries(summary).forEach(([k, v]) => lines.push(`# ${k}: ${v}`));
+    lines.push("");
+    const header = ["Data/hora", "Evento", "E-mail alvo", "Realizado por", "Papel", "Mensagem"];
+    lines.push(header.map(escape).join(","));
+    audit.forEach((r) => {
+      lines.push([
+        format(new Date(r.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR }),
+        r.status,
+        r.target_email,
+        r.promoted_by_email || "",
+        r.role,
+        r.message || "",
+      ].map(escape).join(","));
+    });
+    const blob = new Blob([`\uFEFF${lines.join("\n")}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio-consolidado-usuarios-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("Relatório CSV exportado.");
+  };
+
+  const exportConsolidatedPDF = () => {
+    if (!audit.length) return toast.info("Nada para exportar.");
+    const summary = buildSummary();
+    const doc = new jsPDF({ orientation: "landscape" });
+    doc.setFontSize(16);
+    doc.text("Relatório consolidado — Promoções & Solicitações de acesso", 14, 16);
+    doc.setFontSize(10);
+    doc.text(
+      `Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })} — ${audit.length} eventos no total`,
+      14,
+      23,
+    );
+    autoTable(doc, {
+      startY: 28,
+      head: [["Status", "Total"]],
+      body: Object.entries(summary).map(([k, v]) => [k, String(v)]),
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [180, 90, 80] },
+      margin: { left: 14 },
+      tableWidth: 80,
+    });
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 8,
+      head: [["Data/hora", "Evento", "E-mail alvo", "Realizado por", "Mensagem"]],
+      body: audit.map((r) => [
+        format(new Date(r.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+        r.status,
+        r.target_email,
+        r.promoted_by_email || "—",
+        r.message || "—",
+      ]),
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [180, 90, 80] },
+    });
+    doc.save(`relatorio-consolidado-usuarios-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success("Relatório PDF exportado.");
+  };
+
   const statusBadge = (s: string) => {
     if (s === "success") return <span className="inline-flex items-center gap-1 text-emerald-600 text-xs"><CheckCircle2 className="h-3 w-3" /> sucesso</span>;
     if (s === "noop") return <span className="text-xs text-muted-foreground">já era admin</span>;
@@ -189,12 +270,18 @@ const AdminUsers = () => {
           <h2 className="font-medium flex items-center gap-2">
             <History className="h-4 w-4" /> Histórico ({filtered.length}/{audit.length})
           </h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={exportCSV} disabled={!filtered.length}>
-              <Download className="h-4 w-4 mr-2" /> CSV
+              <Download className="h-4 w-4 mr-2" /> CSV (filtrado)
             </Button>
             <Button size="sm" variant="outline" onClick={exportPDF} disabled={!filtered.length}>
-              <FileText className="h-4 w-4 mr-2" /> PDF
+              <FileText className="h-4 w-4 mr-2" /> PDF (filtrado)
+            </Button>
+            <Button size="sm" onClick={exportConsolidatedCSV} disabled={!audit.length}>
+              <Download className="h-4 w-4 mr-2" /> Relatório CSV
+            </Button>
+            <Button size="sm" onClick={exportConsolidatedPDF} disabled={!audit.length}>
+              <FileText className="h-4 w-4 mr-2" /> Relatório PDF
             </Button>
           </div>
         </div>
