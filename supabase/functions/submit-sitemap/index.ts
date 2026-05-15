@@ -1,3 +1,7 @@
+// Submete o sitemap ao Google Search Console via gateway oficial e
+// registra histórico de indexação em store_settings (chave `sitemap_monitor_history`).
+// Pode ser chamado manualmente ou agendado via pg_cron.
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -5,172 +9,137 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const GSC_GATEWAY = 'https://connector-gateway.lovable.dev/google_search_console/webmasters/v3'
+
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('Starting sitemap submission to Google and Bing...')
-    
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    
-    // Fetch SEO settings for canonical URL
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
+    const GSC_KEY = Deno.env.get('GOOGLE_SEARCH_CONSOLE_API_KEY')
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured')
+    if (!GSC_KEY) throw new Error('GOOGLE_SEARCH_CONSOLE_API_KEY not configured (conecte Google Search Console em Conectores)')
+
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
     const { data: seoData } = await supabase
-      .from('store_settings')
-      .select('value')
-      .eq('key', 'seo_config')
-      .single()
-    
-    const seoConfig = seoData?.value as { canonical_url?: string, sitemap_notification_email?: string } | null
+      .from('store_settings').select('value').eq('key', 'seo_config').single()
+    const seoConfig = seoData?.value as { canonical_url?: string; sitemap_notification_email?: string; gsc_property?: string } | null
     const siteUrl = seoConfig?.canonical_url || 'https://emporiolelecute.com.br'
     const sitemapUrl = `${siteUrl}/sitemap.xml`
-    
-    // Submit to Google using IndexNow-style ping
-    const googlePingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`
-    
-    console.log(`Pinging Google with sitemap: ${sitemapUrl}`)
-    
-    let googleStatus = 'pending'
-    try {
-      const googleResponse = await fetch(googlePingUrl)
-      googleStatus = googleResponse.ok ? 'success' : `failed (${googleResponse.status})`
-      console.log(`Google ping result: ${googleStatus}`)
-    } catch (err) {
-      console.error('Google ping error:', err)
-      googleStatus = 'error'
+
+    // Domain property por padrão; se o usuário tiver URL-prefix configurado em seo_config.gsc_property, usa o configurado.
+    const property = seoConfig?.gsc_property || `sc-domain:${siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}`
+    const propertyEnc = encodeURIComponent(property)
+    const sitemapEnc = encodeURIComponent(sitemapUrl)
+
+    const headers = {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      'X-Connection-Api-Key': GSC_KEY,
+      'Content-Type': 'application/json',
     }
-    
-    // Submit to Bing
-    const bingPingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`
-    
-    console.log(`Pinging Bing with sitemap: ${sitemapUrl}`)
-    
-    let bingStatus = 'pending'
-    try {
-      const bingResponse = await fetch(bingPingUrl)
-      bingStatus = bingResponse.ok ? 'success' : `failed (${bingResponse.status})`
-      console.log(`Bing ping result: ${bingStatus}`)
-    } catch (err) {
-      console.error('Bing ping error:', err)
-      bingStatus = 'error'
+
+    // 1) Submit (PUT é idempotente)
+    const submitRes = await fetch(`${GSC_GATEWAY}/sites/${propertyEnc}/sitemaps/${sitemapEnc}`, {
+      method: 'PUT', headers,
+    })
+    const submitOk = submitRes.status === 204 || submitRes.ok
+    let submitError: string | null = null
+    if (!submitOk) {
+      submitError = await submitRes.text()
+      console.error('GSC submit failed', submitRes.status, submitError)
     }
-    
-    // Also ping Yandex
-    const yandexPingUrl = `https://webmaster.yandex.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`
-    
-    let yandexStatus = 'pending'
+
+    // 2) Status atual (lastDownloaded, indexed counts)
+    let status: any = null
     try {
-      const yandexResponse = await fetch(yandexPingUrl)
-      yandexStatus = yandexResponse.ok ? 'success' : `failed (${yandexResponse.status})`
-      console.log(`Yandex ping result: ${yandexStatus}`)
-    } catch (err) {
-      console.error('Yandex ping error:', err)
-      yandexStatus = 'error'
-    }
-    
-    // Update last submission time in store_settings
-    const submissionResult = {
+      const statusRes = await fetch(`${GSC_GATEWAY}/sites/${propertyEnc}/sitemaps/${sitemapEnc}`, { headers })
+      if (statusRes.ok) status = await statusRes.json()
+      else console.warn('GSC status failed', statusRes.status)
+    } catch (e) { console.warn('GSC status error', e) }
+
+    const submittedWeb = parseInt(status?.contents?.find((c: any) => c.type === 'web')?.submitted ?? '0', 10)
+    const indexedWeb = parseInt(status?.contents?.find((c: any) => c.type === 'web')?.indexed ?? '0', 10)
+    const submittedImg = parseInt(status?.contents?.find((c: any) => c.type === 'image')?.submitted ?? '0', 10)
+
+    const submission = {
       submitted_at: new Date().toISOString(),
-      google_status: googleStatus,
-      bing_status: bingStatus,
-      yandex_status: yandexStatus,
+      property,
       sitemap_url: sitemapUrl,
+      gsc_status: submitOk ? 'success' : `failed (${submitRes.status})`,
+      gsc_error: submitError,
+      last_downloaded: status?.lastDownloaded ?? null,
+      is_pending: status?.isPending ?? null,
+      submitted_web: submittedWeb,
+      indexed_web: indexedWeb,
+      submitted_images: submittedImg,
+      warnings: status?.warnings ?? '0',
+      errors: status?.errors ?? '0',
     }
-    
-    await supabase
-      .from('store_settings')
-      .upsert({
-        key: 'last_sitemap_submission',
-        value: submissionResult,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'key'
-      })
-    
-    console.log('Sitemap submission completed successfully')
-    
-    // Send notification email if configured
+
+    await supabase.from('store_settings').upsert(
+      { key: 'last_sitemap_submission', value: submission, updated_at: new Date().toISOString() },
+      { onConflict: 'key' },
+    )
+
+    // 3) Append a histórico (mantém últimos 60 pontos)
+    const { data: histRow } = await supabase
+      .from('store_settings').select('value').eq('key', 'sitemap_monitor_history').maybeSingle()
+    const history = Array.isArray((histRow?.value as any)?.points) ? (histRow!.value as any).points : []
+    history.push({
+      ts: submission.submitted_at,
+      submitted_web: submittedWeb,
+      indexed_web: indexedWeb,
+      gsc_status: submission.gsc_status,
+    })
+    const trimmed = history.slice(-60)
+    await supabase.from('store_settings').upsert(
+      { key: 'sitemap_monitor_history', value: { points: trimmed }, updated_at: new Date().toISOString() },
+      { onConflict: 'key' },
+    )
+
+    // 4) Email opcional
     const notificationEmail = seoConfig?.sitemap_notification_email
-    
     if (notificationEmail) {
       try {
         const resendKey = Deno.env.get('RESEND_API_KEY')
         if (resendKey) {
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${resendKey}`,
-            },
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendKey}` },
             body: JSON.stringify({
               from: 'Empório LeleCute <noreply@emporiolelecute.com.br>',
               to: [notificationEmail],
-              subject: 'Sitemap Submetido aos Buscadores - Empório LeleCute',
-              html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                  <h2 style="color: #F87C6D;">Sitemap Submetido Automaticamente</h2>
-                  <p>O sitemap foi submetido aos mecanismos de busca.</p>
-                  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                    <tr>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>Data/Hora:</strong></td>
-                      <td style="padding: 10px; border: 1px solid #ddd;">${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>Google:</strong></td>
-                      <td style="padding: 10px; border: 1px solid #ddd;">${googleStatus === 'success' ? '✅ Sucesso' : '❌ ' + googleStatus}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>Bing:</strong></td>
-                      <td style="padding: 10px; border: 1px solid #ddd;">${bingStatus === 'success' ? '✅ Sucesso' : '❌ ' + bingStatus}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>Yandex:</strong></td>
-                      <td style="padding: 10px; border: 1px solid #ddd;">${yandexStatus === 'success' ? '✅ Sucesso' : '❌ ' + yandexStatus}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>Sitemap URL:</strong></td>
-                      <td style="padding: 10px; border: 1px solid #ddd;"><a href="${sitemapUrl}">${sitemapUrl}</a></td>
-                    </tr>
-                  </table>
-                  <p style="color: #666; font-size: 12px;">
-                    Nota: Este é um ping automático para notificar os buscadores sobre atualizações. A indexação real pode levar de algumas horas a alguns dias.
-                  </p>
-                </div>
-              `,
+              subject: 'Sitemap — relatório de indexação',
+              html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+                <h2 style="color:#F87C6D">Sitemap atualizado no Google Search Console</h2>
+                <p>Propriedade: <code>${property}</code></p>
+                <ul>
+                  <li>Status submissão: <strong>${submission.gsc_status}</strong></li>
+                  <li>URLs web submetidas: <strong>${submittedWeb}</strong></li>
+                  <li>URLs web indexadas: <strong>${indexedWeb}</strong></li>
+                  <li>Imagens submetidas: <strong>${submittedImg}</strong></li>
+                  <li>Último download Google: ${submission.last_downloaded ?? '—'}</li>
+                  <li>Avisos: ${submission.warnings} · Erros: ${submission.errors}</li>
+                </ul>
+                <p><a href="${sitemapUrl}">${sitemapUrl}</a></p>
+              </div>`,
             }),
           })
-          console.log('Notification email sent successfully')
         }
-      } catch (emailError) {
-        console.error('Error sending notification email:', emailError)
-      }
+      } catch (e) { console.error('email error', e) }
     }
-    
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Sitemap submetido com sucesso aos buscadores',
-        results: submissionResult,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
-    
+
+    return new Response(JSON.stringify({ success: submitOk, submission }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Error submitting sitemap:', error)
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
+    const msg = error instanceof Error ? error.message : 'Unknown error'
+    console.error('submit-sitemap error', error)
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 })
