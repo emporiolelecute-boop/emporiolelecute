@@ -94,6 +94,125 @@ function ModeBadge({ mode }: { mode: HeroSlideMode }) {
 }
 
 // ---------------------------------------------------------------------------
+// Live preview — alternates between Mobile and Desktop using the same
+// resolution logic as the public HeroSlider.
+// ---------------------------------------------------------------------------
+
+type PreviewDevice = 'mobile' | 'desktop';
+
+function SlidePreview({ slide }: { slide: Partial<HeroSlide> }) {
+  const [device, setDevice] = useState<PreviewDevice>('desktop');
+
+  const isMobilePreview = device === 'mobile';
+  const mobileSrc = slide.image_mobile_url || '';
+  const desktopSrc = slide.image_desktop_url || '';
+  const fallbackSrc = slide.image_url || '';
+
+  let mode: HeroSlideMode;
+  let imgSrc: string;
+  if (isMobilePreview && mobileSrc) {
+    mode = 'banner_mobile';
+    imgSrc = mobileSrc;
+  } else if (!isMobilePreview && desktopSrc) {
+    mode = 'banner_desktop';
+    imgSrc = desktopSrc;
+  } else {
+    mode = 'text_image';
+    imgSrc = fallbackSrc;
+  }
+
+  const alt = slide.image_alt || slide.title || 'Prévia do slide';
+
+  return (
+    <div className="rounded-xl border bg-muted/30 p-4">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Label className="text-sm">Prévia ao vivo</Label>
+          <ModeBadge mode={mode} />
+        </div>
+        <div className="inline-flex rounded-md border bg-background p-0.5">
+          <button
+            type="button"
+            onClick={() => setDevice('mobile')}
+            className={cn(
+              'px-3 py-1.5 text-xs rounded inline-flex items-center gap-1.5 transition-colors',
+              isMobilePreview
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Smartphone className="h-3.5 w-3.5" /> Mobile
+          </button>
+          <button
+            type="button"
+            onClick={() => setDevice('desktop')}
+            className={cn(
+              'px-3 py-1.5 text-xs rounded inline-flex items-center gap-1.5 transition-colors',
+              !isMobilePreview
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Monitor className="h-3.5 w-3.5" /> Desktop
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          'mx-auto bg-background border-8 border-foreground/80 overflow-hidden shadow-lg',
+          isMobilePreview ? 'w-[360px] max-w-full rounded-[28px]' : 'w-full max-w-[1024px] rounded-xl'
+        )}
+      >
+        {mode === 'text_image' ? (
+          <div className="p-4 sm:p-6 grid sm:grid-cols-2 gap-4 items-center bg-background">
+            <div className="min-w-0">
+              {slide.tagline && (
+                <span className="inline-block text-[10px] uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full mb-2">
+                  {slide.tagline}
+                </span>
+              )}
+              <p className="font-display text-lg sm:text-xl leading-tight text-foreground line-clamp-3">
+                {slide.title || 'Título do slide'}
+              </p>
+              {slide.subtitle && (
+                <p className="text-xs text-muted-foreground mt-2 line-clamp-3">{slide.subtitle}</p>
+              )}
+              {slide.cta_label && (
+                <span className="mt-3 inline-block text-[11px] bg-primary text-primary-foreground rounded-full px-3 py-1">
+                  {slide.cta_label}
+                </span>
+              )}
+            </div>
+            <div className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+              {imgSrc ? (
+                <img src={imgSrc} alt={alt} className="w-full h-full object-contain" />
+              ) : (
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+        ) : imgSrc ? (
+          <img src={imgSrc} alt={alt} className="w-full h-auto block" />
+        ) : (
+          <div className="aspect-[16/5] bg-muted flex items-center justify-center">
+            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+
+      <p className="text-[11px] text-muted-foreground mt-3 text-center">
+        {mode === 'text_image'
+          ? 'Sem imagem específica para este dispositivo — exibindo layout Texto + Imagem (fallback).'
+          : isMobilePreview
+            ? 'Banner Mobile — exibido automaticamente em celulares (< 768px).'
+            : 'Banner Desktop — exibido automaticamente em telas ≥ 768px.'}
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Default form state
 // ---------------------------------------------------------------------------
 
