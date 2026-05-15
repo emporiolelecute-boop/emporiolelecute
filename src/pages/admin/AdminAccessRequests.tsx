@@ -16,7 +16,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 
 interface PendingRequest {
-  id: string;
+  id: string;            // request_id
+  user_id: string;
   email: string;
   full_name: string | null;
   access_requested_at: string | null;
@@ -41,11 +42,11 @@ const AdminAccessRequests = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data: pending, error } = await supabase
-      .from('profiles')
-      .select('id, email, full_name, access_requested_at')
-      .eq('access_requested', true)
-      .order('access_requested_at', { ascending: false });
+    const { data: pending, error } = await (supabase as any)
+      .from('admin_access_requests')
+      .select('id, user_id, requested_at, user_email_snapshot')
+      .eq('status', 'pending')
+      .order('requested_at', { ascending: false });
 
     if (error) {
       toast({ title: 'Erro ao carregar', description: error.message, variant: 'destructive' });
@@ -53,18 +54,33 @@ const AdminAccessRequests = () => {
       return;
     }
 
-    const ids = (pending ?? []).map((p) => p.id);
+    const list = (pending ?? []) as Array<{
+      id: string; user_id: string; requested_at: string | null; user_email_snapshot: string | null;
+    }>;
+    const userIds = list.map((p) => p.user_id);
+    let profileMap = new Map<string, { email: string; full_name: string | null }>();
     let admins = new Set<string>();
-    if (ids.length) {
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin')
-        .in('user_id', ids);
-      admins = new Set((roles ?? []).map((r) => r.user_id));
+    if (userIds.length) {
+      const [{ data: profs }, { data: roles }] = await Promise.all([
+        supabase.from('profiles').select('id, email, full_name').in('id', userIds),
+        supabase.from('user_roles').select('user_id').eq('role', 'admin').in('user_id', userIds),
+      ]);
+      (profs ?? []).forEach((p: any) =>
+        profileMap.set(p.id, { email: p.email, full_name: p.full_name }));
+      admins = new Set((roles ?? []).map((r: any) => r.user_id));
     }
 
-    setRows((pending ?? []).filter((p) => !admins.has(p.id)));
+    setRows(
+      list
+        .filter((p) => !admins.has(p.user_id))
+        .map((p) => ({
+          id: p.id,
+          user_id: p.user_id,
+          email: profileMap.get(p.user_id)?.email ?? p.user_email_snapshot ?? '(sem e-mail)',
+          full_name: profileMap.get(p.user_id)?.full_name ?? null,
+          access_requested_at: p.requested_at,
+        })),
+    );
     setLoading(false);
   };
 
