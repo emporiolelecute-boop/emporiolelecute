@@ -5,6 +5,7 @@ export interface InstagramFeedEmbed {
   id: string;
   post_url: string;
   caption: string | null;
+  preview_image_url: string | null;
   position: number;
   is_active: boolean;
   created_at?: string;
@@ -52,6 +53,7 @@ export const useSaveInstagramFeedEmbed = () => {
         const { error } = await (supabase as any).from(TABLE).update({
           post_url: item.post_url,
           caption: item.caption ?? null,
+          preview_image_url: item.preview_image_url ?? null,
           position: item.position ?? 0,
           is_active: item.is_active ?? true,
         }).eq("id", item.id);
@@ -60,6 +62,7 @@ export const useSaveInstagramFeedEmbed = () => {
         const { error } = await (supabase as any).from(TABLE).insert({
           post_url: item.post_url!,
           caption: item.caption ?? null,
+          preview_image_url: item.preview_image_url ?? null,
           position: item.position ?? 0,
           is_active: item.is_active ?? true,
         });

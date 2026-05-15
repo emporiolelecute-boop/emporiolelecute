@@ -283,6 +283,7 @@ export type Database = {
           is_active: boolean
           position: number
           post_url: string
+          preview_image_url: string | null
           updated_at: string
         }
         Insert: {
@@ -292,6 +293,7 @@ export type Database = {
           is_active?: boolean
           position?: number
           post_url: string
+          preview_image_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -301,6 +303,7 @@ export type Database = {
           is_active?: boolean
           position?: number
           post_url?: string
+          preview_image_url?: string | null
           updated_at?: string
         }
         Relationships: []

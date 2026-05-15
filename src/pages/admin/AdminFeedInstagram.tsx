@@ -124,6 +124,7 @@ const AdminFeedInstagram = () => {
 
   const [draftUrl, setDraftUrl] = useState("");
   const [draftCaption, setDraftCaption] = useState("");
+  const [draftPreviewImg, setDraftPreviewImg] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [cfg, setCfg] = useState({
@@ -153,12 +154,14 @@ const AdminFeedInstagram = () => {
       await save.mutateAsync({
         post_url: draftUrl.trim(),
         caption: draftCaption.trim() || null,
+        preview_image_url: draftPreviewImg.trim() || null,
         position: items.length,
         is_active: true,
       });
       toast.success("Post adicionado");
       setDraftUrl("");
       setDraftCaption("");
+      setDraftPreviewImg("");
       setPreviewUrl(null);
     } catch (e: any) {
       toast.error(e.message || "Erro ao salvar");
@@ -317,6 +320,20 @@ const AdminFeedInstagram = () => {
               <Plus className="h-4 w-4 mr-1" /> Adicionar
             </Button>
           </div>
+        </div>
+        <div className="space-y-1">
+          <Label>Imagem de prévia (URL pública, opcional)</Label>
+          <Input
+            placeholder="https://...jpg — usada se o embed não carregar"
+            value={draftPreviewImg}
+            onChange={(e) => setDraftPreviewImg(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Recomendado: copie a URL da imagem do post (clique direito → copiar endereço da imagem) para garantir uma prévia mesmo se o embed bloquear.
+          </p>
+          {draftPreviewImg && (
+            <img src={draftPreviewImg} alt="" className="h-32 rounded-md border mt-2 object-cover" />
+          )}
         </div>
 
         {previewUrl && (

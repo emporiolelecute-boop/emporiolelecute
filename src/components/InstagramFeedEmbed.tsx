@@ -30,9 +30,10 @@ const loadEmbedScript = () => {
 interface EmbedCardProps {
   url: string;
   caption: string | null;
+  previewImageUrl?: string | null;
 }
 
-const EmbedCard = ({ url, caption }: EmbedCardProps) => {
+const EmbedCard = ({ url, caption, previewImageUrl }: EmbedCardProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -42,7 +43,6 @@ const EmbedCard = ({ url, caption }: EmbedCardProps) => {
       const hasIframe = wrapperRef.current?.querySelector("iframe");
       if (!hasIframe) {
         setFailed(true);
-        // log failure (best-effort, ignore errors)
         void supabase.from("instagram_embed_failures").insert({
           post_url: url,
           route: typeof location !== "undefined" ? location.pathname : null,
@@ -60,15 +60,38 @@ const EmbedCard = ({ url, caption }: EmbedCardProps) => {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="block rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow p-6 h-full min-h-[280px] flex flex-col items-center justify-center gap-3 text-center group"
+        className="block rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow h-full group"
       >
-        <Instagram className="h-10 w-10 text-primary" />
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {caption || "Veja esta postagem no Instagram"}
-        </p>
-        <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:underline">
-          Ver no Instagram <ExternalLink className="h-3 w-3" />
-        </span>
+        {previewImageUrl ? (
+          <div className="relative aspect-square bg-muted">
+            <img
+              src={previewImageUrl}
+              alt={caption || "Postagem do Instagram"}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-white">
+                Ver no Instagram <ExternalLink className="h-3 w-3" />
+              </span>
+            </div>
+            <Instagram className="absolute top-3 right-3 h-6 w-6 text-white drop-shadow" />
+          </div>
+        ) : (
+          <div className="p-6 min-h-[280px] flex flex-col items-center justify-center gap-3 text-center">
+            <Instagram className="h-10 w-10 text-primary" />
+            <p className="text-sm text-muted-foreground line-clamp-3">
+              {caption || "Veja esta postagem no Instagram"}
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:underline">
+              Ver no Instagram <ExternalLink className="h-3 w-3" />
+            </span>
+          </div>
+        )}
+        {previewImageUrl && caption && (
+          <p className="text-sm text-muted-foreground line-clamp-2 p-3">{caption}</p>
+        )}
       </a>
     );
   }
@@ -141,7 +164,7 @@ const InstagramFeedEmbed = () => {
         {visible && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {shown.map((item) => (
-              <EmbedCard key={item.id} url={item.post_url} caption={item.caption} />
+              <EmbedCard key={item.id} url={item.post_url} caption={item.caption} previewImageUrl={item.preview_image_url} />
             ))}
           </div>
         )}
