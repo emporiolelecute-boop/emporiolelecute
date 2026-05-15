@@ -248,6 +248,33 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_embed_failures: {
+        Row: {
+          id: string
+          ms_to_fallback: number | null
+          occurred_at: string
+          post_url: string | null
+          route: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          ms_to_fallback?: number | null
+          occurred_at?: string
+          post_url?: string | null
+          route?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          ms_to_fallback?: number | null
+          occurred_at?: string
+          post_url?: string | null
+          route?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       instagram_feed_embeds: {
         Row: {
           caption: string | null
@@ -1087,6 +1114,36 @@ export type Database = {
           top_keywords?: Json | null
           total_clicks?: number | null
           total_impressions?: number | null
+        }
+        Relationships: []
+      }
+      stale_bundle_logs: {
+        Row: {
+          id: string
+          message: string | null
+          occurred_at: string
+          reloaded: boolean
+          route: string | null
+          stack: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          message?: string | null
+          occurred_at?: string
+          reloaded?: boolean
+          route?: string | null
+          stack?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          message?: string | null
+          occurred_at?: string
+          reloaded?: boolean
+          route?: string | null
+          stack?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }

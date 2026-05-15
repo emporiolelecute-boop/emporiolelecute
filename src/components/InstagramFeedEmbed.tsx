@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Instagram, ExternalLink } from "lucide-react";
 import { useInstagramFeedEmbedsPublic } from "@/hooks/useInstagramFeedEmbeds";
 import { useInstagramFeedConfig } from "@/hooks/useInstagramFeedConfig";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -36,12 +37,22 @@ const EmbedCard = ({ url, caption }: EmbedCardProps) => {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    const startedAt = Date.now();
     const t = window.setTimeout(() => {
       const hasIframe = wrapperRef.current?.querySelector("iframe");
-      if (!hasIframe) setFailed(true);
+      if (!hasIframe) {
+        setFailed(true);
+        // log failure (best-effort, ignore errors)
+        void supabase.from("instagram_embed_failures").insert({
+          post_url: url,
+          route: typeof location !== "undefined" ? location.pathname : null,
+          ms_to_fallback: Date.now() - startedAt,
+          user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
+        });
+      }
     }, FALLBACK_TIMEOUT_MS);
     return () => window.clearTimeout(t);
-  }, []);
+  }, [url]);
 
   if (failed) {
     return (

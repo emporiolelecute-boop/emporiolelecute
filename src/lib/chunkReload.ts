@@ -1,9 +1,30 @@
 /**
  * Detecta erros de carregamento de chunks dinâmicos (stale-bundle após deploy)
- * e dispara um hard-reload único. Se reincidir, emite evento para UI de fallback.
+ * e dispara um hard-reload único. Persiste cada ocorrência no banco para
+ * análise posterior. Respeita configuração administrativa (toggle + intervalo).
  */
+import { supabase } from "@/integrations/supabase/client";
+
 const RELOAD_FLAG = "lov_chunk_reload_at";
-const RELOAD_WINDOW_MS = 30_000;
+const DEFAULT_RELOAD_WINDOW_MS = 30_000;
+
+type StaleConfig = { auto_reload?: boolean; min_interval_ms?: number };
+let cachedConfig: StaleConfig | null = null;
+
+const fetchConfig = async (): Promise<StaleConfig> => {
+  if (cachedConfig) return cachedConfig;
+  try {
+    const { data } = await supabase
+      .from("store_settings")
+      .select("value")
+      .eq("key", "stale_bundle_config")
+      .maybeSingle();
+    cachedConfig = (data?.value as StaleConfig) || {};
+  } catch {
+    cachedConfig = {};
+  }
+  return cachedConfig;
+};
 
 const isChunkError = (msg: string | undefined) => {
   if (!msg) return false;
@@ -16,38 +37,70 @@ const isChunkError = (msg: string | undefined) => {
   );
 };
 
-const tryReload = () => {
+const logToDb = async (payload: {
+  message: string;
+  stack?: string;
+  reloaded: boolean;
+}) => {
+  try {
+    await supabase.from("stale_bundle_logs").insert({
+      route: location.pathname,
+      message: payload.message.slice(0, 1000),
+      stack: payload.stack?.slice(0, 4000) ?? null,
+      user_agent: navigator.userAgent.slice(0, 500),
+      reloaded: payload.reloaded,
+    });
+  } catch {
+    /* ignore */
+  }
+};
+
+const handleStale = async (message: string, stack?: string) => {
+  const cfg = await fetchConfig();
+  const autoReload = cfg.auto_reload !== false; // default true
+  const windowMs = Math.max(5_000, cfg.min_interval_ms ?? DEFAULT_RELOAD_WINDOW_MS);
+
+  let canReload = autoReload;
   try {
     const last = Number(sessionStorage.getItem(RELOAD_FLAG) || "0");
     const now = Date.now();
-    if (now - last < RELOAD_WINDOW_MS) {
-      // Já tentamos recarregar há pouco — mostrar fallback
+    if (canReload && now - last < windowMs) {
+      canReload = false;
       window.dispatchEvent(new CustomEvent("lov:stale-bundle"));
-      return;
+    } else if (canReload) {
+      sessionStorage.setItem(RELOAD_FLAG, String(now));
+    } else {
+      window.dispatchEvent(new CustomEvent("lov:stale-bundle"));
     }
-    sessionStorage.setItem(RELOAD_FLAG, String(now));
   } catch {
     /* sessionStorage indisponível */
   }
-  // Reportar antes do reload
-  // eslint-disable-next-line no-console
-  console.warn("[stale-bundle] hard-reloading", { route: location.pathname });
-  location.reload();
+
+  await logToDb({ message, stack, reloaded: canReload });
+
+  if (canReload) {
+    // eslint-disable-next-line no-console
+    console.warn("[stale-bundle] hard-reloading", { route: location.pathname });
+    location.reload();
+  }
 };
 
 export const installChunkReloadHandler = () => {
   window.addEventListener("error", (e) => {
-    if (isChunkError(e?.message) || isChunkError((e?.error as Error)?.message)) {
+    const err = e?.error as Error | undefined;
+    const msg = e?.message || err?.message;
+    if (isChunkError(msg)) {
       e.preventDefault();
-      tryReload();
+      void handleStale(msg!, err?.stack);
     }
   });
   window.addEventListener("unhandledrejection", (e) => {
-    const msg =
-      typeof e.reason === "string" ? e.reason : (e.reason as Error | undefined)?.message;
+    const reason = e.reason as Error | string | undefined;
+    const msg = typeof reason === "string" ? reason : reason?.message;
+    const stack = typeof reason === "string" ? undefined : reason?.stack;
     if (isChunkError(msg)) {
       e.preventDefault();
-      tryReload();
+      void handleStale(msg!, stack);
     }
   });
 };
