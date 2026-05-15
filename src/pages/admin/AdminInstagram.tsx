@@ -74,7 +74,7 @@ const AdminInstagram = () => {
         </div>
       </div>
 
-      <InstagramSyncManager onSynced={() => queryClient.invalidateQueries({ queryKey: ['admin-instagram-posts'] })} />
+      <InstagramSyncManager onSynced={() => queryClient.invalidateQueries({ queryKey: ['instagram_posts'] })} />
 
       <Card>
         <CardHeader>
