@@ -33,6 +33,33 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [backfillOpen, setBackfillOpen] = useState(false);
+  const [backfillKg, setBackfillKg] = useState('0.150');
+  const [backfilling, setBackfilling] = useState(false);
+
+  const productsWithoutWeight = products?.filter((p: any) => !p.weight || p.weight <= 0).length || 0;
+
+  const runBackfill = async () => {
+    const kg = parseFloat(backfillKg.replace(',', '.'));
+    if (!kg || kg <= 0 || kg > 30) {
+      toast({ title: 'Peso inválido', description: 'Use um valor entre 0.001 e 30 kg', variant: 'destructive' });
+      return;
+    }
+    setBackfilling(true);
+    try {
+      const { data, error } = await (supabase as any).rpc('apply_default_weight', { _default_kg: kg });
+      if (error) throw error;
+      toast({
+        title: 'Backfill concluído',
+        description: `${data?.updated ?? 0} produto(s) atualizado(s) com ${kg} kg.`,
+      });
+      setBackfillOpen(false);
+    } catch (e: any) {
+      toast({ title: 'Erro no backfill', description: e?.message || 'Tente novamente', variant: 'destructive' });
+    } finally {
+      setBackfilling(false);
+    }
+  };
 
   const filteredProducts = products?.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
