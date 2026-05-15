@@ -38,8 +38,11 @@ const BlogPost = () => {
 
   const articleSchema = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: post.title,
+    url,
+    inLanguage: "pt-BR",
+    wordCount: post.contentHtml.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length,
     description: post.seoDescription || post.excerpt,
     image: post.coverImage ? [post.coverImage] : undefined,
     author: { "@type": "Organization", name: post.author },
@@ -129,9 +132,23 @@ const BlogPost = () => {
                   src={post.coverImage}
                   alt={post.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
             )}
+
+            {/* CTA WhatsApp — topo do artigo */}
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-3 p-4 bg-primary-light/40 border border-primary/20 rounded-xl">
+              <p className="text-sm text-foreground m-0">
+                <strong>Precisa de lembrancinhas prontas?</strong> Fale com a artesã agora.
+              </p>
+              <a href={waUrl} target="_blank" rel="noopener noreferrer" onClick={handleWaClick}>
+                <Button size="sm" className="gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Atendimento no WhatsApp
+                </Button>
+              </a>
+            </div>
 
             <div
               className="prose prose-neutral max-w-none prose-headings:font-display prose-a:text-primary"
