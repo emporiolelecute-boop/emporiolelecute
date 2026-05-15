@@ -1540,6 +1540,7 @@ export type Database = {
         Args: { _order_id: string }
         Returns: Json
       }
+      cleanup_seo_url_status: { Args: never; Returns: undefined }
       cleanup_stale_bundle_logs: { Args: never; Returns: Json }
       create_order_with_items: {
         Args: { _items: Json; _order: Json }
