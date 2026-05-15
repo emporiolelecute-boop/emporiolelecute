@@ -310,7 +310,10 @@ const AdminAccessRequests = () => {
                 </div>
               )}
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button variant="destructive" onClick={() => { setRejectTarget(selected); setRejectReason(''); }} disabled={acting === selected.id}>
+                <X className="w-4 h-4 mr-1" /> Reprovar
+              </Button>
               <Button onClick={() => approve(selected.email, selected.id)} disabled={acting === selected.id}>
                 <Check className="w-4 h-4 mr-1" />
                 {acting === selected.id ? 'Aprovando...' : 'Aprovar acesso administrativo'}
@@ -319,6 +322,38 @@ const AdminAccessRequests = () => {
           </CardContent>
         </Card>
       )}
+
+      <AlertDialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) setRejectTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reprovar solicitação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação registra a reprovação no histórico de auditoria. Informe um motivo claro — o usuário pode solicitar novamente após 24 h.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              <strong>{rejectTarget?.full_name || rejectTarget?.email}</strong>
+              {rejectTarget?.full_name && <span className="block text-xs">{rejectTarget?.email}</span>}
+            </p>
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Motivo da reprovação (obrigatório, mín. 3 caracteres)"
+              rows={4}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); reject(); }}
+              disabled={acting === rejectTarget?.id || rejectReason.trim().length < 3}
+            >
+              Confirmar reprovação
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
