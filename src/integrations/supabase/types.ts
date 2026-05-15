@@ -648,6 +648,11 @@ export type Database = {
           id: string
           notes: string | null
           order_code: string
+          paid_at: string | null
+          payment_id: string | null
+          payment_method: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          shipped_at: string | null
           shipping_company: string | null
           shipping_days: string | null
           shipping_method: string
@@ -655,6 +660,9 @@ export type Database = {
           status: string
           subtotal: number
           total: number
+          tracking_carrier: string | null
+          tracking_code: string | null
+          tracking_url: string | null
           updated_at: string
         }
         Insert: {
@@ -674,6 +682,11 @@ export type Database = {
           id?: string
           notes?: string | null
           order_code: string
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shipped_at?: string | null
           shipping_company?: string | null
           shipping_days?: string | null
           shipping_method: string
@@ -681,6 +694,9 @@ export type Database = {
           status?: string
           subtotal: number
           total: number
+          tracking_carrier?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -700,6 +716,11 @@ export type Database = {
           id?: string
           notes?: string | null
           order_code?: string
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shipped_at?: string | null
           shipping_company?: string | null
           shipping_days?: string | null
           shipping_method?: string
@@ -707,6 +728,9 @@ export type Database = {
           status?: string
           subtotal?: number
           total?: number
+          tracking_carrier?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1330,6 +1354,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      payment_status: "pending" | "approved" | "refunded" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1458,6 +1483,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      payment_status: ["pending", "approved", "refunded", "cancelled"],
     },
   },
 } as const
