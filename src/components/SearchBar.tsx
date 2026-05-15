@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDbProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
+import { optimizeImage } from "@/lib/image";
 
 const SearchBar = () => {
   const [query, setQuery] = useState("");
@@ -143,9 +144,9 @@ const SearchBar = () => {
                       }`}
                     >
                       <img
-                        src={product.images?.[0] || '/placeholder.svg'}
+                        src={optimizeImage(product.images?.[0], { width: 96, resize: "contain" })}
                         alt={product.name}
-                        className="w-10 h-10 rounded-lg object-cover"
+                        className="w-10 h-10 rounded-lg object-contain bg-muted p-1"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">
