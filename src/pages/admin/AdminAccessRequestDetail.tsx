@@ -358,7 +358,23 @@ const AdminAccessRequestDetail = () => {
                       <TableCell className="text-xs">{n.admin_count}</TableCell>
                       <TableCell className="text-xs">{n.sent_count}</TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-md break-words">
-                        {n.error_message || '—'}
+                        {n.error_message ? (
+                          <div className="flex items-start gap-2">
+                            <pre className="whitespace-pre-wrap break-words text-xs flex-1 m-0 font-mono">
+                              {n.error_message}
+                            </pre>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
+                              onClick={() => copyToClipboard(n.error_message!, 'Mensagem de erro')}
+                              title="Copiar mensagem completa"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ) : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
