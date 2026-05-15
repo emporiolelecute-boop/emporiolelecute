@@ -182,12 +182,48 @@ const AdminDiagnostics = () => {
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [igFailures]);
 
+  // Detecção de picos: últimas 24h vs média diária dos últimos 7 dias (excluindo últimas 24h)
+  const detectSpike = (rows: { occurred_at: string }[]) => {
+    const now = Date.now();
+    const last24 = rows.filter((r) => now - new Date(r.occurred_at).getTime() < 86_400_000).length;
+    const prev6days = rows.filter((r) => {
+      const age = now - new Date(r.occurred_at).getTime();
+      return age >= 86_400_000 && age < 7 * 86_400_000;
+    }).length;
+    const avgDaily = prev6days / 6;
+    if (last24 < 5) return null; // ruído baixo
+    if (avgDaily === 0 && last24 >= 5) return { last24, avgDaily, ratio: Infinity };
+    if (last24 >= avgDaily * 2) return { last24, avgDaily, ratio: last24 / Math.max(avgDaily, 1) };
+    return null;
+  };
+  const staleSpike = useMemo(() => detectSpike(staleLogs), [staleLogs]);
+  const igSpike = useMemo(() => detectSpike(igFailures), [igFailures]);
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-display text-foreground">Diagnóstico</h1>
         <p className="text-muted-foreground">Logs de stale-bundle e falhas de embed do Instagram.</p>
       </div>
+
+      {(staleSpike || igSpike) && (
+        <div className="space-y-2">
+          {staleSpike && (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">
+              <strong className="text-destructive">⚠ Pico de stale-bundle:</strong>{" "}
+              {staleSpike.last24} ocorrências nas últimas 24h (média diária recente: {staleSpike.avgDaily.toFixed(1)}
+              {staleSpike.ratio !== Infinity && ` — ${staleSpike.ratio.toFixed(1)}x acima do normal`}).
+            </div>
+          )}
+          {igSpike && (
+            <div className="rounded-lg border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm">
+              <strong className="text-amber-700 dark:text-amber-300">⚠ Pico de falhas no embed Instagram:</strong>{" "}
+              {igSpike.last24} falhas nas últimas 24h (média recente: {igSpike.avgDaily.toFixed(1)}
+              {igSpike.ratio !== Infinity && ` — ${igSpike.ratio.toFixed(1)}x acima do normal`}).
+            </div>
+          )}
+        </div>
+      )}
 
       <Tabs defaultValue="stale">
         <TabsList>
