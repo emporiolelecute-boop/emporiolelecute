@@ -335,6 +335,8 @@ const AdminInstagram = () => {
         </CardContent>
       </Card>
 
+      <InstagramSchedulePanel />
+
       {/* Form: URL + extract + preview */}
       <Card>
         <CardHeader>
