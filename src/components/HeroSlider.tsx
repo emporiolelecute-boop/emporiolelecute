@@ -350,8 +350,9 @@ const HeroSlider = () => {
       >
         {previous && (
           <div
-            key={`prev-${previous.id}`}
-            className="absolute inset-0 w-full opacity-0 motion-safe:transition-opacity motion-safe:duration-500 motion-safe:ease-out pointer-events-none"
+            key={`prev-${previous.id}-${prevSlide}`}
+            className="absolute inset-0 w-full motion-safe:animate-fade-out motion-reduce:hidden pointer-events-none"
+            style={{ animationFillMode: "forwards", animationDuration: "500ms" }}
             aria-hidden="true"
           >
             <SlideRenderer slide={previous} isPriority={false} />
