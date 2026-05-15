@@ -46,6 +46,7 @@ const menuItems = [
   { icon: MessageSquare, label: 'Depoimentos', path: '/admin/depoimentos' },
   { icon: Home, label: 'Blocos Homepage', path: '/admin/blocos' },
   { icon: Instagram, label: 'Instagram', path: '/admin/instagram' },
+  { icon: Instagram, label: 'Feed Instagram', path: '/admin/feed-instagram' },
   { icon: MapPin, label: 'Landings SEO', path: '/admin/landings' },
   { icon: Home, label: 'Páginas', path: '/admin/paginas' },
   { icon: Menu, label: 'Menus', path: '/admin/menus' },
