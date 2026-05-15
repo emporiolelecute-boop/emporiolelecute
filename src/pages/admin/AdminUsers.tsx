@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ShieldCheck, History, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, History, AlertCircle, CheckCircle2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -69,6 +69,37 @@ const AdminUsers = () => {
     promote.mutate(v);
   };
 
+  const exportCSV = () => {
+    if (!audit.length) {
+      toast.info("Nada para exportar.");
+      return;
+    }
+    const header = ["Data/hora", "E-mail promovido", "Promovido por", "Papel", "Status", "Mensagem"];
+    const escape = (v: any) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = audit.map((r) => [
+      format(new Date(r.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR }),
+      r.target_email,
+      r.promoted_by_email || "",
+      r.role,
+      r.status,
+      r.message || "",
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(escape).join(",")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `promocoes-admin-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado.");
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
@@ -104,9 +135,14 @@ const AdminUsers = () => {
       </Card>
 
       <Card className="p-5 space-y-3">
-        <h2 className="font-medium flex items-center gap-2">
-          <History className="h-4 w-4" /> Histórico de promoções ({audit.length})
-        </h2>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="font-medium flex items-center gap-2">
+            <History className="h-4 w-4" /> Histórico de promoções ({audit.length})
+          </h2>
+          <Button size="sm" variant="outline" onClick={exportCSV} disabled={!audit.length}>
+            <Download className="h-4 w-4 mr-2" /> Exportar CSV
+          </Button>
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : audit.length === 0 ? (
