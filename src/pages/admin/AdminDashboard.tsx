@@ -19,6 +19,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import AdminRecentActivity from '@/components/admin/AdminRecentActivity';
 
 interface Order {
   id: string;
