@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import RobotsAndSitemapPanel from '@/components/admin/RobotsAndSitemapPanel';
 
 type CheckRun = { id: string; ran_at: string; source: string; total: number; passed: number; errors: number; warnings: number; checks: Array<{ name: string; ok: boolean; detail: string; severity: string }>; alert_sent: boolean };
 
@@ -226,6 +227,7 @@ export default function AdminSEODashboard() {
 
         {/* OVERVIEW */}
         <TabsContent value="overview" className="space-y-4">
+          <RobotsAndSitemapPanel />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader><CardTitle className="text-base">Último envio do sitemap</CardTitle></CardHeader>
