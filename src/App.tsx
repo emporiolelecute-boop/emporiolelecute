@@ -60,6 +60,7 @@ const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
 
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
+import CanonicalNormalizer from "./components/CanonicalNormalizer";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
           <BrowserRouter>
             <AnalyticsWrapper>
               <RedirectHandler />
+              <CanonicalNormalizer />
               <TrackingScripts />
               <Routes>
                 {/* Public Routes */}
