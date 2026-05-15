@@ -58,16 +58,38 @@ const AdminInstagram = () => {
     setForm(blank);
   };
 
+  const [syncing, setSyncing] = useState(false);
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('instagram-sync');
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error + ((data as any).hint ? ` — ${(data as any).hint}` : ''));
+      toast({ title: 'Sincronizado', description: `${(data as any).synced} posts importados do Instagram.` });
+      window.location.reload();
+    } catch (e: any) {
+      toast({ title: 'Falha na sincronização', description: e.message, variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <Instagram className="w-7 h-7 text-primary" />
-        <div>
-          <h1 className="text-2xl font-display">Posts do Instagram</h1>
-          <p className="text-sm text-muted-foreground">
-            Cole as URLs ou faça upload das últimas postagens do @emporiolelecute. Os 6 primeiros visíveis aparecem no site.
-          </p>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <Instagram className="w-7 h-7 text-primary" />
+          <div>
+            <h1 className="text-2xl font-display">Posts do Instagram</h1>
+            <p className="text-sm text-muted-foreground">
+              Sincronize automaticamente do @emporiolelecute ou adicione manualmente. Os 6 primeiros visíveis aparecem no site.
+            </p>
+          </div>
         </div>
+        <Button onClick={handleSync} disabled={syncing} variant="outline">
+          {syncing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+          Sincronizar do Instagram
+        </Button>
       </div>
 
       <Card>
