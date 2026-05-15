@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import StaleBundleOverlay from "@/components/StaleBundleOverlay";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
@@ -103,6 +104,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <StaleBundleOverlay />
+          <PwaInstallPrompt />
           <BrowserRouter>
             <AnalyticsWrapper>
               <RedirectHandler />
