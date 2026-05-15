@@ -281,10 +281,31 @@ const AdminOccasionLandings = () => {
               <Textarea value={form.faqs_json} rows={6} className="font-mono text-xs"
                 onChange={(e) => setForm({ ...form, faqs_json: e.target.value })} />
             </div>
-            <div>
-              <Label>Galeria (JSON: ["url1","url2"])</Label>
-              <Textarea value={form.gallery_json} rows={3} className="font-mono text-xs"
-                onChange={(e) => setForm({ ...form, gallery_json: e.target.value })} />
+            <div className="space-y-2 border rounded-lg p-4 bg-muted/30">
+              <Label className="flex items-center gap-2 text-base"><ImageIcon className="w-4 h-4"/>Galeria de imagens</Label>
+              <p className="text-xs text-muted-foreground">Faça upload das fotos que serão mostradas na landing. A primeira aparece em destaque.</p>
+              <ImageUploader
+                images={form.gallery}
+                onImagesChange={(imgs) => setForm({ ...form, gallery: imgs })}
+                maxImages={12}
+              />
+            </div>
+
+            <div className="space-y-3 border rounded-lg p-4 bg-muted/30">
+              <Label className="flex items-center gap-2 text-base"><ImageIcon className="w-4 h-4"/>Open Graph (compartilhamento social)</Label>
+              <p className="text-xs text-muted-foreground">Imagem exibida no WhatsApp/Facebook/Instagram quando o link da landing é compartilhado. Recomendado 1200×630.</p>
+              <SingleImageUpload
+                value={form.og_image_url}
+                onChange={(url) => setForm({ ...form, og_image_url: url })}
+                folder="og-landings"
+                hint="1200x630 recomendado · até 5MB"
+                previewMaxWidth={360}
+              />
+              <div>
+                <Label className="text-xs">Texto alternativo (alt)</Label>
+                <Input value={form.og_image_alt} onChange={(e) => setForm({ ...form, og_image_alt: e.target.value })}
+                  placeholder="Ex: Lembrancinhas artesanais para chá de bebê" />
+              </div>
             </div>
             <div>
               <Label>Depoimentos (JSON)</Label>
