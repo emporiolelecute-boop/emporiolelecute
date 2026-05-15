@@ -227,6 +227,7 @@ export default function AdminSEODashboard() {
 
         {/* OVERVIEW */}
         <TabsContent value="overview" className="space-y-4">
+          <RobotsAndSitemapPanel />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader><CardTitle className="text-base">Último envio do sitemap</CardTitle></CardHeader>
