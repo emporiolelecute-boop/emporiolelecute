@@ -150,6 +150,22 @@ Deno.serve(async (req) => {
       sent += slice.length;
     }
 
+    // Log attempt (best-effort) for the admin audit screen
+    try {
+      await admin.from("access_request_notifications").insert({
+        requester_id: body.user_id ?? null,
+        requester_email: requesterEmail,
+        requested_at: body.requested_at ?? null,
+        admin_count: adminEmails.length,
+        sent_count: sent,
+        status: errors.length === 0 ? "sent" : (sent > 0 ? "partial" : "failed"),
+        error_message: errors.length ? errors.join(" | ").slice(0, 2000) : null,
+        details: { batch_size: BATCH_SIZE, errors },
+      });
+    } catch (logErr) {
+      console.warn("[notify-admins-new-request] failed to write audit log", logErr);
+    }
+
     return new Response(
       JSON.stringify({
         ok: errors.length === 0,
@@ -161,7 +177,21 @@ Deno.serve(async (req) => {
     );
   } catch (e) {
     console.error("[notify-admins-new-request] error", e);
-    // Always return 200 so the DB trigger is not blamed for app errors.
+    // Best-effort error log — uses a fresh service-role client to avoid scope issues.
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+      const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (SUPABASE_URL && SERVICE_ROLE) {
+        const adminLog = createClient(SUPABASE_URL, SERVICE_ROLE, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        await adminLog.from("access_request_notifications").insert({
+          status: "failed",
+          error_message: (e instanceof Error ? e.message : String(e)).slice(0, 2000),
+          details: {},
+        });
+      }
+    } catch (_) { /* swallow */ }
     return new Response(
       JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
