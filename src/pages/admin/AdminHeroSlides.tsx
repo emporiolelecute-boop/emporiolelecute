@@ -369,8 +369,8 @@ const AdminHeroSlides = () => {
                   A imagem ocupa 100% da largura sem cortes. Recomendado proporção 16:5 ou 16:6 · PNG, JPG ou WEBP · até 5 MB
                 </p>
                 <SingleImageUpload
-                  value={form.image_url || ''}
-                  onChange={(url) => setForm({ ...form, image_url: url })}
+                  value={form.image_desktop_url || ''}
+                  onChange={(url) => setForm({ ...form, image_desktop_url: url })}
                   folder="hero/desktop"
                   hint="Proporção 16:5 recomendada (ex: 1920×600)"
                   previewMaxWidth={480}
