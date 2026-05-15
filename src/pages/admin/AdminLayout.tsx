@@ -61,6 +61,7 @@ const menuItems = [
   { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
   { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
   { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
+  { icon: Activity, label: 'Telemetria', path: '/admin/telemetria' },
   { icon: ShieldCheck, label: 'Usuários', path: '/admin/usuarios' },
   { icon: ShieldCheck, label: 'Solicitações de acesso', path: '/admin/usuarios/solicitacoes' },
   { icon: BarChart3, label: 'Auditoria', path: '/admin/auditoria' },
