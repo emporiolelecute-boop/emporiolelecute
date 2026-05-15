@@ -90,7 +90,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <img
                 src={optimizeImage(image, { width: 160 })}
                 alt={`${productName} - Miniatura ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-muted p-1"
                 loading="lazy"
                 decoding="async"
                 onError={(e) => {
