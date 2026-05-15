@@ -50,6 +50,7 @@ const AdminFaqs = lazy(() => import("./pages/admin/AdminFaqs"));
 const AdminHomepageBlocks = lazy(() => import("./pages/admin/AdminHomepageBlocks"));
 const AdminMerchantFeed = lazy(() => import("./pages/admin/AdminMerchantFeed"));
 const AdminInstagram = lazy(() => import("./pages/admin/AdminInstagram"));
+const AdminFeedInstagram = lazy(() => import("./pages/admin/AdminFeedInstagram"));
 const AdminOccasionLandings = lazy(() => import("./pages/admin/AdminOccasionLandings"));
 const AdminHeroSlides = lazy(() => import("./pages/admin/AdminHeroSlides"));
 const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
@@ -326,6 +327,11 @@ const App = () => {
                   <Route path="instagram" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminInstagram />
+                    </Suspense>
+                  } />
+                  <Route path="feed-instagram" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminFeedInstagram />
                     </Suspense>
                   } />
                   <Route path="landings" element={
