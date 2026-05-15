@@ -60,6 +60,11 @@ interface Order {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  tracking_code?: string | null;
+  tracking_carrier?: string | null;
+  tracking_url?: string | null;
+  shipped_at?: string | null;
+  payment_status?: string | null;
 }
 
 interface OrderItem {
