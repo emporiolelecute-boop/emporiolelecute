@@ -446,41 +446,71 @@ const AdminAccessRequestDetail = () => {
                   <TableRow>
                     <TableHead>Data</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Origem</TableHead>
+                    <TableHead>Motivo</TableHead>
                     <TableHead>Admins</TableHead>
                     <TableHead>Enviados</TableHead>
-                    <TableHead>Erro</TableHead>
+                    <TableHead>Erro / Log</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {notifications.map((n) => (
-                    <TableRow key={n.id}>
-                      <TableCell className="text-xs whitespace-nowrap">
-                        {new Date(n.created_at).toLocaleString('pt-BR')}
-                      </TableCell>
-                      <TableCell><Badge variant={notifBadge(n.status)}>{n.status}</Badge></TableCell>
-                      <TableCell className="text-xs">{n.admin_count}</TableCell>
-                      <TableCell className="text-xs">{n.sent_count}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground max-w-md break-words">
-                        {n.error_message ? (
-                          <div className="flex items-start gap-2">
-                            <pre className="whitespace-pre-wrap break-words text-xs flex-1 m-0 font-mono">
-                              {n.error_message}
-                            </pre>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 shrink-0"
-                              onClick={() => copyToClipboard(n.error_message!, 'Mensagem de erro')}
-                              title="Copiar mensagem completa"
-                            >
-                              <Copy className="w-3.5 h-3.5" />
-                            </Button>
+                  {notifications.map((n) => {
+                    const reason = n.details?.reason as string | undefined;
+                    const sourceTag = (n.details?.source as string | undefined) || 'trigger';
+                    return (
+                      <TableRow key={n.id}>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {new Date(n.created_at).toLocaleString('pt-BR')}
+                        </TableCell>
+                        <TableCell><Badge variant={notifBadge(n.status)}>{n.status}</Badge></TableCell>
+                        <TableCell className="text-xs">
+                          <Badge variant="outline" className="text-[10px]">
+                            {sourceTag === 'manual_resend' ? 'Reenvio manual' : 'Automático'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] break-words">
+                          {reason || <span className="opacity-50">—</span>}
+                        </TableCell>
+                        <TableCell className="text-xs">{n.admin_count}</TableCell>
+                        <TableCell className="text-xs">{n.sent_count}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-md break-words">
+                          <div className="flex flex-col gap-2">
+                            {n.error_message ? (
+                              <div className="flex items-start gap-2">
+                                <pre className="whitespace-pre-wrap break-words text-xs flex-1 m-0 font-mono">
+                                  {n.error_message}
+                                </pre>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 shrink-0"
+                                  onClick={() => copyToClipboard(n.error_message!, 'Mensagem de erro')}
+                                  title="Copiar mensagem de erro"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="opacity-60">sem erro</span>
+                            )}
+                            <div className="flex gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-[10px] px-2"
+                                onClick={() => copyToClipboard(buildLogPayload(n), 'Log completo')}
+                                title="Copiar log/causa completa (JSON + erro)"
+                              >
+                                <FileText className="w-3 h-3 mr-1" /> Copiar log
+                              </Button>
+                            </div>
                           </div>
-                        ) : '—'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
