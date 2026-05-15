@@ -283,34 +283,50 @@ export default function AdminTelemetry() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pageRows.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="text-xs whitespace-nowrap">
-                        {new Date(r.occurred_at).toLocaleString("pt-BR")}
-                      </TableCell>
-                      <TableCell>
-                        {r.source ? <Badge variant="outline" className="text-xs">{r.source}</Badge> : "—"}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono">{r.component || "—"}</TableCell>
-                      <TableCell className="text-xs font-mono max-w-[180px] truncate" title={r.route || ""}>
-                        {r.route || "—"}
-                      </TableCell>
-                      <TableCell className="text-xs max-w-[320px] truncate" title={r.cleanMessage}>
-                        {r.cleanMessage || "—"}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">
-                        {r.cid ? r.cid.slice(0, 8) : "—"}
-                      </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button size="icon" variant="ghost" onClick={() => setDetail(r)} title="Ver detalhes">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={() => copyStack(r)} title="Copiar stack">
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {pageRows.map((r) => {
+                    const count = (r as ParsedLog & { count?: number }).count;
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {new Date(r.occurred_at).toLocaleString("pt-BR")}
+                        </TableCell>
+                        <TableCell>
+                          {r.source ? <Badge variant="outline" className="text-xs">{r.source}</Badge> : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs font-mono">{r.component || "—"}</TableCell>
+                        <TableCell className="text-xs font-mono max-w-[180px] truncate" title={r.route || ""}>
+                          {r.route || "—"}
+                        </TableCell>
+                        <TableCell className="text-xs max-w-[320px] truncate" title={r.cleanMessage}>
+                          <span className="inline-flex items-center gap-2">
+                            {grouped && count && count > 1 && (
+                              <Badge variant="secondary" className="text-[10px]">×{count}</Badge>
+                            )}
+                            <span className="truncate">{r.cleanMessage || "—"}</span>
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-xs font-mono text-muted-foreground">
+                          {r.cid ? (
+                            <button
+                              onClick={() => setCidFilter(r.cid!)}
+                              className="hover:text-foreground hover:underline"
+                              title="Filtrar por este cid"
+                            >
+                              {r.cid.slice(0, 8)}
+                            </button>
+                          ) : "—"}
+                        </TableCell>
+                        <TableCell className="text-right space-x-1">
+                          <Button size="icon" variant="ghost" onClick={() => setDetail(r)} title="Ver detalhes">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => copyStack(r)} title="Copiar stack">
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
               {totalPages > 1 && (
