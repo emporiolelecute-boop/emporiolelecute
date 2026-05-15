@@ -504,30 +504,79 @@ export default function AdminSEODashboard() {
             </Card>
           )}
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Histórico de execuções</CardTitle>
-              <CardDescription>{runs.length} execuções gravadas (cron diário + manuais)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {runs.length ? (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Origem</TableHead><TableHead>OK/Total</TableHead><TableHead>Erros</TableHead><TableHead>Avisos</TableHead><TableHead>Alerta</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {runs.map(r => (
-                      <TableRow key={r.id}>
-                        <TableCell className="text-xs">{format(new Date(r.ran_at), 'dd/MM/yyyy HH:mm')}</TableCell>
-                        <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
-                        <TableCell>{r.passed}/{r.total}</TableCell>
-                        <TableCell>{r.errors > 0 ? <Badge variant="destructive">{r.errors}</Badge> : r.errors}</TableCell>
-                        <TableCell>{r.warnings}</TableCell>
-                        <TableCell>{r.alert_sent ? <Badge variant="default">enviado</Badge> : '—'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : <p className="text-sm text-muted-foreground">Sem execuções registradas ainda. Rode os checks ou aguarde o cron diário.</p>}
-            </CardContent>
-          </Card>
+          {(() => {
+            const filtered = runs.filter(r => {
+              if (filterSource !== 'all' && r.source !== filterSource) return false;
+              const t = new Date(r.ran_at).getTime();
+              if (filterFrom && t < new Date(filterFrom).getTime()) return false;
+              if (filterTo && t > new Date(filterTo).getTime() + 86_400_000) return false;
+              return true;
+            });
+            const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+            const safePage = Math.min(page, totalPages - 1);
+            const slice = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2"><Filter className="h-4 w-4"/>Histórico de execuções</CardTitle>
+                  <CardDescription>{filtered.length} de {runs.length} execuções (cron diário + manuais)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Origem</Label>
+                      <select value={filterSource} onChange={(e) => { setFilterSource(e.target.value as typeof filterSource); setPage(0); }}
+                        className="h-9 rounded-md border bg-background px-2 text-sm">
+                        <option value="all">Todas</option>
+                        <option value="cron">cron</option>
+                        <option value="cron-daily">cron-daily</option>
+                        <option value="manual">manual</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">De</Label>
+                      <Input type="date" value={filterFrom} onChange={(e) => { setFilterFrom(e.target.value); setPage(0); }} className="h-9 w-40" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Até</Label>
+                      <Input type="date" value={filterTo} onChange={(e) => { setFilterTo(e.target.value); setPage(0); }} className="h-9 w-40" />
+                    </div>
+                    {(filterSource !== 'all' || filterFrom || filterTo) && (
+                      <Button size="sm" variant="ghost" onClick={() => { setFilterSource('all'); setFilterFrom(''); setFilterTo(''); setPage(0); }}>Limpar</Button>
+                    )}
+                  </div>
+
+                  {slice.length ? (
+                    <Table>
+                      <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Origem</TableHead><TableHead>OK/Total</TableHead><TableHead>Erros</TableHead><TableHead>Avisos</TableHead><TableHead>Alerta</TableHead></TableRow></TableHeader>
+                      <TableBody>
+                        {slice.map(r => (
+                          <TableRow key={r.id}>
+                            <TableCell className="text-xs">{format(new Date(r.ran_at), 'dd/MM/yyyy HH:mm')}</TableCell>
+                            <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
+                            <TableCell>{r.passed}/{r.total}</TableCell>
+                            <TableCell>{r.errors > 0 ? <Badge variant="destructive">{r.errors}</Badge> : r.errors}</TableCell>
+                            <TableCell>{r.warnings}</TableCell>
+                            <TableCell>{r.alert_sent ? <Badge variant="default">enviado</Badge> : '—'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : <p className="text-sm text-muted-foreground">Nenhum registro para os filtros atuais.</p>}
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Página {safePage + 1} de {totalPages}</span>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" disabled={safePage === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>Anterior</Button>
+                        <Button size="sm" variant="outline" disabled={safePage >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Próxima</Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
         </TabsContent>
       </Tabs>
     </div>
