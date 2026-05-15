@@ -150,6 +150,13 @@ Deno.serve(async (req) => {
         );
       }
       const meta = await fetchPostMeta(cls.permalink!);
+      if (body.post_id) {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        );
+        await logAttempt(supabase, body.post_id, body.source || "manual", meta);
+      }
       return Response.json(
         {
           ok: !!meta.image_url,
@@ -159,6 +166,7 @@ Deno.serve(async (req) => {
           shortcode: cls.shortcode,
           extraction_status: meta.image_url ? "extracted" : "failed",
           extraction_error: meta.error,
+          meta_used: meta.meta_used,
           timestamp: new Date().toISOString(),
         },
         { headers: corsHeaders },
@@ -171,11 +179,12 @@ Deno.serve(async (req) => {
       return Response.json(r, { headers: corsHeaders });
     }
 
-    if (action === "bulk-refresh") {
+    if (action === "bulk-refresh" || action === "scheduled-refresh") {
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       );
+      const source = action === "scheduled-refresh" ? "cron" : "manual";
       const { data: posts, error } = await supabase
         .from("instagram_posts")
         .select("id, post_url, alt_text, shortcode")
@@ -186,6 +195,7 @@ Deno.serve(async (req) => {
       for (const p of posts || []) {
         const cls = classifyUrl(p.post_url || "");
         if (!cls.ok) {
+          await logAttempt(supabase, p.id, source, { image_url: null, title: null, error: cls.reason || "URL inválida", meta_used: null });
           results.push({ id: p.id, ok: false, error: cls.reason });
           continue;
         }
@@ -199,11 +209,21 @@ Deno.serve(async (req) => {
         if (meta.image_url) update.image_url = meta.image_url;
         if (meta.title && (!p.alt_text || p.alt_text.startsWith("Empório"))) update.alt_text = meta.title.slice(0, 200);
         await supabase.from("instagram_posts").update(update).eq("id", p.id);
-        results.push({ id: p.id, ok: !!meta.image_url, error: meta.error });
-        // pequena pausa para não atrair rate-limit
+        await logAttempt(supabase, p.id, source, meta);
+        results.push({ id: p.id, ok: !!meta.image_url, error: meta.error, meta_used: meta.meta_used });
         await new Promise((r) => setTimeout(r, 250));
       }
       const okCount = results.filter((r) => r.ok).length;
+      try {
+        await supabase.from("instagram_sync_history").insert({
+          source,
+          action: action === "scheduled-refresh" ? "scheduled-refresh" : "bulk-refresh",
+          status: results.length === 0 ? "success" : (okCount > 0 ? "success" : "failed"),
+          synced_count: okCount,
+          selected_count: results.length,
+          details: { results: results.slice(0, 50) },
+        });
+      } catch (_) { /* ignore */ }
       return Response.json(
         { ok: true, total: results.length, refreshed: okCount, failed: results.length - okCount, results },
         { headers: corsHeaders },
