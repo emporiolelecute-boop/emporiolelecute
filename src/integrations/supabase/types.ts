@@ -1381,6 +1381,10 @@ export type Database = {
     }
     Functions: {
       apply_default_weight: { Args: { _default_kg?: number }; Returns: Json }
+      check_resend_email_cooldown: {
+        Args: { _order_id: string }
+        Returns: Json
+      }
       create_order_with_items: {
         Args: { _items: Json; _order: Json }
         Returns: Json

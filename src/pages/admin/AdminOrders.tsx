@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -97,6 +97,31 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [trackingDialog, setTrackingDialog] = useState<{ order: Order; code: string; carrier: string; url: string } | null>(null);
+  const RESEND_COOLDOWN_MS = 60_000;
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>(() => {
+    try {
+      const raw = localStorage.getItem('resend_cooldowns');
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const remainingFor = (orderId: string) => {
+    const exp = cooldowns[orderId];
+    if (!exp) return 0;
+    return Math.max(0, Math.ceil((exp - now) / 1000));
+  };
+  const setCooldown = (orderId: string) => {
+    const exp = Date.now() + RESEND_COOLDOWN_MS;
+    setCooldowns((prev) => {
+      const next = { ...prev, [orderId]: exp };
+      try { localStorage.setItem('resend_cooldowns', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -204,6 +229,10 @@ const AdminOrders = () => {
   // Resend status email mutation
   const resendEmailMutation = useMutation({
     mutationFn: async (order: Order) => {
+      // Server-side cooldown + per-admin hourly limit
+      const { error: rateErr } = await (supabase as any).rpc('check_resend_email_cooldown', { _order_id: order.id });
+      if (rateErr) throw rateErr;
+
       const payload: Record<string, unknown> = {
         type: 'status_update',
         orderCode: order.order_code,
@@ -219,7 +248,7 @@ const AdminOrders = () => {
       }
       const { error: invokeErr } = await supabase.functions.invoke('send-order-email', { body: payload });
 
-      // Audit attempt
+      // Audit attempt (triggered_by/email auto-filled by trigger)
       await supabase.from('tracking_email_log').insert({
         order_id: order.id,
         order_code: order.order_code,
@@ -234,9 +263,12 @@ const AdminOrders = () => {
       });
 
       if (invokeErr) throw invokeErr;
+      return order.id;
     },
-    onSuccess: () =>
-      toast({ title: 'E-mail reenviado', description: 'O cliente recebeu uma nova notificação.' }),
+    onSuccess: (orderId) => {
+      if (orderId) setCooldown(orderId);
+      toast({ title: 'E-mail reenviado', description: 'O cliente recebeu uma nova notificação.' });
+    },
     onError: (e: any) =>
       toast({
         title: 'Falha ao reenviar e-mail',
@@ -420,15 +452,24 @@ const AdminOrders = () => {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => resendEmailMutation.mutate(order)}
-                            disabled={resendEmailMutation.isPending}
-                            title="Reenviar e-mail de status"
-                          >
-                            <Send className="h-4 w-4" />
-                          </Button>
+                          {(() => {
+                            const remaining = remainingFor(order.id);
+                            const disabled = resendEmailMutation.isPending || remaining > 0;
+                            return (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => resendEmailMutation.mutate(order)}
+                                disabled={disabled}
+                                title={remaining > 0 ? `Aguarde ${remaining}s para reenviar` : 'Reenviar e-mail de status'}
+                              >
+                                <Send className="h-4 w-4" />
+                                {remaining > 0 && (
+                                  <span className="ml-1 text-xs tabular-nums">{remaining}s</span>
+                                )}
+                              </Button>
+                            );
+                          })()}
                           <Button
                             variant="ghost"
                             size="sm"
