@@ -38,7 +38,7 @@ export default function AdminRecentActivity() {
       _sort_dir: "desc",
     });
     if (!error && data && typeof data === "object" && "rows" in data) {
-      setRows(((data as { rows: AuditRow[] }).rows) ?? []);
+      setRows(((data as unknown as { rows: AuditRow[] }).rows) ?? []);
     }
     setLoading(false);
   };
