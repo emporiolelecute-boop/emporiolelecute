@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ShieldCheck, History, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, History, AlertCircle, CheckCircle2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
