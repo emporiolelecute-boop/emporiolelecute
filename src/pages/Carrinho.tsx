@@ -13,6 +13,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateCoupon, type ValidCoupon } from "@/hooks/useCoupons";
+import { optimizeImage } from "@/lib/image";
 
 interface AddressData {
   cep: string;
@@ -348,9 +349,9 @@ const Carrinho = () => {
                     >
                       <Link to={`/produtos/${item.slug}`} className="shrink-0">
                         <img 
-                          src={item.image || '/placeholder.svg'} 
+                          src={optimizeImage(item.image, { width: 160, resize: "contain" })} 
                           alt={item.name}
-                          className="w-20 h-20 object-cover rounded-lg"
+                          className="w-20 h-20 object-contain rounded-lg bg-muted p-1"
                         />
                       </Link>
                       <div className="flex-1 min-w-0">
