@@ -163,7 +163,13 @@ Deno.serve(async (req) => {
         sent_count: sent,
         status: errors.length === 0 ? "sent" : (sent > 0 ? "partial" : "failed"),
         error_message: errors.length ? errors.join(" | ").slice(0, 2000) : null,
-        details: { batch_size: BATCH_SIZE, errors, source: body.source ?? "trigger" },
+        details: {
+          batch_size: BATCH_SIZE,
+          errors,
+          source: body.source ?? "trigger",
+          reason: body.reason ? String(body.reason).slice(0, 500) : null,
+          request_id: body.request_id ?? null,
+        },
       });
     } catch (logErr) {
       console.warn("[notify-admins-new-request] failed to write audit log", logErr);
