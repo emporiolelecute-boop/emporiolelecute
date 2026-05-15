@@ -863,6 +863,45 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_check_runs: {
+        Row: {
+          alert_error: string | null
+          alert_sent: boolean
+          checks: Json
+          errors: number
+          id: string
+          passed: number
+          ran_at: string
+          source: string
+          total: number
+          warnings: number
+        }
+        Insert: {
+          alert_error?: string | null
+          alert_sent?: boolean
+          checks?: Json
+          errors?: number
+          id?: string
+          passed?: number
+          ran_at?: string
+          source?: string
+          total?: number
+          warnings?: number
+        }
+        Update: {
+          alert_error?: string | null
+          alert_sent?: boolean
+          checks?: Json
+          errors?: number
+          id?: string
+          passed?: number
+          ran_at?: string
+          source?: string
+          total?: number
+          warnings?: number
+        }
+        Relationships: []
+      }
       seo_snapshots: {
         Row: {
           authority_score: number | null
