@@ -61,6 +61,7 @@ const AdminRobots = lazy(() => import("./pages/admin/AdminRobots"));
 const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
 const AdminSEODashboard = lazy(() => import("./pages/admin/AdminSEODashboard"));
 const AdminCloudflareGuide = lazy(() => import("./pages/admin/AdminCloudflareGuide"));
+const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
 
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
@@ -334,6 +335,11 @@ const App = () => {
                   <Route path="feed-instagram" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminFeedInstagram />
+                    </Suspense>
+                  } />
+                  <Route path="diagnostico" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminDiagnostics />
                     </Suspense>
                   } />
                   <Route path="landings" element={

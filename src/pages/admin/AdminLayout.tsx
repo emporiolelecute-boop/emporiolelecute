@@ -59,6 +59,7 @@ const menuItems = [
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
   { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
   { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
+  { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
 ];
 
 const AdminLayout = () => {
