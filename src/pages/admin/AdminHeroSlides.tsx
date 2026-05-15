@@ -251,116 +251,103 @@ const AdminHeroSlides = () => {
           </DialogHeader>
 
           <div className="space-y-6 py-2">
-            {/* ---- Mode selector ---- */}
+            {/* ---- Compositions ---- */}
             <div>
-              <Label className="mb-2 block">Tipo de slide *</Label>
-              <ModeSelector
-                value={mode}
-                onChange={(v) => setForm({ ...form, display_mode: v })}
+              <Label className="mb-2 block">Composições do slide</Label>
+              <CompositionSummary />
+            </div>
+
+            {/* ---- Text fields ---- */}
+            <div>
+              <Label>Tagline <span className="text-muted-foreground font-normal">(chip acima do título)</span></Label>
+              <Input
+                className="mt-1"
+                value={form.tagline || ''}
+                onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+                placeholder="Ex: Ateliê Criativo"
+              />
+            </div>
+            <div>
+              <Label>Título *</Label>
+              <Input
+                className="mt-1"
+                value={form.title || ''}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Ex: Lembrancinhas que encantam"
+              />
+            </div>
+            <div>
+              <Label>Subtítulo</Label>
+              <Textarea
+                className="mt-1"
+                value={form.subtitle || ''}
+                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+                placeholder="Descrição curta exibida abaixo do título"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Texto do botão <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Input
+                  className="mt-1"
+                  value={form.cta_label || ''}
+                  onChange={(e) => setForm({ ...form, cta_label: e.target.value })}
+                  placeholder="Ex: Ver produtos"
+                />
+              </div>
+              <div>
+                <Label>URL do botão</Label>
+                <Input
+                  className="mt-1"
+                  value={form.cta_url || ''}
+                  onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
+                  placeholder="/produtos"
+                />
+              </div>
+            </div>
+
+            {/* ---- Image upload ---- */}
+            <div>
+              <Label>Imagem Texto + Imagem <span className="text-muted-foreground font-normal">(fallback)</span></Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Usada quando a tela não tiver um banner específico. Recomendado 800×800 · PNG, JPG ou WEBP · até 5 MB
+              </p>
+              <SingleImageUpload
+                value={form.image_url || ''}
+                onChange={(url) => setForm({ ...form, image_url: url })}
+                folder="hero"
+                hint="800×800 recomendado"
+                previewMaxWidth={320}
               />
             </div>
 
-            {/* ---- Text fields — only for text_image mode ---- */}
-            {mode === 'text_image' && (
-              <>
-                <div>
-                  <Label>Tagline <span className="text-muted-foreground font-normal">(chip acima do título)</span></Label>
-                  <Input
-                    className="mt-1"
-                    value={form.tagline || ''}
-                    onChange={(e) => setForm({ ...form, tagline: e.target.value })}
-                    placeholder="Ex: Ateliê Criativo"
-                  />
-                </div>
-                <div>
-                  <Label>Título *</Label>
-                  <Input
-                    className="mt-1"
-                    value={form.title || ''}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="Ex: Lembrancinhas que encantam"
-                  />
-                </div>
-                <div>
-                  <Label>Subtítulo</Label>
-                  <Textarea
-                    className="mt-1"
-                    value={form.subtitle || ''}
-                    onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
-                    placeholder="Descrição curta exibida abaixo do título"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Texto do botão <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                    <Input
-                      className="mt-1"
-                      value={form.cta_label || ''}
-                      onChange={(e) => setForm({ ...form, cta_label: e.target.value })}
-                      placeholder="Ex: Ver produtos"
-                    />
-                  </div>
-                  <div>
-                    <Label>URL do botão</Label>
-                    <Input
-                      className="mt-1"
-                      value={form.cta_url || ''}
-                      onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
-                      placeholder="/produtos"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+            <div>
+              <Label>Imagem Mobile <span className="text-muted-foreground font-normal">(celular / tablet)</span></Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Quando preenchida, substitui automaticamente o layout texto+imagem no celular. A imagem ocupa 100% da largura sem cortes.
+              </p>
+              <SingleImageUpload
+                value={form.image_mobile_url || ''}
+                onChange={(url) => setForm({ ...form, image_mobile_url: url })}
+                folder="hero/mobile"
+                hint="Proporção 9:16 ou 1:1 recomendada"
+                previewMaxWidth={280}
+              />
+            </div>
 
-            {/* ---- Image upload ---- */}
-            {mode === 'text_image' && (
-              <div>
-                <Label>Imagem <span className="text-muted-foreground font-normal">(quadrada, ao lado do texto)</span></Label>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-                  Recomendado 800×800 · PNG, JPG ou WEBP · até 5 MB
-                </p>
-                <SingleImageUpload
-                  value={form.image_url || ''}
-                  onChange={(url) => setForm({ ...form, image_url: url })}
-                  folder="hero"
-                  hint="800×800 recomendado"
-                  previewMaxWidth={320}
-                />
-              </div>
-            )}
-
-            {mode === 'banner_mobile' && (
-              <div>
-                <Label>Imagem do banner <span className="text-muted-foreground font-normal">(celular / tablet)</span></Label>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-                  A imagem ocupa 100% da largura sem cortes. Recomendado proporção 9:16 ou 1:1 · PNG, JPG ou WEBP · até 5 MB
-                </p>
-                <SingleImageUpload
-                  value={form.image_mobile_url || ''}
-                  onChange={(url) => setForm({ ...form, image_mobile_url: url })}
-                  folder="hero/mobile"
-                  hint="Proporção 9:16 ou 1:1 recomendada"
-                  previewMaxWidth={280}
-                />
-              </div>
-            )}
-
-            {mode === 'banner_desktop' && (
-              <div>
-                <Label>Imagem do banner <span className="text-muted-foreground font-normal">(desktop)</span></Label>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-                  A imagem ocupa 100% da largura sem cortes. Recomendado proporção 16:5 ou 16:6 · PNG, JPG ou WEBP · até 5 MB
-                </p>
-                <SingleImageUpload
-                  value={form.image_desktop_url || ''}
-                  onChange={(url) => setForm({ ...form, image_desktop_url: url })}
-                  folder="hero/desktop"
-                  hint="Proporção 16:5 recomendada (ex: 1920×600)"
-                  previewMaxWidth={480}
-                />
-              </div>
-            )}
+            <div>
+              <Label>Imagem Desktop <span className="text-muted-foreground font-normal">(PC)</span></Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Quando preenchida, substitui automaticamente o layout texto+imagem no PC. A imagem ocupa 100% da largura sem cortes.
+              </p>
+              <SingleImageUpload
+                value={form.image_desktop_url || ''}
+                onChange={(url) => setForm({ ...form, image_desktop_url: url })}
+                folder="hero/desktop"
+                hint="Proporção 16:5 recomendada (ex: 1920×600)"
+                previewMaxWidth={480}
+              />
+            </div>
 
             {/* ---- Alt text — always shown ---- */}
             <div>
