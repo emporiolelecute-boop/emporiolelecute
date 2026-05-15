@@ -30,12 +30,12 @@ const AdminLogin = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Redirect if already logged in as admin
+  // Redirect once role check completes
   useEffect(() => {
-    if (!loading && user && isAdmin) {
-      navigate('/admin');
-    }
-  }, [user, isAdmin, loading, navigate]);
+    if (loading || !user || !adminChecked) return;
+    if (isAdmin) navigate('/admin', { replace: true });
+    else navigate('/acesso-restrito', { replace: true });
+  }, [user, isAdmin, adminChecked, loading, navigate]);
 
   const validateForm = () => {
     try {
