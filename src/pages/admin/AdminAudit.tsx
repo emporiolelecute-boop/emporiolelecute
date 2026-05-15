@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/select';
@@ -16,28 +18,64 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft, RefreshCw, Search, Download, History, FileText, ArrowUp, ArrowDown,
+  AlertTriangle, ShieldAlert, EyeOff, Eye,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-interface AuditRow {
-  id: string;
+interface TimelineRow {
+  source: 'audit' | 'request' | 'notification';
+  event_id: string;
   created_at: string;
   status: string;
-  role: string;
-  target_email: string;
+  role: string | null;
   target_user_id: string | null;
-  promoted_by_email: string | null;
-  message: string | null;
+  target_email: string | null;
+  actor_email: string | null;
+  details: string | null;
 }
 
-const STATUS_OPTIONS = ['all', 'requested', 'success', 'rejected', 'revoked', 'noop', 'error'] as const;
+interface Anomaly {
+  target_email: string;
+  target_user_id: string | null;
+  event_count: number;
+  approvals: number;
+  requests: number;
+  negatives: number;
+  first_event: string;
+  last_event: string;
+}
+
+const STATUS_OPTIONS = [
+  'all', 'requested', 'success', 'rejected', 'revoked', 'noop', 'error',
+  'pending', 'approved', 'denied', 'sent', 'failed',
+] as const;
+const SOURCE_OPTIONS = ['all', 'audit', 'request', 'notification'] as const;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
-type SortKey = 'created_at' | 'status' | 'target_email' | 'promoted_by_email';
+type SortKey = 'created_at' | 'status' | 'target_email' | 'actor_email' | 'source';
 type SortDir = 'asc' | 'desc';
 
-function toCsv(rows: AuditRow[]): string {
-  const header = ['created_at', 'status', 'role', 'target_email', 'target_user_id', 'promoted_by_email', 'message'];
+const MASK_KEY = 'admin_audit_mask_pii';
+
+function maskEmail(e?: string | null): string {
+  if (!e) return '—';
+  const [user, domain] = e.split('@');
+  if (!domain) return e.length <= 2 ? '••' : e[0] + '••• ';
+  const maskedUser = user.length <= 2 ? user[0] + '•' : user[0] + '•••' + user.slice(-1);
+  const dotIdx = domain.lastIndexOf('.');
+  const dPart = dotIdx > 0 ? domain.slice(0, dotIdx) : domain;
+  const tld = dotIdx > 0 ? domain.slice(dotIdx) : '';
+  const maskedDomain = (dPart.length <= 2 ? dPart[0] + '•' : dPart[0] + '•••') + tld;
+  return `${maskedUser}@${maskedDomain}`;
+}
+
+function fmt(e: string | null | undefined, mask: boolean) {
+  if (!e) return '—';
+  return mask ? maskEmail(e) : e;
+}
+
+function toCsv(rows: TimelineRow[], mask: boolean): string {
+  const header = ['created_at', 'source', 'status', 'role', 'target_email', 'target_user_id', 'actor_email', 'details'];
   const escape = (v: any) => {
     if (v === null || v === undefined) return '';
     const s = String(v).replace(/"/g, '""');
@@ -46,8 +84,11 @@ function toCsv(rows: AuditRow[]): string {
   const lines = [header.join(',')];
   for (const r of rows) {
     lines.push([
-      r.created_at, r.status, r.role, r.target_email,
-      r.target_user_id ?? '', r.promoted_by_email ?? '', r.message ?? '',
+      r.created_at, r.source, r.status, r.role ?? '',
+      fmt(r.target_email, mask),
+      r.target_user_id ?? '',
+      fmt(r.actor_email, mask),
+      r.details ?? '',
     ].map(escape).join(','));
   }
   return lines.join('\n');
@@ -55,76 +96,102 @@ function toCsv(rows: AuditRow[]): string {
 
 const AdminAudit = () => {
   const { toast } = useToast();
-  const [rows, setRows] = useState<AuditRow[]>([]);
+  const [rows, setRows] = useState<TimelineRow[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [status, setStatus] = useState<typeof STATUS_OPTIONS[number]>('all');
+  const [source, setSource] = useState<typeof SOURCE_OPTIONS[number]>('all');
   const [from, setFrom] = useState<string>('');
   const [to, setTo] = useState<string>('');
   const [sortKey, setSortKey] = useState<SortKey>('created_at');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [maskPii, setMaskPii] = useState<boolean>(() => {
+    try { return localStorage.getItem(MASK_KEY) === '1'; } catch { return false; }
+  });
+  const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+  const [windowHours, setWindowHours] = useState(24);
+  const [threshold, setThreshold] = useState(3);
 
-  const load = async () => {
+  // Persist masking preference
+  useEffect(() => {
+    try { localStorage.setItem(MASK_KEY, maskPii ? '1' : '0'); } catch { /* noop */ }
+  }, [maskPii]);
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query.trim()), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, status, source, from, to, sortKey, sortDir, pageSize]);
+
+  const load = useCallback(async () => {
     setLoading(true);
-    let q = supabase.from('role_promotion_audit')
-      .select('id, created_at, status, role, target_email, target_user_id, promoted_by_email, message')
-      .order('created_at', { ascending: false })
-      .limit(2000);
-    if (from) q = q.gte('created_at', new Date(from).toISOString());
-    if (to) q = q.lte('created_at', new Date(to + 'T23:59:59').toISOString());
-    const { data, error } = await q;
+    const { data, error } = await supabase.rpc('list_admin_audit_timeline', {
+      _search: debouncedQuery || null,
+      _status: status === 'all' ? null : status,
+      _source: source === 'all' ? null : source,
+      _from: from ? new Date(from).toISOString() : null,
+      _to: to ? new Date(to + 'T23:59:59').toISOString() : null,
+      _sort_key: sortKey,
+      _sort_dir: sortDir,
+      _limit: pageSize,
+      _offset: (page - 1) * pageSize,
+    });
     if (error) {
       toast({ title: 'Erro ao carregar auditoria', description: error.message, variant: 'destructive' });
       setLoading(false);
       return;
     }
-    setRows(data || []);
+    const payload = (data ?? {}) as { total?: number; rows?: TimelineRow[] };
+    setRows(payload.rows ?? []);
+    setTotal(payload.total ?? 0);
     setLoading(false);
+  }, [debouncedQuery, status, source, from, to, sortKey, sortDir, page, pageSize, toast]);
+
+  const loadAnomalies = useCallback(async () => {
+    const { data, error } = await supabase.rpc('admin_audit_anomalies', {
+      _window_hours: windowHours,
+      _threshold: threshold,
+    });
+    if (error) return;
+    const payload = (data ?? {}) as { items?: Anomaly[] };
+    setAnomalies(payload.items ?? []);
+  }, [windowHours, threshold]);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadAnomalies(); }, [loadAnomalies]);
+
+  const refreshAll = async () => {
+    setRefreshing(true);
+    const { error } = await supabase.rpc('refresh_admin_audit_timeline');
+    setRefreshing(false);
+    if (error) {
+      toast({ title: 'Falha ao atualizar', description: error.message, variant: 'destructive' });
+      return;
+    }
+    await Promise.all([load(), loadAnomalies()]);
+    toast({ title: 'Auditoria atualizada' });
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [from, to]);
-  useEffect(() => { setPage(1); }, [query, status, sortKey, sortDir, pageSize, from, to]);
-
-  const filtered = useMemo(() => {
-    const qq = query.trim().toLowerCase();
-    const out = rows.filter((r) => {
-      if (status !== 'all' && r.status !== status) return false;
-      if (!qq) return true;
-      return (
-        r.target_email.toLowerCase().includes(qq) ||
-        (r.promoted_by_email || '').toLowerCase().includes(qq) ||
-        (r.message || '').toLowerCase().includes(qq)
-      );
-    });
-    const dir = sortDir === 'asc' ? 1 : -1;
-    out.sort((a, b) => {
-      const av = (a[sortKey] ?? '') as string;
-      const bv = (b[sortKey] ?? '') as string;
-      if (sortKey === 'created_at') {
-        return (new Date(av).getTime() - new Date(bv).getTime()) * dir;
-      }
-      return av.localeCompare(bv, 'pt-BR') * dir;
-    });
-    return out;
-  }, [rows, query, status, sortKey, sortDir]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const pageRows = useMemo(
-    () => filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [filtered, currentPage, pageSize],
+
+  const anomalyEmails = useMemo(
+    () => new Set(anomalies.map((a) => (a.target_email || '').toLowerCase())),
+    [anomalies],
   );
 
-  const counts = useMemo(() => {
-    const map: Record<string, number> = {};
-    rows.forEach((r) => { map[r.status] = (map[r.status] || 0) + 1; });
-    return map;
-  }, [rows]);
-
   const exportCsv = () => {
-    const csv = toCsv(filtered);
+    const csv = toCsv(rows, maskPii);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -140,37 +207,41 @@ const AdminAudit = () => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
     const today = new Date().toLocaleString('pt-BR');
     doc.setFontSize(14);
-    doc.text('Auditoria de Acesso Administrativo', 40, 40);
+    doc.text('Auditoria Consolidada — Acesso Administrativo', 40, 40);
     doc.setFontSize(9);
     doc.setTextColor(120);
     doc.text(
-      `Gerado em ${today} • ${filtered.length} evento(s)` +
+      `Gerado em ${today} • página ${currentPage} (${rows.length} de ${total} eventos)` +
       (status !== 'all' ? ` • status=${status}` : '') +
-      (from ? ` • de ${from}` : '') + (to ? ` até ${to}` : ''),
+      (source !== 'all' ? ` • origem=${source}` : '') +
+      (from ? ` • de ${from}` : '') + (to ? ` até ${to}` : '') +
+      (maskPii ? ' • PII mascarada (LGPD)' : ''),
       40, 56,
     );
     doc.setTextColor(0);
 
     autoTable(doc, {
       startY: 72,
-      head: [['Data', 'Status', 'Alvo', 'Por', 'Mensagem']],
-      body: filtered.map((r) => [
+      head: [['Data', 'Origem', 'Status', 'Alvo', 'Por', 'Detalhes']],
+      body: rows.map((r) => [
         new Date(r.created_at).toLocaleString('pt-BR'),
+        r.source,
         r.status,
-        r.target_email,
-        r.promoted_by_email || '—',
-        r.message || '—',
+        fmt(r.target_email, maskPii),
+        fmt(r.actor_email, maskPii),
+        r.details || '—',
       ]),
       styles: { fontSize: 8, cellPadding: 4, overflow: 'linebreak' },
       headStyles: { fillColor: [232, 93, 58] },
       columnStyles: {
-        0: { cellWidth: 100 },
+        0: { cellWidth: 90 },
         1: { cellWidth: 60 },
-        2: { cellWidth: 170 },
-        3: { cellWidth: 170 },
-        4: { cellWidth: 'auto' },
+        2: { cellWidth: 60 },
+        3: { cellWidth: 150 },
+        4: { cellWidth: 150 },
+        5: { cellWidth: 'auto' },
       },
-      didDrawPage: (data) => {
+      didDrawPage: () => {
         const pageCount = (doc as any).internal.getNumberOfPages();
         const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
         doc.setFontSize(8);
@@ -187,10 +258,17 @@ const AdminAudit = () => {
   };
 
   const badgeVariant = (s: string): 'default' | 'destructive' | 'secondary' | 'outline' => {
-    if (s === 'success') return 'default';
-    if (s === 'rejected' || s === 'error' || s === 'revoked') return 'destructive';
-    if (s === 'requested') return 'secondary';
+    if (s === 'success' || s === 'approved' || s === 'sent') return 'default';
+    if (s === 'rejected' || s === 'denied' || s === 'error' || s === 'revoked' || s === 'failed') return 'destructive';
+    if (s === 'requested' || s === 'pending') return 'secondary';
     return 'outline';
+  };
+
+  const sourceLabel = (s: string) => {
+    if (s === 'audit') return 'Promoção';
+    if (s === 'request') return 'Solicitação';
+    if (s === 'notification') return 'Notificação';
+    return s;
   };
 
   const toggleSort = (key: SortKey) => {
@@ -209,18 +287,16 @@ const AdminAudit = () => {
     </button>
   );
 
-  // Compact pagination range
   const pageNumbers = useMemo(() => {
     const out: (number | 'ellipsis')[] = [];
-    const add = (n: number | 'ellipsis') => out.push(n);
     const last = totalPages;
     const c = currentPage;
-    const window = 1;
-    add(1);
-    if (c - window > 2) add('ellipsis');
-    for (let i = Math.max(2, c - window); i <= Math.min(last - 1, c + window); i++) add(i);
-    if (c + window < last - 1) add('ellipsis');
-    if (last > 1) add(last);
+    const win = 1;
+    out.push(1);
+    if (c - win > 2) out.push('ellipsis');
+    for (let i = Math.max(2, c - win); i <= Math.min(last - 1, c + win); i++) out.push(i);
+    if (c + win < last - 1) out.push('ellipsis');
+    if (last > 1) out.push(last);
     return out;
   }, [currentPage, totalPages]);
 
@@ -234,35 +310,95 @@ const AdminAudit = () => {
             </Link>
           </div>
           <h1 className="text-2xl font-display flex items-center gap-2">
-            <History className="w-6 h-6 text-primary" /> Auditoria de Acesso
+            <History className="w-6 h-6 text-primary" /> Auditoria Consolidada
           </h1>
           <p className="text-muted-foreground text-sm">
-            Histórico completo de promoções, solicitações, reprovações e revogações de acesso administrativo.
+            Linha do tempo unificada de promoções, solicitações de acesso e tentativas de notificação.
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" onClick={load} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 border rounded-md bg-card">
+            {maskPii ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+            <Label htmlFor="mask-pii" className="text-xs cursor-pointer select-none">
+              Mascarar PII (LGPD)
+            </Label>
+            <Switch id="mask-pii" checked={maskPii} onCheckedChange={setMaskPii} />
+          </div>
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing || loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
           </Button>
-          <Button variant="outline" onClick={exportCsv} disabled={filtered.length === 0}>
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
             <Download className="w-4 h-4 mr-2" /> CSV
           </Button>
-          <Button onClick={exportPdf} disabled={filtered.length === 0}>
+          <Button onClick={exportPdf} disabled={rows.length === 0}>
             <FileText className="w-4 h-4 mr-2" /> PDF
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-        {(['requested', 'success', 'rejected', 'revoked', 'noop', 'error'] as const).map((s) => (
-          <Card key={s}>
-            <CardContent className="p-4">
-              <div className="text-xs uppercase text-muted-foreground">{s}</div>
-              <div className="text-2xl font-semibold">{counts[s] || 0}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Anomaly detection */}
+      <Card className={anomalies.length > 0 ? 'border-destructive/40' : ''}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldAlert className={`w-5 h-5 ${anomalies.length > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+              Detecção de anomalias
+            </CardTitle>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground">Janela</span>
+              <Select value={String(windowHours)} onValueChange={(v) => setWindowHours(Number(v))}>
+                <SelectTrigger className="h-8 w-[110px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 hora</SelectItem>
+                  <SelectItem value="6">6 horas</SelectItem>
+                  <SelectItem value="24">24 horas</SelectItem>
+                  <SelectItem value="72">3 dias</SelectItem>
+                  <SelectItem value="168">7 dias</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-muted-foreground">Limite</span>
+              <Select value={String(threshold)} onValueChange={(v) => setThreshold(Number(v))}>
+                <SelectTrigger className="h-8 w-[80px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[2, 3, 5, 10].map((n) => (
+                    <SelectItem key={n} value={String(n)}>≥ {n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <CardDescription className="text-xs">
+            Usuários com {threshold}+ eventos em {windowHours}h. Linhas destacadas na tabela abaixo.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {anomalies.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">Nenhuma anomalia no período.</p>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {anomalies.slice(0, 6).map((a) => (
+                <div
+                  key={(a.target_user_id ?? '') + a.target_email}
+                  className="border border-destructive/30 rounded-md p-3 text-xs bg-destructive/5"
+                >
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{fmt(a.target_email, maskPii)}</div>
+                      <div className="text-muted-foreground mt-1">
+                        {a.event_count} eventos · {a.approvals} aprov. · {a.requests} solic. · {a.negatives} neg.
+                      </div>
+                      <div className="text-muted-foreground text-[10px] mt-0.5">
+                        Último: {new Date(a.last_event).toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -270,18 +406,26 @@ const AdminAudit = () => {
           <CardDescription>
             {loading
               ? 'Carregando…'
-              : `${filtered.length} de ${rows.length} eventos · página ${currentPage} de ${totalPages}`}
+              : `${rows.length} de ${total} eventos · página ${currentPage} de ${totalPages}`}
           </CardDescription>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 pt-3">
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por e-mail, mensagem…"
+                placeholder="Buscar por e-mail, detalhes…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
+            <Select value={source} onValueChange={(v) => setSource(v as any)}>
+              <SelectTrigger><SelectValue placeholder="Origem" /></SelectTrigger>
+              <SelectContent>
+                {SOURCE_OPTIONS.map((s) => (
+                  <SelectItem key={s} value={s}>{s === 'all' ? 'Todas as origens' : sourceLabel(s)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={status} onValueChange={(v) => setStatus(v as any)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -302,34 +446,44 @@ const AdminAudit = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead><SortHeader k="created_at" label="Data" /></TableHead>
+                  <TableHead><SortHeader k="source" label="Origem" /></TableHead>
                   <TableHead><SortHeader k="status" label="Status" /></TableHead>
                   <TableHead><SortHeader k="target_email" label="Alvo" /></TableHead>
-                  <TableHead><SortHeader k="promoted_by_email" label="Por" /></TableHead>
-                  <TableHead>Mensagem</TableHead>
+                  <TableHead><SortHeader k="actor_email" label="Por" /></TableHead>
+                  <TableHead>Detalhes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pageRows.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="text-xs whitespace-nowrap">
-                      {new Date(r.created_at).toLocaleString('pt-BR')}
-                    </TableCell>
-                    <TableCell><Badge variant={badgeVariant(r.status)}>{r.status}</Badge></TableCell>
-                    <TableCell className="text-xs">
-                      <div>{r.target_email}</div>
-                      {r.target_user_id && (
-                        <code className="text-[10px] text-muted-foreground">{r.target_user_id.slice(0, 8)}…</code>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs">{r.promoted_by_email || '—'}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-md">
-                      {r.message || '—'}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {!loading && pageRows.length === 0 && (
+                {rows.map((r) => {
+                  const isAnomaly = !!r.target_email && anomalyEmails.has(r.target_email.toLowerCase());
+                  return (
+                    <TableRow key={`${r.source}-${r.event_id}`} className={isAnomaly ? 'bg-destructive/5' : undefined}>
+                      <TableCell className="text-xs whitespace-nowrap">
+                        {new Date(r.created_at).toLocaleString('pt-BR')}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-[10px] uppercase">{sourceLabel(r.source)}</Badge>
+                      </TableCell>
+                      <TableCell><Badge variant={badgeVariant(r.status)}>{r.status}</Badge></TableCell>
+                      <TableCell className="text-xs">
+                        <div className="flex items-center gap-1.5">
+                          {isAnomaly && <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" />}
+                          <span>{fmt(r.target_email, maskPii)}</span>
+                        </div>
+                        {r.target_user_id && (
+                          <code className="text-[10px] text-muted-foreground">{r.target_user_id.slice(0, 8)}…</code>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs">{fmt(r.actor_email, maskPii)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground max-w-md">
+                        {r.details || '—'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {!loading && rows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm">
                       Nenhum evento para os filtros selecionados.
                     </TableCell>
                   </TableRow>
