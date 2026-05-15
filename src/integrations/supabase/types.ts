@@ -241,7 +241,11 @@ export type Database = {
           created_at: string
           cta_label: string | null
           cta_url: string | null
+          display_mode: string
           id: string
+          image_alt: string | null
+          image_desktop_url: string | null
+          image_mobile_url: string | null
           image_url: string | null
           is_visible: boolean
           position: number
@@ -254,7 +258,11 @@ export type Database = {
           created_at?: string
           cta_label?: string | null
           cta_url?: string | null
+          display_mode?: string
           id?: string
+          image_alt?: string | null
+          image_desktop_url?: string | null
+          image_mobile_url?: string | null
           image_url?: string | null
           is_visible?: boolean
           position?: number
@@ -267,7 +275,11 @@ export type Database = {
           created_at?: string
           cta_label?: string | null
           cta_url?: string | null
+          display_mode?: string
           id?: string
+          image_alt?: string | null
+          image_desktop_url?: string | null
+          image_mobile_url?: string | null
           image_url?: string | null
           is_visible?: boolean
           position?: number

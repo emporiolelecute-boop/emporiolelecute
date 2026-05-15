@@ -126,6 +126,7 @@ const empty: Partial<HeroSlide> = {
   subtitle: '',
   image_url: '',
   image_mobile_url: '',
+  image_desktop_url: '',
   image_alt: '',
   cta_label: '',
   cta_url: '',
@@ -185,15 +186,21 @@ const AdminHeroSlides = () => {
               <CardContent className="flex items-center gap-4 p-4">
                 {/* Thumbnail */}
                 <div className="w-20 h-20 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0">
-                  {s.image_url ? (
-                    <img
-                      src={s.image_url}
-                      alt={s.image_alt || s.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                  )}
+                  {(() => {
+                    const thumb =
+                      s.display_mode === 'banner_desktop' ? s.image_desktop_url :
+                      s.display_mode === 'banner_mobile' ? s.image_mobile_url :
+                      s.image_url;
+                    return thumb ? (
+                      <img
+                        src={thumb}
+                        alt={s.image_alt || s.title}
+                        className="w-full h-full object-contain bg-muted"
+                      />
+                    ) : (
+                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    );
+                  })()}
                 </div>
 
                 {/* Info */}
@@ -368,8 +375,8 @@ const AdminHeroSlides = () => {
                   A imagem ocupa 100% da largura sem cortes. Recomendado proporção 16:5 ou 16:6 · PNG, JPG ou WEBP · até 5 MB
                 </p>
                 <SingleImageUpload
-                  value={form.image_url || ''}
-                  onChange={(url) => setForm({ ...form, image_url: url })}
+                  value={form.image_desktop_url || ''}
+                  onChange={(url) => setForm({ ...form, image_desktop_url: url })}
                   folder="hero/desktop"
                   hint="Proporção 16:5 recomendada (ex: 1920×600)"
                   previewMaxWidth={480}

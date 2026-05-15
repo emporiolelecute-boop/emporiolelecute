@@ -20,6 +20,7 @@ const fallbackSlides: HeroSlide[] = [
     subtitle: "Cada produto é feito sob encomenda com ingredientes naturais e embalagem especial.",
     image_url: sabonetesImg,
     image_mobile_url: null,
+    image_desktop_url: null,
     image_alt: "Sabonetes artesanais personalizados Empório LeleCute",
     cta_label: null,
     cta_url: null,
@@ -34,6 +35,7 @@ const fallbackSlides: HeroSlide[] = [
     subtitle: "Sabonetes artesanais, velas perfumadas e presentes personalizados feitos com amor e carinho.",
     image_url: lembrancinhasImg,
     image_mobile_url: null,
+    image_desktop_url: null,
     image_alt: "Lembrancinhas artesanais personalizadas Empório LeleCute",
     cta_label: null,
     cta_url: null,
@@ -48,6 +50,7 @@ const fallbackSlides: HeroSlide[] = [
     subtitle: "Cores, aromas, embalagens e tags personalizadas para seu evento perfeito.",
     image_url: kitsImg,
     image_mobile_url: null,
+    image_desktop_url: null,
     image_alt: "Kits de lembrancinhas personalizados Empório LeleCute",
     cta_label: null,
     cta_url: null,
@@ -174,8 +177,8 @@ function SlideBannerDesktop({
   isPriority: boolean;
 }) {
   const imgSrc =
-    (slide.image_url && fallbackImageMap[slide.image_url]) ||
-    slide.image_url ||
+    (slide.image_desktop_url && fallbackImageMap[slide.image_desktop_url]) ||
+    slide.image_desktop_url ||
     "";
   const alt = slide.image_alt || slide.title;
 

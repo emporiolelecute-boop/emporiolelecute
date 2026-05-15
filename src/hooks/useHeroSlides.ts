@@ -17,10 +17,12 @@ export interface HeroSlide {
   tagline: string | null;
   title: string;
   subtitle: string | null;
-  /** Imagem principal (usada em text_image e banner_desktop) */
+  /** Imagem principal (usada apenas em text_image) */
   image_url: string | null;
-  /** Imagem para banner mobile (usada em banner_mobile) */
+  /** Imagem para banner mobile (usada apenas em banner_mobile) */
   image_mobile_url: string | null;
+  /** Imagem para banner desktop (usada apenas em banner_desktop) */
+  image_desktop_url: string | null;
   /** Texto alternativo da imagem para acessibilidade */
   image_alt: string | null;
   cta_label: string | null;
