@@ -185,7 +185,7 @@ const ProductPage = () => {
 
   // Calculate totals using store settings
   const totalPrice = product.price * quantity;
-  const pixDiscountPercent = paymentConfig?.pix_discount ?? 7;
+  const pixDiscountPercent = paymentConfig?.pix_discount ?? 5;
   const installments = paymentConfig?.installments ?? 3;
   const pixPrice = totalPrice * (1 - pixDiscountPercent / 100);
   const installmentValue = totalPrice / installments;

@@ -10,10 +10,20 @@ import { useFaqs } from "@/hooks/useFaqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import FAQStructuredData from "@/components/FAQStructuredData";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { usePaymentConfig } from "@/hooks/useStoreSettings";
 
 const FAQSection = () => {
   const { data: faqs, isLoading } = useFaqs();
   const { buildWhatsappUrl } = useContactInfo();
+  const { data: paymentConfig } = usePaymentConfig();
+  const pixDiscount = paymentConfig?.pix_discount ?? 5;
+  const installments = paymentConfig?.installments ?? 3;
+  const interpolate = (text: string) =>
+    text
+      .replace(/\{pix_discount\}/g, String(pixDiscount))
+      .replace(/\{installments\}/g, String(installments))
+      .replace(/\(com \d+% de desconto\)/gi, `(com ${pixDiscount}% de desconto)`)
+      .replace(/PIX com \d+% de desconto/gi, `PIX com ${pixDiscount}% de desconto`);
 
   // Fallback FAQs if database is empty
   const defaultFaqs = [
@@ -35,7 +45,7 @@ const FAQSection = () => {
     {
       id: '4',
       question: "Quais são as formas de pagamento aceitas?",
-      answer: "Aceitamos PIX (com 7% de desconto), cartão de crédito (parcelamento em até 3x sem juros), boleto bancário e Mercado Pago."
+      answer: `Aceitamos PIX (com ${pixDiscount}% de desconto), cartão de crédito (parcelamento em até ${installments}x sem juros), boleto bancário e Mercado Pago.`
     },
     {
       id: '5',
@@ -51,7 +61,10 @@ const FAQSection = () => {
 
   // Filter only visible FAQs from database
   const visibleFaqs = faqs?.filter(faq => faq.is_visible !== false) || [];
-  const displayFaqs = visibleFaqs.length > 0 ? visibleFaqs : defaultFaqs;
+  const displayFaqs = (visibleFaqs.length > 0 ? visibleFaqs : defaultFaqs).map((f) => ({
+    ...f,
+    answer: interpolate(f.answer),
+  }));
 
   return (
     <>
@@ -98,8 +111,8 @@ const FAQSection = () => {
                       {faq.question}
                     </span>
                   </AccordionTrigger>
-                  <AccordionContent className="pb-5 text-muted-foreground leading-relaxed">
-                    {faq.answer}
+                  <AccordionContent className="pb-5 text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {interpolate(faq.answer)}
                   </AccordionContent>
                 </AccordionItem>
               ))}

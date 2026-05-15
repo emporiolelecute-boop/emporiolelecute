@@ -15,7 +15,7 @@ const FAQ = () => {
     {
       id: '1',
       question: "Quais são as formas de pagamento?",
-      answer: "Aceitamos PIX com 7% de desconto e cartão de crédito em até 3x sem juros.",
+      answer: "Aceitamos PIX (com desconto especial) e cartão de crédito em até 3x sem juros.",
     },
     {
       id: '2',
