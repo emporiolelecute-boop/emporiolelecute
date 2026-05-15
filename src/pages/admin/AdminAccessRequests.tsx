@@ -100,6 +100,9 @@ const AdminAccessRequests = () => {
         });
         setRows((prev) => prev.filter((r) => r.id !== id));
         if (selected?.id === id) setSelected(null);
+        // Refresh the *current* admin's cached role so any policy change
+        // propagates instantly without a page reload.
+        void refreshRole();
       }
     } catch (e: any) {
       toast({ title: 'Erro', description: e.message, variant: 'destructive' });
