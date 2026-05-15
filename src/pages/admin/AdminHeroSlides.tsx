@@ -371,6 +371,9 @@ const AdminHeroSlides = () => {
               <CompositionSummary />
             </div>
 
+            {/* ---- Live preview ---- */}
+            <SlidePreview slide={form} />
+
             {/* ---- Text fields ---- */}
             <div>
               <Label>Tagline <span className="text-muted-foreground font-normal">(chip acima do título)</span></Label>
