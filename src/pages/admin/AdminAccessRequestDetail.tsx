@@ -228,7 +228,22 @@ const AdminAccessRequestDetail = () => {
             <ShieldCheck className="w-6 h-6 text-primary" /> Detalhes da solicitação
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {profile.access_requested && (
+            <Button
+              variant="outline"
+              onClick={resendNotification}
+              disabled={resending || cooldown > 0}
+              title={cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Reenviar e-mail aos admins'}
+            >
+              <Send className="w-4 h-4 mr-1" />
+              {resending
+                ? 'Enviando…'
+                : cooldown > 0
+                  ? `Reenviar (${cooldown}s)`
+                  : 'Reenviar notificação'}
+            </Button>
+          )}
           {profile.access_requested && !isAdmin && (
             <>
               <Button variant="destructive" onClick={() => setRejecting(true)} disabled={acting}>
