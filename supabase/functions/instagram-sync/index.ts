@@ -143,21 +143,37 @@ Deno.serve(async (req) => {
     }
 
     // ============== SYNC (manual ou scheduled) ==============
-    // Rate limit: bloquear se houver sincronização nos últimos 5min
-    const { data: lastRun } = await admin
-      .from('instagram_sync_history')
-      .select('ran_at')
-      .eq('action', 'sync')
-      .eq('status', 'success')
-      .order('ran_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (lastRun?.ran_at) {
-      const ageMin = (Date.now() - new Date(lastRun.ran_at).getTime()) / 60000;
-      const minInterval = isScheduled ? 0 : 1; // manual: 1min cooldown
-      if (ageMin < minInterval) {
-        await logHistory({ action: 'sync', source: isScheduled ? 'scheduled' : 'manual', status: 'skipped', error_message: 'Rate limit cooldown', details: { age_minutes: ageMin } });
-        return json({ error: 'Aguarde antes de sincronizar novamente', hint: `Última sync há ${ageMin.toFixed(1)} min.` }, 429);
+    // Para scheduled: ler config do store_settings e respeitar intervalo
+    if (isScheduled) {
+      const { data: cfg } = await admin
+        .from('store_settings').select('value').eq('key', 'instagram_sync_config').maybeSingle();
+      const v = (cfg?.value || {}) as any;
+      if (!v.enabled) {
+        return json({ skipped: true, reason: 'disabled' });
+      }
+      const intervalHours = Number(v.interval_hours) || 24;
+      const { data: last } = await admin
+        .from('instagram_sync_history')
+        .select('ran_at').eq('action', 'sync').eq('status', 'success')
+        .order('ran_at', { ascending: false }).limit(1).maybeSingle();
+      if (last?.ran_at) {
+        const ageHours = (Date.now() - new Date(last.ran_at).getTime()) / 3600000;
+        if (ageHours < intervalHours) {
+          return json({ skipped: true, reason: 'interval_not_reached', age_hours: ageHours });
+        }
+      }
+    } else {
+      // Manual: cooldown de 1 minuto
+      const { data: lastRun } = await admin
+        .from('instagram_sync_history')
+        .select('ran_at').eq('action', 'sync').eq('status', 'success')
+        .order('ran_at', { ascending: false }).limit(1).maybeSingle();
+      if (lastRun?.ran_at) {
+        const ageMin = (Date.now() - new Date(lastRun.ran_at).getTime()) / 60000;
+        if (ageMin < 1) {
+          await logHistory({ action: 'sync', source: 'manual', status: 'skipped', error_message: 'Rate limit cooldown', details: { age_minutes: ageMin } });
+          return json({ error: 'Aguarde antes de sincronizar novamente', hint: `Última sync há ${ageMin.toFixed(1)} min.` }, 429);
+        }
       }
     }
 
