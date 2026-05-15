@@ -270,12 +270,18 @@ const AdminUsers = () => {
           <h2 className="font-medium flex items-center gap-2">
             <History className="h-4 w-4" /> Histórico ({filtered.length}/{audit.length})
           </h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={exportCSV} disabled={!filtered.length}>
-              <Download className="h-4 w-4 mr-2" /> CSV
+              <Download className="h-4 w-4 mr-2" /> CSV (filtrado)
             </Button>
             <Button size="sm" variant="outline" onClick={exportPDF} disabled={!filtered.length}>
-              <FileText className="h-4 w-4 mr-2" /> PDF
+              <FileText className="h-4 w-4 mr-2" /> PDF (filtrado)
+            </Button>
+            <Button size="sm" onClick={exportConsolidatedCSV} disabled={!audit.length}>
+              <Download className="h-4 w-4 mr-2" /> Relatório CSV
+            </Button>
+            <Button size="sm" onClick={exportConsolidatedPDF} disabled={!audit.length}>
+              <FileText className="h-4 w-4 mr-2" /> Relatório PDF
             </Button>
           </div>
         </div>
