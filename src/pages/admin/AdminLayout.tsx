@@ -106,7 +106,9 @@ const AdminLayout = () => {
           <Menu className="w-5 h-5 text-foreground" />
         </button>
         <Link to="/admin" className="flex items-center gap-2">
-          <img src={logoImg} alt="LeleCute" className="w-10 h-10 object-contain" />
+          <span className="w-10 h-10 rounded-full bg-white shadow ring-1 ring-primary/20 flex items-center justify-center overflow-hidden">
+            <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-0.5" />
+          </span>
           <span className="font-display text-lg text-foreground">Admin</span>
         </Link>
         <div className="w-10" />
