@@ -177,8 +177,8 @@ function SlideBannerDesktop({
   isPriority: boolean;
 }) {
   const imgSrc =
-    (slide.image_url && fallbackImageMap[slide.image_url]) ||
-    slide.image_url ||
+    (slide.image_desktop_url && fallbackImageMap[slide.image_desktop_url]) ||
+    slide.image_desktop_url ||
     "";
   const alt = slide.image_alt || slide.title;
 
