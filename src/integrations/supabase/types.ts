@@ -248,6 +248,36 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_feed_embeds: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          position: number
+          post_url: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position?: number
+          post_url: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position?: number
+          post_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       instagram_post_attempts: {
         Row: {
           attempted_at: string
