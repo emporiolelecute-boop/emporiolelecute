@@ -1,13 +1,16 @@
 // Lightweight client-side telemetry. Captures runtime errors with as much
 // context as we can collect (source, route, component stack, user agent,
-// breadcrumbs) and persists them to `stale_bundle_logs` so admins can
-// diagnose production issues without needing the user's devtools.
+// breadcrumbs, correlation id, network failures) and persists them to
+// `stale_bundle_logs` so admins can diagnose production issues without
+// needing the user's devtools.
 import { supabase } from "@/integrations/supabase/client";
 
 type ErrorSource =
   | "react-boundary"
   | "window-error"
   | "unhandled-rejection"
+  | "fetch-error"
+  | "xhr-error"
   | "manual";
 
 interface LogParams {
@@ -18,7 +21,36 @@ interface LogParams {
   extra?: Record<string, unknown>;
 }
 
-// Rolling breadcrumb log for last user actions before the crash.
+// ---------- Correlation ID (per session) ----------
+// A stable id stored in sessionStorage so every log emitted during a single
+// browser session shares the same identifier. Lets admins group breadcrumbs +
+// errors that belong to the same incident.
+const CID_KEY = "lc_telemetry_cid";
+
+function uuid(): string {
+  try {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return (crypto as Crypto).randomUUID();
+    }
+  } catch { /* fallthrough */ }
+  return "cid-" + Math.random().toString(36).slice(2, 10) + "-" + Date.now().toString(36);
+}
+
+function getCorrelationId(): string {
+  if (typeof sessionStorage === "undefined") return "no-session";
+  let cid = sessionStorage.getItem(CID_KEY);
+  if (!cid) {
+    cid = uuid();
+    try { sessionStorage.setItem(CID_KEY, cid); } catch { /* ignore */ }
+  }
+  return cid;
+}
+
+export function getTelemetryCorrelationId(): string {
+  return getCorrelationId();
+}
+
+// ---------- Breadcrumbs ----------
 const breadcrumbs: Array<{ t: number; type: string; detail: string }> = [];
 const MAX_BREADCRUMBS = 25;
 
@@ -27,7 +59,7 @@ export function pushBreadcrumb(type: string, detail: string) {
   if (breadcrumbs.length > MAX_BREADCRUMBS) breadcrumbs.shift();
 }
 
-// Throttle: avoid flooding when an error fires in a render loop.
+// ---------- Throttle ----------
 const recentKeys = new Map<string, number>();
 const THROTTLE_MS = 10_000;
 
@@ -36,7 +68,6 @@ function shouldThrottle(key: string) {
   const last = recentKeys.get(key) || 0;
   if (now - last < THROTTLE_MS) return true;
   recentKeys.set(key, now);
-  // prune
   if (recentKeys.size > 50) {
     for (const [k, ts] of recentKeys) {
       if (now - ts > THROTTLE_MS) recentKeys.delete(k);
@@ -53,16 +84,17 @@ export async function logClientError(params: LogParams) {
     typeof window !== "undefined"
       ? `${window.innerWidth}x${window.innerHeight}`
       : "";
+  const cid = getCorrelationId();
 
   const payloadKey = `${source}|${(message || "").slice(0, 120)}`;
   if (shouldThrottle(payloadKey)) return;
 
-  // Try to extract the failing component from the React component stack.
   const componentName = componentStack
     ? (componentStack.trim().split("\n")[0] || "").replace(/^\s*(in|at)\s+/, "").trim()
     : undefined;
 
   const enrichedStack = [
+    `--- correlation_id ---\n${cid}`,
     componentStack ? `--- componentStack ---\n${componentStack}` : "",
     stack ? `--- errorStack ---\n${stack}` : "",
     `--- breadcrumbs ---\n${JSON.stringify(breadcrumbs.slice(-15))}`,
@@ -71,11 +103,14 @@ export async function logClientError(params: LogParams) {
     .filter(Boolean)
     .join("\n\n");
 
-  const tagged = `[${source}]${componentName ? `[${componentName}]` : ""} ${message}`;
+  // Tag format: [cid:xxx] [source][component] message
+  // Telemetry viewer parses this prefix to extract correlation id + component.
+  const tagged =
+    `[cid:${cid.slice(0, 8)}] [${source}]` +
+    `${componentName ? `[${componentName}]` : ""} ${message}`;
 
-  // Always log locally so devs see it in console.
   // eslint-disable-next-line no-console
-  console.error("[telemetry]", tagged, { route, componentName, extra, stack, componentStack });
+  console.error("[telemetry]", tagged, { route, cid, componentName, extra, stack, componentStack });
 
   try {
     await (supabase as any).from("stale_bundle_logs").insert({
@@ -90,11 +125,155 @@ export async function logClientError(params: LogParams) {
   }
 }
 
+// ---------- Fetch / XHR wrapping ----------
+// Capture network failures (network errors and 5xx). 4xx is intentionally
+// skipped to avoid noise from validation/auth flows.
+
+function describeFetchInput(input: RequestInfo | URL): { url: string; method: string } {
+  try {
+    if (typeof input === "string") return { url: input, method: "GET" };
+    if (input instanceof URL) return { url: input.toString(), method: "GET" };
+    const req = input as Request;
+    return { url: req.url, method: req.method || "GET" };
+  } catch {
+    return { url: String(input), method: "GET" };
+  }
+}
+
+function shouldSkipUrl(url: string) {
+  // Avoid feedback loop: never log the telemetry insert itself.
+  if (!url) return true;
+  if (url.includes("/rest/v1/stale_bundle_logs")) return true;
+  return false;
+}
+
+function safeBodyPreview(init?: RequestInit): string | undefined {
+  if (!init || init.body == null) return undefined;
+  try {
+    if (typeof init.body === "string") return init.body.slice(0, 500);
+    if (init.body instanceof FormData) return "[FormData]";
+    if (init.body instanceof Blob) return `[Blob ${init.body.size}b]`;
+    if (init.body instanceof ArrayBuffer) return `[ArrayBuffer ${init.body.byteLength}b]`;
+    return JSON.stringify(init.body).slice(0, 500);
+  } catch {
+    return "[unserializable]";
+  }
+}
+
+function installFetchCapture() {
+  if (typeof window === "undefined" || !window.fetch) return;
+  const orig = window.fetch.bind(window);
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const { url, method: defaultMethod } = describeFetchInput(input);
+    const method = (init?.method || defaultMethod || "GET").toUpperCase();
+    const start = Date.now();
+    try {
+      const res = await orig(input as RequestInfo, init);
+      if (res.status >= 500 && !shouldSkipUrl(url)) {
+        void logClientError({
+          source: "fetch-error",
+          message: `fetch ${res.status} ${method} ${url}`,
+          extra: {
+            url,
+            method,
+            status: res.status,
+            statusText: res.statusText,
+            durationMs: Date.now() - start,
+            requestBody: safeBodyPreview(init),
+          },
+        });
+      }
+      return res;
+    } catch (err) {
+      if (!shouldSkipUrl(url)) {
+        const e = err as Error;
+        void logClientError({
+          source: "fetch-error",
+          message: `fetch network error ${method} ${url}: ${e?.message || "unknown"}`,
+          stack: e?.stack,
+          extra: {
+            url,
+            method,
+            durationMs: Date.now() - start,
+            requestBody: safeBodyPreview(init),
+          },
+        });
+      }
+      throw err;
+    }
+  };
+}
+
+function installXhrCapture() {
+  if (typeof window === "undefined" || !window.XMLHttpRequest) return;
+  const Xhr = window.XMLHttpRequest;
+  const origOpen = Xhr.prototype.open;
+  const origSend = Xhr.prototype.send;
+
+  Xhr.prototype.open = function (
+    this: XMLHttpRequest & { __lc?: { method: string; url: string; start: number } },
+    method: string,
+    url: string | URL,
+    ...rest: unknown[]
+  ) {
+    this.__lc = { method: (method || "GET").toUpperCase(), url: String(url), start: 0 };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (origOpen as any).call(this, method, url, ...rest);
+  };
+
+  Xhr.prototype.send = function (
+    this: XMLHttpRequest & { __lc?: { method: string; url: string; start: number } },
+    body?: Document | XMLHttpRequestBodyInit | null
+  ) {
+    const meta = this.__lc;
+    if (meta) {
+      meta.start = Date.now();
+      const onErr = (kind: "error" | "timeout" | "abort") => {
+        if (shouldSkipUrl(meta.url)) return;
+        void logClientError({
+          source: "xhr-error",
+          message: `xhr ${kind} ${meta.method} ${meta.url}`,
+          extra: {
+            url: meta.url,
+            method: meta.method,
+            kind,
+            durationMs: Date.now() - meta.start,
+            requestBody: typeof body === "string" ? body.slice(0, 500) : body ? "[non-string body]" : undefined,
+          },
+        });
+      };
+      this.addEventListener("error", () => onErr("error"));
+      this.addEventListener("timeout", () => onErr("timeout"));
+      this.addEventListener("loadend", () => {
+        if (this.readyState === 4 && this.status >= 500 && !shouldSkipUrl(meta.url)) {
+          void logClientError({
+            source: "xhr-error",
+            message: `xhr ${this.status} ${meta.method} ${meta.url}`,
+            extra: {
+              url: meta.url,
+              method: meta.method,
+              status: this.status,
+              durationMs: Date.now() - meta.start,
+            },
+          });
+        }
+      });
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (origSend as any).call(this, body as any);
+  };
+}
+
 let installed = false;
 
 export function installTelemetry() {
   if (installed || typeof window === "undefined") return;
   installed = true;
+
+  // Initialize correlation id eagerly so it appears in console early.
+  const cid = getCorrelationId();
+  // eslint-disable-next-line no-console
+  console.info("[telemetry] session correlation id:", cid);
 
   // Track route changes as breadcrumbs.
   const origPush = history.pushState;
@@ -105,7 +284,6 @@ export function installTelemetry() {
   window.addEventListener("popstate", () =>
     pushBreadcrumb("popstate", location.pathname)
   );
-  // Track clicks on actionable elements.
   window.addEventListener(
     "click",
     (e) => {
@@ -124,7 +302,6 @@ export function installTelemetry() {
   );
 
   window.addEventListener("error", (e) => {
-    // Skip resource load errors (img/script) without an Error object.
     if (!e.error && !e.message) return;
     const err = e.error as Error | undefined;
     void logClientError({
@@ -152,4 +329,7 @@ export function installTelemetry() {
       stack,
     });
   });
+
+  installFetchCapture();
+  installXhrCapture();
 }
