@@ -93,7 +93,7 @@ const Envio = () => {
                 </div>
                 <h3 className="font-display text-xl text-foreground mb-2">Faça seu Pedido</h3>
                 <p className="text-muted-foreground">
-                  Entre em contato via WhatsApp ou Elo7, informe o CEP e receba o orçamento com frete incluso.
+                  Entre em contato via WhatsApp, informe o CEP e receba o orçamento com frete incluso.
                 </p>
               </div>
               

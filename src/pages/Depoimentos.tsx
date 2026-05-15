@@ -214,30 +214,6 @@ const Depoimentos = () => {
           </div>
         </section>
 
-        {/* Elo7 CTA */}
-        <section className="container mx-auto px-4 py-16">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-8 md:p-12 text-primary-foreground">
-              <h2 className="font-display text-2xl md:text-3xl mb-4">
-                Veja mais avaliações no Elo7
-              </h2>
-              <p className="text-primary-foreground/80 mb-6">
-                Confira todas as nossas avaliações verificadas na plataforma Elo7, 
-                onde temos mais de 5.000 avaliações 5 estrelas.
-              </p>
-              <a
-                href="https://www.elo7.com.br/emporiolelecute"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
-                  Ver no Elo7
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </Button>
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
       
       <Footer />

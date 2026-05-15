@@ -78,7 +78,7 @@ const Sobre = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-4xl font-bold text-primary mb-2">4.9</p>
-                    <p className="text-sm text-muted-foreground">Avaliação no Elo7</p>
+                    <p className="text-sm text-muted-foreground">Avaliação dos clientes</p>
                   </div>
                 </div>
               </div>
@@ -148,7 +148,6 @@ const Sobre = () => {
                 "Personalização completa com nome e data",
                 "Envio para todo o Brasil com embalagem especial",
                 "Mais de 50 mil clientes satisfeitos",
-                "Avaliação 4.9 estrelas no Elo7",
                 "Atendimento humanizado via WhatsApp",
                 "Prazo de produção transparente",
               ].map((item, index) => (

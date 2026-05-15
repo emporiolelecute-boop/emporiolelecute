@@ -27,7 +27,6 @@ interface StoreSettings {
   social_links: {
     instagram: string;
     facebook: string;
-    elo7: string;
   };
   shipping_policy: {
     note: string;
@@ -67,7 +66,6 @@ const AdminSettings = () => {
     social_links: {
       instagram: 'https://www.instagram.com/emporiolelecute',
       facebook: 'https://www.facebook.com/emporiolelecute',
-      elo7: 'https://www.elo7.com.br/emporiolelecute',
     },
     shipping_policy: {
       note: 'O frete será calculado após a confirmação do pedido via WhatsApp',
