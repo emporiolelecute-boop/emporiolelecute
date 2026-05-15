@@ -88,7 +88,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               )}
             >
               <img
-                src={optimizeImage(image, { width: 160 })}
+                src={optimizeImage(image, { width: 160, resize: "contain" })}
                 alt={`${productName} - Miniatura ${index + 1}`}
                 className="w-full h-full object-contain bg-muted"
                 loading="lazy"
