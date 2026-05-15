@@ -45,6 +45,10 @@ interface Order {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  tracking_code?: string | null;
+  tracking_carrier?: string | null;
+  tracking_url?: string | null;
+  shipped_at?: string | null;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof Clock; description: string }> = {
