@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -95,14 +95,17 @@ function downloadCsv(rows: ParsedLog[]) {
 }
 
 export default function AdminTelemetry() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<ParsedLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [routeFilter, setRouteFilter] = useState("");
   const [componentFilter, setComponentFilter] = useState("");
   const [messageFilter, setMessageFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [cidFilter, setCidFilter] = useState(searchParams.get("cid") ?? "");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [grouped, setGrouped] = useState(false);
   const [page, setPage] = useState(1);
   const [detail, setDetail] = useState<ParsedLog | null>(null);
 
@@ -126,6 +129,15 @@ export default function AdminTelemetry() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to]);
 
+  // Sync cid filter to URL so it's shareable.
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (cidFilter) next.set("cid", cidFilter);
+    else next.delete("cid");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cidFilter]);
+
   const sources = useMemo(() => {
     const s = new Set<string>();
     rows.forEach((r) => r.source && s.add(r.source));
@@ -136,20 +148,41 @@ export default function AdminTelemetry() {
     const r = routeFilter.trim().toLowerCase();
     const c = componentFilter.trim().toLowerCase();
     const m = messageFilter.trim().toLowerCase();
+    const cid = cidFilter.trim().toLowerCase();
     return rows.filter((row) => {
       if (sourceFilter !== "all" && row.source !== sourceFilter) return false;
       if (r && !(row.route || "").toLowerCase().includes(r)) return false;
       if (c && !(row.component || "").toLowerCase().includes(c)) return false;
       if (m && !(row.cleanMessage || "").toLowerCase().includes(m)) return false;
+      if (cid && !(row.cid || "").toLowerCase().includes(cid)) return false;
       return true;
     });
-  }, [rows, routeFilter, componentFilter, messageFilter, sourceFilter]);
+  }, [rows, routeFilter, componentFilter, messageFilter, sourceFilter, cidFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Optional dedup grouping: collapse rows with same source+component+cleanMessage+route
+  // and show count + first/last occurrence.
+  const displayRows = useMemo(() => {
+    if (!grouped) return filtered;
+    const map = new Map<string, ParsedLog & { count: number; firstAt: string; lastAt: string }>();
+    for (const r of filtered) {
+      const key = [r.source, r.component, r.route, r.cleanMessage].join("|");
+      const ex = map.get(key);
+      if (ex) {
+        ex.count++;
+        if (r.occurred_at < ex.firstAt) ex.firstAt = r.occurred_at;
+        if (r.occurred_at > ex.lastAt) ex.lastAt = r.occurred_at;
+      } else {
+        map.set(key, { ...r, count: 1, firstAt: r.occurred_at, lastAt: r.occurred_at });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1));
+  }, [filtered, grouped]);
+
+  const totalPages = Math.max(1, Math.ceil(displayRows.length / PAGE_SIZE));
+  const pageRows = displayRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   useEffect(() => {
     setPage(1);
-  }, [routeFilter, componentFilter, messageFilter, sourceFilter, from, to]);
+  }, [routeFilter, componentFilter, messageFilter, sourceFilter, cidFilter, from, to, grouped]);
 
   const copyStack = async (row: ParsedLog) => {
     const text = [
@@ -197,14 +230,21 @@ export default function AdminTelemetry() {
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
-          <CardDescription>{loading ? "Carregando..." : `${filtered.length} de ${rows.length} eventos`}</CardDescription>
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-3 pt-3">
+          <CardDescription>
+            {loading ? "Carregando..." : `${displayRows.length}${grouped ? " grupos" : ""} de ${filtered.length} eventos (total bruto: ${rows.length})`}
+          </CardDescription>
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-3 pt-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Rota" value={routeFilter} onChange={(e) => setRouteFilter(e.target.value)} className="pl-9" />
             </div>
             <Input placeholder="Componente" value={componentFilter} onChange={(e) => setComponentFilter(e.target.value)} />
             <Input placeholder="Mensagem contém..." value={messageFilter} onChange={(e) => setMessageFilter(e.target.value)} />
+            <Input
+              placeholder="Correlation id (cid)"
+              value={cidFilter}
+              onChange={(e) => setCidFilter(e.target.value)}
+            />
             <select
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
@@ -219,6 +259,10 @@ export default function AdminTelemetry() {
             </select>
             <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <label className="flex items-center gap-2 text-sm h-10 px-3">
+              <input type="checkbox" checked={grouped} onChange={(e) => setGrouped(e.target.checked)} />
+              Agrupar duplicados
+            </label>
           </div>
         </CardHeader>
         <CardContent>
@@ -239,34 +283,50 @@ export default function AdminTelemetry() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pageRows.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="text-xs whitespace-nowrap">
-                        {new Date(r.occurred_at).toLocaleString("pt-BR")}
-                      </TableCell>
-                      <TableCell>
-                        {r.source ? <Badge variant="outline" className="text-xs">{r.source}</Badge> : "—"}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono">{r.component || "—"}</TableCell>
-                      <TableCell className="text-xs font-mono max-w-[180px] truncate" title={r.route || ""}>
-                        {r.route || "—"}
-                      </TableCell>
-                      <TableCell className="text-xs max-w-[320px] truncate" title={r.cleanMessage}>
-                        {r.cleanMessage || "—"}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">
-                        {r.cid ? r.cid.slice(0, 8) : "—"}
-                      </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button size="icon" variant="ghost" onClick={() => setDetail(r)} title="Ver detalhes">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={() => copyStack(r)} title="Copiar stack">
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {pageRows.map((r) => {
+                    const count = (r as ParsedLog & { count?: number }).count;
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {new Date(r.occurred_at).toLocaleString("pt-BR")}
+                        </TableCell>
+                        <TableCell>
+                          {r.source ? <Badge variant="outline" className="text-xs">{r.source}</Badge> : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs font-mono">{r.component || "—"}</TableCell>
+                        <TableCell className="text-xs font-mono max-w-[180px] truncate" title={r.route || ""}>
+                          {r.route || "—"}
+                        </TableCell>
+                        <TableCell className="text-xs max-w-[320px] truncate" title={r.cleanMessage}>
+                          <span className="inline-flex items-center gap-2">
+                            {grouped && count && count > 1 && (
+                              <Badge variant="secondary" className="text-[10px]">×{count}</Badge>
+                            )}
+                            <span className="truncate">{r.cleanMessage || "—"}</span>
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-xs font-mono text-muted-foreground">
+                          {r.cid ? (
+                            <button
+                              onClick={() => setCidFilter(r.cid!)}
+                              className="hover:text-foreground hover:underline"
+                              title="Filtrar por este cid"
+                            >
+                              {r.cid.slice(0, 8)}
+                            </button>
+                          ) : "—"}
+                        </TableCell>
+                        <TableCell className="text-right space-x-1">
+                          <Button size="icon" variant="ghost" onClick={() => setDetail(r)} title="Ver detalhes">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => copyStack(r)} title="Copiar stack">
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
               {totalPages > 1 && (
