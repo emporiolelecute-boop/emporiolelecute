@@ -124,7 +124,7 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 h-full w-72 bg-card/95 backdrop-blur-xl border-r border-border/50 z-50 transition-all duration-300 shadow-xl lg:shadow-none",
+        "fixed top-0 left-0 h-full w-72 bg-card/95 backdrop-blur-xl border-r border-border/50 z-50 transition-all duration-300 shadow-xl lg:shadow-none flex flex-col",
         "lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
