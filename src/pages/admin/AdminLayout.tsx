@@ -177,7 +177,7 @@ const AdminLayout = () => {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50 space-y-2 bg-card/50 backdrop-blur-sm">
+        <div className="shrink-0 p-4 border-t border-border/50 space-y-2 bg-card/80 backdrop-blur-sm">
           <Link
             to="/"
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-all group"
