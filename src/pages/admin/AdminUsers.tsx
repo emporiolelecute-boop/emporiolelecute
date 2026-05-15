@@ -146,6 +146,7 @@ const AdminUsers = () => {
     if (s === "error") return <span className="inline-flex items-center gap-1 text-destructive text-xs"><AlertCircle className="h-3 w-3" /> erro</span>;
     if (s === "requested") return <span className="text-xs text-blue-600">solicitado</span>;
     if (s === "revoked") return <span className="inline-flex items-center gap-1 text-amber-600 text-xs"><ShieldOff className="h-3 w-3" /> revogado</span>;
+    if (s === "rejected") return <span className="inline-flex items-center gap-1 text-destructive text-xs"><AlertCircle className="h-3 w-3" /> reprovado</span>;
     return <span className="text-xs">{s}</span>;
   };
 
@@ -215,6 +216,7 @@ const AdminUsers = () => {
             <option value="noop">Já era admin</option>
             <option value="requested">Solicitado</option>
             <option value="revoked">Revogado</option>
+            <option value="rejected">Reprovado</option>
           </select>
         </div>
         {isLoading ? (

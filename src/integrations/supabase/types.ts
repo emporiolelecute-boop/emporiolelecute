@@ -1317,6 +1317,10 @@ export type Database = {
         Returns: boolean
       }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
+      reject_admin_request: {
+        Args: { _reason: string; _user_id: string }
+        Returns: Json
+      }
       request_admin_access: { Args: never; Returns: Json }
       validate_coupon: {
         Args: { _code: string; _subtotal: number }

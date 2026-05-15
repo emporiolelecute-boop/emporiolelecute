@@ -7,7 +7,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ShieldCheck, RefreshCw, Check, Search, ArrowUp, ArrowDown, Eye } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, RefreshCw, Check, Search, ArrowUp, ArrowDown, Eye, X } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 interface PendingRequest {
   id: string;
@@ -29,6 +34,8 @@ const AdminAccessRequests = () => {
   const [selected, setSelected] = useState<PendingRequest | null>(null);
   const [attempts, setAttempts] = useState<any[]>([]);
   const [loadingAttempts, setLoadingAttempts] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<PendingRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -92,6 +99,32 @@ const AdminAccessRequests = () => {
         setRows((prev) => prev.filter((r) => r.id !== id));
         if (selected?.id === id) setSelected(null);
       }
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, variant: 'destructive' });
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const reject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (reason.length < 3) {
+      toast({ title: 'Motivo obrigatório', description: 'Informe ao menos 3 caracteres.', variant: 'destructive' });
+      return;
+    }
+    setActing(rejectTarget.id);
+    try {
+      const { error } = await (supabase as any).rpc('reject_admin_request', {
+        _user_id: rejectTarget.id,
+        _reason: reason,
+      });
+      if (error) throw error;
+      toast({ title: 'Solicitação reprovada', description: rejectTarget.email });
+      setRows((prev) => prev.filter((r) => r.id !== rejectTarget.id));
+      if (selected?.id === rejectTarget.id) setSelected(null);
+      setRejectTarget(null);
+      setRejectReason('');
     } catch (e: any) {
       toast({ title: 'Erro', description: e.message, variant: 'destructive' });
     } finally {
@@ -195,6 +228,14 @@ const AdminAccessRequests = () => {
                         </Button>
                         <Button
                           size="sm"
+                          variant="destructive"
+                          onClick={() => { setRejectTarget(r); setRejectReason(''); }}
+                          disabled={acting === r.id}
+                        >
+                          <X className="w-4 h-4 mr-1" /> Reprovar
+                        </Button>
+                        <Button
+                          size="sm"
                           onClick={() => approve(r.email, r.id)}
                           disabled={acting === r.id}
                         >
@@ -269,7 +310,10 @@ const AdminAccessRequests = () => {
                 </div>
               )}
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button variant="destructive" onClick={() => { setRejectTarget(selected); setRejectReason(''); }} disabled={acting === selected.id}>
+                <X className="w-4 h-4 mr-1" /> Reprovar
+              </Button>
               <Button onClick={() => approve(selected.email, selected.id)} disabled={acting === selected.id}>
                 <Check className="w-4 h-4 mr-1" />
                 {acting === selected.id ? 'Aprovando...' : 'Aprovar acesso administrativo'}
@@ -278,6 +322,38 @@ const AdminAccessRequests = () => {
           </CardContent>
         </Card>
       )}
+
+      <AlertDialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) setRejectTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reprovar solicitação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação registra a reprovação no histórico de auditoria. Informe um motivo claro — o usuário pode solicitar novamente após 24 h.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              <strong>{rejectTarget?.full_name || rejectTarget?.email}</strong>
+              {rejectTarget?.full_name && <span className="block text-xs">{rejectTarget?.email}</span>}
+            </p>
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Motivo da reprovação (obrigatório, mín. 3 caracteres)"
+              rows={4}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); reject(); }}
+              disabled={acting === rejectTarget?.id || rejectReason.trim().length < 3}
+            >
+              Confirmar reprovação
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
