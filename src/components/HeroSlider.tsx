@@ -266,7 +266,7 @@ const HeroSlider = () => {
       aria-label="Seção principal - Empório LeleCute"
     >
       {/* Decorative background — only for text_image mode */}
-      {display.mode === "text_image" && (
+      {!hasAnyBanner && (
         <>
           <div className="absolute inset-0 bg-dotted-pattern opacity-30 pointer-events-none" />
           <div className="absolute top-32 right-[15%] text-amber-400 pointer-events-none">
