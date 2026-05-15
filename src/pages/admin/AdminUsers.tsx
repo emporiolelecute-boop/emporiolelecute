@@ -69,6 +69,37 @@ const AdminUsers = () => {
     promote.mutate(v);
   };
 
+  const exportCSV = () => {
+    if (!audit.length) {
+      toast.info("Nada para exportar.");
+      return;
+    }
+    const header = ["Data/hora", "E-mail promovido", "Promovido por", "Papel", "Status", "Mensagem"];
+    const escape = (v: any) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = audit.map((r) => [
+      format(new Date(r.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR }),
+      r.target_email,
+      r.promoted_by_email || "",
+      r.role,
+      r.status,
+      r.message || "",
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(escape).join(",")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `promocoes-admin-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado.");
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
