@@ -283,16 +283,24 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                 </h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {config.gallery.map((src, i) => (
-                  <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
-                    <img
-                      src={src}
-                      alt={`${config.heroBadge} — foto real ${i + 1}`}
-                      loading="lazy"
-                      className="w-full h-full object-cover hover:scale-105 transition-transform"
-                    />
-                  </div>
-                ))}
+                {config.gallery.map((item, i) => {
+                  const src = typeof item === "string" ? item : item.src;
+                  const alt =
+                    typeof item === "string"
+                      ? `${config.heroBadge} — foto real ${i + 1}`
+                      : item.alt || `${config.heroBadge} — foto real ${i + 1}`;
+                  return (
+                    <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
+                      <img
+                        src={src}
+                        alt={alt}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>

@@ -32,7 +32,7 @@ export interface OccasionLanding {
   seo_copy: string;
   whatsapp_message: string;
   faqs: OccasionLandingFAQ[];
-  gallery: string[];
+  gallery: (string | { src: string; alt?: string })[];
   testimonials: OccasionLandingTestimonial[];
   social_proof_stats: OccasionLandingStat[];
   related_route_slugs: string[];
