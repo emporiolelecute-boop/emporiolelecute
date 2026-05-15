@@ -58,6 +58,7 @@ const AdminRedirects = lazy(() => import("./pages/admin/AdminRedirects"));
 const AdminRobots = lazy(() => import("./pages/admin/AdminRobots"));
 const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
 const AdminSEODashboard = lazy(() => import("./pages/admin/AdminSEODashboard"));
+const AdminCloudflareGuide = lazy(() => import("./pages/admin/AdminCloudflareGuide"));
 
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
