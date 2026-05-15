@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.cleanup_stale_bundle_logs() FROM PUBLIC, anon, authenticated;
