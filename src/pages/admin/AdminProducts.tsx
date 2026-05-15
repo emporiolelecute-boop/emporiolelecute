@@ -267,6 +267,39 @@ const AdminProducts = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={backfillOpen} onOpenChange={(o) => !backfilling && setBackfillOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Scale className="w-5 h-5 text-primary" /> Backfill de peso padrão
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Aplica o peso informado a todos os produtos ativos sem peso (atualmente{' '}
+              <strong>{productsWithoutWeight}</strong>). Use para evitar erros no cálculo de frete.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <label className="text-sm font-medium">Peso padrão (kg)</label>
+            <Input
+              type="number"
+              step="0.001"
+              min="0.001"
+              max="30"
+              value={backfillKg}
+              onChange={(e) => setBackfillKg(e.target.value)}
+              disabled={backfilling}
+            />
+            <p className="text-xs text-muted-foreground">Sugerido: 0.150 kg para sabonetes pequenos.</p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={backfilling}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); runBackfill(); }} disabled={backfilling}>
+              {backfilling ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Aplicando...</> : 'Aplicar peso'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
