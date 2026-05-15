@@ -58,7 +58,7 @@ const AdminProductForm = () => {
     images: [''],
     features: [''],
     keywords: [] as string[],
-    elo7_link: '',
+    
     is_active: true,
     // Personalization fields
     personalization_enabled: true,
