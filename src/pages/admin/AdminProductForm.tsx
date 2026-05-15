@@ -217,7 +217,7 @@ const AdminProductForm = () => {
         images: formData.images.filter(Boolean),
         features: formData.features.filter(Boolean),
         keywords: formData.keywords,
-        elo7_link: formData.elo7_link || null,
+        
         is_active: formData.is_active,
         personalization_enabled: formData.personalization_enabled,
         personalization_label: formData.personalization_label || null,
