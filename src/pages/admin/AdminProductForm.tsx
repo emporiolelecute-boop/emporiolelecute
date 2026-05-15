@@ -186,6 +186,17 @@ const AdminProductForm = () => {
       return;
     }
 
+    // Peso obrigatório para novos produtos (evita erros no cálculo de frete)
+    const weightNum = formData.weight ? parseFloat(formData.weight) : 0;
+    if (!isEditing && (!weightNum || weightNum <= 0)) {
+      toast({
+        title: 'Peso obrigatório',
+        description: 'Informe o peso do produto (kg) para permitir o cálculo de frete.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSaving(true);
 
     try {
@@ -516,16 +527,28 @@ const AdminProductForm = () => {
                   placeholder="7"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="weight">Peso (kg)</Label>
+              <div className={`space-y-2 rounded-md p-2 -m-2 transition-colors ${
+                (!formData.weight || parseFloat(formData.weight) <= 0)
+                  ? 'bg-destructive/5 ring-1 ring-destructive/40'
+                  : 'bg-emerald-500/5 ring-1 ring-emerald-500/30'
+              }`}>
+                <Label htmlFor="weight" className="flex items-center gap-1">
+                  Peso (kg) <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="weight"
                   type="number"
                   step="0.001"
+                  min="0.001"
+                  required={!isEditing}
                   value={formData.weight}
                   onChange={(e) => setFormData((prev) => ({ ...prev, weight: e.target.value }))}
                   placeholder="0.100"
+                  aria-invalid={!formData.weight || parseFloat(formData.weight) <= 0}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Obrigatório para o cálculo de frete (Melhor Envio).
+                </p>
               </div>
             </div>
           </CardContent>
