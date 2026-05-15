@@ -452,15 +452,24 @@ const AdminOrders = () => {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => resendEmailMutation.mutate(order)}
-                            disabled={resendEmailMutation.isPending}
-                            title="Reenviar e-mail de status"
-                          >
-                            <Send className="h-4 w-4" />
-                          </Button>
+                          {(() => {
+                            const remaining = remainingFor(order.id);
+                            const disabled = resendEmailMutation.isPending || remaining > 0;
+                            return (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => resendEmailMutation.mutate(order)}
+                                disabled={disabled}
+                                title={remaining > 0 ? `Aguarde ${remaining}s para reenviar` : 'Reenviar e-mail de status'}
+                              >
+                                <Send className="h-4 w-4" />
+                                {remaining > 0 && (
+                                  <span className="ml-1 text-xs tabular-nums">{remaining}s</span>
+                                )}
+                              </Button>
+                            );
+                          })()}
                           <Button
                             variant="ghost"
                             size="sm"
