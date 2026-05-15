@@ -28,7 +28,7 @@ export const BlurImage = ({
   priority = false,
   className,
   wrapperClassName,
-  resize = "contain",
+  resize = "cover",
   aspect,
   sizes,
   ...rest
