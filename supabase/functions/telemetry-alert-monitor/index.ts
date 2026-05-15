@@ -86,17 +86,18 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Get admin recipients
-  const { data: admins } = await admin.rpc("get_admin_emails" as any).then(
-    (r) => r,
-    () => ({ data: null }),
-  );
-  let recipients: string[] = Array.isArray(admins)
-    ? (admins as Array<{ email?: string } | string>).map((a) => (typeof a === "string" ? a : a?.email ?? "")).filter(Boolean)
-    : [];
+  // Get admin recipients via auth.admin (service role)
+  let recipients: string[] = [];
+  try {
+    const { data: roleRows } = await admin.from("user_roles").select("user_id").eq("role", "admin");
+    const ids = (roleRows ?? []).map((r: { user_id: string }) => r.user_id);
+    for (const uid of ids) {
+      const { data: u } = await admin.auth.admin.getUserById(uid);
+      if (u?.user?.email) recipients.push(u.user.email);
+    }
+  } catch (_) { /* fall through */ }
 
   if (recipients.length === 0) {
-    // Fallback to known admin email from project memory
     recipients = ["emporiolelecute@gmail.com"];
   }
 
