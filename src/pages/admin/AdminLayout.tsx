@@ -27,6 +27,7 @@ import {
   Tag,
   ArrowRightLeft,
   BarChart3,
+  ShieldCheck,
   Bot
 } from 'lucide-react';
 import { useState } from 'react';
@@ -60,6 +61,7 @@ const menuItems = [
   { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
   { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
   { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
+  { icon: ShieldCheck, label: 'Usuários', path: '/admin/usuarios' },
 ];
 
 const AdminLayout = () => {

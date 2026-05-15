@@ -62,6 +62,7 @@ const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
 const AdminSEODashboard = lazy(() => import("./pages/admin/AdminSEODashboard"));
 const AdminCloudflareGuide = lazy(() => import("./pages/admin/AdminCloudflareGuide"));
 const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
@@ -375,6 +376,11 @@ const App = () => {
                   <Route path="tracking" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminTracking />
+                    </Suspense>
+                  } />
+                  <Route path="usuarios" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminUsers />
                     </Suspense>
                   } />
                 </Route>
