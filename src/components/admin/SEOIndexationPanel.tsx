@@ -187,6 +187,8 @@ export default function SEOIndexationPanel() {
         </CardContent>
       </Card>
 
+      <CoverageFunnel rows={rows} onFilterIssues={() => setFilter('issues')} />
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
