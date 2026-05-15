@@ -3,25 +3,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * Modos de exibição de um slide do hero:
- *  - text_image    : layout padrão — texto à esquerda + imagem quadrada à direita (todos os tamanhos)
- *  - banner_mobile : banner full-width SEM texto — visível apenas em mobile/tablet (< md), some no desktop
- *  - banner_desktop: banner full-width SEM texto — visível apenas em desktop (≥ md), some no mobile
+ * Campo legado mantido por compatibilidade. A exibição real é resolvida por tela:
+ *  - mobile usa image_mobile_url quando existir
+ *  - desktop usa image_desktop_url quando existir
+ *  - sem imagem específica, cai para texto + image_url
  */
 export type HeroSlideMode = 'text_image' | 'banner_mobile' | 'banner_desktop';
 
 export interface HeroSlide {
   id: string;
-  /** Modo de exibição do slide */
+  /** Campo legado: cada slide pode ter mobile, desktop e texto+imagem no mesmo registro */
   display_mode: HeroSlideMode;
   tagline: string | null;
   title: string;
   subtitle: string | null;
-  /** Imagem principal (usada apenas em text_image) */
+  /** Imagem principal usada no fallback texto + imagem */
   image_url: string | null;
-  /** Imagem para banner mobile (usada apenas em banner_mobile) */
+  /** Imagem para banner mobile */
   image_mobile_url: string | null;
-  /** Imagem para banner desktop (usada apenas em banner_desktop) */
+  /** Imagem para banner desktop */
   image_desktop_url: string | null;
   /** Texto alternativo da imagem para acessibilidade */
   image_alt: string | null;
