@@ -94,11 +94,8 @@ export const LEMBRANCINHAS_LANDINGS: LembrancinhasLandingConfig[] = [
     ],
     relatedRouteSlugs: ["maternidade", "cha-revelacao"],
     gallery: [
-      "/src/assets/category-lembrancinhas.webp",
-      "/src/assets/category-sabonetes.webp",
-      "/src/assets/category-velas.webp",
-      "/src/assets/category-kits.webp",
-    ],
+      "/og-image.webp",
+    ].filter((_, i) => i < 0), // gallery preenchida via admin (Supabase). Hardcoded vazia para evitar imagens repetidas.
     socialProofStats: [
       { value: "+2.000", label: "Famílias atendidas" },
       { value: "10+", label: "Anos de experiência" },
