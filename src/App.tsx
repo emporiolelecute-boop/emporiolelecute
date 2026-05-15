@@ -63,6 +63,7 @@ const AdminSEODashboard = lazy(() => import("./pages/admin/AdminSEODashboard"));
 const AdminCloudflareGuide = lazy(() => import("./pages/admin/AdminCloudflareGuide"));
 const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminAccessRequests = lazy(() => import("./pages/admin/AdminAccessRequests"));
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -390,6 +391,11 @@ const App = () => {
                   <Route path="usuarios" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminUsers />
+                    </Suspense>
+                  } />
+                  <Route path="usuarios/solicitacoes" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminAccessRequests />
                     </Suspense>
                   } />
                 </Route>
