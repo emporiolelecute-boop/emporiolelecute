@@ -132,6 +132,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   src={image}
                   alt={`${productName} - Imagem ${index + 1}`}
                   width={800}
+                  resize="contain"
                   responsiveWidths={[400, 600, 800, 1200]}
                   priority={index === 0}
                   sizes="(max-width: 1024px) 100vw, 600px"
