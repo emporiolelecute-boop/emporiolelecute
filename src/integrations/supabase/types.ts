@@ -1305,6 +1305,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_default_weight: { Args: { _default_kg?: number }; Returns: Json }
       create_order_with_items: {
         Args: { _items: Json; _order: Json }
         Returns: Json
