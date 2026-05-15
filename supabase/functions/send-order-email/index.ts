@@ -425,6 +425,9 @@ interface StatusUpdateRequest {
   customerName: string;
   newStatus: string;
   statusLabel: string;
+  trackingCode?: string;
+  trackingCarrier?: string;
+  trackingUrl?: string;
 }
 
 function generateStatusUpdateEmailHtml(data: StatusUpdateRequest): string {
