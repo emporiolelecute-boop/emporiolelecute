@@ -229,6 +229,10 @@ const AdminOrders = () => {
   // Resend status email mutation
   const resendEmailMutation = useMutation({
     mutationFn: async (order: Order) => {
+      // Server-side cooldown + per-admin hourly limit
+      const { error: rateErr } = await (supabase as any).rpc('check_resend_email_cooldown', { _order_id: order.id });
+      if (rateErr) throw rateErr;
+
       const payload: Record<string, unknown> = {
         type: 'status_update',
         orderCode: order.order_code,
@@ -244,7 +248,7 @@ const AdminOrders = () => {
       }
       const { error: invokeErr } = await supabase.functions.invoke('send-order-email', { body: payload });
 
-      // Audit attempt
+      // Audit attempt (triggered_by/email auto-filled by trigger)
       await supabase.from('tracking_email_log').insert({
         order_id: order.id,
         order_code: order.order_code,
@@ -259,9 +263,12 @@ const AdminOrders = () => {
       });
 
       if (invokeErr) throw invokeErr;
+      return order.id;
     },
-    onSuccess: () =>
-      toast({ title: 'E-mail reenviado', description: 'O cliente recebeu uma nova notificação.' }),
+    onSuccess: (orderId) => {
+      if (orderId) setCooldown(orderId);
+      toast({ title: 'E-mail reenviado', description: 'O cliente recebeu uma nova notificação.' });
+    },
     onError: (e: any) =>
       toast({
         title: 'Falha ao reenviar e-mail',
