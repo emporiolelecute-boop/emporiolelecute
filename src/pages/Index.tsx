@@ -16,6 +16,8 @@ import OrganizationStructuredData from "@/components/OrganizationStructuredData"
 import WebSiteStructuredData from "@/components/WebSiteStructuredData";
 import LocalBusinessStructuredData from "@/components/LocalBusinessStructuredData";
 
+import { ScrollReveal } from "@/components/ScrollReveal";
+
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -26,14 +28,34 @@ const Index = () => {
       <Header />
       <main>
         <HeroSlider />
-        <CategoriesHighlight />
         
-        <BestSellers />
-        <OccasionsSection />
-        <QuoteCTABanner />
-        <Testimonials />
-        <FAQSection />
-        <InstagramFeed />
+        <ScrollReveal>
+          <CategoriesHighlight />
+        </ScrollReveal>
+        
+        <ScrollReveal delay={100}>
+          <BestSellers />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <OccasionsSection />
+        </ScrollReveal>
+
+        <ScrollReveal delay={100}>
+          <QuoteCTABanner />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <Testimonials />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <FAQSection />
+        </ScrollReveal>
+
+        <ScrollReveal delay={100}>
+          <InstagramFeed />
+        </ScrollReveal>
       </main>
       <Footer />
       <WhatsAppButton />

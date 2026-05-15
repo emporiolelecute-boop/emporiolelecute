@@ -257,13 +257,16 @@
   
   /* Parallax container */
   .parallax-container {
-    overflow: hidden;
-    position: relative;
+    @apply overflow-hidden relative;
   }
   
   .parallax-bg {
-    position: absolute;
-    inset: -20%;
+    @apply absolute inset-[-20%];
     will-change: transform;
+  }
+
+  /* Scroll Reveal Active States */
+  .animate-active {
+    @apply opacity-100 translate-x-0 translate-y-0 scale-100 !important;
   }
 }
