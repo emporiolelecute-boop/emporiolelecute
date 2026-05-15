@@ -144,8 +144,8 @@ const AdminHeroSlides = () => {
         <div>
           <h1 className="text-3xl font-display">Slides do Hero</h1>
           <p className="text-muted-foreground">
-            Gerencie os banners exibidos no topo da Home. Cada slide pode ser
-            exibido como texto+imagem, banner mobile ou banner desktop.
+            Gerencie os banners exibidos no topo da Home. Cada slide pode ter
+            imagem de texto+imagem, mobile e desktop no mesmo cadastro.
           </p>
         </div>
         <Button onClick={startNew}>
@@ -163,10 +163,7 @@ const AdminHeroSlides = () => {
                 {/* Thumbnail */}
                 <div className="w-20 h-20 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0">
                   {(() => {
-                    const thumb =
-                      s.display_mode === 'banner_desktop' ? s.image_desktop_url :
-                      s.display_mode === 'banner_mobile' ? s.image_mobile_url :
-                      s.image_url;
+                    const thumb = s.image_desktop_url || s.image_mobile_url || s.image_url;
                     return thumb ? (
                       <img
                         src={thumb}
