@@ -224,11 +224,13 @@ const App = () => {
                   </Suspense>
                 } />
                 <Route path="/admin" element={
-                  <RequireAdmin>
-                    <Suspense fallback={<AdminSkeleton />}>
-                      <AdminLayout />
-                    </Suspense>
-                  </RequireAdmin>
+                  <AdminErrorBoundary>
+                    <RequireAdmin>
+                      <Suspense fallback={<AdminSkeleton />}>
+                        <AdminLayout />
+                      </Suspense>
+                    </RequireAdmin>
+                  </AdminErrorBoundary>
                 }>
                   <Route index element={
                     <Suspense fallback={<AdminSkeleton />}>
