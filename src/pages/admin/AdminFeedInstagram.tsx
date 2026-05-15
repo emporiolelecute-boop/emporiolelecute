@@ -306,6 +306,18 @@ const AdminFeedInstagram = () => {
               value={draftCaption}
               onChange={(e) => setDraftCaption(e.target.value)}
             />
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              type="button"
+              disabled={!draftEmbedSrc}
+              onClick={() => setPreviewUrl(draftEmbedSrc)}
+            >
+              Pré-visualizar
+            </Button>
+            <Button onClick={handleAdd} disabled={save.isPending || !draftShortcode}>
+              <Plus className="h-4 w-4 mr-1" /> Adicionar
+            </Button>
           </div>
         </div>
         <div className="space-y-1">
@@ -321,20 +333,6 @@ const AdminFeedInstagram = () => {
           {draftPreviewImg && (
             <img src={draftPreviewImg} alt="" className="h-32 rounded-md border mt-2 object-cover" />
           )}
-        </div>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              type="button"
-              disabled={!draftEmbedSrc}
-              onClick={() => setPreviewUrl(draftEmbedSrc)}
-            >
-              Pré-visualizar
-            </Button>
-            <Button onClick={handleAdd} disabled={save.isPending || !draftShortcode}>
-              <Plus className="h-4 w-4 mr-1" /> Adicionar
-            </Button>
-          </div>
         </div>
 
         {previewUrl && (
