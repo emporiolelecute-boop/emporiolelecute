@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import RobotsAndSitemapPanel from '@/components/admin/RobotsAndSitemapPanel';
 
 type CheckRun = { id: string; ran_at: string; source: string; total: number; passed: number; errors: number; warnings: number; checks: Array<{ name: string; ok: boolean; detail: string; severity: string }>; alert_sent: boolean };
 
