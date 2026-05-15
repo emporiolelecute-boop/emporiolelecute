@@ -55,6 +55,7 @@ const menuItems = [
   { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   { icon: Rss, label: 'Feed Merchant', path: '/admin/merchant-feed' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
+  { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
 ];
 
 const AdminLayout = () => {

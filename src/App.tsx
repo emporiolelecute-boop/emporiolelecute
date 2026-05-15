@@ -57,6 +57,7 @@ const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminRedirects = lazy(() => import("./pages/admin/AdminRedirects"));
 const AdminRobots = lazy(() => import("./pages/admin/AdminRobots"));
 const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
+const AdminSEODashboard = lazy(() => import("./pages/admin/AdminSEODashboard"));
 
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
@@ -295,6 +296,11 @@ const App = () => {
                   <Route path="seo/relatorio" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSEOReport />
+                    </Suspense>
+                  } />
+                  <Route path="seo-dashboard" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSEODashboard />
                     </Suspense>
                   } />
                   <Route path="merchant-feed" element={
