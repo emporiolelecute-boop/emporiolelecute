@@ -68,9 +68,16 @@ Deno.serve(async (req) => {
       .eq('user_id', userId).eq('role', 'admin').maybeSingle();
     if (!roleData) return json({ error: 'Forbidden' }, 403);
   } else {
-    // chamada interna do cron — exige header secreto = service role
+    // chamada interna do cron — header secreto deve bater com service role OU com o token armazenado
     const internal = req.headers.get('x-internal-key');
-    if (internal !== serviceKey) return json({ error: 'Forbidden' }, 403);
+    let internalOk = internal === serviceKey;
+    if (!internalOk && internal) {
+      const { data: keyRow } = await admin
+        .from('store_settings').select('value').eq('key', 'instagram_sync_internal_key').maybeSingle();
+      const stored = (keyRow?.value as any)?.key;
+      internalOk = !!stored && internal === stored;
+    }
+    if (!internalOk) return json({ error: 'Forbidden' }, 403);
   }
 
   const IG_TOKEN = Deno.env.get('IG_ACCESS_TOKEN');
