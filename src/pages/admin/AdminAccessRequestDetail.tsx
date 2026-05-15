@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, ShieldCheck, Check, X, Mail, History } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Check, X, Mail, History, Send, Copy } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -56,6 +56,74 @@ const AdminAccessRequestDetail = () => {
   const [acting, setActing] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  const COOLDOWN_SECONDS = 60;
+  const cooldownKey = id ? `notify_resend_cooldown:${id}` : '';
+
+  // Hydrate cooldown from localStorage
+  useEffect(() => {
+    if (!cooldownKey) return;
+    const raw = localStorage.getItem(cooldownKey);
+    if (!raw) return;
+    const remaining = Math.max(0, Math.ceil((Number(raw) - Date.now()) / 1000));
+    if (remaining > 0) setCooldown(remaining);
+    else localStorage.removeItem(cooldownKey);
+  }, [cooldownKey]);
+
+  // Tick cooldown
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
+
+  const copyToClipboard = async (text: string, label = 'Mensagem') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: `${label} copiada` });
+    } catch {
+      toast({ title: 'Falha ao copiar', variant: 'destructive' });
+    }
+  };
+
+  const resendNotification = async () => {
+    if (!profile || cooldown > 0) return;
+    setResending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('notify-admins-new-request', {
+        body: {
+          user_id: profile.id,
+          email: profile.email,
+          requested_at: profile.access_requested_at ?? new Date().toISOString(),
+          source: 'manual_resend',
+        },
+      });
+      if (error) throw error;
+      const result = data as { ok?: boolean; sent?: number; admin_count?: number; errors?: string[] } | null;
+      if (result?.ok === false) {
+        toast({
+          title: 'Notificação registrada com falhas',
+          description: (result?.errors || []).join(' | ').slice(0, 200) || 'Veja o histórico abaixo.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Notificação reenviada',
+          description: `${result?.sent ?? 0} de ${result?.admin_count ?? 0} admin(s) notificado(s).`,
+        });
+      }
+      const until = Date.now() + COOLDOWN_SECONDS * 1000;
+      if (cooldownKey) localStorage.setItem(cooldownKey, String(until));
+      setCooldown(COOLDOWN_SECONDS);
+      await load();
+    } catch (e: any) {
+      toast({ title: 'Erro ao reenviar', description: e.message, variant: 'destructive' });
+    } finally {
+      setResending(false);
+    }
+  };
 
   const load = async () => {
     if (!id) return;
@@ -160,7 +228,22 @@ const AdminAccessRequestDetail = () => {
             <ShieldCheck className="w-6 h-6 text-primary" /> Detalhes da solicitação
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {profile.access_requested && (
+            <Button
+              variant="outline"
+              onClick={resendNotification}
+              disabled={resending || cooldown > 0}
+              title={cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Reenviar e-mail aos admins'}
+            >
+              <Send className="w-4 h-4 mr-1" />
+              {resending
+                ? 'Enviando…'
+                : cooldown > 0
+                  ? `Reenviar (${cooldown}s)`
+                  : 'Reenviar notificação'}
+            </Button>
+          )}
           {profile.access_requested && !isAdmin && (
             <>
               <Button variant="destructive" onClick={() => setRejecting(true)} disabled={acting}>
@@ -275,7 +358,23 @@ const AdminAccessRequestDetail = () => {
                       <TableCell className="text-xs">{n.admin_count}</TableCell>
                       <TableCell className="text-xs">{n.sent_count}</TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-md break-words">
-                        {n.error_message || '—'}
+                        {n.error_message ? (
+                          <div className="flex items-start gap-2">
+                            <pre className="whitespace-pre-wrap break-words text-xs flex-1 m-0 font-mono">
+                              {n.error_message}
+                            </pre>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
+                              onClick={() => copyToClipboard(n.error_message!, 'Mensagem de erro')}
+                              title="Copiar mensagem completa"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ) : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
