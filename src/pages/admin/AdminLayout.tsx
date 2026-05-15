@@ -148,7 +148,7 @@ const AdminLayout = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1.5">
+        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1.5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
