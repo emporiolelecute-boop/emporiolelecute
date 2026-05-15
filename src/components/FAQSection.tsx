@@ -45,7 +45,7 @@ const FAQSection = () => {
     {
       id: '4',
       question: "Quais são as formas de pagamento aceitas?",
-      answer: "Aceitamos PIX (com 7% de desconto), cartão de crédito (parcelamento em até 3x sem juros), boleto bancário e Mercado Pago."
+      answer: `Aceitamos PIX (com ${pixDiscount}% de desconto), cartão de crédito (parcelamento em até ${installments}x sem juros), boleto bancário e Mercado Pago.`
     },
     {
       id: '5',
