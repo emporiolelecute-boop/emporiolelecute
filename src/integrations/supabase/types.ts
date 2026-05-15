@@ -281,6 +281,45 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_sync_history: {
+        Row: {
+          action: string
+          details: Json
+          error_message: string | null
+          id: string
+          ran_at: string
+          selected_count: number | null
+          source: string
+          status: string
+          synced_count: number
+          triggered_by: string | null
+        }
+        Insert: {
+          action?: string
+          details?: Json
+          error_message?: string | null
+          id?: string
+          ran_at?: string
+          selected_count?: number | null
+          source?: string
+          status?: string
+          synced_count?: number
+          triggered_by?: string | null
+        }
+        Update: {
+          action?: string
+          details?: Json
+          error_message?: string | null
+          id?: string
+          ran_at?: string
+          selected_count?: number | null
+          source?: string
+          status?: string
+          synced_count?: number
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           created_at: string | null

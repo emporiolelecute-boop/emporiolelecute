@@ -1,11 +1,12 @@
 import SingleImageUpload from '@/components/admin/SingleImageUpload';
+import InstagramSyncManager from '@/components/admin/InstagramSyncManager';
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus, Trash2, Save, Instagram, RefreshCw } from "lucide-react";
+import { Loader2, Trash2, Save, Instagram } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   useAdminInstagramPosts,
@@ -14,6 +15,7 @@ import {
   InstagramPost,
 } from "@/hooks/useInstagramPosts";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const blank: Partial<InstagramPost> = {
   image_url: "",
@@ -58,39 +60,21 @@ const AdminInstagram = () => {
     setForm(blank);
   };
 
-  const [syncing, setSyncing] = useState(false);
-  const handleSync = async () => {
-    setSyncing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('instagram-sync');
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error + ((data as any).hint ? ` — ${(data as any).hint}` : ''));
-      toast({ title: 'Sincronizado', description: `${(data as any).synced} posts importados do Instagram.` });
-      window.location.reload();
-    } catch (e: any) {
-      toast({ title: 'Falha na sincronização', description: e.message, variant: 'destructive' });
-    } finally {
-      setSyncing(false);
-    }
-  };
+  const queryClient = useQueryClient();
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Instagram className="w-7 h-7 text-primary" />
-          <div>
-            <h1 className="text-2xl font-display">Posts do Instagram</h1>
-            <p className="text-sm text-muted-foreground">
-              Sincronize automaticamente do @emporiolelecute ou adicione manualmente. Os 6 primeiros visíveis aparecem no site.
-            </p>
-          </div>
+      <div className="flex items-center gap-3">
+        <Instagram className="w-7 h-7 text-primary" />
+        <div>
+          <h1 className="text-2xl font-display">Posts do Instagram</h1>
+          <p className="text-sm text-muted-foreground">
+            Valide as credenciais, escolha quais imagens importar e configure sincronização agendada. Os 6 primeiros visíveis aparecem no site.
+          </p>
         </div>
-        <Button onClick={handleSync} disabled={syncing} variant="outline">
-          {syncing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-          Sincronizar do Instagram
-        </Button>
       </div>
+
+      <InstagramSyncManager onSynced={() => queryClient.invalidateQueries({ queryKey: ['instagram_posts'] })} />
 
       <Card>
         <CardHeader>
