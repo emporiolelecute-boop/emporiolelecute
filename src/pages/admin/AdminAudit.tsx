@@ -382,14 +382,24 @@ const AdminAudit = () => {
             </Label>
             <Switch id="mask-pii" checked={maskPii} onCheckedChange={setMaskPii} />
           </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 border rounded-md bg-card">
+            <Label className="text-xs select-none">Escopo</Label>
+            <Select value={exportScope} onValueChange={(v) => setExportScope(v as 'page' | 'all')}>
+              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="page">Página atual</SelectItem>
+                <SelectItem value="all">Todos filtrados</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button variant="outline" onClick={refreshAll} disabled={refreshing || loading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
           </Button>
-          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            <Download className="w-4 h-4 mr-2" /> CSV
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0 || exporting}>
+            <Download className="w-4 h-4 mr-2" /> {exporting ? 'Gerando…' : 'CSV'}
           </Button>
-          <Button onClick={exportPdf} disabled={rows.length === 0}>
-            <FileText className="w-4 h-4 mr-2" /> PDF
+          <Button onClick={exportPdf} disabled={rows.length === 0 || exporting}>
+            <FileText className="w-4 h-4 mr-2" /> {exporting ? 'Gerando…' : 'PDF'}
           </Button>
         </div>
       </div>
