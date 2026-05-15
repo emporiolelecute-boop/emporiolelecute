@@ -65,6 +65,8 @@ const AdminCloudflareGuide = lazyWithRetry(() => import("./pages/admin/AdminClou
 const AdminDiagnostics = lazyWithRetry(() => import("./pages/admin/AdminDiagnostics"), "AdminDiagnostics");
 const AdminUsers = lazyWithRetry(() => import("./pages/admin/AdminUsers"), "AdminUsers");
 const AdminAccessRequests = lazyWithRetry(() => import("./pages/admin/AdminAccessRequests"), "AdminAccessRequests");
+const AdminAccessRequestDetail = lazyWithRetry(() => import("./pages/admin/AdminAccessRequestDetail"), "AdminAccessRequestDetail");
+const AdminAudit = lazyWithRetry(() => import("./pages/admin/AdminAudit"), "AdminAudit");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
