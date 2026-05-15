@@ -216,6 +216,7 @@ const AdminUsers = () => {
             <option value="noop">Já era admin</option>
             <option value="requested">Solicitado</option>
             <option value="revoked">Revogado</option>
+            <option value="rejected">Reprovado</option>
           </select>
         </div>
         {isLoading ? (
