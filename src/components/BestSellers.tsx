@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
