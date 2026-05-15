@@ -245,7 +245,7 @@ const AdminAccessRequests = () => {
                       </TableCell>
                       <TableCell className="text-right space-x-2 whitespace-nowrap">
                         <Button size="sm" variant="outline" asChild>
-                          <Link to={`/admin/usuarios/solicitacoes/${r.id}`}>
+                          <Link to={`/admin/usuarios/solicitacoes/${r.user_id}`}>
                             <Eye className="w-4 h-4 mr-1" /> Detalhes
                           </Link>
                         </Button>
