@@ -59,7 +59,10 @@ const AdminAccessRequestDetail = () => {
   const { refreshRole, roleRefreshing } = useAuth();
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
