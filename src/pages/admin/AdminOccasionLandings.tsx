@@ -28,7 +28,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, MapPin, Image as ImageIcon, Trash } from "lucide-react";
+import SingleImageUpload from "@/components/admin/SingleImageUpload";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 type FormState = {
   id?: string;
