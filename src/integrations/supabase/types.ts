@@ -53,6 +53,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_access_requests: {
+        Row: {
+          created_at: string
+          id: string
+          rejection_reason: string | null
+          requested_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_email: string | null
+          status: string
+          updated_at: string
+          user_email_snapshot: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rejection_reason?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_email?: string | null
+          status?: string
+          updated_at?: string
+          user_email_snapshot?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rejection_reason?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_email?: string | null
+          status?: string
+          updated_at?: string
+          user_email_snapshot?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -1029,8 +1071,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          access_requested: boolean
-          access_requested_at: string | null
           created_at: string
           email: string
           full_name: string | null
@@ -1038,8 +1078,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          access_requested?: boolean
-          access_requested_at?: string | null
           created_at?: string
           email: string
           full_name?: string | null
@@ -1047,8 +1085,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          access_requested?: boolean
-          access_requested_at?: string | null
           created_at?: string
           email?: string
           full_name?: string | null

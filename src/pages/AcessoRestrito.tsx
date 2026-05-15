@@ -21,16 +21,18 @@ const AcessoRestrito = () => {
     if (!loading && user && isAdmin) navigate('/admin', { replace: true });
   }, [user, isAdmin, loading, navigate]);
 
-  // Pre-load existing request flag
+  // Pre-load existing pending request
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from('profiles')
-      .select('access_requested')
-      .eq('id', user.id)
+    (supabase as any)
+      .from('admin_access_requests')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .limit(1)
       .maybeSingle()
-      .then(({ data }) => {
-        if (data?.access_requested) setRequested(true);
+      .then(({ data }: { data: { id: string } | null }) => {
+        if (data?.id) setRequested(true);
       });
   }, [user]);
 
