@@ -966,6 +966,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_requested: boolean
+          access_requested_at: string | null
           created_at: string
           email: string
           full_name: string | null
@@ -973,6 +975,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_requested?: boolean
+          access_requested_at?: string | null
           created_at?: string
           email: string
           full_name?: string | null
@@ -980,6 +984,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_requested?: boolean
+          access_requested_at?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
@@ -1311,6 +1317,7 @@ export type Database = {
         Returns: boolean
       }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
+      request_admin_access: { Args: never; Returns: Json }
       validate_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: Json
