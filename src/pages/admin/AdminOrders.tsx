@@ -95,6 +95,7 @@ const AdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [trackingDialog, setTrackingDialog] = useState<{ order: Order; code: string; carrier: string; url: string } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
