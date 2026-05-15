@@ -4,6 +4,7 @@ import CategoriesHighlight from "@/components/CategoriesHighlight";
 
 import BestSellers from "@/components/BestSellers";
 import OccasionsSection from "@/components/OccasionsSection";
+import QuoteCTABanner from "@/components/QuoteCTABanner";
 import Testimonials from "@/components/Testimonials";
 import FAQSection from "@/components/FAQSection";
 import InstagramFeed from "@/components/InstagramFeed";
