@@ -1,0 +1,1 @@
+ALTER TABLE public.products DROP COLUMN IF EXISTS elo7_link;

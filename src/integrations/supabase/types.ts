@@ -980,7 +980,6 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string | null
-          elo7_link: string | null
           features: string[] | null
           google_product_category: string | null
           id: string
@@ -1008,7 +1007,6 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
-          elo7_link?: string | null
           features?: string[] | null
           google_product_category?: string | null
           id?: string
@@ -1036,7 +1034,6 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
-          elo7_link?: string | null
           features?: string[] | null
           google_product_category?: string | null
           id?: string
