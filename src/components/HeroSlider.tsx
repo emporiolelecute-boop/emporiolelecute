@@ -340,10 +340,16 @@ const HeroSlider = () => {
 
   const slide = slides[currentSlide] ?? slides[0];
   if (!slide) return null;
-  const previous = prevSlide !== null ? slides[prevSlide] : null;
+  const previous = !reducedMotion && prevSlide !== null ? slides[prevSlide] : null;
 
-  const nextSlideFn = () => goTo((currentSlide + 1) % slides.length);
-  const prevSlideFn = () => goTo((currentSlide - 1 + slides.length) % slides.length);
+  const nextSlideFn = useCallback(
+    () => goTo((currentSlide + 1) % slides.length),
+    [goTo, currentSlide, slides.length]
+  );
+  const prevSlideFn = useCallback(
+    () => goTo((currentSlide - 1 + slides.length) % slides.length),
+    [goTo, currentSlide, slides.length]
+  );
 
   const isPriority = currentSlide === 0;
   const hasAnyBanner = Boolean(
