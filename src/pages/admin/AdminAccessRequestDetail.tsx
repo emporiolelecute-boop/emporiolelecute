@@ -107,6 +107,7 @@ const AdminAccessRequestDetail = () => {
 
   const resendNotification = async () => {
     if (!profile || cooldown > 0) return;
+    const reasonTrimmed = resendReason.trim().slice(0, 500);
     setResending(true);
     try {
       const { data, error } = await supabase.functions.invoke('notify-admins-new-request', {
@@ -116,6 +117,7 @@ const AdminAccessRequestDetail = () => {
           requested_at: lastRequestedAt ?? new Date().toISOString(),
           request_id: pendingRequest?.id ?? lastRequest?.id ?? null,
           source: 'manual_resend',
+          reason: reasonTrimmed || null,
         },
       });
       if (error) throw error;
@@ -135,12 +137,41 @@ const AdminAccessRequestDetail = () => {
       const until = Date.now() + COOLDOWN_SECONDS * 1000;
       if (cooldownKey) localStorage.setItem(cooldownKey, String(until));
       setCooldown(COOLDOWN_SECONDS);
+      setResendReason('');
       await load();
     } catch (e: any) {
       toast({ title: 'Erro ao reenviar', description: e.message, variant: 'destructive' });
     } finally {
       setResending(false);
     }
+  };
+
+  const requestPermalink = typeof window !== 'undefined' && id
+    ? `${window.location.origin}/admin/usuarios/solicitacoes/${id}`
+    : '';
+
+  const buildLogPayload = (n: NotificationEntry) => {
+    const lines = [
+      `Tentativa: ${n.id}`,
+      `Data: ${new Date(n.created_at).toLocaleString('pt-BR')}`,
+      `Status: ${n.status}`,
+      `Admins: ${n.admin_count} • Enviados: ${n.sent_count}`,
+    ];
+    const reason = n.details?.reason;
+    const sourceTag = n.details?.source;
+    if (sourceTag) lines.push(`Origem: ${sourceTag}`);
+    if (reason) lines.push(`Motivo informado: ${reason}`);
+    if (n.error_message) {
+      lines.push('---');
+      lines.push('Erro completo:');
+      lines.push(n.error_message);
+    }
+    if (n.details && Object.keys(n.details).length) {
+      lines.push('---');
+      lines.push('Detalhes (JSON):');
+      lines.push(JSON.stringify(n.details, null, 2));
+    }
+    return lines.join('\n');
   };
 
   const load = async () => {
