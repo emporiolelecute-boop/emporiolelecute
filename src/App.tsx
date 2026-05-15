@@ -304,6 +304,11 @@ const App = () => {
                       <AdminSEODashboard />
                     </Suspense>
                   } />
+                  <Route path="cloudflare-worker" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCloudflareGuide />
+                    </Suspense>
+                  } />
                   <Route path="merchant-feed" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminMerchantFeed />
