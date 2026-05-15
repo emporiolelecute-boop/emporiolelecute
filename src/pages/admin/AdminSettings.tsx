@@ -406,23 +406,6 @@ const AdminSettings = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4" />
-                Elo7
-              </Label>
-              <Input 
-                value={settings.social_links.elo7}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  social_links: {
-                    ...settings.social_links,
-                    elo7: e.target.value
-                  }
-                })}
-                placeholder="https://elo7.com.br/..."
-              />
-            </div>
           </CardContent>
         </Card>
 
