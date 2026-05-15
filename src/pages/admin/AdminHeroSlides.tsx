@@ -248,6 +248,149 @@ function SlidePreview({ slide }: { slide: Partial<HeroSlide> }) {
 }
 
 // ---------------------------------------------------------------------------
+// HeroShowcase — auto-cycles through ALL slides while alternating Mobile/Desktop
+// ---------------------------------------------------------------------------
+
+function HeroShowcase({ slides }: { slides: HeroSlide[] }) {
+  const visible = (slides || []).filter((s) => s.is_visible !== false);
+  const [index, setIndex] = useState(0);
+  const [device, setDevice] = useState<PreviewDevice>('desktop');
+  const [playing, setPlaying] = useState(true);
+  const SLIDE_MS = 4000;
+
+  useEffect(() => {
+    if (!playing || visible.length === 0) return;
+    const id = window.setInterval(() => {
+      // Toggle device first; when it returns to desktop, advance the slide.
+      setDevice((d) => {
+        const next = d === 'desktop' ? 'mobile' : 'desktop';
+        if (next === 'desktop') {
+          setIndex((i) => (i + 1) % visible.length);
+        }
+        return next;
+      });
+    }, SLIDE_MS);
+    return () => window.clearInterval(id);
+  }, [playing, visible.length]);
+
+  if (visible.length === 0) return null;
+  const safeIndex = index % visible.length;
+  const current = visible[safeIndex];
+  const isMobilePreview = device === 'mobile';
+  const mobileSrc = current.image_mobile_url || '';
+  const desktopSrc = current.image_desktop_url || '';
+  const fallbackSrc = current.image_url || '';
+
+  let mode: HeroSlideMode;
+  let imgSrc: string;
+  if (isMobilePreview && mobileSrc) {
+    mode = 'banner_mobile';
+    imgSrc = mobileSrc;
+  } else if (!isMobilePreview && desktopSrc) {
+    mode = 'banner_desktop';
+    imgSrc = desktopSrc;
+  } else {
+    mode = 'text_image';
+    imgSrc = fallbackSrc;
+  }
+  const alt = current.image_alt || current.title || 'Prévia do slide';
+
+  return (
+    <Card className="mb-6">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Prévia automática do carrossel</Label>
+            <ModeBadge mode={mode} />
+            <span className="text-[11px] text-muted-foreground">
+              Slide {safeIndex + 1}/{visible.length} · {isMobilePreview ? 'Mobile' : 'Desktop'}
+            </span>
+            {playing && (
+              <span className="text-[10px] uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full animate-pulse">
+                auto
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setPlaying((v) => !v)}
+              className="px-2 py-1.5 text-xs rounded inline-flex items-center gap-1.5 border bg-background text-muted-foreground hover:text-foreground"
+              aria-label={playing ? 'Pausar' : 'Reproduzir'}
+            >
+              {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              {playing ? 'Pausar' : 'Reproduzir'}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            'mx-auto bg-background border-8 border-foreground/80 overflow-hidden shadow-lg transition-all duration-300',
+            isMobilePreview ? 'w-[320px] max-w-full rounded-[28px]' : 'w-full max-w-[960px] rounded-xl'
+          )}
+        >
+          {mode === 'text_image' ? (
+            <div className="p-4 sm:p-6 grid sm:grid-cols-2 gap-4 items-center bg-background">
+              <div className="min-w-0">
+                {current.tagline && (
+                  <span className="inline-block text-[10px] uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full mb-2">
+                    {current.tagline}
+                  </span>
+                )}
+                <p className="font-display text-lg sm:text-xl leading-tight text-foreground line-clamp-3">
+                  {current.title || 'Título do slide'}
+                </p>
+                {current.subtitle && (
+                  <p className="text-xs text-muted-foreground mt-2 line-clamp-3">{current.subtitle}</p>
+                )}
+                {current.cta_label && (
+                  <span className="mt-3 inline-block text-[11px] bg-primary text-primary-foreground rounded-full px-3 py-1">
+                    {current.cta_label}
+                  </span>
+                )}
+              </div>
+              <div className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                {imgSrc ? (
+                  <img src={imgSrc} alt={alt} className="w-full h-full object-contain" />
+                ) : (
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+          ) : imgSrc ? (
+            <img src={imgSrc} alt={alt} className="w-full h-auto block" />
+          ) : (
+            <div className="aspect-[16/5] bg-muted flex items-center justify-center">
+              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+
+        {/* Slide dots */}
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          {visible.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                setPlaying(false);
+                setIndex(i);
+              }}
+              aria-label={`Ir para slide ${i + 1}`}
+              className={cn(
+                'h-2 rounded-full transition-all',
+                i === safeIndex ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60'
+              )}
+            />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Default form state
 // ---------------------------------------------------------------------------
 
@@ -310,6 +453,8 @@ const AdminHeroSlides = () => {
       {isLoading ? (
         <p className="text-muted-foreground">Carregando…</p>
       ) : (
+        <>
+          <HeroShowcase slides={slides || []} />
         <div className="space-y-3">
           {(slides || []).map((s) => (
             <Card key={s.id}>
@@ -388,6 +533,7 @@ const AdminHeroSlides = () => {
             </p>
           )}
         </div>
+        </>
       )}
 
       {/* ------------------------------------------------------------------ */}
