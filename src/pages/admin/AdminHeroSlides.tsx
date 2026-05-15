@@ -1,3 +1,4 @@
+import SingleImageUpload from '@/components/admin/SingleImageUpload';
 import { useState } from 'react';
 import { useAdminHeroSlides, useUpsertHeroSlide, useDeleteHeroSlide, type HeroSlide } from '@/hooks/useHeroSlides';
 import { Button } from '@/components/ui/button';

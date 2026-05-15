@@ -1,3 +1,4 @@
+import SingleImageUpload from '@/components/admin/SingleImageUpload';
 import { useState } from 'react';
 import { Loader2, LayoutGrid, Save, Eye, EyeOff, Image, Link, Type, FileText, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
