@@ -31,15 +31,16 @@ const BodySchema = z.object({
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
+  const startedAt = Date.now();
   try {
     const parsed = BodySchema.safeParse(await req.json());
     if (!parsed.success) {
+      console.warn('[calculate-shipping] validation failed', parsed.error.flatten());
       return json({ error: parsed.error.flatten().fieldErrors }, 400);
     }
     const { cep_destino, items } = parsed.data;
     const destino = cep_destino.replace(/\D/g, '');
 
-    // Soma pesos com fallback para 0.150 kg
     const totalWeight = items.reduce(
       (acc, it) => acc + (it.weight_kg ?? DEFAULT_WEIGHT_KG) * it.quantity,
       0,
@@ -49,8 +50,17 @@ Deno.serve(async (req) => {
       0,
     );
 
+    console.log('[calculate-shipping] request', {
+      origin_cep_set: !!ORIGIN_CEP,
+      destino_prefix: destino.slice(0, 3),
+      item_count: items.length,
+      total_weight_kg: round(totalWeight),
+      me_token_set: !!ME_TOKEN,
+    });
+
     // Caso 1: CEP de origem == destino → entrega local / retirada
     if (ORIGIN_CEP && destino === ORIGIN_CEP) {
+      console.log('[calculate-shipping] local_delivery match');
       return json({
         local_delivery: true,
         origin_cep: ORIGIN_CEP,
@@ -58,12 +68,13 @@ Deno.serve(async (req) => {
         options: [
           { service: 'Retirada / Entrega local', price: 0, days: '1-2', company: 'Empório LeleCute' },
         ],
+        elapsed_ms: Date.now() - startedAt,
       });
     }
 
     // Caso 2: cotação real no Melhor Envio
     if (!ME_TOKEN || !ORIGIN_CEP) {
-      // Fallback: estimativa simples enquanto credenciais não estão configuradas
+      console.log('[calculate-shipping] estimated_fallback', { reason: !ME_TOKEN ? 'no_token' : 'no_origin' });
       return json({
         estimated: true,
         total_weight_kg: round(totalWeight),
@@ -71,6 +82,7 @@ Deno.serve(async (req) => {
           { service: 'PAC (estimado)', price: estimate(totalWeight, 1.0), days: '5-9', company: 'Correios' },
           { service: 'SEDEX (estimado)', price: estimate(totalWeight, 1.8), days: '2-4', company: 'Correios' },
         ],
+        elapsed_ms: Date.now() - startedAt,
       });
     }
 
@@ -89,6 +101,7 @@ Deno.serve(async (req) => {
       options: { receipt: false, own_hand: false, insurance_value: subtotal },
     };
 
+    console.log('[calculate-shipping] calling Melhor Envio', { products: mePayload.products.length });
     const meRes = await fetch(ME_API, {
       method: 'POST',
       headers: {
@@ -102,7 +115,8 @@ Deno.serve(async (req) => {
 
     if (!meRes.ok) {
       const text = await meRes.text();
-      return json({ error: 'Falha na consulta Melhor Envio', detail: text }, 502);
+      console.error('[calculate-shipping] ME error', meRes.status, text.slice(0, 500));
+      return json({ error: 'Falha na consulta Melhor Envio', status: meRes.status, detail: text }, 502);
     }
 
     const data = await meRes.json();
@@ -115,12 +129,14 @@ Deno.serve(async (req) => {
         days: `${o.delivery_range?.min ?? '?'}-${o.delivery_range?.max ?? '?'}`,
       }));
 
+    console.log('[calculate-shipping] ME ok', { options_returned: options.length, elapsed_ms: Date.now() - startedAt });
     return json({
       total_weight_kg: round(totalWeight),
       options,
+      elapsed_ms: Date.now() - startedAt,
     });
   } catch (err) {
-    console.error('calculate-shipping error', err);
+    console.error('[calculate-shipping] unexpected', err);
     return json({ error: 'Erro interno', message: String(err) }, 500);
   }
 });
