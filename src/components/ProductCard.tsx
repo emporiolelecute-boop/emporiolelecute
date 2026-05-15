@@ -80,7 +80,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
 
   return (
     <article 
-      className="bg-card rounded-2xl overflow-hidden shadow-card border border-border/50 product-card group"
+      className="bg-card rounded-2xl overflow-hidden shadow-card border border-border/50 product-card group transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 active:translate-y-0 active:scale-[0.99]"
       itemScope
       itemType="https://schema.org/Product"
     >
