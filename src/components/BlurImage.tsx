@@ -9,6 +9,7 @@ interface BlurImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"
   responsiveWidths?: number[];
   priority?: boolean;
   wrapperClassName?: string;
+  resize?: "cover" | "contain" | "fill";
   /** Aspect ratio class for wrapper, e.g. "aspect-square". Defaults to none (image controls size). */
   aspect?: string;
 }
@@ -27,6 +28,7 @@ export const BlurImage = ({
   priority = false,
   className,
   wrapperClassName,
+  resize = "contain",
   aspect,
   sizes,
   ...rest
@@ -35,8 +37,8 @@ export const BlurImage = ({
   const [errored, setErrored] = useState(false);
   const isStorage = typeof src === "string" && src.includes("/storage/v1/object/public/");
   const placeholder = isStorage ? optimizeImage(src, { width: 24, quality: 30 }) : null;
-  const optimized = optimizeImage(src, { width });
-  const srcSet = responsiveWidths ? buildSrcSet(src, responsiveWidths) : undefined;
+  const optimized = optimizeImage(src, { width, resize });
+  const srcSet = responsiveWidths ? buildSrcSet(src, responsiveWidths, 75, resize) : undefined;
 
   return (
     <div className={cn("relative overflow-hidden bg-muted", aspect, wrapperClassName)}>
