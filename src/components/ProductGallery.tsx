@@ -113,7 +113,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
       {/* Main Image Container */}
       <div className="flex-1">
         <div 
-          className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg group cursor-zoom-in"
+          className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg group cursor-pointer"
           onClick={() => setIsZoomed(true)}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -147,7 +147,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               e.stopPropagation();
               setIsZoomed(true);
             }}
-            className="absolute bottom-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+            className="absolute bottom-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
             aria-label="Ampliar imagem"
           >
             <ZoomIn className="h-5 w-5 text-foreground" />
@@ -161,7 +161,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   e.stopPropagation();
                   goToPrevious();
                 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
                 aria-label="Imagem anterior"
               >
                 <ChevronLeft className="h-5 w-5 text-foreground" />
@@ -171,7 +171,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   e.stopPropagation();
                   goToNext();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
                 aria-label="Próxima imagem"
               >
                 <ChevronRight className="h-5 w-5 text-foreground" />
@@ -280,14 +280,14 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <>
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-all hover:scale-110 shadow-lg"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
                   aria-label="Imagem anterior"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-all hover:scale-110 shadow-lg"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
                   aria-label="Próxima imagem"
                 >
                   <ChevronRight className="h-6 w-6" />
@@ -303,9 +303,9 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                     key={index}
                     onClick={() => goToSlide(index)}
                     className={cn(
-                      "w-16 h-16 rounded-lg overflow-hidden transition-all duration-300",
+                      "w-16 h-16 rounded-lg overflow-hidden transition-opacity duration-300 bg-muted",
                       index === currentIndex
-                        ? "ring-2 ring-primary scale-110"
+                        ? "ring-2 ring-primary opacity-100"
                         : "opacity-60 hover:opacity-100"
                     )}
                   >
@@ -313,6 +313,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                       src={optimizeImage(image, { width: 128 })}
                       alt={`Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
                     />
                   </button>
                 ))}
