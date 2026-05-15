@@ -390,9 +390,7 @@ const AdminHeroSlides = () => {
             </Button>
             <Button
               onClick={save}
-              disabled={
-                (mode === 'text_image' && !form.title) || upsert.isPending
-              }
+              disabled={!form.title || upsert.isPending}
             >
               {upsert.isPending ? 'Salvando…' : 'Salvar'}
             </Button>
