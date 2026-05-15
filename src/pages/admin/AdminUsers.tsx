@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ShieldCheck, History, AlertCircle, CheckCircle2, Download } from "lucide-react";
+import { ShieldCheck, History, AlertCircle, CheckCircle2, Download, FileText, ShieldOff } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface AuditRow {
   id: string;
@@ -23,6 +25,8 @@ interface AuditRow {
 const AdminUsers = () => {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterText, setFilterText] = useState("");
 
   const { data: audit = [], isLoading } = useQuery({
     queryKey: ["role_promotion_audit"],
@@ -69,17 +73,26 @@ const AdminUsers = () => {
     promote.mutate(v);
   };
 
+  const filtered = useMemo(() => {
+    const q = filterText.trim().toLowerCase();
+    return audit.filter((r) => {
+      if (filterStatus !== "all" && r.status !== filterStatus) return false;
+      if (q && !r.target_email.toLowerCase().includes(q) && !(r.promoted_by_email || "").toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [audit, filterStatus, filterText]);
+
   const exportCSV = () => {
-    if (!audit.length) {
+    if (!filtered.length) {
       toast.info("Nada para exportar.");
       return;
     }
-    const header = ["Data/hora", "E-mail promovido", "Promovido por", "Papel", "Status", "Mensagem"];
+    const header = ["Data/hora", "E-mail alvo", "Realizado por", "Papel", "Status", "Mensagem"];
     const escape = (v: any) => {
       const s = v === null || v === undefined ? "" : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const rows = audit.map((r) => [
+    const rows = filtered.map((r) => [
       format(new Date(r.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR }),
       r.target_email,
       r.promoted_by_email || "",
@@ -92,12 +105,48 @@ const AdminUsers = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `promocoes-admin-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `auditoria-admin-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
     toast.success("CSV exportado.");
+  };
+
+  const exportPDF = () => {
+    if (!filtered.length) {
+      toast.info("Nada para exportar.");
+      return;
+    }
+    const doc = new jsPDF({ orientation: "landscape" });
+    doc.setFontSize(14);
+    doc.text("Auditoria de papéis admin", 14, 16);
+    doc.setFontSize(9);
+    doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })} — ${filtered.length} registros`, 14, 22);
+    autoTable(doc, {
+      startY: 26,
+      head: [["Data/hora", "E-mail alvo", "Realizado por", "Status", "Mensagem"]],
+      body: filtered.map((r) => [
+        format(new Date(r.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+        r.target_email,
+        r.promoted_by_email || "—",
+        r.status,
+        r.message || "—",
+      ]),
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [180, 90, 80] },
+    });
+    doc.save(`auditoria-admin-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success("PDF exportado.");
+  };
+
+  const statusBadge = (s: string) => {
+    if (s === "success") return <span className="inline-flex items-center gap-1 text-emerald-600 text-xs"><CheckCircle2 className="h-3 w-3" /> sucesso</span>;
+    if (s === "noop") return <span className="text-xs text-muted-foreground">já era admin</span>;
+    if (s === "error") return <span className="inline-flex items-center gap-1 text-destructive text-xs"><AlertCircle className="h-3 w-3" /> erro</span>;
+    if (s === "requested") return <span className="text-xs text-blue-600">solicitado</span>;
+    if (s === "revoked") return <span className="inline-flex items-center gap-1 text-amber-600 text-xs"><ShieldOff className="h-3 w-3" /> revogado</span>;
+    return <span className="text-xs">{s}</span>;
   };
 
   return (
@@ -137,51 +186,62 @@ const AdminUsers = () => {
       <Card className="p-5 space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="font-medium flex items-center gap-2">
-            <History className="h-4 w-4" /> Histórico de promoções ({audit.length})
+            <History className="h-4 w-4" /> Histórico ({filtered.length}/{audit.length})
           </h2>
-          <Button size="sm" variant="outline" onClick={exportCSV} disabled={!audit.length}>
-            <Download className="h-4 w-4 mr-2" /> Exportar CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={exportCSV} disabled={!filtered.length}>
+              <Download className="h-4 w-4 mr-2" /> CSV
+            </Button>
+            <Button size="sm" variant="outline" onClick={exportPDF} disabled={!filtered.length}>
+              <FileText className="h-4 w-4 mr-2" /> PDF
+            </Button>
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row gap-2">
+          <Input
+            placeholder="Buscar por e-mail..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            className="md:max-w-xs"
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="border rounded-md bg-background px-3 py-2 text-sm"
+          >
+            <option value="all">Todos os status</option>
+            <option value="success">Sucesso</option>
+            <option value="error">Erro</option>
+            <option value="noop">Já era admin</option>
+            <option value="requested">Solicitado</option>
+            <option value="revoked">Revogado</option>
+          </select>
         </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : audit.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma promoção registrada ainda.</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum registro com os filtros atuais.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase text-muted-foreground border-b">
                 <tr>
                   <th className="py-2 pr-3">Data/hora</th>
-                  <th className="py-2 pr-3">E-mail promovido</th>
-                  <th className="py-2 pr-3">Promovido por</th>
+                  <th className="py-2 pr-3">E-mail alvo</th>
+                  <th className="py-2 pr-3">Realizado por</th>
                   <th className="py-2 pr-3">Status</th>
                   <th className="py-2 pr-3">Detalhes</th>
                 </tr>
               </thead>
               <tbody>
-                {audit.map((r) => (
+                {filtered.map((r) => (
                   <tr key={r.id} className="border-b last:border-0">
                     <td className="py-2 pr-3 whitespace-nowrap text-muted-foreground">
                       {format(new Date(r.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                     </td>
                     <td className="py-2 pr-3 break-all">{r.target_email}</td>
                     <td className="py-2 pr-3 break-all text-muted-foreground">{r.promoted_by_email || "—"}</td>
-                    <td className="py-2 pr-3">
-                      {r.status === "success" && (
-                        <span className="inline-flex items-center gap-1 text-emerald-600 text-xs">
-                          <CheckCircle2 className="h-3 w-3" /> sucesso
-                        </span>
-                      )}
-                      {r.status === "noop" && (
-                        <span className="text-xs text-muted-foreground">já era admin</span>
-                      )}
-                      {r.status === "error" && (
-                        <span className="inline-flex items-center gap-1 text-destructive text-xs">
-                          <AlertCircle className="h-3 w-3" /> erro
-                        </span>
-                      )}
-                    </td>
+                    <td className="py-2 pr-3">{statusBadge(r.status)}</td>
                     <td className="py-2 pr-3 text-xs text-muted-foreground">{r.message || "—"}</td>
                   </tr>
                 ))}
@@ -193,5 +253,6 @@ const AdminUsers = () => {
     </div>
   );
 };
+
 
 export default AdminUsers;
