@@ -31,6 +31,8 @@ import {
   Smartphone,
   Monitor,
   LayoutTemplate,
+  Play,
+  Pause,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -102,6 +104,22 @@ type PreviewDevice = 'mobile' | 'desktop';
 
 function SlidePreview({ slide }: { slide: Partial<HeroSlide> }) {
   const [device, setDevice] = useState<PreviewDevice>('desktop');
+  const [autoPlay, setAutoPlay] = useState(true);
+  const AUTO_INTERVAL_MS = 3500;
+
+  // Auto-alternate between mobile and desktop while autoPlay is on.
+  useEffect(() => {
+    if (!autoPlay) return;
+    const id = window.setInterval(() => {
+      setDevice((d) => (d === 'desktop' ? 'mobile' : 'desktop'));
+    }, AUTO_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [autoPlay]);
+
+  const handleManual = (next: PreviewDevice) => {
+    setAutoPlay(false);
+    setDevice(next);
+  };
 
   const isMobilePreview = device === 'mobile';
   const mobileSrc = slide.image_mobile_url || '';
@@ -129,32 +147,49 @@ function SlidePreview({ slide }: { slide: Partial<HeroSlide> }) {
         <div className="flex items-center gap-2">
           <Label className="text-sm">Prévia ao vivo</Label>
           <ModeBadge mode={mode} />
+          {autoPlay && (
+            <span className="text-[10px] uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full animate-pulse">
+              auto
+            </span>
+          )}
         </div>
-        <div className="inline-flex rounded-md border bg-background p-0.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setDevice('mobile')}
-            className={cn(
-              'px-3 py-1.5 text-xs rounded inline-flex items-center gap-1.5 transition-colors',
-              isMobilePreview
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
+            onClick={() => setAutoPlay((v) => !v)}
+            className="px-2 py-1.5 text-xs rounded inline-flex items-center gap-1.5 border bg-background text-muted-foreground hover:text-foreground"
+            aria-label={autoPlay ? 'Pausar alternância automática' : 'Iniciar alternância automática'}
+            title={autoPlay ? 'Pausar' : 'Reproduzir'}
           >
-            <Smartphone className="h-3.5 w-3.5" /> Mobile
+            {autoPlay ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {autoPlay ? 'Pausar' : 'Auto'}
           </button>
-          <button
-            type="button"
-            onClick={() => setDevice('desktop')}
-            className={cn(
-              'px-3 py-1.5 text-xs rounded inline-flex items-center gap-1.5 transition-colors',
-              !isMobilePreview
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <Monitor className="h-3.5 w-3.5" /> Desktop
-          </button>
+          <div className="inline-flex rounded-md border bg-background p-0.5">
+            <button
+              type="button"
+              onClick={() => handleManual('mobile')}
+              className={cn(
+                'px-3 py-1.5 text-xs rounded inline-flex items-center gap-1.5 transition-colors',
+                isMobilePreview
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Smartphone className="h-3.5 w-3.5" /> Mobile
+            </button>
+            <button
+              type="button"
+              onClick={() => handleManual('desktop')}
+              className={cn(
+                'px-3 py-1.5 text-xs rounded inline-flex items-center gap-1.5 transition-colors',
+                !isMobilePreview
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Monitor className="h-3.5 w-3.5" /> Desktop
+            </button>
+          </div>
         </div>
       </div>
 
