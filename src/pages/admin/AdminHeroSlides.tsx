@@ -138,8 +138,6 @@ const AdminHeroSlides = () => {
     setOpen(false);
   };
 
-  const mode = form.display_mode ?? 'text_image';
-
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -185,7 +183,7 @@ const AdminHeroSlides = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-medium truncate">{s.title || '(sem título)'}</p>
-                    <ModeBadge mode={s.display_mode ?? 'text_image'} />
+                    <ModeBadge mode="text_image" />
                   </div>
                   {s.tagline && (
                     <p className="text-xs text-primary truncate">{s.tagline}</p>
