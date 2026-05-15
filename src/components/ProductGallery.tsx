@@ -136,7 +136,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   responsiveWidths={[400, 600, 800, 1200]}
                   priority={index === 0}
                   sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-contain"
+                  className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
                 />
               </div>
             ))}
@@ -148,7 +148,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               e.stopPropagation();
               setIsZoomed(true);
             }}
-            className="absolute bottom-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
+            className="absolute bottom-4 right-4 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 active:scale-95 shadow-md"
             aria-label="Ampliar imagem"
           >
             <ZoomIn className="h-5 w-5 text-foreground" />
@@ -162,7 +162,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   e.stopPropagation();
                   goToPrevious();
                 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 active:scale-95 shadow-md"
                 aria-label="Imagem anterior"
               >
                 <ChevronLeft className="h-5 w-5 text-foreground" />
@@ -172,7 +172,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   e.stopPropagation();
                   goToNext();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 active:scale-95 shadow-md"
                 aria-label="Próxima imagem"
               >
                 <ChevronRight className="h-5 w-5 text-foreground" />
@@ -281,14 +281,14 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <>
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background hover:scale-110 active:scale-95 transition-all duration-300 shadow-lg"
                   aria-label="Imagem anterior"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background hover:scale-110 active:scale-95 transition-all duration-300 shadow-lg"
                   aria-label="Próxima imagem"
                 >
                   <ChevronRight className="h-6 w-6" />
