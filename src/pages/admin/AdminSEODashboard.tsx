@@ -61,6 +61,9 @@ export default function AdminSEODashboard() {
   const [loadingSemrush, setLoadingSemrush] = useState(false);
   const [loadingGsc, setLoadingGsc] = useState(false);
   const [loadingChecks, setLoadingChecks] = useState(false);
+  const [runs, setRuns] = useState<CheckRun[]>([]);
+  const [alertCfg, setAlertCfg] = useState<{ email: string; webhook_url: string; enabled: boolean }>({ email: '', webhook_url: '', enabled: true });
+  const [savingCfg, setSavingCfg] = useState(false);
 
   const loadSnapshots = useCallback(async () => {
     const { data } = await supabase.from('seo_snapshots')
