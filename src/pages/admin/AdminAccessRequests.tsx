@@ -242,10 +242,10 @@ const AdminAccessRequests = () => {
                         <Button
                           size="sm"
                           onClick={() => approve(r.email, r.id)}
-                          disabled={acting === r.id}
+                          disabled={acting === r.id || roleRefreshing}
                         >
                           <Check className="w-4 h-4 mr-1" />
-                          {acting === r.id ? 'Aprovando...' : 'Aprovar'}
+                          {acting === r.id || roleRefreshing ? 'Aprovando...' : 'Aprovar'}
                         </Button>
                       </TableCell>
                     </TableRow>
