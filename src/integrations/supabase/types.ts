@@ -242,6 +242,7 @@ export type Database = {
           cta_label: string | null
           cta_url: string | null
           id: string
+          image_mobile_url: string | null
           image_url: string | null
           is_visible: boolean
           position: number
@@ -255,6 +256,7 @@ export type Database = {
           cta_label?: string | null
           cta_url?: string | null
           id?: string
+          image_mobile_url?: string | null
           image_url?: string | null
           is_visible?: boolean
           position?: number
@@ -268,6 +270,7 @@ export type Database = {
           cta_label?: string | null
           cta_url?: string | null
           id?: string
+          image_mobile_url?: string | null
           image_url?: string | null
           is_visible?: boolean
           position?: number
