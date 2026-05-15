@@ -90,7 +90,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <img
                 src={optimizeImage(image, { width: 160 })}
                 alt={`${productName} - Miniatura ${index + 1}`}
-                className="w-full h-full object-contain bg-muted"
+                className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
                 onError={(e) => {
@@ -226,7 +226,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                 <img
                   src={optimizeImage(image, { width: 160 })}
                   alt={`${productName} - Miniatura ${index + 1}`}
-                  className="w-full h-full object-contain bg-muted"
+                  className="w-full h-full object-cover"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
@@ -312,7 +312,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                     <img
                       src={optimizeImage(image, { width: 128 })}
                       alt={`Miniatura ${index + 1}`}
-                      className="w-full h-full object-contain bg-muted"
+                      className="w-full h-full object-cover"
                     />
                   </button>
                 ))}
