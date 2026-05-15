@@ -63,6 +63,7 @@ const menuItems = [
   { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
   { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
   { icon: Activity, label: 'Telemetria', path: '/admin/telemetria' },
+  { icon: Clock, label: 'Tarefas Agendadas', path: '/admin/cron' },
   { icon: ShieldCheck, label: 'Usuários', path: '/admin/usuarios' },
   { icon: ShieldCheck, label: 'Solicitações de acesso', path: '/admin/usuarios/solicitacoes' },
   { icon: BarChart3, label: 'Auditoria', path: '/admin/auditoria' },
