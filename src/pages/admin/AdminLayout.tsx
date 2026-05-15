@@ -63,6 +63,7 @@ const menuItems = [
   { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
   { icon: ShieldCheck, label: 'Usuários', path: '/admin/usuarios' },
   { icon: ShieldCheck, label: 'Solicitações de acesso', path: '/admin/usuarios/solicitacoes' },
+  { icon: BarChart3, label: 'Auditoria', path: '/admin/auditoria' },
 ];
 
 const AdminLayout = () => {

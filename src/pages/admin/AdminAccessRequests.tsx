@@ -228,8 +228,10 @@ const AdminAccessRequests = () => {
                         <Badge variant="secondary">Em análise</Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2 whitespace-nowrap">
-                        <Button size="sm" variant="outline" onClick={() => openDetails(r)}>
-                          <Eye className="w-4 h-4 mr-1" /> Detalhes
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to={`/admin/usuarios/solicitacoes/${r.id}`}>
+                            <Eye className="w-4 h-4 mr-1" /> Detalhes
+                          </Link>
                         </Button>
                         <Button
                           size="sm"

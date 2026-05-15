@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_request_notifications: {
+        Row: {
+          admin_count: number
+          created_at: string
+          details: Json
+          error_message: string | null
+          id: string
+          requested_at: string | null
+          requester_email: string | null
+          requester_id: string | null
+          sent_count: number
+          status: string
+        }
+        Insert: {
+          admin_count?: number
+          created_at?: string
+          details?: Json
+          error_message?: string | null
+          id?: string
+          requested_at?: string | null
+          requester_email?: string | null
+          requester_id?: string | null
+          sent_count?: number
+          status?: string
+        }
+        Update: {
+          admin_count?: number
+          created_at?: string
+          details?: Json
+          error_message?: string | null
+          id?: string
+          requested_at?: string | null
+          requester_email?: string | null
+          requester_id?: string | null
+          sent_count?: number
+          status?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
