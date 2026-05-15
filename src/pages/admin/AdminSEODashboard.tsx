@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import RobotsAndSitemapPanel from '@/components/admin/RobotsAndSitemapPanel';
+import SEOIndexationPanel from '@/components/admin/SEOIndexationPanel';
 
 type CheckRun = { id: string; ran_at: string; source: string; total: number; passed: number; errors: number; warnings: number; checks: Array<{ name: string; ok: boolean; detail: string; severity: string }>; alert_sent: boolean };
 
@@ -220,10 +221,15 @@ export default function AdminSEODashboard() {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
+          <TabsTrigger value="indexation">Indexação</TabsTrigger>
           <TabsTrigger value="gsc">Google Search Console</TabsTrigger>
           <TabsTrigger value="semrush">Semrush (Backlinks/Keywords)</TabsTrigger>
           <TabsTrigger value="checks">Checks pré-deploy</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="indexation" className="space-y-4">
+          <SEOIndexationPanel />
+        </TabsContent>
 
         {/* OVERVIEW */}
         <TabsContent value="overview" className="space-y-4">
