@@ -386,19 +386,44 @@ export default function AdminSEODashboard() {
               </span>
             )}
           </div>
-          {checks ? (
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><Bell className="h-4 w-4"/>Alertas em falhas</CardTitle>
+              <CardDescription>Receba notificação quando algum check de severidade <strong>error</strong> falhar (cron diário 04:00 UTC).</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="alert-email">E-mail</Label>
+                <Input id="alert-email" type="email" placeholder="voce@exemplo.com" value={alertCfg.email}
+                  onChange={(e) => setAlertCfg(a => ({ ...a, email: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="alert-webhook">Webhook URL (opcional)</Label>
+                <Input id="alert-webhook" placeholder="https://hooks.slack.com/..." value={alertCfg.webhook_url}
+                  onChange={(e) => setAlertCfg(a => ({ ...a, webhook_url: e.target.value }))} />
+              </div>
+              <div className="flex items-center gap-2 md:col-span-2">
+                <Switch id="alert-on" checked={alertCfg.enabled} onCheckedChange={(v) => setAlertCfg(a => ({ ...a, enabled: v }))} />
+                <Label htmlFor="alert-on">Alertas ativos</Label>
+                <Button size="sm" className="ml-auto" onClick={saveAlertCfg} disabled={savingCfg}>{savingCfg ? 'Salvando...' : 'Salvar'}</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {checks && (
             <Card>
-              <CardContent className="pt-6">
+              <CardHeader><CardTitle className="text-base">Última execução</CardTitle></CardHeader>
+              <CardContent>
                 <Table>
                   <TableHeader><TableRow><TableHead>Check</TableHead><TableHead>Status</TableHead><TableHead>Detalhe</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {checks.checks.map((c, i) => (
                       <TableRow key={i}>
                         <TableCell className="font-mono text-xs">{c.name}</TableCell>
-                        <TableCell>
-                          {c.ok
-                            ? <Badge variant="default" className="gap-1"><CheckCircle2 className="h-3 w-3"/>OK</Badge>
-                            : <Badge variant={c.severity === 'error' ? 'destructive' : 'secondary'} className="gap-1"><AlertTriangle className="h-3 w-3"/>{c.severity}</Badge>}
+                        <TableCell>{c.ok
+                          ? <Badge variant="default" className="gap-1"><CheckCircle2 className="h-3 w-3"/>OK</Badge>
+                          : <Badge variant={c.severity === 'error' ? 'destructive' : 'secondary'} className="gap-1"><AlertTriangle className="h-3 w-3"/>{c.severity}</Badge>}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">{c.detail}</TableCell>
                       </TableRow>
@@ -407,7 +432,56 @@ export default function AdminSEODashboard() {
                 </Table>
               </CardContent>
             </Card>
-          ) : <Skeleton className="h-72" />}
+          )}
+
+          {diff.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Diff vs execução anterior</CardTitle>
+                <CardDescription>{prevRun && format(new Date(prevRun.ran_at), "dd/MM HH:mm")} → {lastRun && format(new Date(lastRun.ran_at), "dd/MM HH:mm")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader><TableRow><TableHead>Check</TableHead><TableHead>Mudança</TableHead><TableHead>Antes</TableHead><TableHead>Agora</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {diff.map((d, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-xs">{d.name}</TableCell>
+                        <TableCell><Badge variant={d.change === 'corrigido' ? 'default' : d.change === 'regrediu' ? 'destructive' : 'secondary'}>{d.change}</Badge></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{d.from}</TableCell>
+                        <TableCell className="text-xs">{d.to}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">Histórico de execuções</CardTitle>
+              <CardDescription>{runs.length} execuções gravadas (cron diário + manuais)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {runs.length ? (
+                <Table>
+                  <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Origem</TableHead><TableHead>OK/Total</TableHead><TableHead>Erros</TableHead><TableHead>Avisos</TableHead><TableHead>Alerta</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {runs.map(r => (
+                      <TableRow key={r.id}>
+                        <TableCell className="text-xs">{format(new Date(r.ran_at), 'dd/MM/yyyy HH:mm')}</TableCell>
+                        <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
+                        <TableCell>{r.passed}/{r.total}</TableCell>
+                        <TableCell>{r.errors > 0 ? <Badge variant="destructive">{r.errors}</Badge> : r.errors}</TableCell>
+                        <TableCell>{r.warnings}</TableCell>
+                        <TableCell>{r.alert_sent ? <Badge variant="default">enviado</Badge> : '—'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : <p className="text-sm text-muted-foreground">Sem execuções registradas ainda. Rode os checks ou aguarde o cron diário.</p>}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
