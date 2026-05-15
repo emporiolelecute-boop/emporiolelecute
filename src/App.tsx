@@ -64,7 +64,16 @@ import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
 import CanonicalNormalizer from "./components/CanonicalNormalizer";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5min — evita refetch em pico de tráfego
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Analytics wrapper component
 const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
