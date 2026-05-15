@@ -410,6 +410,8 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AdminRecentActivity />
     </div>
   );
 };
