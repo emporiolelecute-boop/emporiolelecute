@@ -100,6 +100,10 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           width="685"
           height="685"
           onLoad={(e) => e.currentTarget.classList.add('loaded')}
+          onError={(e) => {
+            e.currentTarget.src = '/placeholder.svg';
+            e.currentTarget.removeAttribute('srcset');
+          }}
           style={{ transition: 'opacity 400ms ease' }}
         />
         
