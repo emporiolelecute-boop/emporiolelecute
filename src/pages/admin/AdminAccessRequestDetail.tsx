@@ -285,19 +285,14 @@ const AdminAccessRequestDetail = () => {
           </h1>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {pendingRequest && (
+          {requestPermalink && (
             <Button
               variant="outline"
-              onClick={resendNotification}
-              disabled={resending || cooldown > 0}
-              title={cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Reenviar e-mail aos admins'}
+              size="sm"
+              onClick={() => copyToClipboard(requestPermalink, 'Link da solicitação')}
+              title="Copiar link permanente desta solicitação"
             >
-              <Send className="w-4 h-4 mr-1" />
-              {resending
-                ? 'Enviando…'
-                : cooldown > 0
-                  ? `Reenviar (${cooldown}s)`
-                  : 'Reenviar notificação'}
+              <Link2 className="w-4 h-4 mr-1" /> Copiar link
             </Button>
           )}
           {pendingRequest && !isAdmin && (
@@ -313,6 +308,45 @@ const AdminAccessRequestDetail = () => {
           )}
         </div>
       </div>
+
+      {pendingRequest && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Send className="w-4 h-4" /> Reenviar notificação aos administradores
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Cooldown de {COOLDOWN_SECONDS}s por solicitação. O motivo será gravado na auditoria.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Input
+              value={resendReason}
+              onChange={(e) => setResendReason(e.target.value.slice(0, 500))}
+              placeholder='Motivo / observação (ex.: "cliente solicitou", "primeiro envio rejeitado")'
+              maxLength={500}
+              disabled={resending || cooldown > 0}
+            />
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <span className="text-[11px] text-muted-foreground">
+                {resendReason.length}/500 caracteres · opcional, mas recomendado para rastreabilidade.
+              </span>
+              <Button
+                onClick={resendNotification}
+                disabled={resending || cooldown > 0}
+                title={cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Reenviar e-mail aos admins'}
+              >
+                <Send className="w-4 h-4 mr-1" />
+                {resending
+                  ? 'Enviando…'
+                  : cooldown > 0
+                    ? `Reenviar (${cooldown}s)`
+                    : 'Reenviar notificação'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
