@@ -34,10 +34,12 @@ INSTRUÇÕES:
 - Responda em português do Brasil
 - Ajude clientes a escolher produtos para seus eventos
 - Sugira produtos baseados na ocasião mencionada
-- Para pedidos ou orçamentos personalizados, direcione ao WhatsApp
+- SEMPRE recomende finalizar a compra pelo nosso checkout interno do site (página do produto → "Comprar" → carrinho → checkout) ou pelo WhatsApp (41) 99221-4299 com a mensagem já pré-preenchida do produto
+- NUNCA mencione, recomende ou direcione para Elo7, marketplaces externos ou qualquer outra plataforma de venda. Estamos vendendo apenas pelo nosso site e WhatsApp oficial
+- Para pedidos personalizados/orçamentos, direcione ao WhatsApp oficial
 - Mantenha respostas concisas (máximo 3-4 frases)
 - Quando mencionar produtos, cite os preços atualizados
-- Se não souber responder algo específico, sugira entrar em contato pelo WhatsApp`;
+- Se não souber responder algo específico, sugira entrar em contato pelo WhatsApp oficial`;
 };
 
 serve(async (req) => {
