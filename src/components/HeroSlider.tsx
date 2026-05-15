@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import TrustBadges from "@/components/TrustBadges";
@@ -223,12 +223,51 @@ function SlideBannerDesktop({
 // Main HeroSlider
 // ---------------------------------------------------------------------------
 
+// Renders the right variant for a given slide (responsive via CSS).
+function SlideRenderer({ slide, isPriority }: { slide: HeroSlide; isPriority: boolean }) {
+  const mobileBannerSrc = resolveImageSrc(slide.image_mobile_url);
+  const desktopBannerSrc = resolveImageSrc(slide.image_desktop_url);
+  const fallbackSrc = resolveImageSrc(slide.image_url) || sabonetesImg;
+  const hasAnyBanner = Boolean(mobileBannerSrc || desktopBannerSrc);
+
+  if (!hasAnyBanner) {
+    return (
+      <div className="pt-20 pb-10 md:pb-14">
+        <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {mobileBannerSrc ? (
+        <SlideBannerMobile slide={slide} isPriority={isPriority} imgSrc={mobileBannerSrc} />
+      ) : (
+        <div className="block md:hidden pt-20 pb-10">
+          <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
+        </div>
+      )}
+      {desktopBannerSrc ? (
+        <SlideBannerDesktop slide={slide} isPriority={isPriority} imgSrc={desktopBannerSrc} />
+      ) : (
+        <div className="hidden md:block pt-20 pb-10 md:pb-14">
+          <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
+        </div>
+      )}
+    </>
+  );
+}
+
 const HeroSlider = () => {
   const { data: dbSlides } = useHeroSlides();
   const slides: HeroSlide[] =
     dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [prevSlide, setPrevSlide] = useState<number | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const activeRef = useRef<HTMLDivElement>(null);
+  const [stageHeight, setStageHeight] = useState<number | "auto">("auto");
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -242,26 +281,51 @@ const HeroSlider = () => {
     if (currentSlide >= slides.length) setCurrentSlide(0);
   }, [slides.length, currentSlide]);
 
+  // Trigger cross-fade: track previous slide, then clear after transition.
+  const goTo = (next: number) => {
+    if (next === currentSlide) return;
+    setPrevSlide(currentSlide);
+    setCurrentSlide(next);
+  };
+
+  useEffect(() => {
+    if (prevSlide === null) return;
+    const t = setTimeout(() => setPrevSlide(null), 600);
+    return () => clearTimeout(t);
+  }, [prevSlide, currentSlide]);
+
+  // Animate stage height to match the active slide.
+  useLayoutEffect(() => {
+    const el = activeRef.current;
+    if (!el) return;
+    const measure = () => setStageHeight(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [currentSlide, slides.length]);
+
   const slide = slides[currentSlide] ?? slides[0];
   if (!slide) return null;
-  const nextSlide = () =>
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  const previous = prevSlide !== null ? slides[prevSlide] : null;
+
+  const nextSlideFn = () => goTo((currentSlide + 1) % slides.length);
+  const prevSlideFn = () => goTo((currentSlide - 1 + slides.length) % slides.length);
 
   const isPriority = currentSlide === 0;
-  const mobileBannerSrc = resolveImageSrc(slide.image_mobile_url);
-  const desktopBannerSrc = resolveImageSrc(slide.image_desktop_url);
-  const fallbackSrc = resolveImageSrc(slide.image_url) || sabonetesImg;
-  const hasAnyBanner = Boolean(mobileBannerSrc || desktopBannerSrc);
+  const hasAnyBanner = Boolean(
+    resolveImageSrc(slide.image_mobile_url) || resolveImageSrc(slide.image_desktop_url)
+  );
   const isBanner = hasAnyBanner;
 
   return (
     <section
       id="inicio"
       className="relative flex flex-col justify-center overflow-hidden bg-background"
-      // Banner modes: no top padding (image starts right after header)
-      // text_image mode: keeps the original spacing
       style={isBanner ? { paddingTop: "var(--header-height, 80px)" } : undefined}
       aria-label="Seção principal - Empório LeleCute"
     >
@@ -275,30 +339,33 @@ const HeroSlider = () => {
         </>
       )}
 
-      {/* Slide content — render responsive banners with CSS so mobile never waits for JS breakpoint detection */}
-      <div key={`${slide.id}-${hasAnyBanner ? "responsive-banner" : "text_image"}`} className="w-full">
-        {hasAnyBanner ? (
-          <>
-            {mobileBannerSrc ? (
-              <SlideBannerMobile slide={slide} isPriority={isPriority} imgSrc={mobileBannerSrc} />
-            ) : (
-              <div className="block md:hidden pt-20 pb-10">
-                <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
-              </div>
-            )}
-            {desktopBannerSrc ? (
-              <SlideBannerDesktop slide={slide} isPriority={isPriority} imgSrc={desktopBannerSrc} />
-            ) : (
-              <div className="hidden md:block pt-20 pb-10 md:pb-14">
-                <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="pt-20 pb-10 md:pb-14">
-            <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
+      {/* Cross-fade stage: previous + current slide stacked, opacity transition */}
+      <div
+        ref={stageRef}
+        className="relative w-full motion-safe:transition-[height] motion-safe:duration-500 motion-safe:ease-out"
+        style={{
+          height: stageHeight === "auto" ? undefined : stageHeight,
+          minHeight: 280,
+        }}
+      >
+        {previous && (
+          <div
+            key={`prev-${previous.id}-${prevSlide}`}
+            className="absolute inset-0 w-full motion-safe:animate-fade-out motion-reduce:hidden pointer-events-none"
+            style={{ animationFillMode: "forwards", animationDuration: "500ms" }}
+            aria-hidden="true"
+          >
+            <SlideRenderer slide={previous} isPriority={false} />
           </div>
         )}
+        <div
+          ref={activeRef}
+          key={`active-${slide.id}`}
+          className="relative w-full opacity-0 motion-safe:animate-fade-in motion-reduce:opacity-100"
+          style={{ animationFillMode: "forwards" }}
+        >
+          <SlideRenderer slide={slide} isPriority={isPriority} />
+        </div>
       </div>
 
       {/* Navigation dots + arrows — shown when there are multiple slides */}
@@ -313,8 +380,8 @@ const HeroSlider = () => {
             {slides.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`h-3 rounded-full transition-all duration-300 ${
+                onClick={() => goTo(index)}
+                className={`h-3 rounded-full transition-all duration-500 ease-out ${
                   index === currentSlide
                     ? "bg-primary w-10"
                     : "bg-primary/30 w-3 hover:bg-primary/50"
@@ -326,15 +393,15 @@ const HeroSlider = () => {
 
           {/* Prev / Next arrows */}
           <button
-            onClick={prevSlide}
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-background/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
+            onClick={prevSlideFn}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-background/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:bg-primary hover:text-primary-foreground active:scale-95 transition-all"
             aria-label="Slide anterior"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
-            onClick={nextSlide}
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-background/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
+            onClick={nextSlideFn}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-background/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:bg-primary hover:text-primary-foreground active:scale-95 transition-all"
             aria-label="Próximo slide"
           >
             <ChevronRight className="h-6 w-6" />

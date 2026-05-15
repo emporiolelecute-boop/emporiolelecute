@@ -1,62 +1,61 @@
-## Escopo
+## Objetivo
 
-Implementar 4 módulos administrativos + entregar relatório técnico de arquitetura.
+Adicionar suavização visual nas trocas de slide do `HeroSlider` (mobile, tablet e desktop), incluindo o caso em que o layout muda entre tipos diferentes (banner mobile → texto+imagem, banner desktop → texto+imagem, banner → banner). Sem mexer na lógica de fetch, RLS, dados ou estrutura responsiva atual.
 
----
+## Princípios
 
-### 1. Robots.txt Dinâmico
-- Edge Function pública `robots-txt` que lê de `store_settings.robots_config`
-- Admin: `AdminRobots.tsx` com:
-  - Toggle global "permitir indexação"
-  - Lista de paths a bloquear (`Disallow`)
-  - Toggle por categoria (bloqueia `/categoria/{slug}`)
-  - Toggle por produto individual (campo `seo_noindex` em `products`)
-- Atualiza `public/robots.txt` estático como fallback + serve dinâmico via função
+- Zero mudança de comportamento: mesmo autoplay (6s), mesmas setas, mesmos dots, mesmos componentes (`SlideTextImage`, `SlideBannerMobile`, `SlideBannerDesktop`).
+- Apenas camada de apresentação: opacidade, leve translate, easing.
+- Acessibilidade: respeitar `prefers-reduced-motion` (desativa animações).
+- Sem libs novas — usar Tailwind/CSS keyframes já existentes (`fade-in`) + uma nova `slide-cross-fade`.
 
-### 2. Redirects 301
-- Nova tabela `redirects` (from_path, to_path, status_code, is_active, hits)
-- Componente `<RedirectHandler />` no `App.tsx` que consulta tabela e faz `<Navigate replace>`
-- Admin: `AdminRedirects.tsx` com CRUD + contador de hits
-- Detecção automática: quando admin altera slug de produto/categoria, oferecer criar redirect
+## Mudanças propostas
 
-### 3. Cupons Globais
-- Nova tabela `coupons` (code, type: percent|fixed, value, min_subtotal, valid_from, valid_until, max_uses, used_count, is_active)
-- Tabela `coupon_uses` (coupon_id, order_id) para auditoria
-- Admin: `AdminCoupons.tsx` CRUD
-- Função RPC `validate_coupon(code, subtotal)` retornando desconto calculado
-- UI no `Carrinho.tsx`: campo "Cupom", aplica desconto, persiste no order
+### 1. Cross-fade entre slides (todos os modos)
+- Empilhar o slide ativo e o anterior em posição absoluta dentro de um wrapper `relative` com altura controlada pelo slide ativo.
+- Slide que entra: opacidade 0→1 + leve `translateY(8px)→0` em ~500ms `ease-out`.
+- Slide que sai: opacidade 1→0 em ~400ms, removido do DOM ao terminar.
+- Resultado: a troca 2→3 (banner mobile → texto+imagem) deixa de ser "salto" e vira esmaecimento.
 
-### 4. Analytics & Ads IDs
-- `store_settings.tracking_config` com: `ga4_id`, `gtm_id`, `meta_pixel_id`, `google_ads_id`, `enabled_routes` (regex/lista)
-- Admin: `AdminTracking.tsx` formulário
-- Componente `<TrackingScripts />` no `App.tsx` que injeta scripts condicionalmente por rota
-- Remove IDs hardcoded existentes
+### 2. Altura fluida do container
+- Wrapper mede a altura do slide ativo via `ResizeObserver` e anima `height` com `transition-[height] duration-500 ease-out`.
+- Evita "pulo" quando o próximo slide tem altura diferente (banner curto vs. texto+imagem alto).
 
-### 5. Relatório Técnico (Markdown)
-Gerado em `/mnt/documents/auditoria-emporiolelecute.md` cobrindo:
-- Modelo de dados (todas as tabelas + relacionamentos)
-- Funcionalidades do admin
-- Páginas públicas
-- Fluxo de carrinho/personalização
-- Integrações (Resend, GSC, WhatsApp, Merchant Center)
-- Design system (cores, fontes, shadcn)
-- TODOs / pendências / áreas com mock
+### 3. Imagens com fade-in ao carregar
+- Adicionar `onLoad` nas `<img>` dos banners para aplicar `opacity-0 → opacity-100` (300ms) — evita flash quando o navegador troca a imagem responsiva.
 
-Entregue como `<presentation-artifact>`.
+### 4. Dots e setas
+- Indicador de dot ativo com `transition-all duration-500 ease-out` (já existe, manter).
+- Setas: pequeno `active:scale-95` para feedback tátil (opcional).
 
----
+### 5. Reduced motion
+- Wrap das animações em `motion-safe:` (Tailwind) e fallback estático em `motion-reduce:`.
 
-## Ordem de execução
+### 6. Telemetria leve (opcional, desligado por padrão)
+- Não adicionar nada novo agora; manter `telemetry.ts` existente.
 
-1. Migrations (redirects, coupons, coupon_uses, products.seo_noindex, store_settings keys)
-2. Edge Function robots-txt
-3. Hooks (`useRedirects`, `useCoupon`, `useTracking`)
-4. Telas admin (4 novas)
-5. Integração frontend (RedirectHandler, TrackingScripts, cupom no carrinho)
-6. Relatório de auditoria
+## Arquivos afetados
 
----
+- `src/components/HeroSlider.tsx` — único arquivo alterado.
+  - Introduz wrapper com posicionamento absoluto + estado `prevSlideIndex` para cross-fade.
+  - Adiciona `ResizeObserver` para altura animada.
+  - Adiciona classes `motion-safe:animate-fade-in`, `transition-opacity duration-500`.
+- `tailwind.config.ts` — adicionar 1 keyframe `slide-cross-fade` (opcional; pode reutilizar `fade-in` existente).
 
-## Confirmação
+## Não será alterado
 
-Confirma este escopo? Algum ponto a ajustar antes de começar (ex.: tipos de cupons, formato de redirects, providers de tracking adicionais)?
+- `useHeroSlides`, RLS, queries, `image_mobile_url`/`image_desktop_url`, fallback, ordem dos slides, tempo de autoplay, breakpoints CSS (`block md:hidden` / `hidden md:block`), TrustBadges.
+
+## Riscos & mitigação
+
+- Risco: posicionamento absoluto pode "esconder" conteúdo se altura medida atrasar. Mitigação: medir `scrollHeight` síncrono no primeiro render via `useLayoutEffect` e definir altura mínima `min-h-[280px] md:min-h-[420px]`.
+- Risco: imagens grandes do desktop carregando depois das do mobile. Mitigação: manter `fetchpriority="high"` no slide 0 e `loading="eager"` nele.
+- Sem mudanças de schema, sem migração, sem mudança de hook.
+
+## Validação
+
+- Visual: navegar `/` em 375px, 768px, 1280px e observar transição 1→2→3→1.
+- Console: sem warnings novos; nenhum erro de hidratação.
+- `prefers-reduced-motion: reduce` — slides trocam instantaneamente sem animação.
+
+Confirma para eu implementar?
