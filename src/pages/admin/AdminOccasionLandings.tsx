@@ -96,6 +96,9 @@ const toForm = (l: OccasionLanding): FormState => ({
   testimonials_json: JSON.stringify(l.testimonials, null, 2),
   social_proof_stats_json: JSON.stringify(l.social_proof_stats, null, 2),
   related_route_slugs_csv: l.related_route_slugs.join(", "),
+  gallery: Array.isArray(l.gallery) ? l.gallery : [],
+  og_image_url: l.og_image_url ?? "",
+  og_image_alt: l.og_image_alt ?? "",
   position: l.position,
   is_published: l.is_published,
 });
@@ -130,11 +133,13 @@ const AdminOccasionLandings = () => {
       seo_copy: form.seo_copy,
       whatsapp_message: form.whatsapp_message,
       faqs: parseJson(form.faqs_json, []),
-      gallery: parseJson(form.gallery_json, []),
+      gallery: form.gallery,
       testimonials: parseJson(form.testimonials_json, []),
       social_proof_stats: parseJson(form.social_proof_stats_json, []),
       related_route_slugs: form.related_route_slugs_csv
         .split(",").map((s) => s.trim()).filter(Boolean),
+      og_image_url: form.og_image_url || null,
+      og_image_alt: form.og_image_alt || null,
       position: Number(form.position) || 0,
       is_published: form.is_published,
     } as any);
