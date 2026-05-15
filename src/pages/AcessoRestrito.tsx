@@ -39,7 +39,17 @@ const AcessoRestrito = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.rpc('request_admin_access');
-      if (error) throw error;
+      if (error) {
+        // pending or rate_limit → still show the persistent "in review" state
+        const isPendingOrLimited = /análise|24 horas|recente/i.test(error.message);
+        if (isPendingOrLimited) setRequested(true);
+        toast({
+          title: isPendingOrLimited ? 'Solicitação em análise' : 'Erro ao solicitar',
+          description: error.message,
+          variant: isPendingOrLimited ? 'default' : 'destructive',
+        });
+        return;
+      }
 
       setRequested(true);
       toast({ title: 'Solicitação enviada', description: 'Aguarde a aprovação de um administrador.' });
