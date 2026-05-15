@@ -26,6 +26,9 @@ const SearchBar = () => {
     const searchTerm = debouncedQuery.toLowerCase();
     return products
       .filter((product) => {
+        // Only show active products in search suggestions
+        if (!product.is_active) return false;
+        
         // Search across multiple fields for best results
         return (
           product.name.toLowerCase().includes(searchTerm) ||

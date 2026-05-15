@@ -2,12 +2,27 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+/**
+ * Modos de exibição de um slide do hero:
+ *  - text_image    : layout padrão — texto à esquerda + imagem quadrada à direita (todos os tamanhos)
+ *  - banner_mobile : banner full-width SEM texto — visível apenas em mobile/tablet (< md), some no desktop
+ *  - banner_desktop: banner full-width SEM texto — visível apenas em desktop (≥ md), some no mobile
+ */
+export type HeroSlideMode = 'text_image' | 'banner_mobile' | 'banner_desktop';
+
 export interface HeroSlide {
   id: string;
+  /** Modo de exibição do slide */
+  display_mode: HeroSlideMode;
   tagline: string | null;
   title: string;
   subtitle: string | null;
+  /** Imagem principal (usada em text_image e banner_desktop) */
   image_url: string | null;
+  /** Imagem para banner mobile (usada em banner_mobile) */
+  image_mobile_url: string | null;
+  /** Texto alternativo da imagem para acessibilidade */
+  image_alt: string | null;
   cta_label: string | null;
   cta_url: string | null;
   position: number;
@@ -49,11 +64,12 @@ export const useUpsertHeroSlide = () => {
   return useMutation({
     mutationFn: async (slide: Partial<HeroSlide>) => {
       if (slide.id) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, created_at, updated_at, ...rest } = slide;
         const { error } = await supabase.from('hero_slides').update(rest).eq('id', id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('hero_slides').insert([slide as any]);
+        const { error } = await supabase.from('hero_slides').insert([slide as HeroSlide]);
         if (error) throw error;
       }
     },
@@ -62,7 +78,7 @@ export const useUpsertHeroSlide = () => {
       qc.invalidateQueries({ queryKey: ['admin_hero_slides'] });
       toast({ title: 'Slide salvo' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: (e: Error) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 };
 
