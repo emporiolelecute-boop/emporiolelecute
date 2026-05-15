@@ -32,41 +32,54 @@ export const BlurImage = ({
   ...rest
 }: BlurImageProps) => {
   const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
   const isStorage = typeof src === "string" && src.includes("/storage/v1/object/public/");
   const placeholder = isStorage ? optimizeImage(src, { width: 24, quality: 30 }) : null;
   const optimized = optimizeImage(src, { width });
   const srcSet = responsiveWidths ? buildSrcSet(src, responsiveWidths) : undefined;
 
   return (
-    <div className={cn("relative overflow-hidden", aspect, wrapperClassName)}>
-      {placeholder && (
+    <div className={cn("relative overflow-hidden bg-muted", aspect, wrapperClassName)}>
+      {placeholder && !errored && (
         <img
           src={placeholder}
           alt=""
           aria-hidden="true"
           className={cn(
-            "absolute inset-0 w-full h-full object-cover scale-110 blur-xl transition-opacity duration-500",
+            "absolute inset-0 w-full h-full object-cover blur-xl transition-opacity duration-500",
             loaded ? "opacity-0" : "opacity-100"
           )}
         />
       )}
-      <img
-        {...rest}
-        src={optimized}
-        srcSet={srcSet}
-        sizes={sizes}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        // @ts-expect-error – fetchpriority is a valid HTML attribute, not yet typed
-        fetchpriority={priority ? "high" : "auto"}
-        onLoad={() => setLoaded(true)}
-        className={cn(
-          "w-full h-full object-cover transition-opacity duration-500",
-          loaded ? "opacity-100" : "opacity-0",
-          className
-        )}
-      />
+      {errored ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+          </svg>
+          <span className="sr-only">Imagem indisponível</span>
+        </div>
+      ) : (
+        <img
+          {...rest}
+          src={optimized}
+          srcSet={srcSet}
+          sizes={sizes}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          // @ts-expect-error – fetchpriority is a valid HTML attribute, not yet typed
+          fetchpriority={priority ? "high" : "auto"}
+          onLoad={() => setLoaded(true)}
+          onError={() => setErrored(true)}
+          className={cn(
+            "w-full h-full object-cover transition-opacity duration-500",
+            loaded ? "opacity-100" : "opacity-0",
+            className
+          )}
+        />
+      )}
     </div>
   );
 };
