@@ -1452,9 +1452,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_audit_timeline: {
+        Row: {
+          actor_email: string | null
+          created_at: string | null
+          details: string | null
+          event_id: string | null
+          role: string | null
+          source: string | null
+          status: string | null
+          target_email: string | null
+          target_user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      admin_audit_anomalies: {
+        Args: { _threshold?: number; _window_hours?: number }
+        Returns: Json
+      }
       apply_default_weight: { Args: { _default_kg?: number }; Returns: Json }
       check_resend_email_cooldown: {
         Args: { _order_id: string }
@@ -1471,7 +1488,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_admin_audit_timeline: {
+        Args: {
+          _from?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _sort_dir?: string
+          _sort_key?: string
+          _source?: string
+          _status?: string
+          _to?: string
+        }
+        Returns: Json
+      }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
+      refresh_admin_audit_timeline: { Args: never; Returns: Json }
       reject_admin_request: {
         Args: { _reason: string; _user_id: string }
         Returns: Json
