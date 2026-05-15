@@ -1,7 +1,8 @@
-import { ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/ProductSkeleton";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
 
@@ -58,8 +59,8 @@ const BestSellers = () => {
 
           {/* Products Grid */}
           {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="mb-12">
+              <ProductGridSkeleton count={3} />
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">

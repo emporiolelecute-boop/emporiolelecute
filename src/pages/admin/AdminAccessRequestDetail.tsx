@@ -7,12 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, ShieldCheck, Check, X, Mail, History, Send, Copy } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Check, X, Mail, History, Send, Copy, Link2, FileText } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 interface Profile {
   id: string;
@@ -69,6 +70,7 @@ const AdminAccessRequestDetail = () => {
   const [reason, setReason] = useState('');
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [resendReason, setResendReason] = useState('');
 
   const COOLDOWN_SECONDS = 60;
   const cooldownKey = id ? `notify_resend_cooldown:${id}` : '';
@@ -105,6 +107,7 @@ const AdminAccessRequestDetail = () => {
 
   const resendNotification = async () => {
     if (!profile || cooldown > 0) return;
+    const reasonTrimmed = resendReason.trim().slice(0, 500);
     setResending(true);
     try {
       const { data, error } = await supabase.functions.invoke('notify-admins-new-request', {
@@ -114,6 +117,7 @@ const AdminAccessRequestDetail = () => {
           requested_at: lastRequestedAt ?? new Date().toISOString(),
           request_id: pendingRequest?.id ?? lastRequest?.id ?? null,
           source: 'manual_resend',
+          reason: reasonTrimmed || null,
         },
       });
       if (error) throw error;
@@ -133,12 +137,41 @@ const AdminAccessRequestDetail = () => {
       const until = Date.now() + COOLDOWN_SECONDS * 1000;
       if (cooldownKey) localStorage.setItem(cooldownKey, String(until));
       setCooldown(COOLDOWN_SECONDS);
+      setResendReason('');
       await load();
     } catch (e: any) {
       toast({ title: 'Erro ao reenviar', description: e.message, variant: 'destructive' });
     } finally {
       setResending(false);
     }
+  };
+
+  const requestPermalink = typeof window !== 'undefined' && id
+    ? `${window.location.origin}/admin/usuarios/solicitacoes/${id}`
+    : '';
+
+  const buildLogPayload = (n: NotificationEntry) => {
+    const lines = [
+      `Tentativa: ${n.id}`,
+      `Data: ${new Date(n.created_at).toLocaleString('pt-BR')}`,
+      `Status: ${n.status}`,
+      `Admins: ${n.admin_count} • Enviados: ${n.sent_count}`,
+    ];
+    const reason = n.details?.reason;
+    const sourceTag = n.details?.source;
+    if (sourceTag) lines.push(`Origem: ${sourceTag}`);
+    if (reason) lines.push(`Motivo informado: ${reason}`);
+    if (n.error_message) {
+      lines.push('---');
+      lines.push('Erro completo:');
+      lines.push(n.error_message);
+    }
+    if (n.details && Object.keys(n.details).length) {
+      lines.push('---');
+      lines.push('Detalhes (JSON):');
+      lines.push(JSON.stringify(n.details, null, 2));
+    }
+    return lines.join('\n');
   };
 
   const load = async () => {
@@ -252,19 +285,14 @@ const AdminAccessRequestDetail = () => {
           </h1>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {pendingRequest && (
+          {requestPermalink && (
             <Button
               variant="outline"
-              onClick={resendNotification}
-              disabled={resending || cooldown > 0}
-              title={cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Reenviar e-mail aos admins'}
+              size="sm"
+              onClick={() => copyToClipboard(requestPermalink, 'Link da solicitação')}
+              title="Copiar link permanente desta solicitação"
             >
-              <Send className="w-4 h-4 mr-1" />
-              {resending
-                ? 'Enviando…'
-                : cooldown > 0
-                  ? `Reenviar (${cooldown}s)`
-                  : 'Reenviar notificação'}
+              <Link2 className="w-4 h-4 mr-1" /> Copiar link
             </Button>
           )}
           {pendingRequest && !isAdmin && (
@@ -280,6 +308,45 @@ const AdminAccessRequestDetail = () => {
           )}
         </div>
       </div>
+
+      {pendingRequest && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Send className="w-4 h-4" /> Reenviar notificação aos administradores
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Cooldown de {COOLDOWN_SECONDS}s por solicitação. O motivo será gravado na auditoria.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Input
+              value={resendReason}
+              onChange={(e) => setResendReason(e.target.value.slice(0, 500))}
+              placeholder='Motivo / observação (ex.: "cliente solicitou", "primeiro envio rejeitado")'
+              maxLength={500}
+              disabled={resending || cooldown > 0}
+            />
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <span className="text-[11px] text-muted-foreground">
+                {resendReason.length}/500 caracteres · opcional, mas recomendado para rastreabilidade.
+              </span>
+              <Button
+                onClick={resendNotification}
+                disabled={resending || cooldown > 0}
+                title={cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Reenviar e-mail aos admins'}
+              >
+                <Send className="w-4 h-4 mr-1" />
+                {resending
+                  ? 'Enviando…'
+                  : cooldown > 0
+                    ? `Reenviar (${cooldown}s)`
+                    : 'Reenviar notificação'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -379,41 +446,71 @@ const AdminAccessRequestDetail = () => {
                   <TableRow>
                     <TableHead>Data</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Origem</TableHead>
+                    <TableHead>Motivo</TableHead>
                     <TableHead>Admins</TableHead>
                     <TableHead>Enviados</TableHead>
-                    <TableHead>Erro</TableHead>
+                    <TableHead>Erro / Log</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {notifications.map((n) => (
-                    <TableRow key={n.id}>
-                      <TableCell className="text-xs whitespace-nowrap">
-                        {new Date(n.created_at).toLocaleString('pt-BR')}
-                      </TableCell>
-                      <TableCell><Badge variant={notifBadge(n.status)}>{n.status}</Badge></TableCell>
-                      <TableCell className="text-xs">{n.admin_count}</TableCell>
-                      <TableCell className="text-xs">{n.sent_count}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground max-w-md break-words">
-                        {n.error_message ? (
-                          <div className="flex items-start gap-2">
-                            <pre className="whitespace-pre-wrap break-words text-xs flex-1 m-0 font-mono">
-                              {n.error_message}
-                            </pre>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 shrink-0"
-                              onClick={() => copyToClipboard(n.error_message!, 'Mensagem de erro')}
-                              title="Copiar mensagem completa"
-                            >
-                              <Copy className="w-3.5 h-3.5" />
-                            </Button>
+                  {notifications.map((n) => {
+                    const reason = n.details?.reason as string | undefined;
+                    const sourceTag = (n.details?.source as string | undefined) || 'trigger';
+                    return (
+                      <TableRow key={n.id}>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {new Date(n.created_at).toLocaleString('pt-BR')}
+                        </TableCell>
+                        <TableCell><Badge variant={notifBadge(n.status)}>{n.status}</Badge></TableCell>
+                        <TableCell className="text-xs">
+                          <Badge variant="outline" className="text-[10px]">
+                            {sourceTag === 'manual_resend' ? 'Reenvio manual' : 'Automático'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] break-words">
+                          {reason || <span className="opacity-50">—</span>}
+                        </TableCell>
+                        <TableCell className="text-xs">{n.admin_count}</TableCell>
+                        <TableCell className="text-xs">{n.sent_count}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-md break-words">
+                          <div className="flex flex-col gap-2">
+                            {n.error_message ? (
+                              <div className="flex items-start gap-2">
+                                <pre className="whitespace-pre-wrap break-words text-xs flex-1 m-0 font-mono">
+                                  {n.error_message}
+                                </pre>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 shrink-0"
+                                  onClick={() => copyToClipboard(n.error_message!, 'Mensagem de erro')}
+                                  title="Copiar mensagem de erro"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="opacity-60">sem erro</span>
+                            )}
+                            <div className="flex gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-[10px] px-2"
+                                onClick={() => copyToClipboard(buildLogPayload(n), 'Log completo')}
+                                title="Copiar log/causa completa (JSON + erro)"
+                              >
+                                <FileText className="w-3 h-3 mr-1" /> Copiar log
+                              </Button>
+                            </div>
                           </div>
-                        ) : '—'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
