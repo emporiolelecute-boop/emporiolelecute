@@ -46,7 +46,7 @@ export const BlurImage = ({
           alt=""
           aria-hidden="true"
           className={cn(
-            "absolute inset-0 w-full h-full object-cover blur-xl transition-opacity duration-500",
+            "absolute inset-0 w-full h-full object-contain blur-xl transition-opacity duration-500",
             loaded ? "opacity-0" : "opacity-100"
           )}
         />
@@ -74,7 +74,7 @@ export const BlurImage = ({
           onLoad={() => setLoaded(true)}
           onError={() => setErrored(true)}
           className={cn(
-            "w-full h-full object-cover transition-opacity duration-500",
+            "w-full h-full object-contain transition-opacity duration-500",
             loaded ? "opacity-100" : "opacity-0",
             className
           )}
