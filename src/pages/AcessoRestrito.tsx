@@ -39,7 +39,17 @@ const AcessoRestrito = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.rpc('request_admin_access');
-      if (error) throw error;
+      if (error) {
+        // pending or rate_limit → still show the persistent "in review" state
+        const isPendingOrLimited = /análise|24 horas|recente/i.test(error.message);
+        if (isPendingOrLimited) setRequested(true);
+        toast({
+          title: isPendingOrLimited ? 'Solicitação em análise' : 'Erro ao solicitar',
+          description: error.message,
+          variant: isPendingOrLimited ? 'default' : 'destructive',
+        });
+        return;
+      }
 
       setRequested(true);
       toast({ title: 'Solicitação enviada', description: 'Aguarde a aprovação de um administrador.' });
@@ -75,17 +85,23 @@ const AcessoRestrito = () => {
           </div>
 
           {requested ? (
-            <div className="rounded-md border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 p-4 flex gap-3 items-start">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <strong className="block text-emerald-700 dark:text-emerald-300">Solicitação enviada</strong>
-                <span className="text-muted-foreground">Você será notificado quando um administrador aprovar seu acesso.</span>
+            <>
+              <div className="rounded-md border border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-4 flex gap-3 items-start">
+                <CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <strong className="block text-amber-700 dark:text-amber-300">Solicitação em análise</strong>
+                  <span className="text-muted-foreground">Você será notificado por e-mail assim que um administrador aprovar seu acesso.</span>
+                </div>
               </div>
-            </div>
+              <Button disabled className="w-full" size="lg" variant="secondary">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Solicitação em análise pela administração
+              </Button>
+            </>
           ) : (
             <>
               <p className="text-sm text-muted-foreground">
-                Clique abaixo para solicitar acesso. Vamos registrar sua solicitação e abrir o WhatsApp para você falar com o administrador.
+                Clique abaixo para solicitar acesso. Registramos sua solicitação no painel e abrimos o WhatsApp como canal alternativo de contato.
               </p>
               <Button onClick={handleRequest} disabled={submitting} className="w-full" size="lg">
                 <MessageCircle className="w-4 h-4 mr-2" />

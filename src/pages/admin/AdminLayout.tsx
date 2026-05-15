@@ -62,6 +62,7 @@ const menuItems = [
   { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
   { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
   { icon: ShieldCheck, label: 'Usuários', path: '/admin/usuarios' },
+  { icon: ShieldCheck, label: 'Solicitações de acesso', path: '/admin/usuarios/solicitacoes' },
 ];
 
 const AdminLayout = () => {
