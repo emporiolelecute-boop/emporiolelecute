@@ -109,9 +109,12 @@ export default function AdminSEODashboard() {
   const runChecks = async () => {
     setLoadingChecks(true);
     try {
-      const { data, error } = await supabase.functions.invoke('seo-checks');
+      const { data, error } = await supabase.functions.invoke('seo-checks', { body: { source: 'manual' } });
       if (error) throw error;
       setChecks(data as never);
+      // refresh runs history after each manual run
+      const { data: rs } = await supabase.from('seo_check_runs').select('*').order('ran_at', { ascending: false }).limit(30);
+      setRuns((rs ?? []) as unknown as CheckRun[]);
     } catch (e) {
       toast.error('Falha nos checks', { description: String(e instanceof Error ? e.message : e) });
     } finally { setLoadingChecks(false); }
