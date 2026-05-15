@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import TrustBadges from "@/components/TrustBadges";
