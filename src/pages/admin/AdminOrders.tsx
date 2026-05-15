@@ -97,6 +97,31 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [trackingDialog, setTrackingDialog] = useState<{ order: Order; code: string; carrier: string; url: string } | null>(null);
+  const RESEND_COOLDOWN_MS = 60_000;
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>(() => {
+    try {
+      const raw = localStorage.getItem('resend_cooldowns');
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const remainingFor = (orderId: string) => {
+    const exp = cooldowns[orderId];
+    if (!exp) return 0;
+    return Math.max(0, Math.ceil((exp - now) / 1000));
+  };
+  const setCooldown = (orderId: string) => {
+    const exp = Date.now() + RESEND_COOLDOWN_MS;
+    setCooldowns((prev) => {
+      const next = { ...prev, [orderId]: exp };
+      try { localStorage.setItem('resend_cooldowns', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
