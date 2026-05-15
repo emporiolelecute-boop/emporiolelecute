@@ -3,6 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "lovable:lazy-retry";
 
+// Configurable via Vite env vars (build-time): VITE_LAZY_RETRIES / VITE_LAZY_BACKOFF_MS
+const RETRIES = Math.max(
+  1,
+  Math.min(10, Number((import.meta as any).env?.VITE_LAZY_RETRIES) || 3),
+);
+const BACKOFF_MS = Math.max(
+  50,
+  Math.min(5000, Number((import.meta as any).env?.VITE_LAZY_BACKOFF_MS) || 250),
+);
+
 async function reportFailure(name: string, err: unknown) {
   try {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -20,9 +30,9 @@ async function reportFailure(name: string, err: unknown) {
 }
 
 /**
- * lazy() wrapper that retries dynamic imports up to 2 times,
- * logs failures to telemetry, and (once per session) hard-reloads
- * to defeat stale chunk hashes after a deploy.
+ * lazy() wrapper that retries dynamic imports (count + backoff configurable
+ * via VITE_LAZY_RETRIES / VITE_LAZY_BACKOFF_MS), logs failures, and (once
+ * per session) hard-reloads to refresh stale chunk hashes after a deploy.
  */
 export function lazyWithRetry<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
@@ -30,22 +40,20 @@ export function lazyWithRetry<T extends ComponentType<any>>(
 ) {
   return lazy(async () => {
     let lastErr: unknown;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < RETRIES; i++) {
       try {
         return await factory();
       } catch (err) {
         lastErr = err;
-        await new Promise((r) => setTimeout(r, 250 * (i + 1)));
+        await new Promise((r) => setTimeout(r, BACKOFF_MS * (i + 1)));
       }
     }
     void reportFailure(name, lastErr);
-    // Hard reload once per session to refresh chunk manifest
     try {
       const already = sessionStorage.getItem(STORAGE_KEY);
       if (!already) {
         sessionStorage.setItem(STORAGE_KEY, "1");
         location.reload();
-        // return a never-resolving promise while reload happens
         return await new Promise<{ default: T }>(() => {});
       }
     } catch {

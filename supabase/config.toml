@@ -1,7 +1,4 @@
 project_id = "xfqffqxqiuqauefrrcxn"
 
-[functions.robots-txt]
-verify_jwt = false
-
-[functions.instagram-oembed]
+[functions.mercadopago-webhook]
 verify_jwt = false
