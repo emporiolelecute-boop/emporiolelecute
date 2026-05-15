@@ -228,6 +228,14 @@ const AdminAccessRequests = () => {
                         </Button>
                         <Button
                           size="sm"
+                          variant="destructive"
+                          onClick={() => { setRejectTarget(r); setRejectReason(''); }}
+                          disabled={acting === r.id}
+                        >
+                          <X className="w-4 h-4 mr-1" /> Reprovar
+                        </Button>
+                        <Button
+                          size="sm"
                           onClick={() => approve(r.email, r.id)}
                           disabled={acting === r.id}
                         >
