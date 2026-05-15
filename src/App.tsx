@@ -183,6 +183,12 @@ const App = () => {
                   </Suspense>
                 } />
 
+                <Route path="/sitemap-check" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <SitemapCheck />
+                  </Suspense>
+                } />
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <Suspense fallback={<AdminSkeleton />}>
