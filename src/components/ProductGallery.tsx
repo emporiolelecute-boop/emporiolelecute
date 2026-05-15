@@ -303,9 +303,9 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                     key={index}
                     onClick={() => goToSlide(index)}
                     className={cn(
-                      "w-16 h-16 rounded-lg overflow-hidden transition-all duration-300",
+                      "w-16 h-16 rounded-lg overflow-hidden transition-opacity duration-300 bg-muted",
                       index === currentIndex
-                        ? "ring-2 ring-primary scale-110"
+                        ? "ring-2 ring-primary opacity-100"
                         : "opacity-60 hover:opacity-100"
                     )}
                   >
@@ -313,6 +313,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                       src={optimizeImage(image, { width: 128 })}
                       alt={`Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
                     />
                   </button>
                 ))}
