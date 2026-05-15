@@ -305,6 +305,7 @@ const AdminFeedInstagram = () => {
               placeholder="Ver no Instagram"
               value={draftCaption}
               onChange={(e) => setDraftCaption(e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Button
