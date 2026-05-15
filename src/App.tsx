@@ -63,7 +63,9 @@ const AdminSEODashboard = lazy(() => import("./pages/admin/AdminSEODashboard"));
 const AdminCloudflareGuide = lazy(() => import("./pages/admin/AdminCloudflareGuide"));
 const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
+import RequireAdmin from "./components/RequireAdmin";
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
 import CanonicalNormalizer from "./components/CanonicalNormalizer";
@@ -213,10 +215,17 @@ const App = () => {
                     <AdminLogin />
                   </Suspense>
                 } />
-                <Route path="/admin" element={
-                  <Suspense fallback={<AdminSkeleton />}>
-                    <AdminLayout />
+                <Route path="/acesso-restrito" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <AcessoRestrito />
                   </Suspense>
+                } />
+                <Route path="/admin" element={
+                  <RequireAdmin>
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminLayout />
+                    </Suspense>
+                  </RequireAdmin>
                 }>
                   <Route index element={
                     <Suspense fallback={<AdminSkeleton />}>

@@ -30,12 +30,12 @@ const AdminLogin = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Redirect if already logged in as admin
+  // Redirect once role check completes
   useEffect(() => {
-    if (!loading && user && isAdmin) {
-      navigate('/admin');
-    }
-  }, [user, isAdmin, loading, navigate]);
+    if (loading || !user || !adminChecked) return;
+    if (isAdmin) navigate('/admin', { replace: true });
+    else navigate('/acesso-restrito', { replace: true });
+  }, [user, isAdmin, adminChecked, loading, navigate]);
 
   const validateForm = () => {
     try {
@@ -106,19 +106,13 @@ const AdminLogin = () => {
     }
   };
 
-  if (loading) {
+  if (loading || (user && !adminChecked)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream to-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // If logged in but role-check hasn't completed yet, keep a stable loading state
-  if (user && !adminChecked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream to-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground font-medium">Verificando permissões de acesso...</p>
+        </div>
       </div>
     );
   }
