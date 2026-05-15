@@ -10,10 +10,20 @@ import { useFaqs } from "@/hooks/useFaqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import FAQStructuredData from "@/components/FAQStructuredData";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { usePaymentConfig } from "@/hooks/useStoreSettings";
 
 const FAQSection = () => {
   const { data: faqs, isLoading } = useFaqs();
   const { buildWhatsappUrl } = useContactInfo();
+  const { data: paymentConfig } = usePaymentConfig();
+  const pixDiscount = paymentConfig?.pix_discount ?? 5;
+  const installments = paymentConfig?.installments ?? 3;
+  const interpolate = (text: string) =>
+    text
+      .replace(/\{pix_discount\}/g, String(pixDiscount))
+      .replace(/\{installments\}/g, String(installments))
+      .replace(/\(com \d+% de desconto\)/gi, `(com ${pixDiscount}% de desconto)`)
+      .replace(/PIX com \d+% de desconto/gi, `PIX com ${pixDiscount}% de desconto`);
 
   // Fallback FAQs if database is empty
   const defaultFaqs = [
