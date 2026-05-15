@@ -672,15 +672,6 @@ const AdminProductForm = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="elo7_link">Link Elo7</Label>
-                <Input
-                  id="elo7_link"
-                  value={formData.elo7_link}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, elo7_link: e.target.value }))}
-                  placeholder="https://www.elo7.com.br/..."
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="google_product_category">Categoria Google (Merchant Center)</Label>
                 <Input
                   id="google_product_category"
