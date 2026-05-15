@@ -60,6 +60,11 @@ interface Order {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  tracking_code?: string | null;
+  tracking_carrier?: string | null;
+  tracking_url?: string | null;
+  shipped_at?: string | null;
+  payment_status?: string | null;
 }
 
 interface OrderItem {
@@ -90,6 +95,7 @@ const AdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [trackingDialog, setTrackingDialog] = useState<{ order: Order; code: string; carrier: string; url: string } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -128,16 +134,32 @@ const AdminOrders = () => {
 
   // Update order status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
+    mutationFn: async ({
+      orderId,
+      newStatus,
+      tracking,
+    }: {
+      orderId: string;
+      newStatus: string;
+      tracking?: { code: string; carrier?: string; url?: string };
+    }) => {
+      const update: Record<string, unknown> = { status: newStatus };
+      if (newStatus === 'shipped' && tracking?.code) {
+        update.tracking_code = tracking.code;
+        update.tracking_carrier = tracking.carrier || null;
+        update.tracking_url = tracking.url || null;
+        update.shipped_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update(update)
         .eq('id', orderId);
-      
+
       if (error) throw error;
 
-      // Send status update email
-      const order = orders?.find(o => o.id === orderId);
+      // Send status update email (with tracking info when shipped)
+      const order = orders?.find((o) => o.id === orderId);
       if (order) {
         await supabase.functions.invoke('send-order-email', {
           body: {
@@ -147,21 +169,32 @@ const AdminOrders = () => {
             customerName: order.customer_name,
             newStatus,
             statusLabel: getStatusInfo(newStatus).label,
+            ...(newStatus === 'shipped' && tracking?.code
+              ? {
+                  trackingCode: tracking.code,
+                  trackingCarrier: tracking.carrier,
+                  trackingUrl: tracking.url,
+                }
+              : {}),
           },
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       toast({
-        title: 'Status atualizado',
-        description: 'O cliente será notificado por email.',
+        title: vars.newStatus === 'shipped' ? 'Pedido marcado como enviado' : 'Status atualizado',
+        description:
+          vars.newStatus === 'shipped'
+            ? 'Código de rastreio salvo e e-mail enviado ao cliente.'
+            : 'O cliente será notificado por email.',
       });
+      setTrackingDialog(null);
     },
-    onError: () => {
+    onError: (e: any) => {
       toast({
         title: 'Erro ao atualizar',
-        description: 'Tente novamente.',
+        description: e?.message || 'Tente novamente.',
         variant: 'destructive',
       });
     },
@@ -174,6 +207,18 @@ const AdminOrders = () => {
   };
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
+    if (newStatus === 'shipped') {
+      const order = orders?.find((o) => o.id === orderId);
+      if (order) {
+        setTrackingDialog({
+          order,
+          code: order.tracking_code || '',
+          carrier: order.tracking_carrier || order.shipping_company || '',
+          url: order.tracking_url || '',
+        });
+        return;
+      }
+    }
     updateStatusMutation.mutate({ orderId, newStatus });
   };
 
@@ -503,6 +548,72 @@ const AdminOrders = () => {
                     Email
                   </Button>
                 </a>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Tracking Code Dialog (when marking as shipped) */}
+      <Dialog open={!!trackingDialog} onOpenChange={(o) => !o && setTrackingDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-primary" />
+              Marcar como Enviado
+            </DialogTitle>
+          </DialogHeader>
+          {trackingDialog && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Pedido <span className="font-mono font-semibold text-foreground">{trackingDialog.order.order_code}</span>.
+                Informe o código de rastreio — o cliente será notificado por e-mail automaticamente.
+              </p>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Código de rastreio *</label>
+                <Input
+                  autoFocus
+                  value={trackingDialog.code}
+                  onChange={(e) => setTrackingDialog({ ...trackingDialog, code: e.target.value.toUpperCase().trim() })}
+                  placeholder="Ex: BR123456789BR"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Transportadora</label>
+                <Input
+                  value={trackingDialog.carrier}
+                  onChange={(e) => setTrackingDialog({ ...trackingDialog, carrier: e.target.value })}
+                  placeholder="Ex: Correios, Jadlog, Loggi"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">URL de rastreio (opcional)</label>
+                <Input
+                  value={trackingDialog.url}
+                  onChange={(e) => setTrackingDialog({ ...trackingDialog, url: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <Button variant="outline" onClick={() => setTrackingDialog(null)}>
+                  Cancelar
+                </Button>
+                <Button
+                  disabled={!trackingDialog.code || trackingDialog.code.length < 4 || updateStatusMutation.isPending}
+                  onClick={() =>
+                    updateStatusMutation.mutate({
+                      orderId: trackingDialog.order.id,
+                      newStatus: 'shipped',
+                      tracking: {
+                        code: trackingDialog.code,
+                        carrier: trackingDialog.carrier || undefined,
+                        url: trackingDialog.url || undefined,
+                      },
+                    })
+                  }
+                >
+                  {updateStatusMutation.isPending ? 'Enviando...' : 'Salvar e notificar'}
+                </Button>
               </div>
             </div>
           )}

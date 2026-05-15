@@ -425,6 +425,9 @@ interface StatusUpdateRequest {
   customerName: string;
   newStatus: string;
   statusLabel: string;
+  trackingCode?: string;
+  trackingCarrier?: string;
+  trackingUrl?: string;
 }
 
 function generateStatusUpdateEmailHtml(data: StatusUpdateRequest): string {
@@ -482,6 +485,15 @@ function generateStatusUpdateEmailHtml(data: StatusUpdateRequest): string {
           <span class="status-badge">${escapeHtml(data.statusLabel)}</span>
           
           <p class="message">${statusMessage}</p>
+
+          ${data.trackingCode ? `
+          <div style="background:#f3f4f6;border-radius:12px;padding:18px;margin:20px 0;text-align:left;">
+            <p style="margin:0 0 8px 0;font-size:12px;color:#666;text-transform:uppercase;font-weight:600;">📦 Código de Rastreio</p>
+            <p style="margin:0;font-size:18px;font-weight:bold;color:#111;letter-spacing:1px;">${escapeHtml(data.trackingCode)}</p>
+            ${data.trackingCarrier ? `<p style="margin:6px 0 0 0;font-size:13px;color:#666;">Transportadora: ${escapeHtml(data.trackingCarrier)}</p>` : ''}
+            ${data.trackingUrl ? `<p style="margin:10px 0 0 0;"><a href="${escapeHtml(data.trackingUrl)}" style="color:#f88770;font-weight:600;text-decoration:none;">🔍 Rastrear na transportadora →</a></p>` : ''}
+          </div>
+          ` : ''}
           
           <a href="https://emporiolelecute.lovable.app/rastrear?code=${escapeHtml(data.orderCode)}" class="cta">📦 Acompanhar Pedido</a>
           
