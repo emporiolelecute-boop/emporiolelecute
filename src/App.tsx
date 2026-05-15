@@ -368,6 +368,11 @@ const App = () => {
                       <AdminTelemetry />
                     </Suspense>
                   } />
+                  <Route path="cron" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCronStatus />
+                    </Suspense>
+                  } />
                   <Route path="landings" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminOccasionLandings />
