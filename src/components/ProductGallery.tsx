@@ -171,7 +171,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   e.stopPropagation();
                   goToNext();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 shadow-md"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-background/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background shadow-md"
                 aria-label="Próxima imagem"
               >
                 <ChevronRight className="h-5 w-5 text-foreground" />
