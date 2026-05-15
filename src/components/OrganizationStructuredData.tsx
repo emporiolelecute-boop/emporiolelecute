@@ -29,7 +29,6 @@ const OrganizationStructuredData = () => {
     "sameAs": [
       "https://www.instagram.com/emporiolelecute",
       "https://www.facebook.com/emporiolelecute",
-      "https://www.elo7.com.br/emporiolelecute",
       "https://br.pinterest.com/emporiolelecute"
     ],
     "contactPoint": [

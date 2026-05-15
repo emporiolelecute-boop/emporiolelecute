@@ -58,7 +58,7 @@ const AdminProductForm = () => {
     images: [''],
     features: [''],
     keywords: [] as string[],
-    elo7_link: '',
+    
     is_active: true,
     // Personalization fields
     personalization_enabled: true,
@@ -90,7 +90,7 @@ const AdminProductForm = () => {
         images: existingProduct.images.length > 0 ? existingProduct.images : [''],
         features: existingProduct.features.length > 0 ? existingProduct.features : [''],
         keywords: keywords,
-        elo7_link: existingProduct.elo7_link || '',
+        
         is_active: existingProduct.is_active,
         personalization_enabled: existingProduct.personalization_enabled ?? true,
         personalization_label: existingProduct.personalization_label || 'Personalização',
@@ -217,7 +217,7 @@ const AdminProductForm = () => {
         images: formData.images.filter(Boolean),
         features: formData.features.filter(Boolean),
         keywords: formData.keywords,
-        elo7_link: formData.elo7_link || null,
+        
         is_active: formData.is_active,
         personalization_enabled: formData.personalization_enabled,
         personalization_label: formData.personalization_label || null,
@@ -669,15 +669,6 @@ const AdminProductForm = () => {
                   value={formData.rating}
                   onChange={(e) => setFormData((prev) => ({ ...prev, rating: e.target.value }))}
                   placeholder="5.0"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="elo7_link">Link Elo7</Label>
-                <Input
-                  id="elo7_link"
-                  value={formData.elo7_link}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, elo7_link: e.target.value }))}
-                  placeholder="https://www.elo7.com.br/..."
                 />
               </div>
               <div className="space-y-2">

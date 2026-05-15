@@ -39,8 +39,7 @@ const LocalBusinessStructuredData = () => {
     },
     "sameAs": [
       "https://www.instagram.com/emporiolelecute",
-      "https://www.facebook.com/emporiolelecute",
-      "https://www.elo7.com.br/emporiolelecute"
+      "https://www.facebook.com/emporiolelecute"
     ]
     // NOTE: aggregateRating removido — só pode ser adicionado quando houver reviews reais
     // exibidos na página (diretrizes Google), caso contrário gera manual action.

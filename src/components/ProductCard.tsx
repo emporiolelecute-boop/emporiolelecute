@@ -91,7 +91,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           srcSet={buildSrcSet(product.image, [300, 450, 600, 800])}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
           alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-0 [&.loaded]:opacity-100 transition-opacity"
+          className="w-full h-full object-contain opacity-0 [&.loaded]:opacity-100"
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           // @ts-expect-error fetchpriority is a valid HTML attribute
@@ -100,7 +100,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           width="685"
           height="685"
           onLoad={(e) => e.currentTarget.classList.add('loaded')}
-          style={{ transition: 'opacity 400ms ease, transform 500ms ease' }}
+          style={{ transition: 'opacity 400ms ease' }}
         />
         
         {/* Badge */}

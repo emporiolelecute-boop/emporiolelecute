@@ -58,7 +58,7 @@ const dbToProduct = (p: DbProduct): Product => ({
   originalPrice: p.original_price ? `R$ ${Number(p.original_price).toFixed(2).replace(".", ",")}` : undefined,
   image: p.images?.[0] || "",
   images: p.images || [],
-  link: p.elo7_link || `${SITE}/produtos/${p.slug}`,
+  link: `${SITE}/produtos/${p.slug}`,
   badge: p.badge || undefined,
   rating: Number(p.rating || 5),
   category: "outros" as const,

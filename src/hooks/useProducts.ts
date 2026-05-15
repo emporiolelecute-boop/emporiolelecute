@@ -19,7 +19,7 @@ export interface DbProduct {
   images: string[];
   features: string[];
   keywords: string[];
-  elo7_link: string | null;
+  
   is_active: boolean;
   created_at: string;
   updated_at: string;

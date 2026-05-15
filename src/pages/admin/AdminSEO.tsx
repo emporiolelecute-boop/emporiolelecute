@@ -30,7 +30,7 @@ const defaultSEOSettings: SEOSettings = {
   site_title: 'Empório LeleCute | Lembrancinhas Artesanais Personalizadas',
   site_description: 'Ateliê criativo de lembrancinhas artesanais personalizadas. Sabonetes, velas perfumadas e presentes únicos para todas as ocasiões especiais.',
   site_keywords: 'lembrancinhas personalizadas, sabonetes artesanais, velas perfumadas, maternidade, chá de bebê, batizado, casamento',
-  og_image: 'https://img.elo7.com.br/users/banner/12A517D.jpg',
+  og_image: 'https://emporiolelecute.com.br/og-image.webp',
   twitter_handle: '@emporiolelecute',
   google_verification: '',
   bing_verification: '',

@@ -23,7 +23,7 @@ const ProductsSection = () => {
       originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
       image: p.images?.[0] || '/placeholder.svg',
       images: p.images || [],
-      link: p.elo7_link || '',
+      link: '',
       badge: p.badge || undefined,
       rating: Math.round(p.rating || 5),
       category: 'outros' as const,

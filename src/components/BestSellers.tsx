@@ -30,7 +30,7 @@ const BestSellers = () => {
       originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
       image: p.images?.[0] || '/placeholder.svg',
       images: p.images || [],
-      link: p.elo7_link || '',
+      link: '',
       badge: p.badge || "Mais Vendido",
       rating: Math.round(p.rating || 5),
       category: 'outros' as const,
@@ -67,7 +67,7 @@ const BestSellers = () => {
               <p className="text-muted-foreground">Nenhum produto disponível no momento.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-12">
               {products.map((product, index) => (
                 <div 
                   key={product.id}

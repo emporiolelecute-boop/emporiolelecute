@@ -27,7 +27,6 @@ interface StoreSettings {
   social_links: {
     instagram: string;
     facebook: string;
-    elo7: string;
   };
   shipping_policy: {
     note: string;
@@ -67,7 +66,6 @@ const AdminSettings = () => {
     social_links: {
       instagram: 'https://www.instagram.com/emporiolelecute',
       facebook: 'https://www.facebook.com/emporiolelecute',
-      elo7: 'https://www.elo7.com.br/emporiolelecute',
     },
     shipping_policy: {
       note: 'O frete será calculado após a confirmação do pedido via WhatsApp',
@@ -408,23 +406,6 @@ const AdminSettings = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4" />
-                Elo7
-              </Label>
-              <Input 
-                value={settings.social_links.elo7}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  social_links: {
-                    ...settings.social_links,
-                    elo7: e.target.value
-                  }
-                })}
-                placeholder="https://elo7.com.br/..."
-              />
-            </div>
           </CardContent>
         </Card>
 
