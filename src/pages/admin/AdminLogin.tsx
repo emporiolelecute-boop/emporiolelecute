@@ -155,7 +155,9 @@ const AdminLogin = () => {
       <Card className="w-full max-w-md shadow-medium">
         <CardHeader className="text-center space-y-2">
           <Link to="/" className="inline-block">
-            <img src={logoImg} alt="LeleCute" className="w-20 h-20 mx-auto object-contain" />
+            <div className="w-24 h-24 mx-auto rounded-full bg-white shadow-lg ring-2 ring-primary/20 flex items-center justify-center overflow-hidden">
+              <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-2" />
+            </div>
           </Link>
           <CardTitle className="text-2xl font-display text-foreground">
             {isSignUp ? 'Criar Conta' : 'Área Administrativa'}

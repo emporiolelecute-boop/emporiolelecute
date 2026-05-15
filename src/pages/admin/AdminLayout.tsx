@@ -106,7 +106,9 @@ const AdminLayout = () => {
           <Menu className="w-5 h-5 text-foreground" />
         </button>
         <Link to="/admin" className="flex items-center gap-2">
-          <img src={logoImg} alt="LeleCute" className="w-10 h-10 object-contain" />
+          <span className="w-10 h-10 rounded-full bg-white shadow ring-1 ring-primary/20 flex items-center justify-center overflow-hidden">
+            <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-0.5" />
+          </span>
           <span className="font-display text-lg text-foreground">Admin</span>
         </Link>
         <div className="w-10" />
@@ -129,12 +131,11 @@ const AdminLayout = () => {
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-5 border-b border-border/50">
           <Link to="/admin" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:blur-xl transition-all" />
-              <img src={logoImg} alt="LeleCute" className="relative w-14 h-14 object-contain" />
+            <div className="w-14 h-14 rounded-full bg-white shadow-md ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all flex items-center justify-center overflow-hidden shrink-0">
+              <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-1" />
             </div>
             <div>
-              <span className="font-display text-xl text-foreground block">LeleCute</span>
+              <span className="font-display text-xl text-foreground block leading-tight">LeleCute</span>
               <span className="text-xs text-muted-foreground">Painel Admin</span>
             </div>
           </Link>
