@@ -198,8 +198,7 @@ const AdminFeedInstagram = () => {
       );
       toast.success("Ordem atualizada");
       // refetch via mutation invalidate
-      save.reset();
-      await save.mutateAsync({ ...reordered[0], position: 0 } as any).catch(() => {});
+      qc.invalidateQueries({ queryKey: ["instagram_feed_embeds"] });
     } catch (err: any) {
       toast.error(err.message || "Erro ao reordenar");
     }
