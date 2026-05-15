@@ -162,11 +162,12 @@ function SlideTextImage({
 function SlideBannerMobile({
   slide,
   isPriority,
+  imgSrc,
 }: {
   slide: HeroSlide;
   isPriority: boolean;
+  imgSrc: string;
 }) {
-  const imgSrc = slide.image_mobile_url || slide.image_url || "";
   const alt = slide.image_alt || slide.title;
 
   if (!imgSrc) return null;
@@ -192,14 +193,12 @@ function SlideBannerMobile({
 function SlideBannerDesktop({
   slide,
   isPriority,
+  imgSrc,
 }: {
   slide: HeroSlide;
   isPriority: boolean;
+  imgSrc: string;
 }) {
-  const imgSrc =
-    (slide.image_desktop_url && fallbackImageMap[slide.image_desktop_url]) ||
-    slide.image_desktop_url ||
-    "";
   const alt = slide.image_alt || slide.title;
 
   if (!imgSrc) return null;
@@ -228,22 +227,8 @@ function SlideBannerDesktop({
 const HeroSlider = () => {
   const { data: dbSlides } = useHeroSlides();
   const isMobile = useIsMobile();
-  const allSlides: HeroSlide[] =
+  const slides: HeroSlide[] =
     dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
-
-  // Filtra slides de acordo com o dispositivo:
-  // - banner_mobile só aparece em mobile
-  // - banner_desktop só aparece em desktop
-  // - text_image aparece em ambos
-  const slides = useMemo(
-    () =>
-      allSlides.filter((s) => {
-        if (s.display_mode === "banner_mobile") return isMobile;
-        if (s.display_mode === "banner_desktop") return !isMobile;
-        return true;
-      }),
-    [allSlides, isMobile],
-  );
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
