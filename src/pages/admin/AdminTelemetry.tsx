@@ -230,14 +230,21 @@ export default function AdminTelemetry() {
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
-          <CardDescription>{loading ? "Carregando..." : `${filtered.length} de ${rows.length} eventos`}</CardDescription>
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-3 pt-3">
+          <CardDescription>
+            {loading ? "Carregando..." : `${displayRows.length}${grouped ? " grupos" : ""} de ${filtered.length} eventos (total bruto: ${rows.length})`}
+          </CardDescription>
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-3 pt-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Rota" value={routeFilter} onChange={(e) => setRouteFilter(e.target.value)} className="pl-9" />
             </div>
             <Input placeholder="Componente" value={componentFilter} onChange={(e) => setComponentFilter(e.target.value)} />
             <Input placeholder="Mensagem contém..." value={messageFilter} onChange={(e) => setMessageFilter(e.target.value)} />
+            <Input
+              placeholder="Correlation id (cid)"
+              value={cidFilter}
+              onChange={(e) => setCidFilter(e.target.value)}
+            />
             <select
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
@@ -252,6 +259,10 @@ export default function AdminTelemetry() {
             </select>
             <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <label className="flex items-center gap-2 text-sm h-10 px-3">
+              <input type="checkbox" checked={grouped} onChange={(e) => setGrouped(e.target.checked)} />
+              Agrupar duplicados
+            </label>
           </div>
         </CardHeader>
         <CardContent>
