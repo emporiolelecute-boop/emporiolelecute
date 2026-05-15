@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -96,6 +97,14 @@ export function useAuth() {
     return { error };
   };
 
+  const signInWithGoogle = async () => {
+    const result = await lovable.auth.signInWithOAuth('google', {
+      redirect_uri: `${window.location.origin}/admin/login`,
+    });
+    if (result.error) return { error: result.error };
+    return { error: null };
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     return { error };
@@ -109,6 +118,7 @@ export function useAuth() {
     adminChecked,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
   };
 }
