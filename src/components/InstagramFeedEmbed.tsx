@@ -164,7 +164,7 @@ const InstagramFeedEmbed = () => {
         {visible && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {shown.map((item) => (
-              <EmbedCard key={item.id} url={item.post_url} caption={item.caption} />
+              <EmbedCard key={item.id} url={item.post_url} caption={item.caption} previewImageUrl={item.preview_image_url} />
             ))}
           </div>
         )}
