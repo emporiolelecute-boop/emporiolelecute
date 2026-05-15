@@ -34,6 +34,8 @@ const AdminAccessRequests = () => {
   const [selected, setSelected] = useState<PendingRequest | null>(null);
   const [attempts, setAttempts] = useState<any[]>([]);
   const [loadingAttempts, setLoadingAttempts] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<PendingRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const load = async () => {
     setLoading(true);
