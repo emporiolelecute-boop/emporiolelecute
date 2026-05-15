@@ -49,6 +49,9 @@ type FormState = {
   testimonials_json: string;
   social_proof_stats_json: string;
   related_route_slugs_csv: string;
+  gallery: string[];
+  og_image_url: string;
+  og_image_alt: string;
   position: number;
   is_published: boolean;
 };
@@ -69,6 +72,9 @@ const blank: FormState = {
   testimonials_json: "[]",
   social_proof_stats_json: "[]",
   related_route_slugs_csv: "",
+  gallery: [],
+  og_image_url: "",
+  og_image_alt: "",
   position: 0,
   is_published: false,
 };
