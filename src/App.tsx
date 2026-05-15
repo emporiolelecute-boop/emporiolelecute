@@ -404,6 +404,16 @@ const App = () => {
                       <AdminAccessRequests />
                     </Suspense>
                   } />
+                  <Route path="usuarios/solicitacoes/:id" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminAccessRequestDetail />
+                    </Suspense>
+                  } />
+                  <Route path="auditoria" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminAudit />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
