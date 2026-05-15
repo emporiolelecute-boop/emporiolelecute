@@ -35,58 +35,36 @@ import {
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
-// Mode selector
+// Slide composition summary
 // ---------------------------------------------------------------------------
 
-const MODES: { value: HeroSlideMode; label: string; icon: React.ReactNode; description: string }[] = [
-  {
-    value: 'text_image',
-    label: 'Texto + Imagem',
-    icon: <LayoutTemplate className="h-5 w-5" />,
-    description: 'Layout padrão: texto à esquerda e imagem à direita. Aparece em todos os tamanhos de tela.',
-  },
-  {
-    value: 'banner_mobile',
-    label: 'Banner Mobile',
-    icon: <Smartphone className="h-5 w-5" />,
-    description: 'Banner full-width sem texto. Visível apenas em celular e tablet. Some no desktop.',
-  },
-  {
-    value: 'banner_desktop',
-    label: 'Banner Desktop',
-    icon: <Monitor className="h-5 w-5" />,
-    description: 'Banner full-width sem texto. Visível apenas no desktop. Some no celular.',
-  },
-];
-
-function ModeSelector({
-  value,
-  onChange,
-}: {
-  value: HeroSlideMode;
-  onChange: (v: HeroSlideMode) => void;
-}) {
+function CompositionSummary() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      {MODES.map((m) => (
-        <button
-          key={m.value}
-          type="button"
-          onClick={() => onChange(m.value)}
-          className={cn(
-            'flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all',
-            value === m.value
-              ? 'border-primary bg-primary/5'
-              : 'border-border hover:border-primary/40 hover:bg-muted/50',
-          )}
-        >
-          <div className={cn('flex items-center gap-2 font-medium text-sm', value === m.value ? 'text-primary' : 'text-foreground')}>
-            {m.icon}
-            {m.label}
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">{m.description}</p>
-        </button>
-      ))}
+      <div className="rounded-xl border-2 border-border bg-muted/30 p-4">
+        <div className="flex items-center gap-2 font-medium text-sm text-foreground">
+          <LayoutTemplate className="h-5 w-5" /> Texto + Imagem
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug mt-2">
+          Fallback quando não houver banner específico para a tela.
+        </p>
+      </div>
+      <div className="rounded-xl border-2 border-border bg-muted/30 p-4">
+        <div className="flex items-center gap-2 font-medium text-sm text-foreground">
+          <Smartphone className="h-5 w-5" /> Mobile
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug mt-2">
+          Exibido automaticamente em celular quando preenchido.
+        </p>
+      </div>
+      <div className="rounded-xl border-2 border-border bg-muted/30 p-4">
+        <div className="flex items-center gap-2 font-medium text-sm text-foreground">
+          <Monitor className="h-5 w-5" /> Desktop
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug mt-2">
+          Exibido automaticamente em PC quando preenchido.
+        </p>
+      </div>
     </div>
   );
 }
