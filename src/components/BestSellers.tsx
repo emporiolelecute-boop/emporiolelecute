@@ -9,17 +9,16 @@ import type { Product } from "@/data/products";
 const BestSellers = () => {
   const { data: dbProducts, isLoading } = useDbProducts();
 
-  // Get products with badges or highest ratings as "best sellers"
-  const products: Product[] = (dbProducts || [])
-    .filter(p => p.is_active)
-    .sort((a, b) => {
-      // Prioritize products with badges
-      if (a.badge && !b.badge) return -1;
-      if (!a.badge && b.badge) return 1;
-      // Then sort by rating
-      return (b.rating || 5) - (a.rating || 5);
-    })
-    .slice(0, 6)
+  // Random selection of active products as "best sellers", keeping desktop parity (multiples of 4)
+  const active = (dbProducts || []).filter(p => p.is_active);
+  const shuffled = [...active].sort(() => Math.random() - 0.5);
+  const desiredMax = 8; // 2 rows of 4 on desktop
+  const count = Math.min(
+    shuffled.length >= 4 ? Math.floor(shuffled.length / 4) * 4 : shuffled.length,
+    desiredMax
+  );
+  const products: Product[] = shuffled
+    .slice(0, count)
     .map(p => ({
       id: p.id,
       slug: p.slug,
