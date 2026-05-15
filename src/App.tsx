@@ -83,6 +83,7 @@ const App = () => {
           <BrowserRouter>
             <AnalyticsWrapper>
               <RedirectHandler />
+              <CanonicalNormalizer />
               <TrackingScripts />
               <Routes>
                 {/* Public Routes */}
