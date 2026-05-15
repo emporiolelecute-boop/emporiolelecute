@@ -346,6 +346,8 @@ export type Database = {
           id: string
           is_published: boolean
           occasion_slug: string
+          og_image_alt: string | null
+          og_image_url: string | null
           position: number
           related_route_slugs: string[]
           route_slug: string
@@ -368,6 +370,8 @@ export type Database = {
           id?: string
           is_published?: boolean
           occasion_slug: string
+          og_image_alt?: string | null
+          og_image_url?: string | null
           position?: number
           related_route_slugs?: string[]
           route_slug: string
@@ -390,6 +394,8 @@ export type Database = {
           id?: string
           is_published?: boolean
           occasion_slug?: string
+          og_image_alt?: string | null
+          og_image_url?: string | null
           position?: number
           related_route_slugs?: string[]
           route_slug?: string

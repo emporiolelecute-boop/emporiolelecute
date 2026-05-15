@@ -44,6 +44,8 @@ const dbToConfig = (row: OccasionLanding): LembrancinhasLandingConfig => ({
   gallery: row.gallery,
   testimonials: row.testimonials,
   socialProofStats: row.social_proof_stats,
+  ogImage: row.og_image_url ?? undefined,
+  ogImageAlt: row.og_image_alt ?? undefined,
 });
 
 const dbToProduct = (p: DbProduct): Product => ({
@@ -140,8 +142,15 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
       <DynamicSEO
         title={config.seoTitle}
         description={config.seoDescription}
+        image={config.ogImage}
         url={pageUrl}
       />
+      {config.ogImage && config.ogImageAlt && (
+        <Helmet>
+          <meta property="og:image:alt" content={config.ogImageAlt} />
+          <meta name="twitter:image:alt" content={config.ogImageAlt} />
+        </Helmet>
+      )}
       {isPreview && (
         <Helmet>
           <meta name="robots" content="noindex, nofollow" />

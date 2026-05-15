@@ -28,7 +28,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, MapPin, Image as ImageIcon, Trash } from "lucide-react";
+import SingleImageUpload from "@/components/admin/SingleImageUpload";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 type FormState = {
   id?: string;
@@ -47,6 +49,9 @@ type FormState = {
   testimonials_json: string;
   social_proof_stats_json: string;
   related_route_slugs_csv: string;
+  gallery: string[];
+  og_image_url: string;
+  og_image_alt: string;
   position: number;
   is_published: boolean;
 };
@@ -67,6 +72,9 @@ const blank: FormState = {
   testimonials_json: "[]",
   social_proof_stats_json: "[]",
   related_route_slugs_csv: "",
+  gallery: [],
+  og_image_url: "",
+  og_image_alt: "",
   position: 0,
   is_published: false,
 };
@@ -88,6 +96,9 @@ const toForm = (l: OccasionLanding): FormState => ({
   testimonials_json: JSON.stringify(l.testimonials, null, 2),
   social_proof_stats_json: JSON.stringify(l.social_proof_stats, null, 2),
   related_route_slugs_csv: l.related_route_slugs.join(", "),
+  gallery: Array.isArray(l.gallery) ? l.gallery : [],
+  og_image_url: l.og_image_url ?? "",
+  og_image_alt: l.og_image_alt ?? "",
   position: l.position,
   is_published: l.is_published,
 });
@@ -122,11 +133,13 @@ const AdminOccasionLandings = () => {
       seo_copy: form.seo_copy,
       whatsapp_message: form.whatsapp_message,
       faqs: parseJson(form.faqs_json, []),
-      gallery: parseJson(form.gallery_json, []),
+      gallery: form.gallery,
       testimonials: parseJson(form.testimonials_json, []),
       social_proof_stats: parseJson(form.social_proof_stats_json, []),
       related_route_slugs: form.related_route_slugs_csv
         .split(",").map((s) => s.trim()).filter(Boolean),
+      og_image_url: form.og_image_url || null,
+      og_image_alt: form.og_image_alt || null,
       position: Number(form.position) || 0,
       is_published: form.is_published,
     } as any);
@@ -268,10 +281,31 @@ const AdminOccasionLandings = () => {
               <Textarea value={form.faqs_json} rows={6} className="font-mono text-xs"
                 onChange={(e) => setForm({ ...form, faqs_json: e.target.value })} />
             </div>
-            <div>
-              <Label>Galeria (JSON: ["url1","url2"])</Label>
-              <Textarea value={form.gallery_json} rows={3} className="font-mono text-xs"
-                onChange={(e) => setForm({ ...form, gallery_json: e.target.value })} />
+            <div className="space-y-2 border rounded-lg p-4 bg-muted/30">
+              <Label className="flex items-center gap-2 text-base"><ImageIcon className="w-4 h-4"/>Galeria de imagens</Label>
+              <p className="text-xs text-muted-foreground">Faça upload das fotos que serão mostradas na landing. A primeira aparece em destaque.</p>
+              <ImageUploader
+                images={form.gallery}
+                onImagesChange={(imgs) => setForm({ ...form, gallery: imgs })}
+                maxImages={12}
+              />
+            </div>
+
+            <div className="space-y-3 border rounded-lg p-4 bg-muted/30">
+              <Label className="flex items-center gap-2 text-base"><ImageIcon className="w-4 h-4"/>Open Graph (compartilhamento social)</Label>
+              <p className="text-xs text-muted-foreground">Imagem exibida no WhatsApp/Facebook/Instagram quando o link da landing é compartilhado. Recomendado 1200×630.</p>
+              <SingleImageUpload
+                value={form.og_image_url}
+                onChange={(url) => setForm({ ...form, og_image_url: url })}
+                folder="og-landings"
+                hint="1200x630 recomendado · até 5MB"
+                previewMaxWidth={360}
+              />
+              <div>
+                <Label className="text-xs">Texto alternativo (alt)</Label>
+                <Input value={form.og_image_alt} onChange={(e) => setForm({ ...form, og_image_alt: e.target.value })}
+                  placeholder="Ex: Lembrancinhas artesanais para chá de bebê" />
+              </div>
             </div>
             <div>
               <Label>Depoimentos (JSON)</Label>

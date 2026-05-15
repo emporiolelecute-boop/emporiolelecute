@@ -1,3 +1,4 @@
+import SingleImageUpload from '@/components/admin/SingleImageUpload';
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,24 +77,13 @@ const AdminInstagram = () => {
         <CardContent className="space-y-4">
           <div>
             <Label>Imagem</Label>
-            <div className="flex gap-2 items-start mt-1">
-              {form.image_url && (
-                <img src={form.image_url} alt="preview" className="w-24 h-24 object-cover rounded-lg border" />
-              )}
-              <div className="flex-1 space-y-2">
-                <Input
-                  placeholder="URL da imagem (ou faça upload)"
-                  value={form.image_url || ""}
-                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                />
-                <Input
-                  type="file"
-                  accept="image/*"
-                  disabled={uploading}
-                  onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
-                />
-              </div>
-            </div>
+            <SingleImageUpload
+              value={form.image_url || ''}
+              onChange={(url) => setForm({ ...form, image_url: url })}
+              folder="instagram"
+              hint="Quadrado 1:1 · PNG, JPG ou WEBP até 5MB"
+              previewMaxWidth={220}
+            />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">

@@ -42,6 +42,10 @@ export interface LembrancinhasLandingConfig {
   testimonials?: { name: string; location?: string; text: string; rating?: number }[];
   /** Estatísticas curtas para reforçar prova social (ex: "+2.000 famílias atendidas"). */
   socialProofStats?: { value: string; label: string }[];
+  /** Imagem Open Graph específica desta landing (sobrescreve a global). */
+  ogImage?: string;
+  /** Texto alternativo da imagem OG. */
+  ogImageAlt?: string;
 }
 
 export const LEMBRANCINHAS_LANDINGS: LembrancinhasLandingConfig[] = [
