@@ -248,6 +248,50 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_post_attempts: {
+        Row: {
+          attempted_at: string
+          error_message: string | null
+          id: string
+          image_url: string | null
+          meta_used: string | null
+          post_id: string
+          source: string
+          status: string
+          title: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          error_message?: string | null
+          id?: string
+          image_url?: string | null
+          meta_used?: string | null
+          post_id: string
+          source?: string
+          status: string
+          title?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          error_message?: string | null
+          id?: string
+          image_url?: string | null
+          meta_used?: string | null
+          post_id?: string
+          source?: string
+          status?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_post_attempts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "instagram_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       instagram_posts: {
         Row: {
           alt_text: string

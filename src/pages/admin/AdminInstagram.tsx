@@ -27,6 +27,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQueryClient } from "@tanstack/react-query";
+import InstagramSchedulePanel from "@/components/admin/InstagramSchedulePanel";
 
 const SHORTCODE_RE = /^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/([A-Za-z0-9_-]+)\/?/i;
 const PROFILE_USERNAME = "emporiolelecute";
@@ -333,6 +334,8 @@ const AdminInstagram = () => {
           )}
         </CardContent>
       </Card>
+
+      <InstagramSchedulePanel />
 
       {/* Form: URL + extract + preview */}
       <Card>

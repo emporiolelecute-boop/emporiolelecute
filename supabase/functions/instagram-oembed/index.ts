@@ -53,28 +53,51 @@ function classifyUrl(url: string): { ok: boolean; shortcode: string | null; perm
   };
 }
 
-async function fetchPostMeta(permalink: string): Promise<{ image_url: string | null; title: string | null; error: string | null }> {
+async function fetchPostMeta(permalink: string): Promise<{ image_url: string | null; title: string | null; error: string | null; meta_used: string | null }> {
   try {
     const res = await fetch(permalink, {
       headers: { "User-Agent": UA, "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8" },
       redirect: "follow",
     });
-    if (!res.ok) return { image_url: null, title: null, error: `HTTP ${res.status} ao acessar o post` };
+    if (!res.ok) return { image_url: null, title: null, error: `HTTP ${res.status} ao acessar o post`, meta_used: null };
     const html = await res.text();
     if (/login|loginPage|"isLoggedIn":false/i.test(html) && !/og:image/i.test(html)) {
-      return { image_url: null, title: null, error: "Instagram exigiu login para esta URL" };
+      return { image_url: null, title: null, error: "Instagram exigiu login para esta URL", meta_used: null };
     }
-    const image_url =
-      extractMeta(html, "og:image") || extractMeta(html, "twitter:image");
+    // Cascata de fallbacks de imagem
+    const candidates: { key: string; value: string | null }[] = [
+      { key: "og:image", value: extractMeta(html, "og:image") },
+      { key: "og:image:secure_url", value: extractMeta(html, "og:image:secure_url") },
+      { key: "twitter:image", value: extractMeta(html, "twitter:image") },
+      { key: "twitter:image:src", value: extractMeta(html, "twitter:image:src") },
+      { key: "image", value: extractMeta(html, "image") },
+    ];
+    const hit = candidates.find((c) => !!c.value);
+    const image_url = hit?.value || null;
+    const meta_used = hit?.key || null;
     const title =
       extractMeta(html, "og:title") ||
       extractMeta(html, "twitter:title") ||
       extractMeta(html, "description");
-    if (!image_url) return { image_url: null, title, error: "Tag og:image não encontrada na página" };
-    return { image_url, title, error: null };
+    if (!image_url) return { image_url: null, title, error: "Nenhuma meta de imagem encontrada (og:image, twitter:image, etc.)", meta_used: null };
+    return { image_url, title, error: null, meta_used };
   } catch (e) {
-    return { image_url: null, title: null, error: `Erro de rede: ${e instanceof Error ? e.message : String(e)}` };
+    return { image_url: null, title: null, error: `Erro de rede: ${e instanceof Error ? e.message : String(e)}`, meta_used: null };
   }
+}
+
+async function logAttempt(supabase: any, post_id: string, source: string, meta: { image_url: string | null; title: string | null; error: string | null; meta_used: string | null }) {
+  try {
+    await supabase.from("instagram_post_attempts").insert({
+      post_id,
+      source,
+      status: meta.image_url ? "success" : "failed",
+      image_url: meta.image_url,
+      title: meta.title,
+      error_message: meta.error,
+      meta_used: meta.meta_used,
+    });
+  } catch (_) { /* não bloqueia fluxo */ }
 }
 
 async function tryProfile(username: string): Promise<{ ok: boolean; posts: { shortcode: string; permalink: string }[]; error?: string }> {
@@ -127,6 +150,13 @@ Deno.serve(async (req) => {
         );
       }
       const meta = await fetchPostMeta(cls.permalink!);
+      if (body.post_id) {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        );
+        await logAttempt(supabase, body.post_id, body.source || "manual", meta);
+      }
       return Response.json(
         {
           ok: !!meta.image_url,
@@ -136,6 +166,7 @@ Deno.serve(async (req) => {
           shortcode: cls.shortcode,
           extraction_status: meta.image_url ? "extracted" : "failed",
           extraction_error: meta.error,
+          meta_used: meta.meta_used,
           timestamp: new Date().toISOString(),
         },
         { headers: corsHeaders },
@@ -148,11 +179,12 @@ Deno.serve(async (req) => {
       return Response.json(r, { headers: corsHeaders });
     }
 
-    if (action === "bulk-refresh") {
+    if (action === "bulk-refresh" || action === "scheduled-refresh") {
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       );
+      const source = action === "scheduled-refresh" ? "cron" : "manual";
       const { data: posts, error } = await supabase
         .from("instagram_posts")
         .select("id, post_url, alt_text, shortcode")
@@ -163,6 +195,7 @@ Deno.serve(async (req) => {
       for (const p of posts || []) {
         const cls = classifyUrl(p.post_url || "");
         if (!cls.ok) {
+          await logAttempt(supabase, p.id, source, { image_url: null, title: null, error: cls.reason || "URL inválida", meta_used: null });
           results.push({ id: p.id, ok: false, error: cls.reason });
           continue;
         }
@@ -176,11 +209,21 @@ Deno.serve(async (req) => {
         if (meta.image_url) update.image_url = meta.image_url;
         if (meta.title && (!p.alt_text || p.alt_text.startsWith("Empório"))) update.alt_text = meta.title.slice(0, 200);
         await supabase.from("instagram_posts").update(update).eq("id", p.id);
-        results.push({ id: p.id, ok: !!meta.image_url, error: meta.error });
-        // pequena pausa para não atrair rate-limit
+        await logAttempt(supabase, p.id, source, meta);
+        results.push({ id: p.id, ok: !!meta.image_url, error: meta.error, meta_used: meta.meta_used });
         await new Promise((r) => setTimeout(r, 250));
       }
       const okCount = results.filter((r) => r.ok).length;
+      try {
+        await supabase.from("instagram_sync_history").insert({
+          source,
+          action: action === "scheduled-refresh" ? "scheduled-refresh" : "bulk-refresh",
+          status: results.length === 0 ? "success" : (okCount > 0 ? "success" : "failed"),
+          synced_count: okCount,
+          selected_count: results.length,
+          details: { results: results.slice(0, 50) },
+        });
+      } catch (_) { /* ignore */ }
       return Response.json(
         { ok: true, total: results.length, refreshed: okCount, failed: results.length - okCount, results },
         { headers: corsHeaders },
