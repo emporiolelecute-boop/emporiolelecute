@@ -37,7 +37,7 @@ export interface LembrancinhasLandingConfig {
   /** Slugs de outras landings para "Você também pode gostar" */
   relatedRouteSlugs: string[];
   /** URLs de fotos reais (sem stock). Quando vazio, a seção de galeria não é renderizada. */
-  gallery?: string[];
+  gallery?: (string | { src: string; alt?: string })[];
   /** Depoimentos curados para prova social. Quando vazio, a seção não é renderizada. */
   testimonials?: { name: string; location?: string; text: string; rating?: number }[];
   /** Estatísticas curtas para reforçar prova social (ex: "+2.000 famílias atendidas"). */
