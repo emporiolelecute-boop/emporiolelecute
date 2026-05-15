@@ -99,6 +99,10 @@ const AdminAccessRequestDetail = () => {
     }
   };
 
+  const pendingRequest = requests.find((r) => r.status === 'pending') ?? null;
+  const lastRequest = requests[0] ?? null;
+  const lastRequestedAt = lastRequest?.requested_at ?? null;
+
   const resendNotification = async () => {
     if (!profile || cooldown > 0) return;
     setResending(true);
@@ -107,7 +111,8 @@ const AdminAccessRequestDetail = () => {
         body: {
           user_id: profile.id,
           email: profile.email,
-          requested_at: profile.access_requested_at ?? new Date().toISOString(),
+          requested_at: lastRequestedAt ?? new Date().toISOString(),
+          request_id: pendingRequest?.id ?? lastRequest?.id ?? null,
           source: 'manual_resend',
         },
       });
@@ -139,12 +144,19 @@ const AdminAccessRequestDetail = () => {
   const load = async () => {
     if (!id) return;
     setLoading(true);
-    const [{ data: p }, { data: roles }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', id).maybeSingle(),
+    const [{ data: p }, { data: roles }, { data: reqs }] = await Promise.all([
+      supabase.from('profiles').select('id, email, full_name, created_at, updated_at').eq('id', id).maybeSingle(),
       supabase.from('user_roles').select('role').eq('user_id', id).eq('role', 'admin'),
+      (supabase as any)
+        .from('admin_access_requests')
+        .select('*')
+        .eq('user_id', id)
+        .order('requested_at', { ascending: false })
+        .limit(50),
     ]);
     setProfile((p as Profile) || null);
     setIsAdmin(!!(roles && roles.length));
+    setRequests((reqs as AccessRequest[]) || []);
 
     if (p?.email) {
       const [{ data: a }, { data: n }] = await Promise.all([
