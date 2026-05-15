@@ -30,6 +30,7 @@ const Index = () => {
         
         <BestSellers />
         <OccasionsSection />
+        <QuoteCTABanner />
         <Testimonials />
         <FAQSection />
         <InstagramFeed />
