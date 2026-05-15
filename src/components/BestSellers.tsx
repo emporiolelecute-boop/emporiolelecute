@@ -11,16 +11,15 @@ const BestSellers = () => {
   const { data: dbProducts, isLoading } = useDbProducts();
 
   // Random selection of active products as "best sellers", keeping desktop parity (multiples of 4)
-  const active = (dbProducts || []).filter(p => p.is_active);
-  const shuffled = [...active].sort(() => Math.random() - 0.5);
-  const desiredMax = 8; // 2 rows of 4 on desktop
-  const count = Math.min(
-    shuffled.length >= 4 ? Math.floor(shuffled.length / 4) * 4 : shuffled.length,
-    desiredMax
-  );
-  const products: Product[] = shuffled
-    .slice(0, count)
-    .map(p => ({
+  const products: Product[] = useMemo(() => {
+    const active = (dbProducts || []).filter(p => p.is_active);
+    const shuffled = [...active].sort(() => Math.random() - 0.5);
+    const desiredMax = 8; // up to 2 rows of 4 on desktop
+    const count = Math.min(
+      shuffled.length >= 4 ? Math.floor(shuffled.length / 4) * 4 : shuffled.length,
+      desiredMax
+    );
+    return shuffled.slice(0, count).map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -38,6 +37,7 @@ const BestSellers = () => {
       keywords: p.keywords || [],
       min_quantity: p.min_quantity || undefined,
     }));
+  }, [dbProducts]);
 
   return (
     <section 
