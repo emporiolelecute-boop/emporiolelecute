@@ -136,7 +136,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   responsiveWidths={[400, 600, 800, 1200]}
                   priority={index === 0}
                   sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-contain"
+                  className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
                 />
               </div>
             ))}
