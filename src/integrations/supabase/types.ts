@@ -252,31 +252,43 @@ export type Database = {
         Row: {
           alt_text: string
           created_at: string
+          extraction_error: string | null
+          extraction_status: string
           id: string
           image_url: string
           is_visible: boolean
+          last_extracted_at: string | null
           position: number
           post_url: string | null
+          shortcode: string | null
           updated_at: string
         }
         Insert: {
           alt_text?: string
           created_at?: string
+          extraction_error?: string | null
+          extraction_status?: string
           id?: string
           image_url: string
           is_visible?: boolean
+          last_extracted_at?: string | null
           position?: number
           post_url?: string | null
+          shortcode?: string | null
           updated_at?: string
         }
         Update: {
           alt_text?: string
           created_at?: string
+          extraction_error?: string | null
+          extraction_status?: string
           id?: string
           image_url?: string
           is_visible?: boolean
+          last_extracted_at?: string | null
           position?: number
           post_url?: string | null
+          shortcode?: string | null
           updated_at?: string
         }
         Relationships: []
