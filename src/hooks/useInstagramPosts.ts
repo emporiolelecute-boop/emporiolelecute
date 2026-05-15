@@ -19,7 +19,7 @@ export const useInstagramPosts = () =>
         .select("*")
         .eq("is_visible", true)
         .order("position", { ascending: true })
-        .limit(6);
+        .limit(12);
       if (error) throw error;
       return (data || []) as InstagramPost[];
     },

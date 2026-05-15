@@ -33,13 +33,14 @@ const InstagramFeed = () => {
           <p className="text-muted-foreground">Acompanhe novidades, bastidores e inspirações</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {posts.map((post) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {posts.slice(0, 12).map((post) => (
             <a
               key={post.id}
               href={post.post_url || "https://www.instagram.com/emporiolelecute"}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label={post.alt_text || "Postagem do Instagram"}
               className="relative aspect-square overflow-hidden rounded-xl group bg-muted/30 block"
             >
               <BlurImage
@@ -47,7 +48,7 @@ const InstagramFeed = () => {
                 alt={post.alt_text}
                 width={400}
                 responsiveWidths={[200, 300, 400, 600]}
-                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
