@@ -46,17 +46,24 @@ import { useContactInfo } from "@/hooks/useContactInfo";
 import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@/data/products";
 
+import { ProductFAQ } from "@/components/ProductFAQ";
+import { StickyAddToCart } from "@/components/StickyAddToCart";
+
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { whatsappNumber } = useContactInfo();
-  const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
-  const navigate = useNavigate();
-  const { data: dbProduct, isLoading } = useDbProduct(slug || "");
-  const { data: allProducts } = useDbProducts();
-  const { data: paymentConfig } = usePaymentConfig();
-  const { addItem } = useCart();
-  
+  // ... (existing hooks)
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showSticky, setShowSticky] = useState(false);
+  
+  // Track scroll for sticky bar
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show after scrolling past the main buy button (approx 800px)
+      setShowSticky(window.scrollY > 800);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const [quantity, setQuantity] = useState(10);
   const [quantityInput, setQuantityInput] = useState<string>("10");
   const [personalization, setPersonalization] = useState("");
@@ -625,19 +632,8 @@ Poderia me ajudar com o valor do frete e prazos?`;
             </div>
           </div>
 
-          {/* Description Section */}
-          <div className="mb-16">
-            <h2 className="font-display text-2xl text-foreground mb-6">Descrição do produto</h2>
-            <div className="bg-card rounded-xl border border-border p-6">
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {product.longDescription || product.description || `${product.name} artesanal da LeleCute.
-
-Cada peça é feita à mão com ingredientes hipoalergênicos de alta qualidade. Perfeito para lembrancinhas de maternidade, chá de bebê, batizado, casamento, aniversário e eventos corporativos.
-
-Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclusivos.`}
-              </p>
-            </div>
-          </div>
+          {/* FAQ Section for SEO */}
+          <ProductFAQ productName={product.name} />
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
@@ -661,6 +657,14 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       <Footer />
       <WhatsAppButton />
       <Chatbot />
+
+      {/* Sticky mobile CTA */}
+      <StickyAddToCart 
+        productName={product.name}
+        price={`R$ ${product.price.toFixed(2).replace('.', ',')}`}
+        onAction={handleAddToCart}
+        isVisible={showSticky && !addedToCart}
+      />
     </div>
   );
 };

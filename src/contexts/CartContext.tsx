@@ -20,6 +20,8 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   total: number;
+  isDrawerOpen: boolean;
+  setIsDrawerOpen: (open: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ const CART_STORAGE_KEY = 'lelecute-cart';
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { toast } = useToast();
 
   // Load cart from localStorage on mount
@@ -68,6 +71,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return [...currentItems, { ...newItem, quantity }];
     });
 
+    setIsDrawerOpen(true);
+
     toast({
       title: "Adicionado ao carrinho! 🛒",
       description: `${quantity}x ${newItem.name}`,
@@ -104,6 +109,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       clearCart,
       itemCount,
       total,
+      isDrawerOpen,
+      setIsDrawerOpen,
     }}>
       {children}
     </CartContext.Provider>

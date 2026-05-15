@@ -75,11 +75,20 @@ const Header = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? "bg-background/80 backdrop-blur-lg border-b border-border/50 shadow-medium py-1" 
-          : "bg-background/95 backdrop-blur-md border-b border-border/30 py-3"
+          ? "bg-background/80 backdrop-blur-lg border-b border-border/50 shadow-medium" 
+          : "bg-background/95 backdrop-blur-md border-b border-border/30"
       }`}
     >
-      <nav ref={navRef} className="container mx-auto px-4" aria-label="Navegação principal">
+      {/* Top Announcement Bar */}
+      <div className={`bg-primary text-primary-foreground text-[10px] md:text-xs py-1.5 px-4 text-center font-medium transition-all duration-300 overflow-hidden ${
+        isScrolled ? "h-0 opacity-0" : "h-auto opacity-100"
+      }`}>
+        <p className="animate-pulse-slow">✨ Parcele em até 3x sem juros • Enviamos para todo o Brasil 📦</p>
+      </div>
+
+      <nav ref={navRef} className={`container mx-auto px-4 transition-all duration-300 ${
+        isScrolled ? "py-2" : "py-3"
+      }`} aria-label="Navegação principal">
         <div className="flex items-center justify-between">
           <Link
             to="/"

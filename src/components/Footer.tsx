@@ -106,7 +106,7 @@ const Footer = () => {
 
           {/* Contato */}
           <div>
-            <h3 className="font-display text-xl mb-4">Contato</h3>
+            <h3 className="font-display text-xl mb-4">Ateliê LeleCute</h3>
             <ul className="space-y-4 text-sm text-primary-foreground/80">
               <li className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -114,7 +114,11 @@ const Footer = () => {
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="whitespace-pre-line">{config.contacts.address}</span>
+                <span className="whitespace-pre-line">
+                  São José dos Pinhais - PR<br />
+                  Atendimento em Curitiba e Região Metropolitana<br />
+                  Enviamos para todo o Brasil
+                </span>
               </li>
             </ul>
           </div>
