@@ -281,14 +281,14 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <>
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background hover:scale-110 active:scale-95 transition-all duration-300 shadow-lg"
                   aria-label="Imagem anterior"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background transition-colors shadow-lg"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-background/90 rounded-full hover:bg-background hover:scale-110 active:scale-95 transition-all duration-300 shadow-lg"
                   aria-label="Próxima imagem"
                 >
                   <ChevronRight className="h-6 w-6" />
