@@ -90,7 +90,7 @@ const AdminProductForm = () => {
         images: existingProduct.images.length > 0 ? existingProduct.images : [''],
         features: existingProduct.features.length > 0 ? existingProduct.features : [''],
         keywords: keywords,
-        elo7_link: existingProduct.elo7_link || '',
+        
         is_active: existingProduct.is_active,
         personalization_enabled: existingProduct.personalization_enabled ?? true,
         personalization_label: existingProduct.personalization_label || 'Personalização',
