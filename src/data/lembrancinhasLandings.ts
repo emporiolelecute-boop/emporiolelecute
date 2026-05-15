@@ -93,6 +93,35 @@ export const LEMBRANCINHAS_LANDINGS: LembrancinhasLandingConfig[] = [
       },
     ],
     relatedRouteSlugs: ["maternidade", "cha-revelacao"],
+    gallery: [
+      "/og-image.webp",
+    ].filter((_, i) => i < 0), // gallery preenchida via admin (Supabase). Hardcoded vazia para evitar imagens repetidas.
+    socialProofStats: [
+      { value: "+2.000", label: "Famílias atendidas" },
+      { value: "10+", label: "Anos de experiência" },
+      { value: "7 dias", label: "Prazo de produção" },
+      { value: "Brasil", label: "Envio nacional" },
+    ],
+    testimonials: [
+      {
+        name: "Mariana S.",
+        location: "Curitiba/PR",
+        rating: 5,
+        text: "Os sabonetes do chá da minha filha ficaram lindos! Personalização impecável e cheirinho maravilhoso. Todas as convidadas elogiaram.",
+      },
+      {
+        name: "Juliana R.",
+        location: "São Paulo/SP",
+        rating: 5,
+        text: "Atendimento rápido pelo WhatsApp, mandaram a arte para aprovar antes de produzir. Chegou tudo embalado individualmente, super bem feito.",
+      },
+      {
+        name: "Camila P.",
+        location: "Belo Horizonte/MG",
+        rating: 5,
+        text: "Encomendei 60 mini velas com o nome do bebê. Produto artesanal de qualidade, exatamente como nas fotos. Recomendo demais!",
+      },
+    ],
   },
   {
     routeSlug: "maternidade",
