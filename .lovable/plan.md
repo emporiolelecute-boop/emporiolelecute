@@ -1,88 +1,92 @@
-## Objetivo
+# Plano: Integração completa Google Search Console + SEO técnico
 
-1. Garantir que usuários com `prefers-reduced-motion: reduce` tenham troca de slides instantânea, sem flash, sem "piscar" e sem layout-shift.
-2. Auditar o HeroSlider (cross-fade + ResizeObserver) para eliminar re-renders desnecessários e engasgos em mobile/desktop.
-3. Apresentar um roadmap curto de melhorias adicionais (sem implementar agora).
+Antes de implementar, alinhamento do que será feito (em ordem de execução). Nada será alterado no que já funciona — apenas adições.
 
----
+## Status atual (já existente no projeto)
+- ✅ Conexão Google Search Console: **já conectada** (secret `GOOGLE_SEARCH_CONSOLE_API_KEY` ativo)
+- ✅ Sitemap dinâmico submetido ao GSC (91 URLs, 54 imagens, 0 erros)
+- ✅ `robots.txt` dinâmico via Edge Function `robots-txt` + painel admin (`AdminRobots`) com sitemap correto
+- ✅ Schema.org já implementado: `Organization`, `WebSite`, `LocalBusiness`, `Product`, `FAQPage`, `BreadcrumbList`, `ItemList`
+- ✅ Edge Function `seo-gsc-analytics` e `seo-checks` existentes
+- ✅ Geração de sitemap por `generate-sitemap` + `submit-sitemap`
 
-## Parte A — Reduced Motion (implementar agora)
-
-Hoje o HeroSlider usa classes `motion-safe:animate-fade-in` e `motion-safe:animate-fade-out`. Com `prefers-reduced-motion: reduce`, essas animações somem, mas:
-
-- O slide ativo entra com `opacity-0` (classe base) e depende da animação para ficar visível → em `motion-reduce` ele fica **invisível**.
-- A altura do stage (`transition-[height]`) também é `motion-safe`, então o "snap" de altura é aceitável, porém o slide anterior fica empilhado por 600ms causando sobreposição.
-
-**Correções:**
-
-1. Detectar `prefers-reduced-motion` via `useEffect` + `matchMedia('(prefers-reduced-motion: reduce)')` e guardar em estado `reducedMotion`.
-2. Quando `reducedMotion === true`:
-   - Não renderizar o slide anterior (`previous`) — troca instantânea.
-   - Renderizar slide ativo com `opacity-100` direto (sem `opacity-0` inicial).
-   - Stage com `height: 'auto'` (sem transição).
-3. Quando `reducedMotion === false`: comportamento atual (cross-fade 500ms).
-4. Garantir fallback CSS: a classe `motion-reduce:opacity-100` já existe no ativo, mas remover o `opacity-0` base condicionalmente para evitar qualquer flash em navegadores que processam `motion-reduce` com atraso.
-
-**Validação:**
-- Chrome DevTools → Rendering → "Emulate CSS prefers-reduced-motion: reduce" → trocar slides 1→2→3 → conteúdo aparece imediatamente, sem fade, sem invisibilidade.
-- Sem `motion-reduce`: cross-fade continua suave.
+Ou seja, **vários itens do pedido já estão prontos**. O plano foca no que falta ou pode ser melhorado.
 
 ---
 
-## Parte B — Auditoria de performance
+## 1. Conexão GSC ✅ (nada a fazer)
+Já conectada e o sitemap `https://emporiolelecute.com.br/sitemap.xml` foi submetido com sucesso. Apenas **revalidar** via painel.
 
-**Riscos atuais identificados na leitura de `HeroSlider.tsx`:**
+## 2. robots.txt completo ✅ (revisão leve)
+Já existe via Edge Function + `public/robots.txt` de fallback. Vou:
+- Garantir que o `public/robots.txt` espelhe a config do banco (mesmas regras)
+- Adicionar `Disallow: /checkout`, `/api/` e bots agressivos opcionais (se quiser)
+- Sem mudanças se já estiver ok — apenas validar diff visual no painel
 
-1. `ResizeObserver` re-cria a cada `currentSlide` ou `slides.length` mudar (deps do `useLayoutEffect`). Em troca de slide, observer é desconectado e recriado — desperdício.
-2. `setStageHeight(el.offsetHeight)` dispara re-render a cada frame de animação de imagem carregando → potencial loop.
-3. `SlideRenderer` renderiza **tanto** mobile quanto desktop ao mesmo tempo (controlados por `block md:hidden` / `hidden md:block`). Isso é correto para evitar flash em resize, mas o slide anterior **também** renderiza ambos — temos até 4 imagens montadas simultaneamente durante o cross-fade.
-4. `window.addEventListener('resize', measure)` sem debounce.
-5. Função `goTo` recriada a cada render (não memoizada) — passada para `onClick` dos dots.
+## 3. Painel de métricas SEO (NOVO)
+Criar página `AdminSEODashboard` (ou expandir a existente) consumindo a Edge Function `seo-gsc-analytics` para mostrar:
+- **Status de indexação**: total submetido vs indexado vs excluído (últimos 30 dias)
+- **Cobertura do sitemap**: contagem de URLs no sitemap × URLs descobertas pelo Google
+- **Top queries** (cliques, impressões, CTR, posição média)
+- **Top páginas** com performance
+- **Erros de cobertura** (404, server errors, redirects, noindex)
+- Gráficos com Recharts já presente
+- Refresh manual + cache de 1h
 
-**Correções:**
+## 4. Monitoramento periódico + alertas (NOVO)
+Edge Function `seo-indexation-monitor` agendada via `pg_cron` (diário 06:00):
+- Lê todas URLs do sitemap
+- Chama GSC URL Inspection API em lote (limite ~2000/dia)
+- Salva snapshot em nova tabela `seo_url_status` (url, coverage_state, last_crawl, indexing_state, checked_at)
+- Se aparecer **nova** URL com erro/excluída → envia e-mail via Resend para `emporiolelecute@gmail.com`
+- Painel mostra histórico + diff do dia
 
-1. **Observer estável**: mover `ResizeObserver` para um `useLayoutEffect` com deps `[]`, observar `stageRef.current` (wrapper) ao invés de `activeRef.current`. Quando o slide ativo trocar, o wrapper já reflete a nova altura via re-render.
-2. **Debounce de medição**: usar `requestAnimationFrame` para coalescer múltiplas chamadas de `measure` no mesmo frame.
-3. **Evitar loop**: comparar `Math.round(el.offsetHeight)` com `stageHeight` antes de chamar `setStageHeight`.
-4. **Imagens duplicadas no cross-fade**: aceitar como custo (necessário para fade), mas garantir que o slide anterior use `loading="lazy"` e `decoding="async"` (já está) e seja `aria-hidden` (já está). Adicionar `pointer-events-none` (já está).
-5. **Debounce resize**: trocar `resize` listener por `ResizeObserver` no `<section>` raiz (já cobre resize de viewport quando o componente é responsivo) — eliminar listener de `window`.
-6. **Memoizar callbacks**: `goTo`, `nextSlideFn`, `prevSlideFn` com `useCallback`.
-7. **Memoizar `slides` derivado**: o array vem do hook; só comparar referência.
+## 5. Reenvio automático do sitemap em mudanças no catálogo (NOVO)
+Trigger Postgres `AFTER INSERT/UPDATE/DELETE` em `products`, `categories`, `pages`, `blog_posts`:
+- Marca flag em `store_settings.key = 'sitemap_dirty'` com timestamp
+- Job `pg_cron` a cada 15min: se dirty, chama `submit-sitemap` (que regenera + faz `ping` ao GSC) e limpa flag
+- Debounce evita reenvio a cada save individual; respeita quota GSC
 
-**Validação:**
-- DevTools Performance → gravar 10s navegando entre slides → verificar se há long tasks > 50ms.
-- React DevTools Profiler → trocar slide → confirmar que apenas `HeroSlider` re-renderiza, não pais.
-
----
-
-## Parte C — Roadmap de melhorias futuras (não implementar agora, para sua aprovação posterior)
-
-1. **Pré-carregar próximo slide**: `<link rel="prefetch">` para imagem do próximo slide quando o atual ficar visível há 3s.
-2. **Pause-on-hover / pause-on-focus**: pausar autoplay quando mouse sobre o slider ou quando dot recebe foco (acessibilidade WAI-ARIA Carousel pattern).
-3. **Swipe gestures no mobile**: arrastar para trocar slide (touch events nativos, sem lib).
-4. **Indicador de progresso**: barra fina abaixo dos dots mostrando o tempo até a próxima troca (visual delicado, suave).
-5. **Lazy mount de slides distantes**: renderizar só os 2 slides "vizinhos" do atual (mais 1 anterior + 1 próximo), reduzindo DOM.
-6. **Preload inteligente da imagem desktop vs mobile**: usar `<picture>` com `<source media>` ao invés de renderizar dois `<img>` (`block md:hidden` / `hidden md:block`) — economiza 1 download por slide.
-7. **Telemetria opcional**: registrar quantos usuários usam setas vs dots vs autoplay (orienta UX).
-8. **Animação direcional**: ao clicar "próximo", slide entra da direita; ao clicar "anterior", da esquerda (atualmente é cross-fade puro).
-9. **ARIA live region**: anunciar troca de slide para leitores de tela (`<div aria-live="polite">Slide 2 de 3</div>`).
-10. **Pausar quando aba está oculta**: usar `document.visibilityState` para parar autoplay e economizar bateria.
-
----
-
-## Arquivos afetados (Partes A e B)
-
-- `src/components/HeroSlider.tsx` — único arquivo alterado.
-
-## Não será alterado
-
-- `useHeroSlides`, RLS, queries, estrutura de banner mobile/desktop, fallback, dots/setas, TrustBadges, autoplay (6s).
-
-## Riscos & mitigação
-
-- **Risco**: ao remover slide anterior em `reduced-motion`, pode haver "salto" de altura. Mitigação: stage com `height: auto` direto (sem transição) — comportamento esperado por quem solicita reduced-motion.
-- **Risco**: `ResizeObserver` em wrapper com altura controlada por estado pode criar feedback loop. Mitigação: comparar valor antes do `setState` (item B.3).
+## 6. Schema.org + Rich Results (revisão)
+Auditar componentes existentes e:
+- Confirmar `Product` com `offers`, `aggregateRating` (condicional), `shippingDetails`, `MerchantReturnPolicy` ✅ já tem
+- Confirmar `BreadcrumbList` em todas as páginas profundas ✅ já tem
+- Adicionar `BreadcrumbList` onde faltar (páginas dinâmicas, blog)
+- `Organization` + `LocalBusiness` ✅ já tem
+- Validar URLs principais via API do Rich Results Test (ou link direto no painel)
+- Adicionar botão no painel SEO: "Validar no Rich Results Test" (abre `https://search.google.com/test/rich-results?url=...` em nova aba para cada URL chave)
 
 ---
 
-**Confirma para eu implementar as Partes A e B?** O Roadmap (Parte C) fica para você escolher quais quer priorizar depois.
+## Detalhes técnicos
+
+### Novos arquivos
+- `supabase/functions/seo-indexation-monitor/index.ts` — cron diário GSC URL Inspection
+- `supabase/functions/seo-sitemap-auto-resubmit/index.ts` — reenvio debounced
+- `src/pages/admin/AdminSEODashboard.tsx` — painel de métricas (ou expandir o existente)
+- `src/components/admin/SEOIndexationPanel.tsx` — tabela de URLs com status
+- Migration: tabela `seo_url_status` + trigger `mark_sitemap_dirty()` + cron jobs
+
+### Novos secrets necessários
+Nenhum — `GOOGLE_SEARCH_CONSOLE_API_KEY`, `LOVABLE_API_KEY`, `RESEND_API_KEY` já configurados.
+
+### Sem mudanças em
+- `HeroSlider.tsx` (funcionando, não tocar)
+- `index.css`, design tokens, componentes públicos
+- Schemas existentes (apenas auditoria)
+
+### Riscos / Cuidados
+- GSC URL Inspection API tem quota de 2000 chamadas/dia — ok para ~91 URLs/dia
+- Cron deve respeitar `pg_cron` + `pg_net` (já habilitados no projeto)
+- Reenvio do sitemap não pode ficar em loop — uso de flag + debounce
+
+---
+
+## Ordem de execução proposta
+1. Auditoria + ajustes mínimos no `robots.txt` e Schema (rápido, baixo risco)
+2. Painel SEO Dashboard com dados do GSC já existente
+3. Tabela + Edge Function de monitoramento de indexação
+4. Cron + alertas por e-mail
+5. Trigger + reenvio automático do sitemap
+
+Posso seguir? Se aprovar, começo pelos itens 1+2 (mais visíveis e seguros) e depois 3-5 em sequência.
