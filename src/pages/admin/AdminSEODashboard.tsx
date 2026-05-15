@@ -135,8 +135,20 @@ export default function AdminSEODashboard() {
 
   const loadAlertCfg = useCallback(async () => {
     const { data } = await supabase.from('store_settings').select('value').eq('key', 'seo_alerts_config').maybeSingle();
-    if (data?.value) setAlertCfg({ email: '', webhook_url: '', enabled: true, ...(data.value as object) });
+    if (data?.value) setAlertCfg({ email: '', webhook_url: '', enabled: true, severities: ['error'], ...(data.value as object) });
   }, []);
+
+  const sendTestAlert = async () => {
+    setSendingTest(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('seo-checks', { body: { test: true } });
+      if (error) throw error;
+      const r = data as { email_sent?: boolean; webhook_sent?: boolean; error?: string | null };
+      if (r.error) toast.error('Falha no teste', { description: r.error });
+      else toast.success(`Teste enviado · email: ${r.email_sent ? 'ok' : '—'} · webhook: ${r.webhook_sent ? 'ok' : '—'}`);
+    } catch (e) { toast.error(String(e instanceof Error ? e.message : e)); }
+    finally { setSendingTest(false); }
+  };
 
   const saveAlertCfg = async () => {
     setSavingCfg(true);
