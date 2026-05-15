@@ -18,10 +18,20 @@ interface Profile {
   id: string;
   email: string;
   full_name: string | null;
-  access_requested: boolean;
-  access_requested_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface AccessRequest {
+  id: string;
+  user_id: string;
+  status: 'pending' | 'approved' | 'denied';
+  requested_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  reviewed_by_email: string | null;
+  rejection_reason: string | null;
+  user_email_snapshot: string | null;
 }
 
 interface AuditEntry {
