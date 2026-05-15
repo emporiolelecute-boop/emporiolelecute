@@ -253,8 +253,11 @@ const HeroSlider = () => {
 
   const isPriority = currentSlide === 0;
   const display = resolveSlideDisplay(slide, isMobile);
-  const isBanner =
-    display.mode === "banner_mobile" || display.mode === "banner_desktop";
+  const mobileBannerSrc = resolveImageSrc(slide.image_mobile_url);
+  const desktopBannerSrc = resolveImageSrc(slide.image_desktop_url);
+  const fallbackSrc = resolveImageSrc(slide.image_url) || sabonetesImg;
+  const hasAnyBanner = Boolean(mobileBannerSrc || desktopBannerSrc);
+  const isBanner = hasAnyBanner;
 
   return (
     <section
@@ -275,18 +278,29 @@ const HeroSlider = () => {
         </>
       )}
 
-      {/* Slide content — keyed so transitions animate on slide change */}
-      <div key={`${slide.id}-${display.mode}`} className="w-full">
-        {display.mode === "text_image" && (
+      {/* Slide content — render responsive banners with CSS so mobile never waits for JS breakpoint detection */}
+      <div key={`${slide.id}-${hasAnyBanner ? "responsive-banner" : "text_image"}`} className="w-full">
+        {hasAnyBanner ? (
+          <>
+            {mobileBannerSrc ? (
+              <SlideBannerMobile slide={slide} isPriority={isPriority} imgSrc={mobileBannerSrc} />
+            ) : (
+              <div className="block md:hidden pt-20 pb-10">
+                <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
+              </div>
+            )}
+            {desktopBannerSrc ? (
+              <SlideBannerDesktop slide={slide} isPriority={isPriority} imgSrc={desktopBannerSrc} />
+            ) : (
+              <div className="hidden md:block pt-20 pb-10 md:pb-14">
+                <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
+              </div>
+            )}
+          </>
+        ) : (
           <div className="pt-20 pb-10 md:pb-14">
-            <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
+            <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={fallbackSrc} />
           </div>
-        )}
-        {display.mode === "banner_mobile" && (
-          <SlideBannerMobile slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
-        )}
-        {display.mode === "banner_desktop" && (
-          <SlideBannerDesktop slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
         )}
       </div>
 
