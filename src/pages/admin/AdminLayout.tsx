@@ -124,12 +124,12 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 h-full w-72 bg-card/95 backdrop-blur-xl border-r border-border/50 z-50 transition-all duration-300 shadow-xl lg:shadow-none",
+        "fixed top-0 left-0 h-full w-72 bg-card/95 backdrop-blur-xl border-r border-border/50 z-50 transition-all duration-300 shadow-xl lg:shadow-none flex flex-col",
         "lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border/50">
+        <div className="flex items-center justify-between p-5 border-b border-border/50 shrink-0">
           <Link to="/admin" className="flex items-center gap-3 group">
             <div className="w-14 h-14 rounded-full bg-white shadow-md ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all flex items-center justify-center overflow-hidden shrink-0">
               <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-1" />
@@ -148,7 +148,7 @@ const AdminLayout = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1.5">
+        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1.5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -177,7 +177,7 @@ const AdminLayout = () => {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50 space-y-2 bg-card/50 backdrop-blur-sm">
+        <div className="shrink-0 p-4 border-t border-border/50 space-y-2 bg-card/80 backdrop-blur-sm">
           <Link
             to="/"
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-all group"
