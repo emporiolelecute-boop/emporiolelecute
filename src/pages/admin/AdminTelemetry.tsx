@@ -178,11 +178,11 @@ export default function AdminTelemetry() {
     return Array.from(map.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1));
   }, [filtered, grouped]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(displayRows.length / PAGE_SIZE));
+  const pageRows = displayRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   useEffect(() => {
     setPage(1);
-  }, [routeFilter, componentFilter, messageFilter, sourceFilter, from, to]);
+  }, [routeFilter, componentFilter, messageFilter, sourceFilter, cidFilter, from, to, grouped]);
 
   const copyStack = async (row: ParsedLog) => {
     const text = [
