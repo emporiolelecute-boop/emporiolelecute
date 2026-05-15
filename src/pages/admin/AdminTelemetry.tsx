@@ -95,14 +95,17 @@ function downloadCsv(rows: ParsedLog[]) {
 }
 
 export default function AdminTelemetry() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<ParsedLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [routeFilter, setRouteFilter] = useState("");
   const [componentFilter, setComponentFilter] = useState("");
   const [messageFilter, setMessageFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [cidFilter, setCidFilter] = useState(searchParams.get("cid") ?? "");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [grouped, setGrouped] = useState(false);
   const [page, setPage] = useState(1);
   const [detail, setDetail] = useState<ParsedLog | null>(null);
 
@@ -126,6 +129,15 @@ export default function AdminTelemetry() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to]);
 
+  // Sync cid filter to URL so it's shareable.
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (cidFilter) next.set("cid", cidFilter);
+    else next.delete("cid");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cidFilter]);
+
   const sources = useMemo(() => {
     const s = new Set<string>();
     rows.forEach((r) => r.source && s.add(r.source));
@@ -136,14 +148,35 @@ export default function AdminTelemetry() {
     const r = routeFilter.trim().toLowerCase();
     const c = componentFilter.trim().toLowerCase();
     const m = messageFilter.trim().toLowerCase();
+    const cid = cidFilter.trim().toLowerCase();
     return rows.filter((row) => {
       if (sourceFilter !== "all" && row.source !== sourceFilter) return false;
       if (r && !(row.route || "").toLowerCase().includes(r)) return false;
       if (c && !(row.component || "").toLowerCase().includes(c)) return false;
       if (m && !(row.cleanMessage || "").toLowerCase().includes(m)) return false;
+      if (cid && !(row.cid || "").toLowerCase().includes(cid)) return false;
       return true;
     });
-  }, [rows, routeFilter, componentFilter, messageFilter, sourceFilter]);
+  }, [rows, routeFilter, componentFilter, messageFilter, sourceFilter, cidFilter]);
+
+  // Optional dedup grouping: collapse rows with same source+component+cleanMessage+route
+  // and show count + first/last occurrence.
+  const displayRows = useMemo(() => {
+    if (!grouped) return filtered;
+    const map = new Map<string, ParsedLog & { count: number; firstAt: string; lastAt: string }>();
+    for (const r of filtered) {
+      const key = [r.source, r.component, r.route, r.cleanMessage].join("|");
+      const ex = map.get(key);
+      if (ex) {
+        ex.count++;
+        if (r.occurred_at < ex.firstAt) ex.firstAt = r.occurred_at;
+        if (r.occurred_at > ex.lastAt) ex.lastAt = r.occurred_at;
+      } else {
+        map.set(key, { ...r, count: 1, firstAt: r.occurred_at, lastAt: r.occurred_at });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1));
+  }, [filtered, grouped]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
