@@ -117,7 +117,50 @@ export default function AdminSEODashboard() {
     } finally { setLoadingChecks(false); }
   };
 
-  useEffect(() => { loadGsc(28, 'query'); runChecks(); }, []);
+  const loadRuns = useCallback(async () => {
+    const { data } = await supabase.from('seo_check_runs').select('*').order('ran_at', { ascending: false }).limit(30);
+    setRuns((data ?? []) as CheckRun[]);
+  }, []);
+
+  const loadAlertCfg = useCallback(async () => {
+    const { data } = await supabase.from('store_settings').select('value').eq('key', 'seo_alerts_config').maybeSingle();
+    if (data?.value) setAlertCfg({ email: '', webhook_url: '', enabled: true, ...(data.value as object) });
+  }, []);
+
+  const saveAlertCfg = async () => {
+    setSavingCfg(true);
+    try {
+      const { data: existing } = await supabase.from('store_settings').select('id').eq('key', 'seo_alerts_config').maybeSingle();
+      if (existing) await supabase.from('store_settings').update({ value: alertCfg }).eq('id', existing.id);
+      else await supabase.from('store_settings').insert({ key: 'seo_alerts_config', value: alertCfg });
+      toast.success('Configuração salva');
+    } catch (e) { toast.error(String(e instanceof Error ? e.message : e)); }
+    finally { setSavingCfg(false); }
+  };
+
+  useEffect(() => { loadGsc(28, 'query'); runChecks(); loadRuns(); loadAlertCfg(); }, [loadRuns, loadAlertCfg]);
+
+  // Diff between two most recent runs
+  const lastRun = runs[0];
+  const prevRun = runs[1];
+  const diff = lastRun && prevRun ? lastRun.checks.map(c => {
+    const old = prevRun.checks.find(x => x.name === c.name);
+    if (!old) return { name: c.name, change: 'novo', from: '—', to: c.detail, ok: c.ok };
+    if (old.ok === c.ok && old.detail === c.detail) return null;
+    return { name: c.name, change: old.ok && !c.ok ? 'regrediu' : (!old.ok && c.ok ? 'corrigido' : 'alterado'), from: old.detail, to: c.detail, ok: c.ok };
+  }).filter(Boolean) as Array<{ name: string; change: string; from: string; to: string; ok: boolean }> : [];
+
+  const exportSemrushCsv = () => downloadCSV('seo-semrush-snapshots.csv', snaps.map(s => ({
+    captured_at: s.captured_at, authority: s.authority_score, backlinks: s.backlinks_total,
+    referring_domains: s.referring_domains, keywords: s.organic_keywords, traffic: s.organic_traffic,
+  })));
+  const exportGscCsv = () => downloadCSV('seo-gsc.csv', (gsc?.rows ?? []).map(r => ({
+    query: r.keys[0], clicks: r.clicks, impressions: r.impressions, ctr: r.ctr, position: r.position,
+  })));
+  const exportRunsCsv = () => downloadCSV('seo-check-runs.csv', runs.map(r => ({
+    ran_at: r.ran_at, source: r.source, total: r.total, passed: r.passed, errors: r.errors, warnings: r.warnings, alert_sent: r.alert_sent,
+  })));
+  const exportPdf = () => window.print();
 
   const trendData = [...snaps].reverse().map(s => ({
     date: format(new Date(s.captured_at), 'dd/MM'),
