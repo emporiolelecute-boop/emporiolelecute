@@ -77,7 +77,7 @@ const defaultPaymentConfig: PaymentConfig = {
 export const defaultTrustBadgesConfig: TrustBadgesConfig = {
   items: [
     { icon: 'Truck', title: 'Envio para', subtitle: 'Todo o Brasil' },
-    { icon: 'Percent', title: 'Descontos', subtitle: '3% PIX' },
+    { icon: 'Percent', title: 'Descontos', subtitle: '5% PIX' },
     { icon: 'Headset', title: 'Atendimento', subtitle: 'Personalizado' },
     { icon: 'CreditCard', title: 'Pague com Cartão', subtitle: 'Até 3x sem juros' },
   ],
