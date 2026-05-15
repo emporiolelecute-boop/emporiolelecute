@@ -49,7 +49,7 @@ type FormState = {
   testimonials_json: string;
   social_proof_stats_json: string;
   related_route_slugs_csv: string;
-  gallery: string[];
+  gallery: string[]; // admin uploader trabalha apenas com URLs simples
   og_image_url: string;
   og_image_alt: string;
   position: number;
@@ -96,7 +96,9 @@ const toForm = (l: OccasionLanding): FormState => ({
   testimonials_json: JSON.stringify(l.testimonials, null, 2),
   social_proof_stats_json: JSON.stringify(l.social_proof_stats, null, 2),
   related_route_slugs_csv: l.related_route_slugs.join(", "),
-  gallery: Array.isArray(l.gallery) ? l.gallery : [],
+  gallery: Array.isArray(l.gallery)
+    ? l.gallery.map((g) => (typeof g === "string" ? g : g.src)).filter(Boolean)
+    : [],
   og_image_url: l.og_image_url ?? "",
   og_image_alt: l.og_image_alt ?? "",
   position: l.position,
