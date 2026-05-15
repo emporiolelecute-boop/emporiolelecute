@@ -56,6 +56,74 @@ const AdminAccessRequestDetail = () => {
   const [acting, setActing] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  const COOLDOWN_SECONDS = 60;
+  const cooldownKey = id ? `notify_resend_cooldown:${id}` : '';
+
+  // Hydrate cooldown from localStorage
+  useEffect(() => {
+    if (!cooldownKey) return;
+    const raw = localStorage.getItem(cooldownKey);
+    if (!raw) return;
+    const remaining = Math.max(0, Math.ceil((Number(raw) - Date.now()) / 1000));
+    if (remaining > 0) setCooldown(remaining);
+    else localStorage.removeItem(cooldownKey);
+  }, [cooldownKey]);
+
+  // Tick cooldown
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
+
+  const copyToClipboard = async (text: string, label = 'Mensagem') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: `${label} copiada` });
+    } catch {
+      toast({ title: 'Falha ao copiar', variant: 'destructive' });
+    }
+  };
+
+  const resendNotification = async () => {
+    if (!profile || cooldown > 0) return;
+    setResending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('notify-admins-new-request', {
+        body: {
+          user_id: profile.id,
+          email: profile.email,
+          requested_at: profile.access_requested_at ?? new Date().toISOString(),
+          source: 'manual_resend',
+        },
+      });
+      if (error) throw error;
+      const result = data as { ok?: boolean; sent?: number; admin_count?: number; errors?: string[] } | null;
+      if (result?.ok === false) {
+        toast({
+          title: 'Notificação registrada com falhas',
+          description: (result?.errors || []).join(' | ').slice(0, 200) || 'Veja o histórico abaixo.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Notificação reenviada',
+          description: `${result?.sent ?? 0} de ${result?.admin_count ?? 0} admin(s) notificado(s).`,
+        });
+      }
+      const until = Date.now() + COOLDOWN_SECONDS * 1000;
+      if (cooldownKey) localStorage.setItem(cooldownKey, String(until));
+      setCooldown(COOLDOWN_SECONDS);
+      await load();
+    } catch (e: any) {
+      toast({ title: 'Erro ao reenviar', description: e.message, variant: 'destructive' });
+    } finally {
+      setResending(false);
+    }
+  };
 
   const load = async () => {
     if (!id) return;
