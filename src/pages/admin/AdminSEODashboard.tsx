@@ -119,7 +119,7 @@ export default function AdminSEODashboard() {
 
   const loadRuns = useCallback(async () => {
     const { data } = await supabase.from('seo_check_runs').select('*').order('ran_at', { ascending: false }).limit(30);
-    setRuns((data ?? []) as CheckRun[]);
+    setRuns((data ?? []) as unknown as CheckRun[]);
   }, []);
 
   const loadAlertCfg = useCallback(async () => {
