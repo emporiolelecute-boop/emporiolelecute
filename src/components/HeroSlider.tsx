@@ -252,9 +252,9 @@ const HeroSlider = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   const isPriority = currentSlide === 0;
+  const display = resolveSlideDisplay(slide, isMobile);
   const isBanner =
-    slide.display_mode === "banner_mobile" ||
-    slide.display_mode === "banner_desktop";
+    display.mode === "banner_mobile" || display.mode === "banner_desktop";
 
   return (
     <section
@@ -266,7 +266,7 @@ const HeroSlider = () => {
       aria-label="Seção principal - Empório LeleCute"
     >
       {/* Decorative background — only for text_image mode */}
-      {slide.display_mode === "text_image" && (
+      {display.mode === "text_image" && (
         <>
           <div className="absolute inset-0 bg-dotted-pattern opacity-30 pointer-events-none" />
           <div className="absolute top-32 right-[15%] text-amber-400 pointer-events-none">
@@ -276,17 +276,17 @@ const HeroSlider = () => {
       )}
 
       {/* Slide content — keyed so transitions animate on slide change */}
-      <div key={slide.id} className="w-full">
-        {slide.display_mode === "text_image" && (
+      <div key={`${slide.id}-${display.mode}`} className="w-full">
+        {display.mode === "text_image" && (
           <div className="pt-20 pb-10 md:pb-14">
-            <SlideTextImage slide={slide} isPriority={isPriority} />
+            <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
           </div>
         )}
-        {slide.display_mode === "banner_mobile" && (
-          <SlideBannerMobile slide={slide} isPriority={isPriority} />
+        {display.mode === "banner_mobile" && (
+          <SlideBannerMobile slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
         )}
-        {slide.display_mode === "banner_desktop" && (
-          <SlideBannerDesktop slide={slide} isPriority={isPriority} />
+        {display.mode === "banner_desktop" && (
+          <SlideBannerDesktop slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
         )}
       </div>
 
