@@ -18,7 +18,7 @@ export function optimizeImage(
   const PUBLIC = "/storage/v1/object/public/";
   if (!url.includes(PUBLIC)) return url;
 
-  const { width = 800, quality = 75, resize = "contain" } = options;
+  const { width = 800, quality = 75, resize = "cover" } = options;
   const transformed = url.replace(PUBLIC, "/storage/v1/render/image/public/");
   const sep = transformed.includes("?") ? "&" : "?";
   return `${transformed}${sep}width=${width}&quality=${quality}&resize=${resize}`;
@@ -31,7 +31,7 @@ export function buildSrcSet(
   url: string | undefined | null,
   widths: number[] = [400, 600, 800, 1200],
   quality = 75,
-  resize: "cover" | "contain" | "fill" = "contain"
+  resize: "cover" | "contain" | "fill" = "cover"
 ): string | undefined {
   if (!url || !url.includes("/storage/v1/object/public/")) return undefined;
   return widths
