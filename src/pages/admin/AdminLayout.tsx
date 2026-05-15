@@ -57,6 +57,7 @@ const menuItems = [
   { icon: Rss, label: 'Feed Merchant', path: '/admin/merchant-feed' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
   { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
+  { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
 ];
 
 const AdminLayout = () => {
