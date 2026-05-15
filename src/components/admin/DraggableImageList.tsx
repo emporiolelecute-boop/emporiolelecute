@@ -76,7 +76,7 @@ const SortableImage = ({ id, url, index, isMain, onRemove }: SortableImageProps)
       <img
         src={url}
         alt={`Imagem ${index + 1}`}
-        className="w-full aspect-square object-cover"
+        className="w-full aspect-square object-contain bg-muted p-1"
         loading="lazy"
       />
       
