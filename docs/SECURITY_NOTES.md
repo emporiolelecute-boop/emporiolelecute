@@ -65,3 +65,19 @@ supabase--linter
 ```
 Expected: **0 ERRORs**, ≤13 WARNs that match the table above. Any new WARN
 should be triaged here before being accepted.
+
+## Audit Timeline (2026-05-15)
+
+- `public.admin_audit_timeline` is a materialized view consolidating
+  `role_promotion_audit`, `admin_access_requests`, and
+  `access_request_notifications`. Direct SELECT is REVOKED from anon and
+  authenticated; reads must go through SECURITY DEFINER RPCs:
+  `list_admin_audit_timeline`, `admin_audit_anomalies`,
+  `refresh_admin_audit_timeline`. All three gate on
+  `has_role(auth.uid(), 'admin')`.
+- The MV is refreshed on demand (admin "Atualizar" button) using
+  `REFRESH MATERIALIZED VIEW CONCURRENTLY` (unique index on
+  `(source, event_id)`), with a non-concurrent fallback for the first run.
+- LGPD: the admin UI exposes a per-session toggle that masks
+  `target_email` / `actor_email` in the table, anomaly cards and CSV/PDF
+  exports. Storage remains immutable — masking is presentation-only.
