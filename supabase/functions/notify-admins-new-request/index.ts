@@ -25,6 +25,7 @@ interface Payload {
   user_id?: string;
   email?: string;
   requested_at?: string;
+  source?: string;
 }
 
 Deno.serve(async (req) => {
