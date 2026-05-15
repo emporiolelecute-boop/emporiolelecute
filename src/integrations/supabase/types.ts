@@ -1399,6 +1399,27 @@ export type Database = {
         }
         Relationships: []
       }
+      telemetry_alert_state: {
+        Row: {
+          id: string
+          last_alert_at: string | null
+          last_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          last_alert_at?: string | null
+          last_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          last_alert_at?: string | null
+          last_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           created_at: string
