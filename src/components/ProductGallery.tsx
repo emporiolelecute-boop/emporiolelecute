@@ -124,8 +124,8 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               <div
                 key={index}
                 className={cn(
-                  "absolute inset-0 transition-all duration-500",
-                  index === currentIndex ? "opacity-100 scale-100" : "opacity-0 scale-105"
+                  "absolute inset-0 transition-opacity duration-500",
+                  index === currentIndex ? "opacity-100" : "opacity-0"
                 )}
               >
                 <BlurImage
@@ -135,6 +135,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   responsiveWidths={[400, 600, 800, 1200]}
                   priority={index === 0}
                   sizes="(max-width: 1024px) 100vw, 600px"
+                  className="object-contain"
                 />
               </div>
             ))}
