@@ -419,14 +419,25 @@ const AdminOrders = () => {
                         <span className="text-sm text-muted-foreground">{formatDate(order.created_at)}</span>
                       </td>
                       <td className="p-4 text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewOrder(order)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => resendEmailMutation.mutate(order)}
+                            disabled={resendEmailMutation.isPending}
+                            title="Reenviar e-mail de status"
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewOrder(order)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
