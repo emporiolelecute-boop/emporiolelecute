@@ -7,9 +7,26 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ExternalLink, Download, Bell } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+
+type CheckRun = { id: string; ran_at: string; source: string; total: number; passed: number; errors: number; warnings: number; checks: Array<{ name: string; ok: boolean; detail: string; severity: string }>; alert_sent: boolean };
+
+function downloadCSV(filename: string, rows: Array<Record<string, unknown>>) {
+  if (!rows.length) { toast.error('Nada para exportar'); return; }
+  const headers = Object.keys(rows[0]);
+  const escape = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const csv = [headers.join(','), ...rows.map(r => headers.map(h => escape(r[h])).join(','))].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 type Snapshot = {
   id: string;
@@ -44,6 +61,9 @@ export default function AdminSEODashboard() {
   const [loadingSemrush, setLoadingSemrush] = useState(false);
   const [loadingGsc, setLoadingGsc] = useState(false);
   const [loadingChecks, setLoadingChecks] = useState(false);
+  const [runs, setRuns] = useState<CheckRun[]>([]);
+  const [alertCfg, setAlertCfg] = useState<{ email: string; webhook_url: string; enabled: boolean }>({ email: '', webhook_url: '', enabled: true });
+  const [savingCfg, setSavingCfg] = useState(false);
 
   const loadSnapshots = useCallback(async () => {
     const { data } = await supabase.from('seo_snapshots')
@@ -89,15 +109,61 @@ export default function AdminSEODashboard() {
   const runChecks = async () => {
     setLoadingChecks(true);
     try {
-      const { data, error } = await supabase.functions.invoke('seo-checks');
+      const { data, error } = await supabase.functions.invoke('seo-checks', { body: { source: 'manual' } });
       if (error) throw error;
       setChecks(data as never);
+      // refresh runs history after each manual run
+      const { data: rs } = await supabase.from('seo_check_runs').select('*').order('ran_at', { ascending: false }).limit(30);
+      setRuns((rs ?? []) as unknown as CheckRun[]);
     } catch (e) {
       toast.error('Falha nos checks', { description: String(e instanceof Error ? e.message : e) });
     } finally { setLoadingChecks(false); }
   };
 
-  useEffect(() => { loadGsc(28, 'query'); runChecks(); }, []);
+  const loadRuns = useCallback(async () => {
+    const { data } = await supabase.from('seo_check_runs').select('*').order('ran_at', { ascending: false }).limit(30);
+    setRuns((data ?? []) as unknown as CheckRun[]);
+  }, []);
+
+  const loadAlertCfg = useCallback(async () => {
+    const { data } = await supabase.from('store_settings').select('value').eq('key', 'seo_alerts_config').maybeSingle();
+    if (data?.value) setAlertCfg({ email: '', webhook_url: '', enabled: true, ...(data.value as object) });
+  }, []);
+
+  const saveAlertCfg = async () => {
+    setSavingCfg(true);
+    try {
+      const { data: existing } = await supabase.from('store_settings').select('id').eq('key', 'seo_alerts_config').maybeSingle();
+      if (existing) await supabase.from('store_settings').update({ value: alertCfg }).eq('id', existing.id);
+      else await supabase.from('store_settings').insert({ key: 'seo_alerts_config', value: alertCfg });
+      toast.success('Configuração salva');
+    } catch (e) { toast.error(String(e instanceof Error ? e.message : e)); }
+    finally { setSavingCfg(false); }
+  };
+
+  useEffect(() => { loadGsc(28, 'query'); runChecks(); loadRuns(); loadAlertCfg(); }, [loadRuns, loadAlertCfg]);
+
+  // Diff between two most recent runs
+  const lastRun = runs[0];
+  const prevRun = runs[1];
+  const diff = lastRun && prevRun ? lastRun.checks.map(c => {
+    const old = prevRun.checks.find(x => x.name === c.name);
+    if (!old) return { name: c.name, change: 'novo', from: '—', to: c.detail, ok: c.ok };
+    if (old.ok === c.ok && old.detail === c.detail) return null;
+    return { name: c.name, change: old.ok && !c.ok ? 'regrediu' : (!old.ok && c.ok ? 'corrigido' : 'alterado'), from: old.detail, to: c.detail, ok: c.ok };
+  }).filter(Boolean) as Array<{ name: string; change: string; from: string; to: string; ok: boolean }> : [];
+
+  const exportSemrushCsv = () => downloadCSV('seo-semrush-snapshots.csv', snaps.map(s => ({
+    captured_at: s.captured_at, authority: s.authority_score, backlinks: s.backlinks_total,
+    referring_domains: s.referring_domains, keywords: s.organic_keywords, traffic: s.organic_traffic,
+  })));
+  const exportGscCsv = () => downloadCSV('seo-gsc.csv', (gsc?.rows ?? []).map(r => ({
+    query: r.keys[0], clicks: r.clicks, impressions: r.impressions, ctr: r.ctr, position: r.position,
+  })));
+  const exportRunsCsv = () => downloadCSV('seo-check-runs.csv', runs.map(r => ({
+    ran_at: r.ran_at, source: r.source, total: r.total, passed: r.passed, errors: r.errors, warnings: r.warnings, alert_sent: r.alert_sent,
+  })));
+  const exportPdf = () => window.print();
 
   const trendData = [...snaps].reverse().map(s => ({
     date: format(new Date(s.captured_at), 'dd/MM'),
@@ -116,10 +182,18 @@ export default function AdminSEODashboard() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard SEO</h1>
-        <p className="text-sm text-muted-foreground">Monitoramento agregado: Google Search Console, Semrush e checks de saúde técnica.</p>
+    <div className="space-y-6 print:space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard SEO</h1>
+          <p className="text-sm text-muted-foreground">Monitoramento agregado: Google Search Console, Semrush e checks de saúde técnica.</p>
+        </div>
+        <div className="flex flex-wrap gap-2 print:hidden">
+          <Button size="sm" variant="outline" onClick={exportSemrushCsv}><Download className="h-4 w-4 mr-1"/>CSV Semrush</Button>
+          <Button size="sm" variant="outline" onClick={exportGscCsv}><Download className="h-4 w-4 mr-1"/>CSV GSC</Button>
+          <Button size="sm" variant="outline" onClick={exportRunsCsv}><Download className="h-4 w-4 mr-1"/>CSV Checks</Button>
+          <Button size="sm" variant="outline" onClick={exportPdf}><Download className="h-4 w-4 mr-1"/>PDF (imprimir)</Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview">
@@ -315,19 +389,44 @@ export default function AdminSEODashboard() {
               </span>
             )}
           </div>
-          {checks ? (
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><Bell className="h-4 w-4"/>Alertas em falhas</CardTitle>
+              <CardDescription>Receba notificação quando algum check de severidade <strong>error</strong> falhar (cron diário 04:00 UTC).</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="alert-email">E-mail</Label>
+                <Input id="alert-email" type="email" placeholder="voce@exemplo.com" value={alertCfg.email}
+                  onChange={(e) => setAlertCfg(a => ({ ...a, email: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="alert-webhook">Webhook URL (opcional)</Label>
+                <Input id="alert-webhook" placeholder="https://hooks.slack.com/..." value={alertCfg.webhook_url}
+                  onChange={(e) => setAlertCfg(a => ({ ...a, webhook_url: e.target.value }))} />
+              </div>
+              <div className="flex items-center gap-2 md:col-span-2">
+                <Switch id="alert-on" checked={alertCfg.enabled} onCheckedChange={(v) => setAlertCfg(a => ({ ...a, enabled: v }))} />
+                <Label htmlFor="alert-on">Alertas ativos</Label>
+                <Button size="sm" className="ml-auto" onClick={saveAlertCfg} disabled={savingCfg}>{savingCfg ? 'Salvando...' : 'Salvar'}</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {checks && (
             <Card>
-              <CardContent className="pt-6">
+              <CardHeader><CardTitle className="text-base">Última execução</CardTitle></CardHeader>
+              <CardContent>
                 <Table>
                   <TableHeader><TableRow><TableHead>Check</TableHead><TableHead>Status</TableHead><TableHead>Detalhe</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {checks.checks.map((c, i) => (
                       <TableRow key={i}>
                         <TableCell className="font-mono text-xs">{c.name}</TableCell>
-                        <TableCell>
-                          {c.ok
-                            ? <Badge variant="default" className="gap-1"><CheckCircle2 className="h-3 w-3"/>OK</Badge>
-                            : <Badge variant={c.severity === 'error' ? 'destructive' : 'secondary'} className="gap-1"><AlertTriangle className="h-3 w-3"/>{c.severity}</Badge>}
+                        <TableCell>{c.ok
+                          ? <Badge variant="default" className="gap-1"><CheckCircle2 className="h-3 w-3"/>OK</Badge>
+                          : <Badge variant={c.severity === 'error' ? 'destructive' : 'secondary'} className="gap-1"><AlertTriangle className="h-3 w-3"/>{c.severity}</Badge>}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">{c.detail}</TableCell>
                       </TableRow>
@@ -336,7 +435,56 @@ export default function AdminSEODashboard() {
                 </Table>
               </CardContent>
             </Card>
-          ) : <Skeleton className="h-72" />}
+          )}
+
+          {diff.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Diff vs execução anterior</CardTitle>
+                <CardDescription>{prevRun && format(new Date(prevRun.ran_at), "dd/MM HH:mm")} → {lastRun && format(new Date(lastRun.ran_at), "dd/MM HH:mm")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader><TableRow><TableHead>Check</TableHead><TableHead>Mudança</TableHead><TableHead>Antes</TableHead><TableHead>Agora</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {diff.map((d, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-xs">{d.name}</TableCell>
+                        <TableCell><Badge variant={d.change === 'corrigido' ? 'default' : d.change === 'regrediu' ? 'destructive' : 'secondary'}>{d.change}</Badge></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{d.from}</TableCell>
+                        <TableCell className="text-xs">{d.to}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">Histórico de execuções</CardTitle>
+              <CardDescription>{runs.length} execuções gravadas (cron diário + manuais)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {runs.length ? (
+                <Table>
+                  <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Origem</TableHead><TableHead>OK/Total</TableHead><TableHead>Erros</TableHead><TableHead>Avisos</TableHead><TableHead>Alerta</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {runs.map(r => (
+                      <TableRow key={r.id}>
+                        <TableCell className="text-xs">{format(new Date(r.ran_at), 'dd/MM/yyyy HH:mm')}</TableCell>
+                        <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
+                        <TableCell>{r.passed}/{r.total}</TableCell>
+                        <TableCell>{r.errors > 0 ? <Badge variant="destructive">{r.errors}</Badge> : r.errors}</TableCell>
+                        <TableCell>{r.warnings}</TableCell>
+                        <TableCell>{r.alert_sent ? <Badge variant="default">enviado</Badge> : '—'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : <p className="text-sm text-muted-foreground">Sem execuções registradas ainda. Rode os checks ou aguarde o cron diário.</p>}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

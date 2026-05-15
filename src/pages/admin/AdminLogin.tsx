@@ -1,3 +1,4 @@
+import logoImg from "@/assets/logo.webp";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -154,7 +155,7 @@ const AdminLogin = () => {
       <Card className="w-full max-w-md shadow-medium">
         <CardHeader className="text-center space-y-2">
           <Link to="/" className="inline-block">
-            <img src="/favicon.jpg" alt="LeleCute" className="w-16 h-16 mx-auto rounded-full" />
+            <img src={logoImg} alt="LeleCute" className="w-20 h-20 mx-auto object-contain" />
           </Link>
           <CardTitle className="text-2xl font-display text-foreground">
             {isSignUp ? 'Criar Conta' : 'Área Administrativa'}

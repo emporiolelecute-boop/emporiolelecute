@@ -1,3 +1,4 @@
+import logoImg from "@/assets/logo.webp";
 import { useEffect } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -56,6 +57,7 @@ const menuItems = [
   { icon: Rss, label: 'Feed Merchant', path: '/admin/merchant-feed' },
   { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
   { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
+  { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
 ];
 
 const AdminLayout = () => {
@@ -104,7 +106,7 @@ const AdminLayout = () => {
           <Menu className="w-5 h-5 text-foreground" />
         </button>
         <Link to="/admin" className="flex items-center gap-2">
-          <img src="/favicon.jpg" alt="LeleCute" className="w-8 h-8 rounded-full" />
+          <img src={logoImg} alt="LeleCute" className="w-10 h-10 object-contain" />
           <span className="font-display text-lg text-foreground">Admin</span>
         </Link>
         <div className="w-10" />
@@ -129,7 +131,7 @@ const AdminLayout = () => {
           <Link to="/admin" className="flex items-center gap-3 group">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:blur-xl transition-all" />
-              <img src="/favicon.jpg" alt="LeleCute" className="relative w-12 h-12 rounded-full ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" />
+              <img src={logoImg} alt="LeleCute" className="relative w-14 h-14 object-contain" />
             </div>
             <div>
               <span className="font-display text-xl text-foreground block">LeleCute</span>
