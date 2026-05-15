@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -9,18 +10,16 @@ import type { Product } from "@/data/products";
 const BestSellers = () => {
   const { data: dbProducts, isLoading } = useDbProducts();
 
-  // Get products with badges or highest ratings as "best sellers"
-  const products: Product[] = (dbProducts || [])
-    .filter(p => p.is_active)
-    .sort((a, b) => {
-      // Prioritize products with badges
-      if (a.badge && !b.badge) return -1;
-      if (!a.badge && b.badge) return 1;
-      // Then sort by rating
-      return (b.rating || 5) - (a.rating || 5);
-    })
-    .slice(0, 6)
-    .map(p => ({
+  // Random selection of active products as "best sellers", keeping desktop parity (multiples of 4)
+  const products: Product[] = useMemo(() => {
+    const active = (dbProducts || []).filter(p => p.is_active);
+    const shuffled = [...active].sort(() => Math.random() - 0.5);
+    const desiredMax = 8; // up to 2 rows of 4 on desktop
+    const count = Math.min(
+      shuffled.length >= 4 ? Math.floor(shuffled.length / 4) * 4 : shuffled.length,
+      desiredMax
+    );
+    return shuffled.slice(0, count).map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -38,6 +37,7 @@ const BestSellers = () => {
       keywords: p.keywords || [],
       min_quantity: p.min_quantity || undefined,
     }));
+  }, [dbProducts]);
 
   return (
     <section 
