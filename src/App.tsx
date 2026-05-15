@@ -362,6 +362,11 @@ const App = () => {
                       <AdminDiagnostics />
                     </Suspense>
                   } />
+                  <Route path="telemetria" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminTelemetry />
+                    </Suspense>
+                  } />
                   <Route path="landings" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminOccasionLandings />
