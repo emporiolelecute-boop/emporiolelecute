@@ -586,7 +586,7 @@ const AdminOrders = () => {
                         <img 
                           src={item.product_image} 
                           alt={item.product_name}
-                          className="w-16 h-16 object-cover rounded-lg"
+                          className="w-16 h-16 object-contain rounded-lg bg-muted p-1"
                         />
                       )}
                       <div className="flex-1">

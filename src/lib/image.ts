@@ -30,10 +30,11 @@ export function optimizeImage(
 export function buildSrcSet(
   url: string | undefined | null,
   widths: number[] = [400, 600, 800, 1200],
-  quality = 75
+  quality = 75,
+  resize: "cover" | "contain" | "fill" = "cover"
 ): string | undefined {
   if (!url || !url.includes("/storage/v1/object/public/")) return undefined;
   return widths
-    .map((w) => `${optimizeImage(url, { width: w, quality })} ${w}w`)
+    .map((w) => `${optimizeImage(url, { width: w, quality, resize })} ${w}w`)
     .join(", ");
 }

@@ -85,13 +85,13 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
       itemType="https://schema.org/Product"
     >
       {/* Product Image */}
-      <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden bg-muted/30">
+      <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden bg-muted">
         <img 
-          src={optimizeImage(product.image, { width: 600 })}
-          srcSet={buildSrcSet(product.image, [300, 450, 600, 800])}
+          src={optimizeImage(product.image, { width: 600, resize: "contain" })}
+          srcSet={buildSrcSet(product.image, [300, 450, 600, 800], 75, "contain")}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
           alt={`${product.name} - Lembrancinha artesanal personalizada Empório LeleCute`}
-          className="w-full h-full object-contain opacity-0 [&.loaded]:opacity-100"
+          className="w-full h-full object-contain p-2 opacity-0 [&.loaded]:opacity-100"
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           // @ts-expect-error fetchpriority is a valid HTML attribute
@@ -100,6 +100,10 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           width="685"
           height="685"
           onLoad={(e) => e.currentTarget.classList.add('loaded')}
+          onError={(e) => {
+            e.currentTarget.src = '/placeholder.svg';
+            e.currentTarget.removeAttribute('srcset');
+          }}
           style={{ transition: 'opacity 400ms ease' }}
         />
         
@@ -121,7 +125,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
         
         {/* Quick View Overlay */}
         <div className="absolute inset-0 bg-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <span className="bg-primary-foreground text-foreground px-6 py-3 rounded-full font-semibold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+          <span className="bg-primary-foreground text-foreground px-6 py-3 rounded-full font-semibold flex items-center gap-2">
             Ver Detalhes
             <ArrowRight className="h-4 w-4" />
           </span>

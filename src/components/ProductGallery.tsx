@@ -88,7 +88,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               )}
             >
               <img
-                src={optimizeImage(image, { width: 160 })}
+                src={optimizeImage(image, { width: 160, resize: "contain" })}
                 alt={`${productName} - Miniatura ${index + 1}`}
                 className="w-full h-full object-contain bg-muted p-1"
                 loading="lazy"
@@ -132,6 +132,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                   src={image}
                   alt={`${productName} - Imagem ${index + 1}`}
                   width={800}
+                  resize="contain"
                   responsiveWidths={[400, 600, 800, 1200]}
                   priority={index === 0}
                   sizes="(max-width: 1024px) 100vw, 600px"
@@ -224,7 +225,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                 )}
               >
                 <img
-                  src={optimizeImage(image, { width: 160 })}
+                  src={optimizeImage(image, { width: 160, resize: "contain" })}
                   alt={`${productName} - Miniatura ${index + 1}`}
                   className="w-full h-full object-contain bg-muted p-1"
                   loading="lazy"
@@ -264,7 +265,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
               onTouchEnd={handleTouchEnd}
             >
               <img
-                src={optimizeImage(images[currentIndex], { width: 1600, quality: 85 })}
+                src={optimizeImage(images[currentIndex], { width: 1600, quality: 85, resize: "contain" })}
                 alt={`${productName} - Imagem ampliada`}
                 className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
                 loading="eager"
@@ -310,7 +311,7 @@ const ProductGallery = ({ images, productName, badge, layout = 'vertical' }: Pro
                     )}
                   >
                     <img
-                      src={optimizeImage(image, { width: 128 })}
+                      src={optimizeImage(image, { width: 128, resize: "contain" })}
                       alt={`Miniatura ${index + 1}`}
                       className="w-full h-full object-contain bg-muted p-1"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}

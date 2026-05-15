@@ -55,7 +55,7 @@ const SortableImageItem = ({ id, url, index, isMain, onRemove, isRemoving }: Sor
           <img
             src={url}
             alt={`Imagem ${index + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-1"
             loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/placeholder.svg';

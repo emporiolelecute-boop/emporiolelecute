@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
+import { optimizeImage } from "@/lib/image";
 
 interface OrderItem {
   id: string;
@@ -380,9 +381,9 @@ const RastrearPedido = () => {
                       <div key={item.id} className="flex gap-4 pb-4 border-b border-border last:border-0 last:pb-0">
                         {item.product_image && (
                           <img 
-                            src={item.product_image} 
+                            src={optimizeImage(item.product_image, { width: 128, resize: "contain" })} 
                             alt={item.product_name}
-                            className="w-16 h-16 object-cover rounded-lg"
+                            className="w-16 h-16 object-contain rounded-lg bg-muted p-1"
                           />
                         )}
                         <div className="flex-1">

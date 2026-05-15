@@ -9,6 +9,7 @@ interface BlurImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"
   responsiveWidths?: number[];
   priority?: boolean;
   wrapperClassName?: string;
+  resize?: "cover" | "contain" | "fill";
   /** Aspect ratio class for wrapper, e.g. "aspect-square". Defaults to none (image controls size). */
   aspect?: string;
 }
@@ -27,6 +28,7 @@ export const BlurImage = ({
   priority = false,
   className,
   wrapperClassName,
+  resize = "cover",
   aspect,
   sizes,
   ...rest
@@ -35,8 +37,8 @@ export const BlurImage = ({
   const [errored, setErrored] = useState(false);
   const isStorage = typeof src === "string" && src.includes("/storage/v1/object/public/");
   const placeholder = isStorage ? optimizeImage(src, { width: 24, quality: 30 }) : null;
-  const optimized = optimizeImage(src, { width });
-  const srcSet = responsiveWidths ? buildSrcSet(src, responsiveWidths) : undefined;
+  const optimized = optimizeImage(src, { width, resize });
+  const srcSet = responsiveWidths ? buildSrcSet(src, responsiveWidths, 75, resize) : undefined;
 
   return (
     <div className={cn("relative overflow-hidden bg-muted", aspect, wrapperClassName)}>
@@ -46,7 +48,7 @@ export const BlurImage = ({
           alt=""
           aria-hidden="true"
           className={cn(
-            "absolute inset-0 w-full h-full object-cover blur-xl transition-opacity duration-500",
+            "absolute inset-0 w-full h-full object-contain blur-xl transition-opacity duration-500",
             loaded ? "opacity-0" : "opacity-100"
           )}
         />
@@ -74,7 +76,7 @@ export const BlurImage = ({
           onLoad={() => setLoaded(true)}
           onError={() => setErrored(true)}
           className={cn(
-            "w-full h-full object-cover transition-opacity duration-500",
+            "w-full h-full object-contain transition-opacity duration-500",
             loaded ? "opacity-100" : "opacity-0",
             className
           )}
