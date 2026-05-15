@@ -135,9 +135,14 @@ const AdminUsers = () => {
       </Card>
 
       <Card className="p-5 space-y-3">
-        <h2 className="font-medium flex items-center gap-2">
-          <History className="h-4 w-4" /> Histórico de promoções ({audit.length})
-        </h2>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="font-medium flex items-center gap-2">
+            <History className="h-4 w-4" /> Histórico de promoções ({audit.length})
+          </h2>
+          <Button size="sm" variant="outline" onClick={exportCSV} disabled={!audit.length}>
+            <Download className="h-4 w-4 mr-2" /> Exportar CSV
+          </Button>
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : audit.length === 0 ? (
