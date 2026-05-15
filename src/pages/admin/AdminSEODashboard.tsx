@@ -7,10 +7,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ExternalLink, Download, Bell } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ExternalLink, Download, Bell, Send, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -62,8 +63,15 @@ export default function AdminSEODashboard() {
   const [loadingGsc, setLoadingGsc] = useState(false);
   const [loadingChecks, setLoadingChecks] = useState(false);
   const [runs, setRuns] = useState<CheckRun[]>([]);
-  const [alertCfg, setAlertCfg] = useState<{ email: string; webhook_url: string; enabled: boolean }>({ email: '', webhook_url: '', enabled: true });
+  const [alertCfg, setAlertCfg] = useState<{ email: string; webhook_url: string; enabled: boolean; severities: string[] }>({ email: '', webhook_url: '', enabled: true, severities: ['error'] });
   const [savingCfg, setSavingCfg] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+  // Filtros do histórico
+  const [filterSource, setFilterSource] = useState<'all'|'cron'|'manual'|'cron-daily'>('all');
+  const [filterFrom, setFilterFrom] = useState<string>('');
+  const [filterTo, setFilterTo] = useState<string>('');
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
   const loadSnapshots = useCallback(async () => {
     const { data } = await supabase.from('seo_snapshots')
@@ -127,8 +135,20 @@ export default function AdminSEODashboard() {
 
   const loadAlertCfg = useCallback(async () => {
     const { data } = await supabase.from('store_settings').select('value').eq('key', 'seo_alerts_config').maybeSingle();
-    if (data?.value) setAlertCfg({ email: '', webhook_url: '', enabled: true, ...(data.value as object) });
+    if (data?.value) setAlertCfg({ email: '', webhook_url: '', enabled: true, severities: ['error'], ...(data.value as object) });
   }, []);
+
+  const sendTestAlert = async () => {
+    setSendingTest(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('seo-checks', { body: { test: true } });
+      if (error) throw error;
+      const r = data as { email_sent?: boolean; webhook_sent?: boolean; error?: string | null };
+      if (r.error) toast.error('Falha no teste', { description: r.error });
+      else toast.success(`Teste enviado · email: ${r.email_sent ? 'ok' : '—'} · webhook: ${r.webhook_sent ? 'ok' : '—'}`);
+    } catch (e) { toast.error(String(e instanceof Error ? e.message : e)); }
+    finally { setSendingTest(false); }
+  };
 
   const saveAlertCfg = async () => {
     setSavingCfg(true);
@@ -406,10 +426,33 @@ export default function AdminSEODashboard() {
                 <Input id="alert-webhook" placeholder="https://hooks.slack.com/..." value={alertCfg.webhook_url}
                   onChange={(e) => setAlertCfg(a => ({ ...a, webhook_url: e.target.value }))} />
               </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label>Severidades que disparam alerta</Label>
+                <div className="flex flex-wrap gap-4">
+                  {(['error','warn'] as const).map(sev => {
+                    const checked = alertCfg.severities.includes(sev);
+                    return (
+                      <label key={sev} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <Checkbox checked={checked} onCheckedChange={(v) => {
+                          setAlertCfg(a => ({
+                            ...a,
+                            severities: v ? Array.from(new Set([...a.severities, sev])) : a.severities.filter(s => s !== sev),
+                          }));
+                        }} />
+                        <Badge variant={sev === 'error' ? 'destructive' : 'secondary'}>{sev}</Badge>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">Pelo menos uma severidade deve estar marcada para receber notificações.</p>
+              </div>
               <div className="flex items-center gap-2 md:col-span-2">
                 <Switch id="alert-on" checked={alertCfg.enabled} onCheckedChange={(v) => setAlertCfg(a => ({ ...a, enabled: v }))} />
                 <Label htmlFor="alert-on">Alertas ativos</Label>
-                <Button size="sm" className="ml-auto" onClick={saveAlertCfg} disabled={savingCfg}>{savingCfg ? 'Salvando...' : 'Salvar'}</Button>
+                <Button size="sm" variant="outline" className="ml-auto" onClick={sendTestAlert} disabled={sendingTest || (!alertCfg.email && !alertCfg.webhook_url)}>
+                  <Send className={`h-4 w-4 mr-1 ${sendingTest ? 'animate-pulse' : ''}`}/>{sendingTest ? 'Enviando...' : 'Enviar teste'}
+                </Button>
+                <Button size="sm" onClick={saveAlertCfg} disabled={savingCfg}>{savingCfg ? 'Salvando...' : 'Salvar'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -461,30 +504,79 @@ export default function AdminSEODashboard() {
             </Card>
           )}
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Histórico de execuções</CardTitle>
-              <CardDescription>{runs.length} execuções gravadas (cron diário + manuais)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {runs.length ? (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Origem</TableHead><TableHead>OK/Total</TableHead><TableHead>Erros</TableHead><TableHead>Avisos</TableHead><TableHead>Alerta</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {runs.map(r => (
-                      <TableRow key={r.id}>
-                        <TableCell className="text-xs">{format(new Date(r.ran_at), 'dd/MM/yyyy HH:mm')}</TableCell>
-                        <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
-                        <TableCell>{r.passed}/{r.total}</TableCell>
-                        <TableCell>{r.errors > 0 ? <Badge variant="destructive">{r.errors}</Badge> : r.errors}</TableCell>
-                        <TableCell>{r.warnings}</TableCell>
-                        <TableCell>{r.alert_sent ? <Badge variant="default">enviado</Badge> : '—'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : <p className="text-sm text-muted-foreground">Sem execuções registradas ainda. Rode os checks ou aguarde o cron diário.</p>}
-            </CardContent>
-          </Card>
+          {(() => {
+            const filtered = runs.filter(r => {
+              if (filterSource !== 'all' && r.source !== filterSource) return false;
+              const t = new Date(r.ran_at).getTime();
+              if (filterFrom && t < new Date(filterFrom).getTime()) return false;
+              if (filterTo && t > new Date(filterTo).getTime() + 86_400_000) return false;
+              return true;
+            });
+            const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+            const safePage = Math.min(page, totalPages - 1);
+            const slice = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2"><Filter className="h-4 w-4"/>Histórico de execuções</CardTitle>
+                  <CardDescription>{filtered.length} de {runs.length} execuções (cron diário + manuais)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Origem</Label>
+                      <select value={filterSource} onChange={(e) => { setFilterSource(e.target.value as typeof filterSource); setPage(0); }}
+                        className="h-9 rounded-md border bg-background px-2 text-sm">
+                        <option value="all">Todas</option>
+                        <option value="cron">cron</option>
+                        <option value="cron-daily">cron-daily</option>
+                        <option value="manual">manual</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">De</Label>
+                      <Input type="date" value={filterFrom} onChange={(e) => { setFilterFrom(e.target.value); setPage(0); }} className="h-9 w-40" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Até</Label>
+                      <Input type="date" value={filterTo} onChange={(e) => { setFilterTo(e.target.value); setPage(0); }} className="h-9 w-40" />
+                    </div>
+                    {(filterSource !== 'all' || filterFrom || filterTo) && (
+                      <Button size="sm" variant="ghost" onClick={() => { setFilterSource('all'); setFilterFrom(''); setFilterTo(''); setPage(0); }}>Limpar</Button>
+                    )}
+                  </div>
+
+                  {slice.length ? (
+                    <Table>
+                      <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Origem</TableHead><TableHead>OK/Total</TableHead><TableHead>Erros</TableHead><TableHead>Avisos</TableHead><TableHead>Alerta</TableHead></TableRow></TableHeader>
+                      <TableBody>
+                        {slice.map(r => (
+                          <TableRow key={r.id}>
+                            <TableCell className="text-xs">{format(new Date(r.ran_at), 'dd/MM/yyyy HH:mm')}</TableCell>
+                            <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
+                            <TableCell>{r.passed}/{r.total}</TableCell>
+                            <TableCell>{r.errors > 0 ? <Badge variant="destructive">{r.errors}</Badge> : r.errors}</TableCell>
+                            <TableCell>{r.warnings}</TableCell>
+                            <TableCell>{r.alert_sent ? <Badge variant="default">enviado</Badge> : '—'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : <p className="text-sm text-muted-foreground">Nenhum registro para os filtros atuais.</p>}
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Página {safePage + 1} de {totalPages}</span>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" disabled={safePage === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>Anterior</Button>
+                        <Button size="sm" variant="outline" disabled={safePage >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Próxima</Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
         </TabsContent>
       </Tabs>
     </div>
