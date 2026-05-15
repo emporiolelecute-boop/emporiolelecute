@@ -221,11 +221,14 @@ Deno.serve(async (req) => {
     const selectedIds: string[] | undefined = body.media_ids;
     const fields = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp';
     const limit = selectedIds?.length ? Math.min(50, selectedIds.length * 2 + 12) : 12;
-    const r = await fetch(`${GRAPH}/${IG_ID}/media?fields=${fields}&limit=${limit}&access_token=${IG_TOKEN}`);
+    const mediaUrl = `${GRAPH}/${IG_ID}/media?fields=${fields}&limit=${limit}&access_token=${IG_TOKEN}`;
+    console.log('[instagram-sync] fetching media', { ig_id_prefix: IG_ID.slice(0, 6), limit });
+    const r = await fetch(mediaUrl);
     const data = await r.json();
+    console.log('[instagram-sync] media response', { ok: r.ok, status: r.status, count: data?.data?.length, error: data?.error });
     if (!r.ok) {
       const fe = friendlyError(data);
-      await logHistory({ action: 'sync', source: isScheduled ? 'scheduled' : 'manual', status: 'error', error_message: fe.title, details: { hint: fe.hint } });
+      await logHistory({ action: 'sync', source: isScheduled ? 'scheduled' : 'manual', status: 'error', error_message: fe.title, details: { hint: fe.hint, raw: data, http_status: r.status } });
       return json({ ...fe, raw: data }, 502);
     }
 
