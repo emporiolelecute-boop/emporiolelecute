@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import TrustBadges from "@/components/TrustBadges";
@@ -67,6 +67,27 @@ const fallbackImageMap: Record<string, string> = {
   '/src/assets/category-kits.webp': kitsImg,
 };
 
+const resolveImageSrc = (src?: string | null) =>
+  (src && fallbackImageMap[src]) || src || "";
+
+const resolveSlideDisplay = (slide: HeroSlide, isMobile: boolean) => {
+  const mobileSrc = resolveImageSrc(slide.image_mobile_url);
+  const desktopSrc = resolveImageSrc(slide.image_desktop_url);
+
+  if (isMobile && mobileSrc) {
+    return { mode: "banner_mobile" as const, imgSrc: mobileSrc };
+  }
+
+  if (!isMobile && desktopSrc) {
+    return { mode: "banner_desktop" as const, imgSrc: desktopSrc };
+  }
+
+  return {
+    mode: "text_image" as const,
+    imgSrc: resolveImageSrc(slide.image_url) || sabonetesImg,
+  };
+};
+
 // ---------------------------------------------------------------------------
 // Sub-components for each display mode
 // ---------------------------------------------------------------------------
@@ -75,14 +96,12 @@ const fallbackImageMap: Record<string, string> = {
 function SlideTextImage({
   slide,
   isPriority,
+  imgSrc,
 }: {
   slide: HeroSlide;
   isPriority: boolean;
+  imgSrc: string;
 }) {
-  const imgSrc =
-    (slide.image_url && fallbackImageMap[slide.image_url]) ||
-    slide.image_url ||
-    sabonetesImg;
   const alt = slide.image_alt || slide.title;
 
   return (
