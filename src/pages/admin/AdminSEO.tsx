@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import SingleImageUpload from '@/components/admin/SingleImageUpload';
 
 interface SEOSettings {
   site_title: string;
@@ -371,28 +372,14 @@ const AdminSEO = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Imagem OG (Open Graph)</Label>
-              <Input 
+              <SingleImageUpload
                 value={settings.og_image}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  og_image: e.target.value
-                })}
-                placeholder="https://seusite.com.br/imagem.jpg"
+                onChange={(url) => setSettings({ ...settings, og_image: url })}
+                folder="og"
+                hint="1200x630 recomendado · PNG, JPG ou WEBP até 5MB"
+                previewMaxWidth={360}
               />
-              <p className="text-xs text-muted-foreground">
-                Imagem exibida ao compartilhar nas redes sociais (1200x630 recomendado)
-              </p>
             </div>
-
-            {settings.og_image && (
-              <div className="mt-2">
-                <img 
-                  src={settings.og_image} 
-                  alt="Preview OG Image"
-                  className="w-full max-w-xs rounded-lg border"
-                />
-              </div>
-            )}
 
             <div className="space-y-2">
               <Label>Twitter/X Handle</Label>
