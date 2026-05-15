@@ -137,7 +137,7 @@ const AdminAccessRequests = () => {
     setActing(rejectTarget.id);
     try {
       const { error } = await (supabase as any).rpc('reject_admin_request', {
-        _user_id: rejectTarget.id,
+        _user_id: rejectTarget.user_id,
         _reason: reason,
       });
       if (error) throw error;
