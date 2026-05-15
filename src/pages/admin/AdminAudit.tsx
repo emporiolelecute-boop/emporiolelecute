@@ -190,20 +190,76 @@ const AdminAudit = () => {
     [anomalies],
   );
 
-  const exportCsv = () => {
-    const csv = toCsv(rows, maskPii);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `auditoria-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  const [exportScope, setExportScope] = useState<'page' | 'all'>('page');
+  const [exporting, setExporting] = useState(false);
+
+  // Fetches rows respecting current filters/search/sort. When scope='all' loops
+  // server pages of 200 (cap 5000) so memory and DB load stay bounded.
+  const fetchExportRows = async (): Promise<TimelineRow[]> => {
+    if (exportScope === 'page') return rows;
+    const CHUNK = 200;
+    const HARD_CAP = 5000;
+    const out: TimelineRow[] = [];
+    let offset = 0;
+    while (out.length < HARD_CAP) {
+      const { data, error } = await supabase.rpc('list_admin_audit_timeline', {
+        _search: debouncedQuery || null,
+        _status: status === 'all' ? null : status,
+        _source: source === 'all' ? null : source,
+        _from: from ? new Date(from).toISOString() : null,
+        _to: to ? new Date(to + 'T23:59:59').toISOString() : null,
+        _sort_key: sortKey,
+        _sort_dir: sortDir,
+        _limit: CHUNK,
+        _offset: offset,
+      });
+      if (error) throw error;
+      const payload = (data ?? {}) as { total?: number; rows?: TimelineRow[] };
+      const chunk = payload.rows ?? [];
+      out.push(...chunk);
+      if (chunk.length < CHUNK) break;
+      offset += CHUNK;
+      if (payload.total != null && offset >= payload.total) break;
+    }
+    return out.slice(0, HARD_CAP);
   };
 
-  const exportPdf = () => {
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const data = await fetchExportRows();
+      const csv = toCsv(data, maskPii);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `auditoria-${exportScope}-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast({ title: 'CSV gerado', description: `${data.length} evento(s).` });
+    } catch (e: any) {
+      toast({ title: 'Falha ao exportar CSV', description: e.message, variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const exportPdf = async () => {
+    setExporting(true);
+    try {
+      const data = await fetchExportRows();
+      buildPdf(data);
+      toast({ title: 'PDF gerado', description: `${data.length} evento(s).` });
+    } catch (e: any) {
+      toast({ title: 'Falha ao exportar PDF', description: e.message, variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const buildPdf = (data: TimelineRow[]) => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
     const today = new Date().toLocaleString('pt-BR');
     doc.setFontSize(14);
@@ -211,10 +267,12 @@ const AdminAudit = () => {
     doc.setFontSize(9);
     doc.setTextColor(120);
     doc.text(
-      `Gerado em ${today} • página ${currentPage} (${rows.length} de ${total} eventos)` +
+      `Gerado em ${today} • escopo=${exportScope === 'page' ? `página ${currentPage}` : `tudo (${data.length} de ${total})`}` +
       (status !== 'all' ? ` • status=${status}` : '') +
       (source !== 'all' ? ` • origem=${source}` : '') +
+      (debouncedQuery ? ` • busca="${debouncedQuery}"` : '') +
       (from ? ` • de ${from}` : '') + (to ? ` até ${to}` : '') +
+      ` • ordem=${sortKey} ${sortDir}` +
       (maskPii ? ' • PII mascarada (LGPD)' : ''),
       40, 56,
     );
@@ -223,7 +281,7 @@ const AdminAudit = () => {
     autoTable(doc, {
       startY: 72,
       head: [['Data', 'Origem', 'Status', 'Alvo', 'Por', 'Detalhes']],
-      body: rows.map((r) => [
+      body: data.map((r) => [
         new Date(r.created_at).toLocaleString('pt-BR'),
         r.source,
         r.status,
@@ -324,14 +382,24 @@ const AdminAudit = () => {
             </Label>
             <Switch id="mask-pii" checked={maskPii} onCheckedChange={setMaskPii} />
           </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 border rounded-md bg-card">
+            <Label className="text-xs select-none">Escopo</Label>
+            <Select value={exportScope} onValueChange={(v) => setExportScope(v as 'page' | 'all')}>
+              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="page">Página atual</SelectItem>
+                <SelectItem value="all">Todos filtrados</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button variant="outline" onClick={refreshAll} disabled={refreshing || loading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
           </Button>
-          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            <Download className="w-4 h-4 mr-2" /> CSV
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0 || exporting}>
+            <Download className="w-4 h-4 mr-2" /> {exporting ? 'Gerando…' : 'CSV'}
           </Button>
-          <Button onClick={exportPdf} disabled={rows.length === 0}>
-            <FileText className="w-4 h-4 mr-2" /> PDF
+          <Button onClick={exportPdf} disabled={rows.length === 0 || exporting}>
+            <FileText className="w-4 h-4 mr-2" /> {exporting ? 'Gerando…' : 'PDF'}
           </Button>
         </div>
       </div>
