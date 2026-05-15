@@ -585,7 +585,10 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
       <TrustBadges />
 
       <Footer />
-      <WhatsAppButton />
+      <WhatsAppButton
+        message={`Olá! Vim pela página de ${config.heroBadge.toLowerCase()}.\n\nGostaria de orçamento:\n• Quantidade: \n• Nome do bebê: \n• Cidade/UF: \n• Cores/tema: `}
+        ariaLabel={`Orçamento via WhatsApp — ${config.heroBadge}`}
+      />
     </div>
   );
 };
