@@ -55,57 +55,37 @@ export interface DbTag {
   created_at: string | null;
 }
 
-// Fetch all products with relations
+// Fetch all products with relations (optimized single query with nested selects)
 export function useDbProducts() {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      // First fetch products with category
       const { data: products, error } = await supabase
         .from('products')
         .select(`
           *,
-          category:categories(*)
+          category:categories(*),
+          occasions:product_occasions(occasion:occasions(*)),
+          tags:product_tags(tag:tags(*))
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Fetch product_occasions relationships
-      const { data: productOccasions } = await supabase
-        .from('product_occasions')
-        .select('product_id, occasion:occasions(*)');
-
-      // Fetch product_tags relationships
-      const { data: productTags } = await supabase
-        .from('product_tags')
-        .select('product_id, tag:tags(*)');
-
-      // Map occasions and tags to products
-      const productsWithRelations = (products || []).map(product => {
-        const occasions = (productOccasions || [])
-          .filter(po => po.product_id === product.id)
-          .map(po => po.occasion)
-          .filter(Boolean) as DbOccasion[];
-
-        const tags = (productTags || [])
-          .filter(pt => pt.product_id === product.id)
-          .map(pt => pt.tag)
-          .filter(Boolean) as DbTag[];
-
-        return {
-          ...product,
-          occasions,
-          tags,
-        };
-      });
-
-      return productsWithRelations as DbProduct[];
+      return (products || []).map(product => ({
+        ...product,
+        occasions: (product.occasions || [])
+          .map((po: { occasion: DbOccasion }) => po.occasion)
+          .filter(Boolean),
+        tags: (product.tags || [])
+          .map((pt: { tag: DbTag }) => pt.tag)
+          .filter(Boolean),
+      })) as DbProduct[];
     },
   });
 }
 
-// Fetch single product by slug with relations
+// Fetch single product by slug with relations (optimized single query with nested selects)
 export function useDbProduct(slug: string) {
   return useQuery({
     queryKey: ['product', slug],
@@ -114,7 +94,9 @@ export function useDbProduct(slug: string) {
         .from('products')
         .select(`
           *,
-          category:categories(*)
+          category:categories(*),
+          occasions:product_occasions(occasion:occasions(*)),
+          tags:product_tags(tag:tags(*))
         `)
         .eq('slug', slug)
         .maybeSingle();
@@ -122,30 +104,14 @@ export function useDbProduct(slug: string) {
       if (error) throw error;
       if (!product) return null;
 
-      // Fetch occasions for this product
-      const { data: productOccasions } = await supabase
-        .from('product_occasions')
-        .select('occasion:occasions(*)')
-        .eq('product_id', product.id);
-
-      // Fetch tags for this product
-      const { data: productTags } = await supabase
-        .from('product_tags')
-        .select('tag:tags(*)')
-        .eq('product_id', product.id);
-
-      const occasions = (productOccasions || [])
-        .map(po => po.occasion)
-        .filter(Boolean) as DbOccasion[];
-
-      const tags = (productTags || [])
-        .map(pt => pt.tag)
-        .filter(Boolean) as DbTag[];
-
       return {
         ...product,
-        occasions,
-        tags,
+        occasions: (product.occasions || [])
+          .map((po: { occasion: DbOccasion }) => po.occasion)
+          .filter(Boolean),
+        tags: (product.tags || [])
+          .map((pt: { tag: DbTag }) => pt.tag)
+          .filter(Boolean),
       } as DbProduct;
     },
     enabled: !!slug,

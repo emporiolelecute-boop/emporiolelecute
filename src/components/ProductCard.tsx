@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -213,4 +213,6 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
   );
 };
 
-export default ProductCard;
+// Wrap with memo to prevent unnecessary re-renders when filtering products
+const ProductCardMemo = React.memo(ProductCard);
+export default ProductCardMemo;
