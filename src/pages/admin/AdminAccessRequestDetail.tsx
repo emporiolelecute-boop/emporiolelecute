@@ -252,7 +252,7 @@ const AdminAccessRequestDetail = () => {
           </h1>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {profile.access_requested && (
+          {pendingRequest && (
             <Button
               variant="outline"
               onClick={resendNotification}
@@ -267,7 +267,7 @@ const AdminAccessRequestDetail = () => {
                   : 'Reenviar notificação'}
             </Button>
           )}
-          {profile.access_requested && !isAdmin && (
+          {pendingRequest && !isAdmin && (
             <>
               <Button variant="destructive" onClick={() => setRejecting(true)} disabled={acting}>
                 <X className="w-4 h-4 mr-1" /> Reprovar
@@ -286,21 +286,34 @@ const AdminAccessRequestDetail = () => {
           <CardTitle className="text-lg">Usuário</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm">
-          <div><span className="text-muted-foreground">request_id:</span> <code className="text-xs">{profile.id}</code></div>
+          <div><span className="text-muted-foreground">user_id:</span> <code className="text-xs">{profile.id}</code></div>
+          {pendingRequest && (
+            <div><span className="text-muted-foreground">request_id:</span> <code className="text-xs">{pendingRequest.id}</code></div>
+          )}
           <div><span className="text-muted-foreground">E-mail:</span> {profile.email}</div>
           <div><span className="text-muted-foreground">Nome:</span> {profile.full_name || '—'}</div>
           <div>
             <span className="text-muted-foreground">Status atual:</span>{' '}
             {isAdmin
               ? <Badge>Admin</Badge>
-              : profile.access_requested
+              : pendingRequest
                 ? <Badge variant="secondary">Em análise</Badge>
-                : <Badge variant="outline">Sem solicitação</Badge>}
+                : lastRequest?.status === 'denied'
+                  ? <Badge variant="destructive">Reprovada</Badge>
+                  : lastRequest?.status === 'approved'
+                    ? <Badge>Aprovada</Badge>
+                    : <Badge variant="outline">Sem solicitação</Badge>}
           </div>
           <div>
-            <span className="text-muted-foreground">Solicitado em:</span>{' '}
-            {profile.access_requested_at ? new Date(profile.access_requested_at).toLocaleString('pt-BR') : '—'}
+            <span className="text-muted-foreground">Última solicitação em:</span>{' '}
+            {lastRequestedAt ? new Date(lastRequestedAt).toLocaleString('pt-BR') : '—'}
           </div>
+          {lastRequest?.rejection_reason && (
+            <div>
+              <span className="text-muted-foreground">Motivo da reprovação:</span>{' '}
+              {lastRequest.rejection_reason}
+            </div>
+          )}
           <div>
             <span className="text-muted-foreground">Última atualização do perfil:</span>{' '}
             {new Date(profile.updated_at).toLocaleString('pt-BR')}
