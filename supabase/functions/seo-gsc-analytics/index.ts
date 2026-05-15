@@ -16,8 +16,13 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const days = Math.min(parseInt(url.searchParams.get('days') ?? '28'), 90)
-    const dim = (url.searchParams.get('dim') ?? 'query') as 'query' | 'page' | 'date'
+    let days = parseInt(url.searchParams.get('days') ?? '0')
+    let dim = url.searchParams.get('dim') as 'query' | 'page' | 'date' | null
+    if (req.method === 'POST') {
+      try { const b = await req.json(); days = b.days ?? days; dim = b.dim ?? dim } catch { /* ignore */ }
+    }
+    days = Math.min(days || 28, 90)
+    dim = (dim ?? 'query') as 'query' | 'page' | 'date'
     const end = new Date()
     const start = new Date(end); start.setDate(start.getDate() - days)
     const fmt = (d: Date) => d.toISOString().slice(0, 10)
