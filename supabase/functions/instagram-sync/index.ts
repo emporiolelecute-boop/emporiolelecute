@@ -95,14 +95,47 @@ Deno.serve(async (req) => {
   try {
     // ============== VALIDATE ==============
     if (action === 'validate') {
-      // Tenta buscar perfil do IG Business Account
+      console.log('[instagram-sync] validate START', { ig_id_prefix: IG_ID.slice(0, 6), ig_id_length: IG_ID.length });
+
+      // 1) Probe genérico para descobrir o TIPO do ID configurado.
+      const probeUrl = `${GRAPH}/${IG_ID}?fields=id,name,username,instagram_business_account,category&access_token=${IG_TOKEN}`;
+      const probeRes = await fetch(probeUrl);
+      const probeData = await probeRes.json();
+      console.log('[instagram-sync] probe response', { ok: probeRes.ok, status: probeRes.status, data: probeData });
+
+      let detectedType: 'ig_business_account' | 'facebook_page' | 'unknown' = 'unknown';
+      let suggested_ig_business_account_id: string | null = null;
+      if (probeRes.ok) {
+        if (probeData.username || probeData.media_count !== undefined) {
+          detectedType = 'ig_business_account';
+        } else if (probeData.instagram_business_account?.id) {
+          detectedType = 'facebook_page';
+          suggested_ig_business_account_id = probeData.instagram_business_account.id;
+        } else if (probeData.category || probeData.name) {
+          detectedType = 'facebook_page';
+        }
+      }
+
+      // 2) Tenta buscar perfil do IG Business Account com fields completos
       const fields = 'id,username,name,profile_picture_url,media_count,followers_count';
       const r = await fetch(`${GRAPH}/${IG_ID}?fields=${fields}&access_token=${IG_TOKEN}`);
       const data = await r.json();
+      console.log('[instagram-sync] ig_account response', { ok: r.ok, status: r.status, data });
       if (!r.ok) {
         const fe = friendlyError(data);
-        await logHistory({ action: 'validate', source: 'manual', status: 'error', error_message: fe.title, details: { hint: fe.hint, raw: data } });
-        return json({ valid: false, ...fe, raw: data }, 200);
+        // Sugestão extra se identificamos uma Page
+        if (detectedType === 'facebook_page') {
+          fe.title = 'IG_BUSINESS_ACCOUNT_ID é de uma Facebook Page, não de uma Instagram Business Account';
+          fe.hint = suggested_ig_business_account_id
+            ? `Substitua o secret IG_BUSINESS_ACCOUNT_ID pelo ID da conta IG vinculada: ${suggested_ig_business_account_id}`
+            : 'A Page configurada não possui Instagram Business Account vinculado. Conecte uma conta IG Profissional à Page no Meta Business Suite.';
+        }
+        await logHistory({
+          action: 'validate', source: 'manual', status: 'error',
+          error_message: fe.title,
+          details: { hint: fe.hint, detected_type: detectedType, suggested_ig_business_account_id, probe: probeData, raw: data },
+        });
+        return json({ valid: false, ...fe, detected_type: detectedType, suggested_ig_business_account_id, probe: probeData, raw: data }, 200);
       }
       // Verifica permissões do token
       const permRes = await fetch(`${GRAPH}/me/permissions?access_token=${IG_TOKEN}`);
