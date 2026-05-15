@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, ShieldCheck, RefreshCw, Check, Search, ArrowUp, ArrowDown, Eye, X } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -25,6 +26,7 @@ const PAGE_SIZE = 10;
 
 const AdminAccessRequests = () => {
   const { toast } = useToast();
+  const { refreshRole, roleRefreshing } = useAuth();
   const [rows, setRows] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -98,6 +100,9 @@ const AdminAccessRequests = () => {
         });
         setRows((prev) => prev.filter((r) => r.id !== id));
         if (selected?.id === id) setSelected(null);
+        // Refresh the *current* admin's cached role so any policy change
+        // propagates instantly without a page reload.
+        void refreshRole();
       }
     } catch (e: any) {
       toast({ title: 'Erro', description: e.message, variant: 'destructive' });
@@ -237,10 +242,10 @@ const AdminAccessRequests = () => {
                         <Button
                           size="sm"
                           onClick={() => approve(r.email, r.id)}
-                          disabled={acting === r.id}
+                          disabled={acting === r.id || roleRefreshing}
                         >
                           <Check className="w-4 h-4 mr-1" />
-                          {acting === r.id ? 'Aprovando...' : 'Aprovar'}
+                          {acting === r.id || roleRefreshing ? 'Aprovando...' : 'Aprovar'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -314,9 +319,9 @@ const AdminAccessRequests = () => {
               <Button variant="destructive" onClick={() => { setRejectTarget(selected); setRejectReason(''); }} disabled={acting === selected.id}>
                 <X className="w-4 h-4 mr-1" /> Reprovar
               </Button>
-              <Button onClick={() => approve(selected.email, selected.id)} disabled={acting === selected.id}>
+              <Button onClick={() => approve(selected.email, selected.id)} disabled={acting === selected.id || roleRefreshing}>
                 <Check className="w-4 h-4 mr-1" />
-                {acting === selected.id ? 'Aprovando...' : 'Aprovar acesso administrativo'}
+                {acting === selected.id || roleRefreshing ? 'Aprovando...' : 'Aprovar acesso administrativo'}
               </Button>
             </div>
           </CardContent>
