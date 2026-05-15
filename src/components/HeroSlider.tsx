@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import TrustBadges from "@/components/TrustBadges";
@@ -265,9 +265,20 @@ const HeroSlider = () => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLDivElement>(null);
   const [stageHeight, setStageHeight] = useState<number | "auto">("auto");
+
+  // Detect prefers-reduced-motion
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => mq.removeEventListener?.("change", update);
+  }, []);
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -282,11 +293,17 @@ const HeroSlider = () => {
   }, [slides.length, currentSlide]);
 
   // Trigger cross-fade: track previous slide, then clear after transition.
-  const goTo = (next: number) => {
-    if (next === currentSlide) return;
-    setPrevSlide(currentSlide);
-    setCurrentSlide(next);
-  };
+  // In reduced-motion mode, swap instantly (no previous overlay).
+  const goTo = useCallback(
+    (next: number) => {
+      setCurrentSlide((cur) => {
+        if (next === cur) return cur;
+        if (!reducedMotion) setPrevSlide(cur);
+        return next;
+      });
+    },
+    [reducedMotion]
+  );
 
   useEffect(() => {
     if (prevSlide === null) return;
@@ -295,26 +312,44 @@ const HeroSlider = () => {
   }, [prevSlide, currentSlide]);
 
   // Animate stage height to match the active slide.
+  // Stable observer (deps []), rAF-coalesced, no-op when value unchanged.
+  // Skipped entirely in reduced-motion mode (height: auto).
   useLayoutEffect(() => {
+    if (reducedMotion) {
+      setStageHeight("auto");
+      return;
+    }
     const el = activeRef.current;
     if (!el) return;
-    const measure = () => setStageHeight(el.offsetHeight);
+    let raf = 0;
+    const measure = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const h = Math.round(el.offsetHeight);
+        setStageHeight((prev) => (typeof prev === "number" && Math.abs(prev - h) < 1 ? prev : h));
+      });
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    window.addEventListener("resize", measure);
     return () => {
+      cancelAnimationFrame(raf);
       ro.disconnect();
-      window.removeEventListener("resize", measure);
     };
-  }, [currentSlide, slides.length]);
+  }, [currentSlide, reducedMotion]);
 
   const slide = slides[currentSlide] ?? slides[0];
   if (!slide) return null;
-  const previous = prevSlide !== null ? slides[prevSlide] : null;
+  const previous = !reducedMotion && prevSlide !== null ? slides[prevSlide] : null;
 
-  const nextSlideFn = () => goTo((currentSlide + 1) % slides.length);
-  const prevSlideFn = () => goTo((currentSlide - 1 + slides.length) % slides.length);
+  const nextSlideFn = useCallback(
+    () => goTo((currentSlide + 1) % slides.length),
+    [goTo, currentSlide, slides.length]
+  );
+  const prevSlideFn = useCallback(
+    () => goTo((currentSlide - 1 + slides.length) % slides.length),
+    [goTo, currentSlide, slides.length]
+  );
 
   const isPriority = currentSlide === 0;
   const hasAnyBanner = Boolean(
@@ -361,8 +396,12 @@ const HeroSlider = () => {
         <div
           ref={activeRef}
           key={`active-${slide.id}`}
-          className="relative w-full opacity-0 motion-safe:animate-fade-in motion-reduce:opacity-100"
-          style={{ animationFillMode: "forwards" }}
+          className={
+            reducedMotion
+              ? "relative w-full"
+              : "relative w-full opacity-0 motion-safe:animate-fade-in motion-reduce:opacity-100"
+          }
+          style={reducedMotion ? undefined : { animationFillMode: "forwards" }}
         >
           <SlideRenderer slide={slide} isPriority={isPriority} />
         </div>

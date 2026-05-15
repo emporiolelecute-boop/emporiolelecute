@@ -1,61 +1,88 @@
 ## Objetivo
 
-Adicionar suavização visual nas trocas de slide do `HeroSlider` (mobile, tablet e desktop), incluindo o caso em que o layout muda entre tipos diferentes (banner mobile → texto+imagem, banner desktop → texto+imagem, banner → banner). Sem mexer na lógica de fetch, RLS, dados ou estrutura responsiva atual.
+1. Garantir que usuários com `prefers-reduced-motion: reduce` tenham troca de slides instantânea, sem flash, sem "piscar" e sem layout-shift.
+2. Auditar o HeroSlider (cross-fade + ResizeObserver) para eliminar re-renders desnecessários e engasgos em mobile/desktop.
+3. Apresentar um roadmap curto de melhorias adicionais (sem implementar agora).
 
-## Princípios
+---
 
-- Zero mudança de comportamento: mesmo autoplay (6s), mesmas setas, mesmos dots, mesmos componentes (`SlideTextImage`, `SlideBannerMobile`, `SlideBannerDesktop`).
-- Apenas camada de apresentação: opacidade, leve translate, easing.
-- Acessibilidade: respeitar `prefers-reduced-motion` (desativa animações).
-- Sem libs novas — usar Tailwind/CSS keyframes já existentes (`fade-in`) + uma nova `slide-cross-fade`.
+## Parte A — Reduced Motion (implementar agora)
 
-## Mudanças propostas
+Hoje o HeroSlider usa classes `motion-safe:animate-fade-in` e `motion-safe:animate-fade-out`. Com `prefers-reduced-motion: reduce`, essas animações somem, mas:
 
-### 1. Cross-fade entre slides (todos os modos)
-- Empilhar o slide ativo e o anterior em posição absoluta dentro de um wrapper `relative` com altura controlada pelo slide ativo.
-- Slide que entra: opacidade 0→1 + leve `translateY(8px)→0` em ~500ms `ease-out`.
-- Slide que sai: opacidade 1→0 em ~400ms, removido do DOM ao terminar.
-- Resultado: a troca 2→3 (banner mobile → texto+imagem) deixa de ser "salto" e vira esmaecimento.
+- O slide ativo entra com `opacity-0` (classe base) e depende da animação para ficar visível → em `motion-reduce` ele fica **invisível**.
+- A altura do stage (`transition-[height]`) também é `motion-safe`, então o "snap" de altura é aceitável, porém o slide anterior fica empilhado por 600ms causando sobreposição.
 
-### 2. Altura fluida do container
-- Wrapper mede a altura do slide ativo via `ResizeObserver` e anima `height` com `transition-[height] duration-500 ease-out`.
-- Evita "pulo" quando o próximo slide tem altura diferente (banner curto vs. texto+imagem alto).
+**Correções:**
 
-### 3. Imagens com fade-in ao carregar
-- Adicionar `onLoad` nas `<img>` dos banners para aplicar `opacity-0 → opacity-100` (300ms) — evita flash quando o navegador troca a imagem responsiva.
+1. Detectar `prefers-reduced-motion` via `useEffect` + `matchMedia('(prefers-reduced-motion: reduce)')` e guardar em estado `reducedMotion`.
+2. Quando `reducedMotion === true`:
+   - Não renderizar o slide anterior (`previous`) — troca instantânea.
+   - Renderizar slide ativo com `opacity-100` direto (sem `opacity-0` inicial).
+   - Stage com `height: 'auto'` (sem transição).
+3. Quando `reducedMotion === false`: comportamento atual (cross-fade 500ms).
+4. Garantir fallback CSS: a classe `motion-reduce:opacity-100` já existe no ativo, mas remover o `opacity-0` base condicionalmente para evitar qualquer flash em navegadores que processam `motion-reduce` com atraso.
 
-### 4. Dots e setas
-- Indicador de dot ativo com `transition-all duration-500 ease-out` (já existe, manter).
-- Setas: pequeno `active:scale-95` para feedback tátil (opcional).
+**Validação:**
+- Chrome DevTools → Rendering → "Emulate CSS prefers-reduced-motion: reduce" → trocar slides 1→2→3 → conteúdo aparece imediatamente, sem fade, sem invisibilidade.
+- Sem `motion-reduce`: cross-fade continua suave.
 
-### 5. Reduced motion
-- Wrap das animações em `motion-safe:` (Tailwind) e fallback estático em `motion-reduce:`.
+---
 
-### 6. Telemetria leve (opcional, desligado por padrão)
-- Não adicionar nada novo agora; manter `telemetry.ts` existente.
+## Parte B — Auditoria de performance
 
-## Arquivos afetados
+**Riscos atuais identificados na leitura de `HeroSlider.tsx`:**
+
+1. `ResizeObserver` re-cria a cada `currentSlide` ou `slides.length` mudar (deps do `useLayoutEffect`). Em troca de slide, observer é desconectado e recriado — desperdício.
+2. `setStageHeight(el.offsetHeight)` dispara re-render a cada frame de animação de imagem carregando → potencial loop.
+3. `SlideRenderer` renderiza **tanto** mobile quanto desktop ao mesmo tempo (controlados por `block md:hidden` / `hidden md:block`). Isso é correto para evitar flash em resize, mas o slide anterior **também** renderiza ambos — temos até 4 imagens montadas simultaneamente durante o cross-fade.
+4. `window.addEventListener('resize', measure)` sem debounce.
+5. Função `goTo` recriada a cada render (não memoizada) — passada para `onClick` dos dots.
+
+**Correções:**
+
+1. **Observer estável**: mover `ResizeObserver` para um `useLayoutEffect` com deps `[]`, observar `stageRef.current` (wrapper) ao invés de `activeRef.current`. Quando o slide ativo trocar, o wrapper já reflete a nova altura via re-render.
+2. **Debounce de medição**: usar `requestAnimationFrame` para coalescer múltiplas chamadas de `measure` no mesmo frame.
+3. **Evitar loop**: comparar `Math.round(el.offsetHeight)` com `stageHeight` antes de chamar `setStageHeight`.
+4. **Imagens duplicadas no cross-fade**: aceitar como custo (necessário para fade), mas garantir que o slide anterior use `loading="lazy"` e `decoding="async"` (já está) e seja `aria-hidden` (já está). Adicionar `pointer-events-none` (já está).
+5. **Debounce resize**: trocar `resize` listener por `ResizeObserver` no `<section>` raiz (já cobre resize de viewport quando o componente é responsivo) — eliminar listener de `window`.
+6. **Memoizar callbacks**: `goTo`, `nextSlideFn`, `prevSlideFn` com `useCallback`.
+7. **Memoizar `slides` derivado**: o array vem do hook; só comparar referência.
+
+**Validação:**
+- DevTools Performance → gravar 10s navegando entre slides → verificar se há long tasks > 50ms.
+- React DevTools Profiler → trocar slide → confirmar que apenas `HeroSlider` re-renderiza, não pais.
+
+---
+
+## Parte C — Roadmap de melhorias futuras (não implementar agora, para sua aprovação posterior)
+
+1. **Pré-carregar próximo slide**: `<link rel="prefetch">` para imagem do próximo slide quando o atual ficar visível há 3s.
+2. **Pause-on-hover / pause-on-focus**: pausar autoplay quando mouse sobre o slider ou quando dot recebe foco (acessibilidade WAI-ARIA Carousel pattern).
+3. **Swipe gestures no mobile**: arrastar para trocar slide (touch events nativos, sem lib).
+4. **Indicador de progresso**: barra fina abaixo dos dots mostrando o tempo até a próxima troca (visual delicado, suave).
+5. **Lazy mount de slides distantes**: renderizar só os 2 slides "vizinhos" do atual (mais 1 anterior + 1 próximo), reduzindo DOM.
+6. **Preload inteligente da imagem desktop vs mobile**: usar `<picture>` com `<source media>` ao invés de renderizar dois `<img>` (`block md:hidden` / `hidden md:block`) — economiza 1 download por slide.
+7. **Telemetria opcional**: registrar quantos usuários usam setas vs dots vs autoplay (orienta UX).
+8. **Animação direcional**: ao clicar "próximo", slide entra da direita; ao clicar "anterior", da esquerda (atualmente é cross-fade puro).
+9. **ARIA live region**: anunciar troca de slide para leitores de tela (`<div aria-live="polite">Slide 2 de 3</div>`).
+10. **Pausar quando aba está oculta**: usar `document.visibilityState` para parar autoplay e economizar bateria.
+
+---
+
+## Arquivos afetados (Partes A e B)
 
 - `src/components/HeroSlider.tsx` — único arquivo alterado.
-  - Introduz wrapper com posicionamento absoluto + estado `prevSlideIndex` para cross-fade.
-  - Adiciona `ResizeObserver` para altura animada.
-  - Adiciona classes `motion-safe:animate-fade-in`, `transition-opacity duration-500`.
-- `tailwind.config.ts` — adicionar 1 keyframe `slide-cross-fade` (opcional; pode reutilizar `fade-in` existente).
 
 ## Não será alterado
 
-- `useHeroSlides`, RLS, queries, `image_mobile_url`/`image_desktop_url`, fallback, ordem dos slides, tempo de autoplay, breakpoints CSS (`block md:hidden` / `hidden md:block`), TrustBadges.
+- `useHeroSlides`, RLS, queries, estrutura de banner mobile/desktop, fallback, dots/setas, TrustBadges, autoplay (6s).
 
 ## Riscos & mitigação
 
-- Risco: posicionamento absoluto pode "esconder" conteúdo se altura medida atrasar. Mitigação: medir `scrollHeight` síncrono no primeiro render via `useLayoutEffect` e definir altura mínima `min-h-[280px] md:min-h-[420px]`.
-- Risco: imagens grandes do desktop carregando depois das do mobile. Mitigação: manter `fetchpriority="high"` no slide 0 e `loading="eager"` nele.
-- Sem mudanças de schema, sem migração, sem mudança de hook.
+- **Risco**: ao remover slide anterior em `reduced-motion`, pode haver "salto" de altura. Mitigação: stage com `height: auto` direto (sem transição) — comportamento esperado por quem solicita reduced-motion.
+- **Risco**: `ResizeObserver` em wrapper com altura controlada por estado pode criar feedback loop. Mitigação: comparar valor antes do `setState` (item B.3).
 
-## Validação
+---
 
-- Visual: navegar `/` em 375px, 768px, 1280px e observar transição 1→2→3→1.
-- Console: sem warnings novos; nenhum erro de hidratação.
-- `prefers-reduced-motion: reduce` — slides trocam instantaneamente sem animação.
-
-Confirma para eu implementar?
+**Confirma para eu implementar as Partes A e B?** O Roadmap (Parte C) fica para você escolher quais quer priorizar depois.
