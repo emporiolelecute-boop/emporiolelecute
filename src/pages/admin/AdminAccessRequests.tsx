@@ -26,6 +26,7 @@ const PAGE_SIZE = 10;
 
 const AdminAccessRequests = () => {
   const { toast } = useToast();
+  const { refreshRole, roleRefreshing } = useAuth();
   const [rows, setRows] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
