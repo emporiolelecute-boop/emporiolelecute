@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import TrustBadges from "@/components/TrustBadges";
 import { Button } from "@/components/ui/button";
 import { useHeroSlides, type HeroSlide } from "@/hooks/useHeroSlides";
+import { useIsMobile } from "@/hooks/use-mobile";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
 import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
 import kitsImg from "@/assets/category-kits.webp";
@@ -207,8 +208,23 @@ function SlideBannerDesktop({
 
 const HeroSlider = () => {
   const { data: dbSlides } = useHeroSlides();
-  const slides: HeroSlide[] =
+  const isMobile = useIsMobile();
+  const allSlides: HeroSlide[] =
     dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
+
+  // Filtra slides de acordo com o dispositivo:
+  // - banner_mobile só aparece em mobile
+  // - banner_desktop só aparece em desktop
+  // - text_image aparece em ambos
+  const slides = useMemo(
+    () =>
+      allSlides.filter((s) => {
+        if (s.display_mode === "banner_mobile") return isMobile;
+        if (s.display_mode === "banner_desktop") return !isMobile;
+        return true;
+      }),
+    [allSlides, isMobile],
+  );
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -225,6 +241,7 @@ const HeroSlider = () => {
   }, [slides.length, currentSlide]);
 
   const slide = slides[currentSlide] ?? slides[0];
+  if (!slide) return null;
   const nextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   const prevSlide = () =>
