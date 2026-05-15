@@ -35,58 +35,36 @@ import {
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
-// Mode selector
+// Slide composition summary
 // ---------------------------------------------------------------------------
 
-const MODES: { value: HeroSlideMode; label: string; icon: React.ReactNode; description: string }[] = [
-  {
-    value: 'text_image',
-    label: 'Texto + Imagem',
-    icon: <LayoutTemplate className="h-5 w-5" />,
-    description: 'Layout padrão: texto à esquerda e imagem à direita. Aparece em todos os tamanhos de tela.',
-  },
-  {
-    value: 'banner_mobile',
-    label: 'Banner Mobile',
-    icon: <Smartphone className="h-5 w-5" />,
-    description: 'Banner full-width sem texto. Visível apenas em celular e tablet. Some no desktop.',
-  },
-  {
-    value: 'banner_desktop',
-    label: 'Banner Desktop',
-    icon: <Monitor className="h-5 w-5" />,
-    description: 'Banner full-width sem texto. Visível apenas no desktop. Some no celular.',
-  },
-];
-
-function ModeSelector({
-  value,
-  onChange,
-}: {
-  value: HeroSlideMode;
-  onChange: (v: HeroSlideMode) => void;
-}) {
+function CompositionSummary() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      {MODES.map((m) => (
-        <button
-          key={m.value}
-          type="button"
-          onClick={() => onChange(m.value)}
-          className={cn(
-            'flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all',
-            value === m.value
-              ? 'border-primary bg-primary/5'
-              : 'border-border hover:border-primary/40 hover:bg-muted/50',
-          )}
-        >
-          <div className={cn('flex items-center gap-2 font-medium text-sm', value === m.value ? 'text-primary' : 'text-foreground')}>
-            {m.icon}
-            {m.label}
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">{m.description}</p>
-        </button>
-      ))}
+      <div className="rounded-xl border-2 border-border bg-muted/30 p-4">
+        <div className="flex items-center gap-2 font-medium text-sm text-foreground">
+          <LayoutTemplate className="h-5 w-5" /> Texto + Imagem
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug mt-2">
+          Fallback quando não houver banner específico para a tela.
+        </p>
+      </div>
+      <div className="rounded-xl border-2 border-border bg-muted/30 p-4">
+        <div className="flex items-center gap-2 font-medium text-sm text-foreground">
+          <Smartphone className="h-5 w-5" /> Mobile
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug mt-2">
+          Exibido automaticamente em celular quando preenchido.
+        </p>
+      </div>
+      <div className="rounded-xl border-2 border-border bg-muted/30 p-4">
+        <div className="flex items-center gap-2 font-medium text-sm text-foreground">
+          <Monitor className="h-5 w-5" /> Desktop
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug mt-2">
+          Exibido automaticamente em PC quando preenchido.
+        </p>
+      </div>
     </div>
   );
 }
@@ -155,12 +133,10 @@ const AdminHeroSlides = () => {
   };
 
   const save = async () => {
-    if (!form.title && form.display_mode === 'text_image') return;
-    await upsert.mutateAsync(form);
+    if (!form.title) return;
+    await upsert.mutateAsync({ ...form, display_mode: 'text_image' });
     setOpen(false);
   };
-
-  const mode = form.display_mode ?? 'text_image';
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -168,8 +144,8 @@ const AdminHeroSlides = () => {
         <div>
           <h1 className="text-3xl font-display">Slides do Hero</h1>
           <p className="text-muted-foreground">
-            Gerencie os banners exibidos no topo da Home. Cada slide pode ser
-            exibido como texto+imagem, banner mobile ou banner desktop.
+            Gerencie os banners exibidos no topo da Home. Cada slide pode ter
+            imagem de texto+imagem, mobile e desktop no mesmo cadastro.
           </p>
         </div>
         <Button onClick={startNew}>
@@ -187,10 +163,7 @@ const AdminHeroSlides = () => {
                 {/* Thumbnail */}
                 <div className="w-20 h-20 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0">
                   {(() => {
-                    const thumb =
-                      s.display_mode === 'banner_desktop' ? s.image_desktop_url :
-                      s.display_mode === 'banner_mobile' ? s.image_mobile_url :
-                      s.image_url;
+                    const thumb = s.image_desktop_url || s.image_mobile_url || s.image_url;
                     return thumb ? (
                       <img
                         src={thumb}
@@ -207,7 +180,7 @@ const AdminHeroSlides = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-medium truncate">{s.title || '(sem título)'}</p>
-                    <ModeBadge mode={s.display_mode ?? 'text_image'} />
+                    <ModeBadge mode="text_image" />
                   </div>
                   {s.tagline && (
                     <p className="text-xs text-primary truncate">{s.tagline}</p>
@@ -273,116 +246,103 @@ const AdminHeroSlides = () => {
           </DialogHeader>
 
           <div className="space-y-6 py-2">
-            {/* ---- Mode selector ---- */}
+            {/* ---- Compositions ---- */}
             <div>
-              <Label className="mb-2 block">Tipo de slide *</Label>
-              <ModeSelector
-                value={mode}
-                onChange={(v) => setForm({ ...form, display_mode: v })}
+              <Label className="mb-2 block">Composições do slide</Label>
+              <CompositionSummary />
+            </div>
+
+            {/* ---- Text fields ---- */}
+            <div>
+              <Label>Tagline <span className="text-muted-foreground font-normal">(chip acima do título)</span></Label>
+              <Input
+                className="mt-1"
+                value={form.tagline || ''}
+                onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+                placeholder="Ex: Ateliê Criativo"
+              />
+            </div>
+            <div>
+              <Label>Título *</Label>
+              <Input
+                className="mt-1"
+                value={form.title || ''}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Ex: Lembrancinhas que encantam"
+              />
+            </div>
+            <div>
+              <Label>Subtítulo</Label>
+              <Textarea
+                className="mt-1"
+                value={form.subtitle || ''}
+                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+                placeholder="Descrição curta exibida abaixo do título"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Texto do botão <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Input
+                  className="mt-1"
+                  value={form.cta_label || ''}
+                  onChange={(e) => setForm({ ...form, cta_label: e.target.value })}
+                  placeholder="Ex: Ver produtos"
+                />
+              </div>
+              <div>
+                <Label>URL do botão</Label>
+                <Input
+                  className="mt-1"
+                  value={form.cta_url || ''}
+                  onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
+                  placeholder="/produtos"
+                />
+              </div>
+            </div>
+
+            {/* ---- Image upload ---- */}
+            <div>
+              <Label>Imagem Texto + Imagem <span className="text-muted-foreground font-normal">(fallback)</span></Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Usada quando a tela não tiver um banner específico. Recomendado 800×800 · PNG, JPG ou WEBP · até 5 MB
+              </p>
+              <SingleImageUpload
+                value={form.image_url || ''}
+                onChange={(url) => setForm({ ...form, image_url: url })}
+                folder="hero"
+                hint="800×800 recomendado"
+                previewMaxWidth={320}
               />
             </div>
 
-            {/* ---- Text fields — only for text_image mode ---- */}
-            {mode === 'text_image' && (
-              <>
-                <div>
-                  <Label>Tagline <span className="text-muted-foreground font-normal">(chip acima do título)</span></Label>
-                  <Input
-                    className="mt-1"
-                    value={form.tagline || ''}
-                    onChange={(e) => setForm({ ...form, tagline: e.target.value })}
-                    placeholder="Ex: Ateliê Criativo"
-                  />
-                </div>
-                <div>
-                  <Label>Título *</Label>
-                  <Input
-                    className="mt-1"
-                    value={form.title || ''}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="Ex: Lembrancinhas que encantam"
-                  />
-                </div>
-                <div>
-                  <Label>Subtítulo</Label>
-                  <Textarea
-                    className="mt-1"
-                    value={form.subtitle || ''}
-                    onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
-                    placeholder="Descrição curta exibida abaixo do título"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Texto do botão <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                    <Input
-                      className="mt-1"
-                      value={form.cta_label || ''}
-                      onChange={(e) => setForm({ ...form, cta_label: e.target.value })}
-                      placeholder="Ex: Ver produtos"
-                    />
-                  </div>
-                  <div>
-                    <Label>URL do botão</Label>
-                    <Input
-                      className="mt-1"
-                      value={form.cta_url || ''}
-                      onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
-                      placeholder="/produtos"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+            <div>
+              <Label>Imagem Mobile <span className="text-muted-foreground font-normal">(celular / tablet)</span></Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Quando preenchida, substitui automaticamente o layout texto+imagem no celular. A imagem ocupa 100% da largura sem cortes.
+              </p>
+              <SingleImageUpload
+                value={form.image_mobile_url || ''}
+                onChange={(url) => setForm({ ...form, image_mobile_url: url })}
+                folder="hero/mobile"
+                hint="Proporção 9:16 ou 1:1 recomendada"
+                previewMaxWidth={280}
+              />
+            </div>
 
-            {/* ---- Image upload ---- */}
-            {mode === 'text_image' && (
-              <div>
-                <Label>Imagem <span className="text-muted-foreground font-normal">(quadrada, ao lado do texto)</span></Label>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-                  Recomendado 800×800 · PNG, JPG ou WEBP · até 5 MB
-                </p>
-                <SingleImageUpload
-                  value={form.image_url || ''}
-                  onChange={(url) => setForm({ ...form, image_url: url })}
-                  folder="hero"
-                  hint="800×800 recomendado"
-                  previewMaxWidth={320}
-                />
-              </div>
-            )}
-
-            {mode === 'banner_mobile' && (
-              <div>
-                <Label>Imagem do banner <span className="text-muted-foreground font-normal">(celular / tablet)</span></Label>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-                  A imagem ocupa 100% da largura sem cortes. Recomendado proporção 9:16 ou 1:1 · PNG, JPG ou WEBP · até 5 MB
-                </p>
-                <SingleImageUpload
-                  value={form.image_mobile_url || ''}
-                  onChange={(url) => setForm({ ...form, image_mobile_url: url })}
-                  folder="hero/mobile"
-                  hint="Proporção 9:16 ou 1:1 recomendada"
-                  previewMaxWidth={280}
-                />
-              </div>
-            )}
-
-            {mode === 'banner_desktop' && (
-              <div>
-                <Label>Imagem do banner <span className="text-muted-foreground font-normal">(desktop)</span></Label>
-                <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-                  A imagem ocupa 100% da largura sem cortes. Recomendado proporção 16:5 ou 16:6 · PNG, JPG ou WEBP · até 5 MB
-                </p>
-                <SingleImageUpload
-                  value={form.image_desktop_url || ''}
-                  onChange={(url) => setForm({ ...form, image_desktop_url: url })}
-                  folder="hero/desktop"
-                  hint="Proporção 16:5 recomendada (ex: 1920×600)"
-                  previewMaxWidth={480}
-                />
-              </div>
-            )}
+            <div>
+              <Label>Imagem Desktop <span className="text-muted-foreground font-normal">(PC)</span></Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Quando preenchida, substitui automaticamente o layout texto+imagem no PC. A imagem ocupa 100% da largura sem cortes.
+              </p>
+              <SingleImageUpload
+                value={form.image_desktop_url || ''}
+                onChange={(url) => setForm({ ...form, image_desktop_url: url })}
+                folder="hero/desktop"
+                hint="Proporção 16:5 recomendada (ex: 1920×600)"
+                previewMaxWidth={480}
+              />
+            </div>
 
             {/* ---- Alt text — always shown ---- */}
             <div>
@@ -430,9 +390,7 @@ const AdminHeroSlides = () => {
             </Button>
             <Button
               onClick={save}
-              disabled={
-                (mode === 'text_image' && !form.title) || upsert.isPending
-              }
+              disabled={!form.title || upsert.isPending}
             >
               {upsert.isPending ? 'Salvando…' : 'Salvar'}
             </Button>

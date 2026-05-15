@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 import TrustBadges from "@/components/TrustBadges";
@@ -67,6 +67,27 @@ const fallbackImageMap: Record<string, string> = {
   '/src/assets/category-kits.webp': kitsImg,
 };
 
+const resolveImageSrc = (src?: string | null) =>
+  (src && fallbackImageMap[src]) || src || "";
+
+const resolveSlideDisplay = (slide: HeroSlide, isMobile: boolean) => {
+  const mobileSrc = resolveImageSrc(slide.image_mobile_url);
+  const desktopSrc = resolveImageSrc(slide.image_desktop_url);
+
+  if (isMobile && mobileSrc) {
+    return { mode: "banner_mobile" as const, imgSrc: mobileSrc };
+  }
+
+  if (!isMobile && desktopSrc) {
+    return { mode: "banner_desktop" as const, imgSrc: desktopSrc };
+  }
+
+  return {
+    mode: "text_image" as const,
+    imgSrc: resolveImageSrc(slide.image_url) || sabonetesImg,
+  };
+};
+
 // ---------------------------------------------------------------------------
 // Sub-components for each display mode
 // ---------------------------------------------------------------------------
@@ -75,14 +96,12 @@ const fallbackImageMap: Record<string, string> = {
 function SlideTextImage({
   slide,
   isPriority,
+  imgSrc,
 }: {
   slide: HeroSlide;
   isPriority: boolean;
+  imgSrc: string;
 }) {
-  const imgSrc =
-    (slide.image_url && fallbackImageMap[slide.image_url]) ||
-    slide.image_url ||
-    sabonetesImg;
   const alt = slide.image_alt || slide.title;
 
   return (
@@ -143,11 +162,12 @@ function SlideTextImage({
 function SlideBannerMobile({
   slide,
   isPriority,
+  imgSrc,
 }: {
   slide: HeroSlide;
   isPriority: boolean;
+  imgSrc: string;
 }) {
-  const imgSrc = slide.image_mobile_url || slide.image_url || "";
   const alt = slide.image_alt || slide.title;
 
   if (!imgSrc) return null;
@@ -173,14 +193,12 @@ function SlideBannerMobile({
 function SlideBannerDesktop({
   slide,
   isPriority,
+  imgSrc,
 }: {
   slide: HeroSlide;
   isPriority: boolean;
+  imgSrc: string;
 }) {
-  const imgSrc =
-    (slide.image_desktop_url && fallbackImageMap[slide.image_desktop_url]) ||
-    slide.image_desktop_url ||
-    "";
   const alt = slide.image_alt || slide.title;
 
   if (!imgSrc) return null;
@@ -209,22 +227,8 @@ function SlideBannerDesktop({
 const HeroSlider = () => {
   const { data: dbSlides } = useHeroSlides();
   const isMobile = useIsMobile();
-  const allSlides: HeroSlide[] =
+  const slides: HeroSlide[] =
     dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
-
-  // Filtra slides de acordo com o dispositivo:
-  // - banner_mobile só aparece em mobile
-  // - banner_desktop só aparece em desktop
-  // - text_image aparece em ambos
-  const slides = useMemo(
-    () =>
-      allSlides.filter((s) => {
-        if (s.display_mode === "banner_mobile") return isMobile;
-        if (s.display_mode === "banner_desktop") return !isMobile;
-        return true;
-      }),
-    [allSlides, isMobile],
-  );
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -248,9 +252,9 @@ const HeroSlider = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   const isPriority = currentSlide === 0;
+  const display = resolveSlideDisplay(slide, isMobile);
   const isBanner =
-    slide.display_mode === "banner_mobile" ||
-    slide.display_mode === "banner_desktop";
+    display.mode === "banner_mobile" || display.mode === "banner_desktop";
 
   return (
     <section
@@ -262,7 +266,7 @@ const HeroSlider = () => {
       aria-label="Seção principal - Empório LeleCute"
     >
       {/* Decorative background — only for text_image mode */}
-      {slide.display_mode === "text_image" && (
+      {display.mode === "text_image" && (
         <>
           <div className="absolute inset-0 bg-dotted-pattern opacity-30 pointer-events-none" />
           <div className="absolute top-32 right-[15%] text-amber-400 pointer-events-none">
@@ -272,17 +276,17 @@ const HeroSlider = () => {
       )}
 
       {/* Slide content — keyed so transitions animate on slide change */}
-      <div key={slide.id} className="w-full">
-        {slide.display_mode === "text_image" && (
+      <div key={`${slide.id}-${display.mode}`} className="w-full">
+        {display.mode === "text_image" && (
           <div className="pt-20 pb-10 md:pb-14">
-            <SlideTextImage slide={slide} isPriority={isPriority} />
+            <SlideTextImage slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
           </div>
         )}
-        {slide.display_mode === "banner_mobile" && (
-          <SlideBannerMobile slide={slide} isPriority={isPriority} />
+        {display.mode === "banner_mobile" && (
+          <SlideBannerMobile slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
         )}
-        {slide.display_mode === "banner_desktop" && (
-          <SlideBannerDesktop slide={slide} isPriority={isPriority} />
+        {display.mode === "banner_desktop" && (
+          <SlideBannerDesktop slide={slide} isPriority={isPriority} imgSrc={display.imgSrc} />
         )}
       </div>
 
