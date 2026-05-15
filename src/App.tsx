@@ -26,6 +26,7 @@ const Loja = lazy(() => import("./pages/Loja"));
 const LembrancinhasLanding = lazy(() => import("./pages/LembrancinhasLanding"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const SitemapCheck = lazy(() => import("./pages/SitemapCheck"));
 
 // Admin pages - lazy loaded
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
