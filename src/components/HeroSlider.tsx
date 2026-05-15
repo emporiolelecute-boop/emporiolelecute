@@ -4,7 +4,6 @@ import { Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import TrustBadges from "@/components/TrustBadges";
 import { Button } from "@/components/ui/button";
 import { useHeroSlides, type HeroSlide } from "@/hooks/useHeroSlides";
-import { useIsMobile } from "@/hooks/use-mobile";
 import sabonetesImg from "@/assets/category-sabonetes.webp";
 import lembrancinhasImg from "@/assets/category-lembrancinhas.webp";
 import kitsImg from "@/assets/category-kits.webp";
@@ -226,7 +225,6 @@ function SlideBannerDesktop({
 
 const HeroSlider = () => {
   const { data: dbSlides } = useHeroSlides();
-  const isMobile = useIsMobile();
   const slides: HeroSlide[] =
     dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
 
@@ -252,7 +250,6 @@ const HeroSlider = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   const isPriority = currentSlide === 0;
-  const display = resolveSlideDisplay(slide, isMobile);
   const mobileBannerSrc = resolveImageSrc(slide.image_mobile_url);
   const desktopBannerSrc = resolveImageSrc(slide.image_desktop_url);
   const fallbackSrc = resolveImageSrc(slide.image_url) || sabonetesImg;
