@@ -36,6 +36,8 @@ export interface OccasionLanding {
   testimonials: OccasionLandingTestimonial[];
   social_proof_stats: OccasionLandingStat[];
   related_route_slugs: string[];
+  og_image_url: string | null;
+  og_image_alt: string | null;
   position: number;
   is_published: boolean;
   created_at: string;
