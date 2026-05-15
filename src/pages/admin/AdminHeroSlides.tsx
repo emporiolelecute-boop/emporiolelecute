@@ -133,8 +133,8 @@ const AdminHeroSlides = () => {
   };
 
   const save = async () => {
-    if (!form.title && form.display_mode === 'text_image') return;
-    await upsert.mutateAsync(form);
+    if (!form.title) return;
+    await upsert.mutateAsync({ ...form, display_mode: 'text_image' });
     setOpen(false);
   };
 
