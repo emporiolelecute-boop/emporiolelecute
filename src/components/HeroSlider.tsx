@@ -396,8 +396,12 @@ const HeroSlider = () => {
         <div
           ref={activeRef}
           key={`active-${slide.id}`}
-          className="relative w-full opacity-0 motion-safe:animate-fade-in motion-reduce:opacity-100"
-          style={{ animationFillMode: "forwards" }}
+          className={
+            reducedMotion
+              ? "relative w-full"
+              : "relative w-full opacity-0 motion-safe:animate-fade-in motion-reduce:opacity-100"
+          }
+          style={reducedMotion ? undefined : { animationFillMode: "forwards" }}
         >
           <SlideRenderer slide={slide} isPriority={isPriority} />
         </div>
