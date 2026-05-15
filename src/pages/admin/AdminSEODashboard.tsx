@@ -426,10 +426,33 @@ export default function AdminSEODashboard() {
                 <Input id="alert-webhook" placeholder="https://hooks.slack.com/..." value={alertCfg.webhook_url}
                   onChange={(e) => setAlertCfg(a => ({ ...a, webhook_url: e.target.value }))} />
               </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label>Severidades que disparam alerta</Label>
+                <div className="flex flex-wrap gap-4">
+                  {(['error','warn'] as const).map(sev => {
+                    const checked = alertCfg.severities.includes(sev);
+                    return (
+                      <label key={sev} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <Checkbox checked={checked} onCheckedChange={(v) => {
+                          setAlertCfg(a => ({
+                            ...a,
+                            severities: v ? Array.from(new Set([...a.severities, sev])) : a.severities.filter(s => s !== sev),
+                          }));
+                        }} />
+                        <Badge variant={sev === 'error' ? 'destructive' : 'secondary'}>{sev}</Badge>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">Pelo menos uma severidade deve estar marcada para receber notificações.</p>
+              </div>
               <div className="flex items-center gap-2 md:col-span-2">
                 <Switch id="alert-on" checked={alertCfg.enabled} onCheckedChange={(v) => setAlertCfg(a => ({ ...a, enabled: v }))} />
                 <Label htmlFor="alert-on">Alertas ativos</Label>
-                <Button size="sm" className="ml-auto" onClick={saveAlertCfg} disabled={savingCfg}>{savingCfg ? 'Salvando...' : 'Salvar'}</Button>
+                <Button size="sm" variant="outline" className="ml-auto" onClick={sendTestAlert} disabled={sendingTest || (!alertCfg.email && !alertCfg.webhook_url)}>
+                  <Send className={`h-4 w-4 mr-1 ${sendingTest ? 'animate-pulse' : ''}`}/>{sendingTest ? 'Enviando...' : 'Enviar teste'}
+                </Button>
+                <Button size="sm" onClick={saveAlertCfg} disabled={savingCfg}>{savingCfg ? 'Salvando...' : 'Salvar'}</Button>
               </div>
             </CardContent>
           </Card>
