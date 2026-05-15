@@ -126,6 +126,7 @@ const empty: Partial<HeroSlide> = {
   subtitle: '',
   image_url: '',
   image_mobile_url: '',
+  image_desktop_url: '',
   image_alt: '',
   cta_label: '',
   cta_url: '',
