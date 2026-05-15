@@ -307,22 +307,15 @@ const AdminHomepageBlocks = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Image className="w-4 h-4" />
-                  URL da Imagem
+                  Imagem do bloco
                 </Label>
-                <Input
+                <SingleImageUpload
                   value={editingBlock.image_url || ''}
-                  onChange={(e) => setEditingBlock({ ...editingBlock, image_url: e.target.value })}
-                  placeholder="https://exemplo.com/imagem.jpg"
+                  onChange={(url) => setEditingBlock({ ...editingBlock, image_url: url })}
+                  folder="homepage-blocks"
+                  hint="Recomendado 16:9 · PNG, JPG ou WEBP até 5MB"
+                  previewMaxWidth={360}
                 />
-                {editingBlock.image_url && (
-                  <div className="mt-2 aspect-video rounded-lg overflow-hidden bg-muted max-w-xs">
-                    <img 
-                      src={editingBlock.image_url} 
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">

@@ -93,8 +93,14 @@ const AdminHeroSlides = () => {
               <Textarea value={form.subtitle || ''} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
             </div>
             <div>
-              <Label>URL da imagem</Label>
-              <Input value={form.image_url || ''} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+              <Label>Imagem</Label>
+              <SingleImageUpload
+                value={form.image_url || ''}
+                onChange={(url) => setForm({ ...form, image_url: url })}
+                folder="hero"
+                hint="Recomendado 1920x900 · PNG, JPG ou WEBP até 5MB"
+                previewMaxWidth={420}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
