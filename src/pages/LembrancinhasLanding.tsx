@@ -14,7 +14,8 @@ import ItemListStructuredData from "@/components/ItemListStructuredData";
 import OrganizationStructuredData from "@/components/OrganizationStructuredData";
 import ProductCard from "@/components/ProductCard";
 import TrustBadges from "@/components/TrustBadges";
-import { trackInternalLink } from "@/lib/analytics";
+import { trackInternalLink, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
+import { useContactInfo } from "@/hooks/useContactInfo";
 import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
 import { useOccasionLanding, usePublishedOccasionLandings, usePreviewOccasionLanding, type OccasionLanding } from "@/hooks/useOccasionLandings";
@@ -110,7 +111,19 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
     slug: p.slug,
   }));
 
-  const whatsappHref = `https://wa.me/5541992214299?text=${encodeURIComponent(config.whatsappMessage)}`;
+  const { whatsappNumber } = useContactInfo();
+  const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
+  const utmCampaign = `landing_${config.routeSlug}`;
+  const whatsappHref = buildWhatsAppUrl({
+    phone,
+    message: config.whatsappMessage,
+    utm_source: "landing",
+    utm_medium: "cta",
+    utm_campaign: utmCampaign,
+    utm_content: config.routeSlug,
+  });
+  const handleWaClick = (position: string) => () =>
+    trackWhatsAppClick({ source: "landing", context: config.routeSlug, utm_campaign: utmCampaign });
   // Related landings: prefer DB-published landings, fallback to hardcoded config.
   const relatedLandings = config.relatedRouteSlugs
     .map((s) => {
@@ -165,7 +178,7 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                 {config.heroSubtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={handleWaClick("hero")}>
                   <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground gap-2">
                     <MessageCircle className="h-5 w-5" />
                     Orçamento via WhatsApp
@@ -261,7 +274,7 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
                 <p className="text-muted-foreground mb-4">
                   Nosso catálogo para esta ocasião está em atualização.
                 </p>
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={handleWaClick("mid_section")}>
                   <Button>Falar com a artesã pelo WhatsApp</Button>
                 </a>
               </div>
@@ -384,7 +397,7 @@ const LembrancinhasLanding = ({ configKey }: Props) => {
             <p className="text-muted-foreground mb-8">
               Atendimento direto com a artesã pelo WhatsApp. Resposta em até 2 horas em horário comercial.
             </p>
-            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={handleWaClick("footer_cta")}>
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground gap-2">
                 <MessageCircle className="h-5 w-5" />
                 Solicitar orçamento agora
