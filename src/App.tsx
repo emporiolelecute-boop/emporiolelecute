@@ -30,6 +30,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SitemapCheck = lazy(() => import("./pages/SitemapCheck"));
 const TaxonomyPage = lazy(() => import("./pages/TaxonomyPage"));
+const CombinationPage = lazy(() => import("./pages/CombinationPage"));
 
 // Admin pages - lazy loaded with retry + telemetry
 import { lazyWithRetry } from "./lib/lazyWithRetry";
@@ -244,6 +245,13 @@ const App = () => {
                 <Route path="/segmento/:slug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <TaxonomyPage kind="segmento" />
+                  </Suspense>
+                } />
+
+                {/* Fase 10.2 — Rota combinatória SAFE MODE (noindex por padrão) */}
+                <Route path="/segmento/:segmentSlug/ocasiao/:occasionSlug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <CombinationPage />
                   </Suspense>
                 } />
 
