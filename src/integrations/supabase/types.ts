@@ -226,9 +226,16 @@ export type Database = {
       }
       combination_pages_registry: {
         Row: {
+          auto_discovered: boolean
+          canonical_path: string | null
+          confidence_score: number
           created_at: string
+          discovery_payload: Json
+          discovery_status: string
+          discovery_type: string | null
           editorial_content: string | null
           faqs: Json
+          generated_slug: string | null
           has_custom_meta: boolean
           has_editorial: boolean
           has_faq: boolean
@@ -241,15 +248,25 @@ export type Database = {
           primary_slug: string
           primary_type: string
           product_count: number
+          products_count: number
+          quality_score: number
           secondary_slug: string
           secondary_type: string
           seo_score: number
+          thin_content_risk: boolean
           updated_at: string
         }
         Insert: {
+          auto_discovered?: boolean
+          canonical_path?: string | null
+          confidence_score?: number
           created_at?: string
+          discovery_payload?: Json
+          discovery_status?: string
+          discovery_type?: string | null
           editorial_content?: string | null
           faqs?: Json
+          generated_slug?: string | null
           has_custom_meta?: boolean
           has_editorial?: boolean
           has_faq?: boolean
@@ -262,15 +279,25 @@ export type Database = {
           primary_slug: string
           primary_type: string
           product_count?: number
+          products_count?: number
+          quality_score?: number
           secondary_slug: string
           secondary_type: string
           seo_score?: number
+          thin_content_risk?: boolean
           updated_at?: string
         }
         Update: {
+          auto_discovered?: boolean
+          canonical_path?: string | null
+          confidence_score?: number
           created_at?: string
+          discovery_payload?: Json
+          discovery_status?: string
+          discovery_type?: string | null
           editorial_content?: string | null
           faqs?: Json
+          generated_slug?: string | null
           has_custom_meta?: boolean
           has_editorial?: boolean
           has_faq?: boolean
@@ -283,9 +310,12 @@ export type Database = {
           primary_slug?: string
           primary_type?: string
           product_count?: number
+          products_count?: number
+          quality_score?: number
           secondary_slug?: string
           secondary_type?: string
           seo_score?: number
+          thin_content_risk?: boolean
           updated_at?: string
         }
         Relationships: []
