@@ -35,10 +35,12 @@ const Produtos = () => {
   const { data: dbCategories } = useDbCategories();
   const { data: dbOccasions } = useDbOccasions();
   const { data: dbTags } = useTags();
-  
+  const { data: dbSegments } = useSegments();
+
   const [search, setSearch] = useState(searchParams.get('busca') || searchParams.get('search') || "");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('categoria') || null);
   const [selectedOccasion, setSelectedOccasion] = useState<string | null>(searchParams.get('ocasiao') || null);
+  const [selectedSegment, setSelectedSegment] = useState<string | null>(searchParams.get('segmento') || null);
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('pagina')) || 1);
@@ -51,20 +53,22 @@ const Produtos = () => {
     const urlSearch = searchParams.get('busca') || searchParams.get('search');
     const urlCategoria = searchParams.get('categoria');
     const urlOcasiao = searchParams.get('ocasiao');
+    const urlSegmento = searchParams.get('segmento');
     const urlTag = searchParams.get('tag');
     const urlPage = searchParams.get('pagina');
-    
-    if (urlSearch !== null) setSearch(urlSearch);
-    if (urlCategoria !== null) setSelectedCategory(urlCategoria);
-    if (urlOcasiao !== null) setSelectedOccasion(urlOcasiao);
-    if (urlTag !== null) setSelectedTag(urlTag);
-    if (urlPage !== null) setCurrentPage(Number(urlPage) || 1);
+
+    setSearch(urlSearch ?? "");
+    setSelectedCategory(urlCategoria);
+    setSelectedOccasion(urlOcasiao);
+    setSelectedSegment(urlSegmento);
+    setSelectedTag(urlTag);
+    setCurrentPage(urlPage ? Number(urlPage) || 1 : 1);
   }, [searchParams]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, selectedCategory, selectedOccasion, selectedTag]);
+  }, [debouncedSearch, selectedCategory, selectedOccasion, selectedSegment, selectedTag]);
 
   // Helper to find category/occasion/tag by slug or ID
   const findCategoryBySlugOrId = (value: string | null) => {
