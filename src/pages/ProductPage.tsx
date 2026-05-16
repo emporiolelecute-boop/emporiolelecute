@@ -47,6 +47,9 @@ import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useCart } from "@/contexts/CartContext";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
+import { buildContextualLinksForProduct } from "@/lib/linkOrchestrator";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 
 const ProductPage = () => {
