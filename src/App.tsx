@@ -101,6 +101,7 @@ const AdminSeoSimulationLab = lazyWithRetry(() => import("./pages/admin/AdminSeo
 const AdminStrategicSimulation = lazyWithRetry(() => import("./pages/admin/AdminStrategicSimulation"), "AdminStrategicSimulation");
 const AdminSeoSingularity = lazyWithRetry(() => import("./pages/admin/AdminSeoSingularity"), "AdminSeoSingularity");
 const AdminSeoConsciousness = lazyWithRetry(() => import("./pages/admin/AdminSeoConsciousness"), "AdminSeoConsciousness");
+const AdminSeoExecutiveGrid = lazyWithRetry(() => import("./pages/admin/AdminSeoExecutiveGrid"), "AdminSeoExecutiveGrid");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
