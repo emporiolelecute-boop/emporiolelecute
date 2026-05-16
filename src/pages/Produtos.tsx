@@ -539,6 +539,33 @@ const Produtos = () => {
             </div>
           </div>
 
+          {/* Segment Filters */}
+          {dbSegments && dbSegments.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-foreground mb-3">Segmentos</h3>
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant={!resolvedSegment ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 text-sm"
+                  onClick={() => handleSegmentChange(null)}
+                >
+                  Todos
+                </Badge>
+                {dbSegments.map((segment) => (
+                  <Badge
+                    key={segment.id}
+                    variant={resolvedSegment?.id === segment.id ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 text-sm"
+                    onClick={() => handleSegmentChange(segment.slug)}
+                  >
+                    {segment.name}
+                    {counts.seg[segment.id] ? <span className="ml-1 opacity-70">({counts.seg[segment.id]})</span> : null}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Tag Filters */}
           {dbTags && dbTags.length > 0 && (
             <div className="mt-4">
