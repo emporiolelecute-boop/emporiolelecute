@@ -790,6 +790,54 @@ const Produtos = () => {
           </section>
         )}
 
+        {/* HUB SEMÂNTICO — interlinking para páginas canônicas */}
+        <section className="container mx-auto px-4 mt-20">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+            {(dbCategories || []).length > 0 && (
+              <div>
+                <h2 className="font-display text-xl text-foreground mb-4">Comprar por categoria</h2>
+                <ul className="space-y-2">
+                  {(dbCategories || []).slice(0, 8).map((c) => (
+                    <li key={c.id}>
+                      <Link to={`/categoria/${c.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {c.name}{counts.cat[c.id] ? <span className="ml-1 opacity-60">({counts.cat[c.id]})</span> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(dbOccasions || []).length > 0 && (
+              <div>
+                <h2 className="font-display text-xl text-foreground mb-4">Comprar por ocasião</h2>
+                <ul className="space-y-2">
+                  {(dbOccasions || []).slice(0, 8).map((o) => (
+                    <li key={o.id}>
+                      <Link to={`/ocasiao/${o.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {o.name}{counts.occ[o.id] ? <span className="ml-1 opacity-60">({counts.occ[o.id]})</span> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(dbSegments || []).length > 0 && (
+              <div>
+                <h2 className="font-display text-xl text-foreground mb-4">Comprar por segmento</h2>
+                <ul className="space-y-2">
+                  {(dbSegments || []).slice(0, 8).map((s) => (
+                    <li key={s.id}>
+                      <Link to={`/segmento/${s.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {s.name}{counts.seg[s.id] ? <span className="ml-1 opacity-60">({counts.seg[s.id]})</span> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* WhatsApp CTA — otimizado para conversão */}
         <div className="container mx-auto px-4 mt-20">
           <div className="bg-gradient-to-r from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-center text-primary-foreground relative overflow-hidden">
