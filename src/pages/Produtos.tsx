@@ -665,7 +665,19 @@ const Produtos = () => {
             </>
           ) : (
             <div className="text-center py-16">
-              <p className="text-muted-foreground mb-4">Nenhum produto encontrado</p>
+              <p className="text-muted-foreground mb-4">
+                Nenhum produto encontrado
+                {(() => {
+                  const parts = [
+                    resolvedCategory?.name,
+                    resolvedOccasion?.name,
+                    resolvedSegment?.name,
+                    resolvedTag?.name,
+                    debouncedSearch ? `"${debouncedSearch}"` : null,
+                  ].filter(Boolean);
+                  return parts.length ? ` para: ${parts.join(' + ')}` : '';
+                })()}
+              </p>
               <Button onClick={handleClearFilters}>
                 Limpar filtros
               </Button>
