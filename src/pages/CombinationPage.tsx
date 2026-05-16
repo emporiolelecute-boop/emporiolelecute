@@ -395,7 +395,40 @@ const CombinationPage = () => {
           </section>
         )}
 
-        {/* CTA WhatsApp */}
+        {/* Fase 11.1 — Linking semântico (somente combinações aprovadas com score forte) */}
+        {(() => {
+          const reg = registryQuery.data;
+          if (!reg) return null;
+          const approved = reg.discovery_status === "approved" && reg.is_indexable !== false;
+          const readiness = reg.readiness_score ?? 0;
+          const coverage = reg.topical_coverage ?? 0;
+          if (!approved || readiness < 75 || coverage < 60) return null;
+          if (!verdict.indexable) return null;
+
+          const used = new Set<string>([canonicalPath]);
+          if (segment) used.add(`/segmento/${segment.slug}`);
+          if (occasion) used.add(`/ocasiao/${occasion.slug}`);
+          relatedCategories.forEach((c) => used.add(`/categoria/${c.slug}`));
+
+          const links = buildContextualLinksForCombination(
+            { path: canonicalPath },
+            {
+              themes: semanticCtx.themes,
+              combinations: semanticCtx.combinations,
+              posts: semanticCtx.posts,
+            }
+          )
+            .filter((l) => !used.has(l.path))
+            .slice(0, 6);
+
+          if (links.length < 3) return null;
+          return (
+            <section className="container mx-auto px-4">
+              <SemanticLinkingBlock title="Conexões relacionadas" links={links} />
+            </section>
+          );
+        })()}
+
         {whatsappHref && (
           <section className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
