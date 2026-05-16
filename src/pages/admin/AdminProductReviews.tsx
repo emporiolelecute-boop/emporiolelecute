@@ -81,6 +81,8 @@ const AdminProductReviews = () => {
         <Button onClick={startNew}><Plus className="h-4 w-4 mr-2" /> Nova avaliação</Button>
       </div>
 
+      <ReviewStrategicGaps />
+
       {/* Filtros */}
       <Card className="mb-4">
         <CardContent className="p-4 grid grid-cols-1 md:grid-cols-6 gap-3">
