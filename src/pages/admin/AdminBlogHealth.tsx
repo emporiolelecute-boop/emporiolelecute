@@ -154,6 +154,7 @@ const AdminBlogHealth = () => {
         </CardContent>
       </Card>
 
+      <Card>
         <CardHeader>
           <CardTitle>Posts com menor score</CardTitle>
         </CardHeader>
