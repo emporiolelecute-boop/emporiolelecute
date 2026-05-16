@@ -32,7 +32,8 @@ import {
   Activity,
   Clock,
   Star,
-  BookOpen
+  BookOpen,
+  TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
