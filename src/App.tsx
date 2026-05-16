@@ -81,6 +81,7 @@ const AdminBlog = lazyWithRetry(() => import("./pages/admin/AdminBlog"), "AdminB
 const AdminBlogHealth = lazyWithRetry(() => import("./pages/admin/AdminBlogHealth"), "AdminBlogHealth");
 const AdminImageHealth = lazyWithRetry(() => import("./pages/admin/AdminImageHealth"), "AdminImageHealth");
 const AdminCombinationPages = lazyWithRetry(() => import("./pages/admin/AdminCombinationPages"), "AdminCombinationPages");
+const AdminDiscovery = lazyWithRetry(() => import("./pages/admin/AdminDiscovery"), "AdminDiscovery");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -504,6 +505,11 @@ const App = () => {
                   <Route path="combination-pages" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminCombinationPages />
+                    </Suspense>
+                  } />
+                  <Route path="discovery" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminDiscovery />
                     </Suspense>
                   } />
                 </Route>
