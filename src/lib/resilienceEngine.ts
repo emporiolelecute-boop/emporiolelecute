@@ -68,6 +68,42 @@ export function estimateRecoveryWindow(t: TelemetrySnapshot): number {
   return Math.max(1, Math.round(base + penalty));
 }
 
+// Fase 14 — extensões de simulação
+
+export function simulateRecoveryElasticity(t: TelemetrySnapshot, stressLevel = 50): number {
+  const base = calculateRecoveryElasticity(t);
+  return clamp(Math.round(base - stressLevel * 0.2));
+}
+
+export function estimateCascadePropagation(t: TelemetrySnapshot): {
+  immediate: number;
+  shortTerm: number;
+  longTerm: number;
+} {
+  const base = detectCascadeFailureRisk(t);
+  return {
+    immediate: clamp(Math.round(base * 0.5)),
+    shortTerm: clamp(Math.round(base * 0.75)),
+    longTerm: clamp(Math.round(base)),
+  };
+}
+
+export function estimateCriticalFailureProbability(t: TelemetrySnapshot): number {
+  return clamp(Math.round(
+    v(t.collapse_risk_score) * 0.4 +
+    v(t.fragile_cluster_count) * 4 +
+    v(t.cascade_failure_risk) * 0.3 +
+    v(t.maintenance_explosion_risk) * 0.3
+  ));
+}
+
+export function estimateLongTermResilience(t: TelemetrySnapshot, months = 12): number {
+  const base = calculateSystemResilience(t);
+  const decay = v(t.content_decay_score) * 0.05 * months;
+  const fatigue = v(t.strategic_fatigue_score) * 0.04 * months;
+  return clamp(Math.round(base - decay - fatigue));
+}
+
 export function buildResilienceReport(t: TelemetrySnapshot): ResilienceReport {
   const sys = calculateSystemResilience(t);
   const cluster = calculateClusterResilience(t);

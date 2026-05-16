@@ -96,6 +96,19 @@ export interface TelemetrySnapshot {
   cascade_failure_risk: number;
   recovery_elasticity: number;
   strategic_fatigue_score: number;
+  // Fase 14 — simulation / digital twin
+  simulation_readiness_score: number;
+  future_stability_score: number;
+  digital_twin_accuracy: number;
+  strategic_resilience_forecast: number;
+  long_term_decay_risk: number;
+  cluster_failure_probability: number;
+  operational_stress_score: number;
+  projected_growth_score: number;
+  projected_roi_score: number;
+  sustainability_forecast: number;
+  authority_compounding_score: number;
+  recovery_projection_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -291,5 +304,17 @@ export function computeTelemetry(
     cascade_failure_risk: 0,
     recovery_elasticity: 0,
     strategic_fatigue_score: 0,
+    simulation_readiness_score: 0,
+    future_stability_score: 0,
+    digital_twin_accuracy: 0,
+    strategic_resilience_forecast: 0,
+    long_term_decay_risk: 0,
+    cluster_failure_probability: 0,
+    operational_stress_score: 0,
+    projected_growth_score: 0,
+    projected_roi_score: 0,
+    sustainability_forecast: 0,
+    authority_compounding_score: 0,
+    recovery_projection_score: 0,
   };
 }
