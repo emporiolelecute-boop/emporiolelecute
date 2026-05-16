@@ -21,6 +21,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { optimizeImage } from "@/lib/image";
 import { normalizeFaqs, metaTitleFallback, metaDescriptionFallback, buildBreadcrumbs, type TaxonomyKind as TaxKind } from "@/lib/taxonomy";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
+import { buildContextualLinksForTaxonomy } from "@/lib/linkOrchestrator";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 
 const SITE_ORIGIN = "https://emporiolelecute.com.br";
