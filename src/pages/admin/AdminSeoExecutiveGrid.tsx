@@ -35,7 +35,7 @@ const MOCK_TELEMETRY: Partial<TelemetrySnapshot> = {
   semantic_stability_score: 64, semantic_balance_score: 60, semantic_entropy_score: 36,
   authority_entropy: 40, authority_dispersion_score: 38, authority_dependency_risk: 42,
   fragile_cluster_count: 2, orphan_cluster_count: 1, fragmentation_pressure_score: 32,
-  strategic_contradiction_score_v2: 0 as any, operational_dissonance_score: 30,
+  operational_dissonance_score: 30,
   business_intent_score: 60, strategic_noise_score: 32,
   recovery_capacity_score: 60, recovery_elasticity: 58, adaptive_recovery_score: 60,
   collapse_risk_score: 28, cascade_failure_risk: 26, strategic_resilience_forecast: 62,
