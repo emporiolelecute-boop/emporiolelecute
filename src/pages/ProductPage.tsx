@@ -673,7 +673,7 @@ Poderia me ajudar com o valor do frete e prazos?`;
           </div>
 
           {/* Description Section */}
-          <div className="mb-16">
+          <div className="mb-12">
             <h2 className="font-display text-2xl text-foreground mb-6">Descrição do produto</h2>
             <div className="bg-card rounded-xl border border-border p-6">
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -685,6 +685,52 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
               </p>
             </div>
           </div>
+
+          {/* Fase 7 — Conteúdo editorial opcional (rich text humano) */}
+          {dbProduct?.editorial_content && (
+            <section className="mb-12" aria-labelledby="editorial-title">
+              <h2 id="editorial-title" className="font-display text-2xl text-foreground mb-6">
+                Sobre esta lembrancinha
+              </h2>
+              <div className="bg-primary/5 rounded-xl border border-primary/10 p-6 prose prose-sm md:prose-base max-w-none text-muted-foreground">
+                <div className="whitespace-pre-line leading-relaxed">
+                  {dbProduct.editorial_content}
+                </div>
+              </div>
+              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Article",
+                headline: `Sobre ${product.name}`,
+                articleBody: dbProduct.editorial_content.slice(0, 4000),
+                mainEntityOfPage: `https://emporiolelecute.com.br/produto/${product.slug}`,
+                author: { "@type": "Organization", name: "Empório LeleCute" },
+              }) }} />
+            </section>
+          )}
+
+          {/* Fase 7 — Avaliações */}
+          {dbProduct?.id && <ProductReviews productId={dbProduct.id} />}
+
+          {/* Fase 7 — Temas relacionados (descoberta visual; tags não-indexáveis) */}
+          {dbProduct?.tags && dbProduct.tags.length > 0 && (
+            <section className="mb-12" aria-labelledby="themes-title">
+              <h2 id="themes-title" className="font-display text-xl text-foreground mb-4">
+                Temas relacionados
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {dbProduct.tags.slice(0, 12).map((t) => (
+                  <Link
+                    key={t.id}
+                    to={`/produtos?tag=${t.slug}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-full text-sm text-muted-foreground transition-colors"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Internal linking by taxonomy (Fase 4) */}
           {dbProduct?.occasions?.[0] && (
