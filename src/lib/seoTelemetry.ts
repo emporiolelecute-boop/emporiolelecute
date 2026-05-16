@@ -25,6 +25,15 @@ export interface TelemetrySnapshot {
   orphan_entities: number;
   authority_flow_score: number;
   semantic_connectivity_score: number;
+  // Fase 11.2 — métricas editoriais
+  editorial_maturity_avg: number;
+  thematic_depth_avg: number;
+  semantic_coverage_avg: number;
+  faq_coverage: number;          // % com FAQ
+  review_coverage: number;       // % com reviews
+  internal_link_quality: number; // 0..100
+  orphan_cluster_count: number;
+  content_gap_count: number;
 }
 
 function avg(vals: number[]): number {
@@ -41,9 +50,20 @@ export interface LinkingTelemetryInput {
   orphanEntities?: number;
 }
 
+export interface EditorialTelemetryInput {
+  maturities?: number[];        // editorial maturity scores
+  thematicDepths?: number[];    // theme maturity scores
+  semanticCoverages?: number[]; // topical coverage scores
+  faqCount?: number;            // entidades com FAQ
+  reviewCount?: number;         // entidades com reviews
+  orphanClusters?: number;
+  contentGaps?: number;
+}
+
 export function computeTelemetry(
   items: IndexableEntity[],
-  linking?: LinkingTelemetryInput
+  linking?: LinkingTelemetryInput,
+  editorial?: EditorialTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
@@ -106,5 +126,13 @@ export function computeTelemetry(
     orphan_entities,
     authority_flow_score: flow,
     semantic_connectivity_score,
+    editorial_maturity_avg: avg(editorial?.maturities ?? []),
+    thematic_depth_avg: avg(editorial?.thematicDepths ?? []),
+    semantic_coverage_avg: avg(editorial?.semanticCoverages ?? readinesses.length ? readinesses : []),
+    faq_coverage: total > 0 ? Math.round(((editorial?.faqCount ?? 0) / total) * 100) : 0,
+    review_coverage: total > 0 ? Math.round(((editorial?.reviewCount ?? 0) / total) * 100) : 0,
+    internal_link_quality: Math.min(100, Math.round(avg_links_per_page * 12)),
+    orphan_cluster_count: editorial?.orphanClusters ?? 0,
+    content_gap_count: editorial?.contentGaps ?? 0,
   };
 }

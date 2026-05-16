@@ -179,3 +179,44 @@ export function buildThemeDescription(params: {
   const tail = occ ? `, ideais para ${occ}.` : ".";
   return (base + tail).slice(0, 160);
 }
+
+// ----- Fase 11.2 — Theme Maturity -----
+
+export interface ThemeMaturityInput {
+  signals: ThemeSignals;
+  editorialLength?: number;
+  faqCount?: number;
+  internalLinksCount?: number;
+  overlapWithOtherHubs?: number; // 0..1
+}
+
+export interface ThemeMaturityResult {
+  score: number;
+  classification: "Elite" | "Forte" | "Média" | "Fraca" | "Crítica";
+  notes: string[];
+}
+
+export function calculateThemeMaturity(i: ThemeMaturityInput): ThemeMaturityResult {
+  const s = i.signals;
+  const notes: string[] = [];
+  let score = 0;
+  score += Math.min(20, s.productsCount * 1.5);
+  score += Math.min(12, (s.occasionsCount + s.segmentsCount) * 2);
+  score += Math.min(15, Math.round((i.editorialLength ?? 0) / 80));
+  score += Math.min(10, (i.faqCount ?? 0) * 2);
+  score += Math.min(12, (i.internalLinksCount ?? 0));
+  score += Math.min(8, s.blogPostsCount * 3);
+  score += Math.min(8, s.reviewsCount);
+  score += Math.round(Math.max(0, Math.min(1, s.visualDiversity)) * 8);
+  const overlap = i.overlapWithOtherHubs ?? 0;
+  if (overlap >= 0.7) { score -= 12; notes.push("Overlap alto com outros hubs"); }
+  if (s.blogPostsCount === 0) notes.push("Falta supporting post");
+  if ((i.faqCount ?? 0) < 2) notes.push("Falta FAQ");
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const classification =
+    score >= 85 ? "Elite" :
+    score >= 70 ? "Forte" :
+    score >= 50 ? "Média" :
+    score >= 30 ? "Fraca" : "Crítica";
+  return { score, classification, notes };
+}

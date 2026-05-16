@@ -153,3 +153,47 @@ export function colorOf(score: number): ProductSeoEvaluation['color'] {
   if (score >= 35) return 'orange';
   return 'rose';
 }
+
+// ----- Fase 11.2 — Product Maturity -----
+
+export interface ProductMaturityInput {
+  editorialLength?: number;
+  reviewsCount?: number;
+  faqCount?: number;
+  imagesCount?: number;
+  internalLinksCount?: number;
+  occasionsCount?: number;
+  segmentsCount?: number;
+  tagsCount?: number;
+  hasCta?: boolean;
+  badge?: string | null;
+  avgRating?: number | null;
+}
+
+export interface ProductMaturityResult {
+  score: number;
+  classification: 'Elite' | 'Forte' | 'Média' | 'Fraca' | 'Crítica';
+  signals: Record<string, number>;
+}
+
+export function calculateProductMaturity(i: ProductMaturityInput): ProductMaturityResult {
+  const s: Record<string, number> = {};
+  s.editorial = Math.min(18, Math.round((i.editorialLength ?? 0) / 80));
+  s.reviews = Math.min(12, (i.reviewsCount ?? 0));
+  s.rating = Math.round(((i.avgRating ?? 0) / 5) * 6);
+  s.faq = Math.min(8, (i.faqCount ?? 0) * 2);
+  s.images = Math.min(10, (i.imagesCount ?? 0) * 2);
+  s.links = Math.min(10, (i.internalLinksCount ?? 0));
+  s.taxonomy = Math.min(12, ((i.occasionsCount ?? 0) + (i.segmentsCount ?? 0) + (i.tagsCount ?? 0)));
+  s.cta = i.hasCta ? 6 : 0;
+  s.badge = i.badge ? 4 : 0;
+  s.semantic = Math.min(8, Math.round(((i.internalLinksCount ?? 0) + (i.occasionsCount ?? 0)) * 0.8));
+  const total = Object.values(s).reduce((a, b) => a + b, 0);
+  const score = Math.max(0, Math.min(100, total));
+  const classification =
+    score >= 85 ? 'Elite' :
+    score >= 70 ? 'Forte' :
+    score >= 50 ? 'Média' :
+    score >= 30 ? 'Fraca' : 'Crítica';
+  return { score, classification, signals: s };
+}

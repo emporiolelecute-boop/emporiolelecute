@@ -203,3 +203,57 @@ export function checklistProgress(items: ChecklistItem[]): { done: number; total
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   return { done, total, pct };
 }
+
+// ----- Fase 11.2 — Editorial Maturity Score -----
+
+export type MaturityClass = "Elite" | "Forte" | "Média" | "Fraca" | "Crítica";
+
+export interface MaturityInput {
+  authority?: number;
+  topicalCoverage?: number;
+  readiness?: number;
+  productsCount?: number;
+  reviewsCount?: number;
+  internalLinksCount?: number;
+  editorialLength?: number;
+  faqCount?: number;
+  goodImagesCount?: number;
+  visualDiversity?: number;
+  blogPostsCount?: number;
+  relatedContentCount?: number;
+  taxonomyDiversity?: number; // occasions+segments+categories
+}
+
+export interface MaturityResult {
+  score: number;          // 0..100
+  classification: MaturityClass;
+  contributions: Record<string, number>;
+}
+
+function n(v: number | undefined | null): number {
+  return typeof v === "number" ? v : 0;
+}
+
+export function calculateEditorialMaturity(i: MaturityInput): MaturityResult {
+  const c: Record<string, number> = {};
+  c.editorial = Math.min(15, Math.round(n(i.editorialLength) / 80));
+  c.faqs = Math.min(10, n(i.faqCount) * 2);
+  c.links = Math.min(10, n(i.internalLinksCount));
+  c.topical = Math.round(n(i.topicalCoverage) * 0.12);
+  c.reviews = Math.min(10, n(i.reviewsCount));
+  c.images = Math.min(8, n(i.goodImagesCount));
+  c.visual = Math.round(Math.max(0, Math.min(1, n(i.visualDiversity))) * 6);
+  c.authority = Math.round(n(i.authority) * 0.18);
+  c.depth = Math.min(8, Math.round(n(i.editorialLength) / 200));
+  c.diversity = Math.min(7, n(i.taxonomyDiversity) * 2);
+  c.related = Math.min(6, n(i.relatedContentCount));
+  c.blog = Math.min(6, n(i.blogPostsCount) * 2);
+  const total = Object.values(c).reduce((a, b) => a + b, 0);
+  const score = Math.max(0, Math.min(100, total));
+  const classification: MaturityClass =
+    score >= 85 ? "Elite" :
+    score >= 70 ? "Forte" :
+    score >= 50 ? "Média" :
+    score >= 30 ? "Fraca" : "Crítica";
+  return { score, classification, contributions: c };
+}
