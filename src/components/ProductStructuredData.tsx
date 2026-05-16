@@ -130,6 +130,23 @@ const ProductStructuredData = ({
           },
         }
       : {}),
+    ...(reviews && reviews.length > 0
+      ? {
+          review: reviews.slice(0, 5).map((r) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: r.author_name },
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: r.rating,
+              bestRating: 5,
+              worstRating: 1,
+            },
+            ...(r.comment ? { reviewBody: r.comment } : {}),
+            ...(r.review_date ? { datePublished: r.review_date.slice(0, 10) } : {}),
+            ...(r.source ? { publisher: { "@type": "Organization", name: r.source } } : {}),
+          })),
+        }
+      : {}),
   };
 
   return (
