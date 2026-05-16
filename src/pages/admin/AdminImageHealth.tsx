@@ -114,6 +114,33 @@ const AdminImageHealth = () => {
         ))}
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          { title: "Imagens críticas", items: exec.critical.map((c) => c.productName), tone: "destructive" as const },
+          { title: "Baixa diversidade", items: exec.lowDiversity.map((c) => `${c.name} (${c.count})`), tone: "secondary" as const },
+          { title: "Sem contexto visual", items: exec.noVisualContext.map((c) => c.name), tone: "destructive" as const },
+          { title: "Imagem muito pequena", items: exec.tooSmall.map((c) => c.name), tone: "secondary" as const },
+          { title: "Sem alt coerente", items: exec.noCoherentAlt.map((c) => c.productName), tone: "secondary" as const },
+        ].map((bucket) => (
+          <Card key={bucket.title}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center justify-between">
+                {bucket.title}
+                <Badge variant={bucket.tone}>{bucket.items.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="max-h-40 overflow-y-auto text-xs text-muted-foreground space-y-0.5">
+                {bucket.items.slice(0, 50).map((n, i) => (
+                  <div key={`${bucket.title}-${i}`} className="truncate">• {n}</div>
+                ))}
+                {bucket.items.length === 0 && <p>—</p>}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Problemas detectados</CardTitle>
