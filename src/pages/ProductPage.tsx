@@ -664,11 +664,40 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
             </div>
           </div>
 
-          {/* Related Products */}
-          {relatedProducts.length > 0 && (
+          {/* Internal linking by taxonomy (Fase 4) */}
+          {dbProduct?.occasions?.[0] && (
+            <RelatedByTaxonomy
+              kind="ocasiao"
+              taxonomyId={dbProduct.occasions[0].id}
+              taxonomySlug={dbProduct.occasions[0].slug}
+              taxonomyName={dbProduct.occasions[0].name}
+              excludeProductId={product.id}
+            />
+          )}
+          {dbProduct?.category && (
+            <RelatedByTaxonomy
+              kind="categoria"
+              taxonomyId={dbProduct.category.id}
+              taxonomySlug={dbProduct.category.slug}
+              taxonomyName={dbProduct.category.name}
+              excludeProductId={product.id}
+            />
+          )}
+          {dbProduct?.segments?.[0] && (
+            <RelatedByTaxonomy
+              kind="segmento"
+              taxonomyId={dbProduct.segments[0].id}
+              taxonomySlug={dbProduct.segments[0].slug}
+              taxonomyName={dbProduct.segments[0].name}
+              excludeProductId={product.id}
+            />
+          )}
+
+          {/* Fallback if nenhuma taxonomia */}
+          {!dbProduct?.occasions?.[0] && !dbProduct?.category && !dbProduct?.segments?.[0] && relatedProducts.length > 0 && (
             <div>
               <h2 className="font-display text-3xl text-foreground text-center mb-8">
-                Produtos <span className="text-primary">Relacionados</span>
+                Você também pode <span className="text-primary">gostar</span>
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map((p) => (
