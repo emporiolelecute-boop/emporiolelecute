@@ -17,7 +17,7 @@ export function slugify(name: string) {
     .replace(/(^-|-$)/g, '');
 }
 
-export interface TaxonomyFaq { question: string; answer: string }
+export interface TaxonomyFaq { question: string; answer: string; [key: string]: string }
 
 export interface TaxonomyEntity {
   id: string;
