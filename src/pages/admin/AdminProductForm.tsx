@@ -493,6 +493,34 @@ const AdminProductForm = () => {
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg font-display">Segmentos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {segments?.map((seg) => (
+                    <label key={seg.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1.5 rounded-md transition-colors">
+                      <Checkbox
+                        checked={selectedSegments.includes(seg.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedSegments((prev) => [...prev, seg.id]);
+                          } else {
+                            setSelectedSegments((prev) => prev.filter((id) => id !== seg.id));
+                          }
+                        }}
+                      />
+                      <span className="text-sm">{seg.name}</span>
+                    </label>
+                  ))}
+                  {!segments?.length && (
+                    <p className="text-sm text-muted-foreground">Nenhum segmento cadastrado</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
