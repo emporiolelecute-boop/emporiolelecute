@@ -25,6 +25,15 @@ export interface TelemetrySnapshot {
   orphan_entities: number;
   authority_flow_score: number;
   semantic_connectivity_score: number;
+  // Fase 11.2 — métricas editoriais
+  editorial_maturity_avg: number;
+  thematic_depth_avg: number;
+  semantic_coverage_avg: number;
+  faq_coverage: number;          // % com FAQ
+  review_coverage: number;       // % com reviews
+  internal_link_quality: number; // 0..100
+  orphan_cluster_count: number;
+  content_gap_count: number;
 }
 
 function avg(vals: number[]): number {
