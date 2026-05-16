@@ -2049,6 +2049,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_strategy_simulations: {
+        Row: {
+          assumptions: Json
+          confidence_score: number
+          created_at: string
+          entities: Json
+          execution_complexity: string
+          id: string
+          notes: string | null
+          projected_authority: number
+          projected_cluster_growth: number
+          projected_decay_risk: number
+          projected_execution_cost: number
+          projected_operational_load: number
+          projected_readiness: number
+          projected_resilience: number
+          projected_revenue_intent: number
+          projected_risk: number
+          projected_roi: number
+          projected_semantic_coverage: number
+          projected_sustainability: number
+          projected_time_to_impact: number
+          scenario_type: string
+          simulation_name: string
+          simulation_result: Json
+          simulation_type: string
+          updated_at: string
+        }
+        Insert: {
+          assumptions?: Json
+          confidence_score?: number
+          created_at?: string
+          entities?: Json
+          execution_complexity?: string
+          id?: string
+          notes?: string | null
+          projected_authority?: number
+          projected_cluster_growth?: number
+          projected_decay_risk?: number
+          projected_execution_cost?: number
+          projected_operational_load?: number
+          projected_readiness?: number
+          projected_resilience?: number
+          projected_revenue_intent?: number
+          projected_risk?: number
+          projected_roi?: number
+          projected_semantic_coverage?: number
+          projected_sustainability?: number
+          projected_time_to_impact?: number
+          scenario_type: string
+          simulation_name: string
+          simulation_result?: Json
+          simulation_type: string
+          updated_at?: string
+        }
+        Update: {
+          assumptions?: Json
+          confidence_score?: number
+          created_at?: string
+          entities?: Json
+          execution_complexity?: string
+          id?: string
+          notes?: string | null
+          projected_authority?: number
+          projected_cluster_growth?: number
+          projected_decay_risk?: number
+          projected_execution_cost?: number
+          projected_operational_load?: number
+          projected_readiness?: number
+          projected_resilience?: number
+          projected_revenue_intent?: number
+          projected_risk?: number
+          projected_roi?: number
+          projected_semantic_coverage?: number
+          projected_sustainability?: number
+          projected_time_to_impact?: number
+          scenario_type?: string
+          simulation_name?: string
+          simulation_result?: Json
+          simulation_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seo_system_health_snapshots: {
         Row: {
           authority_efficiency: number
