@@ -149,6 +149,29 @@ export interface TelemetrySnapshot {
   evolution_velocity_score: number;
   semantic_plateau_score: number;
   strategic_blackhole_score: number;
+  // Fase 14.3 — consciousness / meta-intelligence
+  system_consciousness_score: number;
+  semantic_awareness_score: number;
+  operational_awareness_score: number;
+  strategic_awareness_score: number;
+  cognitive_fatigue_score: number;
+  semantic_confusion_score: number;
+  systemic_coherence_score: number;
+  fragmentation_pressure_score: number;
+  strategic_contradiction_score: number;
+  operational_dissonance_score: number;
+  meta_intelligence_score: number;
+  strategic_perception_score: number;
+  existential_risk_score: number;
+  semantic_identity_risk: number;
+  survival_probability_score: number;
+  systemic_instability_score: number;
+  intelligence_density_score: number;
+  cognitive_pressure_score: number;
+  strategic_noise_score: number;
+  false_growth_signal_score: number;
+  semantic_hallucination_score: number;
+  awareness_collapse_risk: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -394,5 +417,27 @@ export function computeTelemetry(
     evolution_velocity_score: 0,
     semantic_plateau_score: 0,
     strategic_blackhole_score: 0,
+    system_consciousness_score: 0,
+    semantic_awareness_score: 0,
+    operational_awareness_score: 0,
+    strategic_awareness_score: 0,
+    cognitive_fatigue_score: 0,
+    semantic_confusion_score: 0,
+    systemic_coherence_score: 0,
+    fragmentation_pressure_score: 0,
+    strategic_contradiction_score: 0,
+    operational_dissonance_score: 0,
+    meta_intelligence_score: 0,
+    strategic_perception_score: 0,
+    existential_risk_score: 0,
+    semantic_identity_risk: 0,
+    survival_probability_score: 0,
+    systemic_instability_score: 0,
+    intelligence_density_score: 0,
+    cognitive_pressure_score: 0,
+    strategic_noise_score: 0,
+    false_growth_signal_score: 0,
+    semantic_hallucination_score: 0,
+    awareness_collapse_risk: 0,
   };
 }

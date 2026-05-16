@@ -1737,6 +1737,93 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_consciousness_memory: {
+        Row: {
+          adaptive_consciousness: number
+          awareness_score: number
+          cognitive_fatigue: number
+          cognitive_load: number
+          collapse_awareness: number
+          consciousness_snapshot: Json
+          consciousness_type: string
+          created_at: string
+          created_by: string | null
+          detected_signals: Json
+          entity_scope: string | null
+          entropy_pressure: number
+          evolutionary_coherence: number
+          executive_summary: Json
+          id: string
+          intelligence_density: number
+          meta_intelligence_score: number
+          operational_consciousness: number
+          resilience_awareness: number
+          semantic_alignment: number
+          semantic_confusion: number
+          semantic_consciousness: number
+          strategic_awareness: number
+          strategic_clarity: number
+          systemic_coherence: number
+          systemic_instability: number
+        }
+        Insert: {
+          adaptive_consciousness?: number
+          awareness_score?: number
+          cognitive_fatigue?: number
+          cognitive_load?: number
+          collapse_awareness?: number
+          consciousness_snapshot?: Json
+          consciousness_type: string
+          created_at?: string
+          created_by?: string | null
+          detected_signals?: Json
+          entity_scope?: string | null
+          entropy_pressure?: number
+          evolutionary_coherence?: number
+          executive_summary?: Json
+          id?: string
+          intelligence_density?: number
+          meta_intelligence_score?: number
+          operational_consciousness?: number
+          resilience_awareness?: number
+          semantic_alignment?: number
+          semantic_confusion?: number
+          semantic_consciousness?: number
+          strategic_awareness?: number
+          strategic_clarity?: number
+          systemic_coherence?: number
+          systemic_instability?: number
+        }
+        Update: {
+          adaptive_consciousness?: number
+          awareness_score?: number
+          cognitive_fatigue?: number
+          cognitive_load?: number
+          collapse_awareness?: number
+          consciousness_snapshot?: Json
+          consciousness_type?: string
+          created_at?: string
+          created_by?: string | null
+          detected_signals?: Json
+          entity_scope?: string | null
+          entropy_pressure?: number
+          evolutionary_coherence?: number
+          executive_summary?: Json
+          id?: string
+          intelligence_density?: number
+          meta_intelligence_score?: number
+          operational_consciousness?: number
+          resilience_awareness?: number
+          semantic_alignment?: number
+          semantic_confusion?: number
+          semantic_consciousness?: number
+          strategic_awareness?: number
+          strategic_clarity?: number
+          systemic_coherence?: number
+          systemic_instability?: number
+        }
+        Relationships: []
+      }
       seo_entity_snapshots: {
         Row: {
           authority_score: number
