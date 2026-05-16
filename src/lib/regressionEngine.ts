@@ -71,3 +71,109 @@ export function regressionRiskScore(findings: RegressionFinding[]): number {
   const med  = findings.filter((f) => f.severity === "medium").length;
   return Math.min(100, high * 12 + med * 6 + findings.length);
 }
+
+// =================== Fase 13 — Predictive Regression =====================
+
+export interface PredictiveRegressionInput {
+  entityType: string;
+  entityId: string;
+  entitySlug?: string;
+  entityName?: string;
+  authorityTrend?: number;       // -1..1
+  linkTrend?: number;            // -1..1
+  reviewTrend?: number;          // -1..1
+  thinContentRisk?: boolean;
+  orphanRisk?: boolean;
+  authorityScore?: number;
+  internalLinks?: number;
+}
+
+export interface PredictiveRegressionFinding {
+  entityType: string;
+  entityId: string;
+  entitySlug?: string;
+  entityName?: string;
+  predictedRegression: number;   // 0..100 (probabilidade)
+  horizonDays: 30 | 90;
+  reasons: string[];
+}
+
+export function predictFutureRegression(items: PredictiveRegressionInput[]): PredictiveRegressionFinding[] {
+  return items.map((i) => {
+    const reasons: string[] = [];
+    let score = 0;
+    if ((i.authorityTrend ?? 0) < -0.1) { score += 30; reasons.push("autoridade em queda"); }
+    if ((i.linkTrend ?? 0)      < -0.1) { score += 20; reasons.push("perda de links"); }
+    if ((i.reviewTrend ?? 0)    < -0.1) { score += 15; reasons.push("queda de reviews"); }
+    if (i.thinContentRisk)              { score += 20; reasons.push("conteúdo raso"); }
+    if (i.orphanRisk)                   { score += 15; reasons.push("órfão"); }
+    if ((i.internalLinks ?? 0) <= 1)    { score += 10; reasons.push("baixa conexão interna"); }
+    const horizon: 30 | 90 = score >= 50 ? 30 : 90;
+    return {
+      entityType: i.entityType, entityId: i.entityId,
+      entitySlug: i.entitySlug, entityName: i.entityName,
+      predictedRegression: Math.min(100, score),
+      horizonDays: horizon, reasons,
+    };
+  }).filter((f) => f.predictedRegression > 0)
+    .sort((a, b) => b.predictedRegression - a.predictedRegression);
+}
+
+export interface ClusterFragilityInput {
+  clusterId: string;
+  clusterName?: string;
+  memberCount: number;
+  averageAuthority: number;
+  totalLinks: number;
+  thinContentCount: number;
+  orphanCount: number;
+}
+
+export interface ClusterFragilityResult {
+  clusterId: string;
+  clusterName?: string;
+  fragilityScore: number;
+  band: "stable" | "watch" | "fragile" | "critical";
+  reasons: string[];
+}
+
+export function detectClusterFragility(items: ClusterFragilityInput[]): ClusterFragilityResult[] {
+  return items.map((c) => {
+    const reasons: string[] = [];
+    let score = 0;
+    if (c.averageAuthority < 50) { score += 30; reasons.push("autoridade média baixa"); }
+    if (c.totalLinks / Math.max(1, c.memberCount) < 2) { score += 20; reasons.push("links por página insuficientes"); }
+    if (c.thinContentCount / Math.max(1, c.memberCount) > 0.3) { score += 25; reasons.push("muitos thin content"); }
+    if (c.orphanCount / Math.max(1, c.memberCount) > 0.2) { score += 15; reasons.push("órfãos no cluster"); }
+    if (c.memberCount < 3) { score += 10; reasons.push("cluster pequeno demais"); }
+    const s = Math.min(100, score);
+    let band: ClusterFragilityResult["band"] = "stable";
+    if (s >= 70) band = "critical";
+    else if (s >= 50) band = "fragile";
+    else if (s >= 25) band = "watch";
+    return { clusterId: c.clusterId, clusterName: c.clusterName, fragilityScore: s, band, reasons };
+  }).sort((a, b) => b.fragilityScore - a.fragilityScore);
+}
+
+export interface AuthorityConcentrationInput {
+  entityId: string;
+  entityName?: string;
+  authority: number;
+  inboundLinks: number;
+}
+
+export interface AuthorityConcentrationResult {
+  topShare: number;       // 0..100 (% concentrado no top 3)
+  risk: "low" | "medium" | "high";
+  topEntities: AuthorityConcentrationInput[];
+}
+
+export function detectAuthorityConcentrationRisk(items: AuthorityConcentrationInput[]): AuthorityConcentrationResult {
+  if (!items.length) return { topShare: 0, risk: "low", topEntities: [] };
+  const sorted = [...items].sort((a, b) => b.authority - a.authority);
+  const total = sorted.reduce((acc, i) => acc + i.authority, 0) || 1;
+  const top3 = sorted.slice(0, 3);
+  const topShare = Math.round((top3.reduce((a, i) => a + i.authority, 0) / total) * 100);
+  const risk = topShare >= 60 ? "high" : topShare >= 40 ? "medium" : "low";
+  return { topShare, risk, topEntities: top3 };
+}
