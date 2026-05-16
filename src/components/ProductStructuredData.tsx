@@ -56,13 +56,19 @@ const ProductStructuredData = ({
     "name": name,
     "description": description,
     "image": images.length > 0 ? images : [`${baseUrl}/placeholder.svg`],
-    "sku": slug,
-    "mpn": slug.toUpperCase(),
+    "sku": sku || slug,
+    "mpn": (sku || slug).toUpperCase(),
     "brand": {
       "@type": "Brand",
       "name": brand
     },
     "category": category,
+    ...(material ? { "material": material } : {}),
+    "additionalProperty": [
+      { "@type": "PropertyValue", "name": "Feito à mão", "value": "Sim" },
+      { "@type": "PropertyValue", "name": "Personalizado", "value": "Sim" },
+      { "@type": "PropertyValue", "name": "Origem", "value": "Brasil" },
+    ],
     "url": productUrl,
     "offers": {
       "@type": "Offer",
