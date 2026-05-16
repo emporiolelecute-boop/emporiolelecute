@@ -116,15 +116,15 @@ const TaxonomyPage = ({ kind }: Props) => {
       }
 
       // ocasiao / segmento — query via tabela de junção
-      const { data, error } = await supabase
-        .from(cfg.joinTable as "product_occasions" | "product_segments")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.from(cfg.joinTable) as any)
         .select(`
           product:products(
             id, slug, name, description, price, original_price,
             images, badge, rating, min_quantity, keywords, is_active, created_at
           )
         `)
-        .eq(cfg.joinCol as "occasion_id" | "segment_id", entity!.id);
+        .eq(cfg.joinCol, entity!.id);
       if (error) throw error;
       type Row = { product: {
         id: string; slug: string; name: string; description: string | null;
@@ -132,7 +132,7 @@ const TaxonomyPage = ({ kind }: Props) => {
         badge: string | null; rating: number; min_quantity: number;
         keywords: string[]; is_active: boolean; created_at: string;
       } | null };
-      return (data as Row[] | null ?? [])
+      return ((data as Row[] | null) ?? [])
         .map((r) => r.product)
         .filter((p): p is NonNullable<Row["product"]> => !!p && p.is_active)
         .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
