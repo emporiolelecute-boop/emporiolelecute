@@ -34,6 +34,24 @@ export interface TelemetrySnapshot {
   internal_link_quality: number; // 0..100
   orphan_cluster_count: number;
   content_gap_count: number;
+  // Fase 12 — knowledge graph + memória
+  knowledge_health_score: number;
+  authority_distribution_score: number;
+  semantic_loop_count: number;
+  regression_risk_score: number;
+  content_decay_score: number;
+  cluster_growth_score: number;
+  orphan_recovery_rate: number;
+}
+
+export interface KnowledgeTelemetryInput {
+  knowledgeHealth?: number;
+  authorityDistribution?: number;
+  semanticLoops?: number;
+  regressionRisk?: number;
+  contentDecay?: number;
+  clusterGrowth?: number;
+  orphanRecoveryRate?: number;
 }
 
 function avg(vals: number[]): number {
