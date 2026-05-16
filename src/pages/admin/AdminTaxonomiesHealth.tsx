@@ -3,12 +3,21 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, AlertTriangle, EyeOff, ImageOff, FileQuestion, Link2Off } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, EyeOff, ImageOff, FileQuestion, Link2Off, ArrowRightLeft, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDbCategories, useDbOccasions } from '@/hooks/useProducts';
 import { useSegments } from '@/hooks/useSegments';
 import { useTags } from '@/hooks/useTags';
 import { evaluateSeo, hasAnyIssue, TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind } from '@/lib/taxonomy';
+
+interface ConsolidationRow {
+  route_slug: string;
+  occasion_slug: string;
+  is_published: boolean;
+  has_redirect: boolean;
+  occasion_exists: boolean;
+  occasion_has_seo: boolean;
+}
 
 type CountMap = Record<string, number>;
 
