@@ -176,7 +176,7 @@ const Produtos = () => {
   const structuralCount = structuralFilters.length;
 
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; categoryName?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[] })[] = useMemo(() => {
+  const products: (Product & { categoryId?: string; categoryName?: string; longDescriptionRaw?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[]; segmentIds: string[]; segmentNames: string[] })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -185,6 +185,7 @@ const Produtos = () => {
         name: p.name,
         description: p.description || '',
         longDescription: p.long_description || undefined,
+        longDescriptionRaw: p.long_description || '',
         price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
         originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
         image: p.images[0] || '/placeholder.svg',
@@ -202,28 +203,46 @@ const Produtos = () => {
         occasionNames: (p.occasions || []).map(o => o.name),
         tagIds: (p.tags || []).map(t => t.id),
         tagNames: (p.tags || []).map(t => t.name),
+        segmentIds: (p.segments || []).map(s => s.id),
+        segmentNames: (p.segments || []).map(s => s.name),
       }));
   }, [dbProducts]);
 
-  // Filter products with debounced search (now includes category/occasion/tag names)
+  // Filter products — search now also covers long description + segments
   const filteredProducts = useMemo(() => {
-    const q = debouncedSearch.toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return products.filter((product) => {
       const matchesSearch = !q ||
         product.name.toLowerCase().includes(q) ||
         product.description.toLowerCase().includes(q) ||
+        (product.longDescriptionRaw?.toLowerCase().includes(q) ?? false) ||
         product.keywords.some(k => k.toLowerCase().includes(q)) ||
         (product.categoryName?.toLowerCase().includes(q) ?? false) ||
         product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
-        product.tagNames.some(n => n.toLowerCase().includes(q));
+        product.tagNames.some(n => n.toLowerCase().includes(q)) ||
+        product.segmentNames.some(n => n.toLowerCase().includes(q));
 
       const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
       const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
+      const matchesSegment = !resolvedSegment || product.segmentIds.includes(resolvedSegment.id);
       const matchesTag = !resolvedTag || product.tagIds.includes(resolvedTag.id);
 
-      return matchesSearch && matchesCategory && matchesOccasion && matchesTag;
+      return matchesSearch && matchesCategory && matchesOccasion && matchesSegment && matchesTag;
     });
-  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedTag]);
+  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag]);
+
+  // Counts per taxonomy (over all active products, not the filtered list — keeps UI predictable)
+  const counts = useMemo(() => {
+    const cat: Record<string, number> = {};
+    const occ: Record<string, number> = {};
+    const seg: Record<string, number> = {};
+    for (const p of products) {
+      if (p.categoryId) cat[p.categoryId] = (cat[p.categoryId] || 0) + 1;
+      for (const id of p.occasionIds) occ[id] = (occ[id] || 0) + 1;
+      for (const id of p.segmentIds) seg[id] = (seg[id] || 0) + 1;
+    }
+    return { cat, occ, seg };
+  }, [products]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
