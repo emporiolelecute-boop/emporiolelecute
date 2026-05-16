@@ -31,6 +31,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SitemapCheck = lazy(() => import("./pages/SitemapCheck"));
 const TaxonomyPage = lazy(() => import("./pages/TaxonomyPage"));
 const CombinationPage = lazy(() => import("./pages/CombinationPage"));
+const ThemePage = lazy(() => import("./pages/ThemePage"));
 
 // Admin pages - lazy loaded with retry + telemetry
 import { lazyWithRetry } from "./lib/lazyWithRetry";
