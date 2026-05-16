@@ -65,6 +65,7 @@ const menuItems = [
   { icon: TrendingUp, label: 'SEO Evolution', path: '/admin/seo-evolution' },
   { icon: Rocket, label: 'SEO War Room', path: '/admin/seo-war-room' },
   { icon: Rocket, label: 'SEO Autonomy', path: '/admin/seo-autonomy' },
+  { icon: Rocket, label: 'SEO Operating System', path: '/admin/seo-os' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
