@@ -148,7 +148,7 @@ const Produtos = () => {
   const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedTag, debouncedSearch].filter(Boolean).length;
 
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; occasionIds: string[]; tagIds: string[] })[] = useMemo(() => {
+  const products: (Product & { categoryId?: string; categoryName?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[] })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -177,18 +177,22 @@ const Produtos = () => {
       }));
   }, [dbProducts]);
 
-  // Filter products with debounced search
+  // Filter products with debounced search (now includes category/occasion/tag names)
   const filteredProducts = useMemo(() => {
+    const q = debouncedSearch.toLowerCase();
     return products.filter((product) => {
-      const matchesSearch = !debouncedSearch ||
-        product.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        product.description.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        product.keywords.some(k => k.toLowerCase().includes(debouncedSearch.toLowerCase()));
-      
+      const matchesSearch = !q ||
+        product.name.toLowerCase().includes(q) ||
+        product.description.toLowerCase().includes(q) ||
+        product.keywords.some(k => k.toLowerCase().includes(q)) ||
+        (product.categoryName?.toLowerCase().includes(q) ?? false) ||
+        product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
+        product.tagNames.some(n => n.toLowerCase().includes(q));
+
       const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
       const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
       const matchesTag = !resolvedTag || product.tagIds.includes(resolvedTag.id);
-      
+
       return matchesSearch && matchesCategory && matchesOccasion && matchesTag;
     });
   }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedTag]);
