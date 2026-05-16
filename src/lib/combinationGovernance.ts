@@ -145,3 +145,45 @@ export function buildCombinationDescription(
     : " Produtos artesanais personalizados feitos com carinho pelo Empório LeleCute.";
   return (base + tail).slice(0, 160);
 }
+
+// ----- Fase 11.2 — Combination Maturity -----
+
+export interface CombinationMaturityInput {
+  productsCount: number;
+  uniqueOccasionShare?: number;   // 0..1 — fração não compartilhada
+  authority?: number;
+  editorialLength?: number;
+  faqCount?: number;
+  internalLinksCount?: number;
+  thinContentRisk?: boolean;
+  supportingPostsCount?: number;
+}
+
+export interface CombinationMaturityResult {
+  score: number;
+  classification: "Elite" | "Forte" | "Média" | "Fraca" | "Crítica";
+  warnings: string[];
+}
+
+export function calculateCombinationMaturity(i: CombinationMaturityInput): CombinationMaturityResult {
+  const warnings: string[] = [];
+  let score = 0;
+  score += Math.min(22, i.productsCount * 2);
+  score += Math.round(Math.max(0, Math.min(1, i.uniqueOccasionShare ?? 0)) * 18);
+  score += Math.round((i.authority ?? 0) * 0.2);
+  score += Math.min(12, Math.round((i.editorialLength ?? 0) / 80));
+  score += Math.min(8, (i.faqCount ?? 0) * 2);
+  score += Math.min(10, (i.internalLinksCount ?? 0));
+  score += Math.min(6, (i.supportingPostsCount ?? 0) * 3);
+  if (i.thinContentRisk) { score -= 15; warnings.push("Thin content"); }
+  if ((i.uniqueOccasionShare ?? 1) < 0.3) warnings.push("Overlap alto com taxonomia base");
+  if ((i.faqCount ?? 0) === 0) warnings.push("Sem FAQ contextual");
+  if ((i.editorialLength ?? 0) < 200) warnings.push("Editorial muito curto");
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const classification =
+    score >= 85 ? "Elite" :
+    score >= 70 ? "Forte" :
+    score >= 50 ? "Média" :
+    score >= 30 ? "Fraca" : "Crítica";
+  return { score, classification, warnings };
+}
