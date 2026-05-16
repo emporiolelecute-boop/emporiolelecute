@@ -18,6 +18,13 @@ export interface TelemetrySnapshot {
   averageAuthority: number;
   averageReadiness: number;
   verdicts: Record<SeoVerdict, number>;
+  // Fase 11.1 — métricas de linking
+  total_contextual_links: number;
+  avg_links_per_page: number;
+  overlinked_pages: number;
+  orphan_entities: number;
+  authority_flow_score: number;
+  semantic_connectivity_score: number;
 }
 
 function avg(vals: number[]): number {
@@ -25,7 +32,19 @@ function avg(vals: number[]): number {
   return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 }
 
-export function computeTelemetry(items: IndexableEntity[]): TelemetrySnapshot {
+export interface LinkingTelemetryInput {
+  /** total de links contextuais renderizados (somatório por página). */
+  totalLinks?: number;
+  /** páginas com overlinking detectado. */
+  overlinkedPages?: number;
+  /** entidades indexáveis sem links internos suficientes. */
+  orphanEntities?: number;
+}
+
+export function computeTelemetry(
+  items: IndexableEntity[],
+  linking?: LinkingTelemetryInput
+): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
   };
@@ -37,6 +56,7 @@ export function computeTelemetry(items: IndexableEntity[]): TelemetrySnapshot {
   let orphan = 0;
   const authorities: number[] = [];
   const readinesses: number[] = [];
+  const linkCounts: number[] = [];
 
   for (const e of items) {
     const v = buildSeoVerdict(e);
@@ -48,10 +68,29 @@ export function computeTelemetry(items: IndexableEntity[]): TelemetrySnapshot {
     if ((e.internal_links_count ?? 0) === 0) orphan++;
     if (typeof e.authority_score === "number") authorities.push(e.authority_score);
     if (typeof e.readiness_score === "number") readinesses.push(e.readiness_score);
+    if (typeof e.internal_links_count === "number") linkCounts.push(e.internal_links_count);
   }
 
+  const total = items.length;
+  const total_contextual_links = linking?.totalLinks ?? linkCounts.reduce((a, b) => a + b, 0);
+  const avg_links_per_page = total > 0 ? Math.round((total_contextual_links / total) * 10) / 10 : 0;
+  const orphan_entities = linking?.orphanEntities ?? orphan;
+  const overlinked_pages = linking?.overlinkedPages ?? 0;
+
+  // Authority flow: média de autoridade ponderada pela presença de links.
+  const flow = total > 0
+    ? Math.round(
+        (avg(authorities) * 0.6) +
+        (Math.min(100, avg_links_per_page * 10) * 0.4)
+      )
+    : 0;
+
+  // Conectividade semântica: % de entidades com pelo menos 3 links internos.
+  const connected = items.filter((e) => (e.internal_links_count ?? 0) >= 3).length;
+  const semantic_connectivity_score = total > 0 ? Math.round((connected / total) * 100) : 0;
+
   return {
-    total: items.length,
+    total,
     indexable,
     blocked,
     thinContent,
@@ -61,5 +100,11 @@ export function computeTelemetry(items: IndexableEntity[]): TelemetrySnapshot {
     averageAuthority: avg(authorities),
     averageReadiness: avg(readinesses),
     verdicts,
+    total_contextual_links,
+    avg_links_per_page,
+    overlinked_pages,
+    orphan_entities,
+    authority_flow_score: flow,
+    semantic_connectivity_score,
   };
 }
