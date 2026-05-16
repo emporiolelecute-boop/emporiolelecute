@@ -299,6 +299,21 @@ ${[
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`).join('\n')}
+${await (async () => {
+  // Fase 9 — Posts editoriais do banco (apenas indexáveis e publicados)
+  const { data: dbPosts } = await supabase
+    .from('blog_posts')
+    .select('slug, updated_at')
+    .eq('is_published', true)
+    .eq('is_indexed', true)
+    .limit(500);
+  return (dbPosts || []).map((p: { slug: string; updated_at: string }) => `  <url>
+    <loc>${siteUrl}/blog/${p.slug}</loc>
+    <lastmod>${(p.updated_at || '').split('T')[0] || today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`).join('\n');
+})()}
 
 </urlset>`
     
