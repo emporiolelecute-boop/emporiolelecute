@@ -630,15 +630,19 @@ const ProductPage = () => {
                 </div>
               )}
 
-              {/* WhatsApp */}
+              {/* WhatsApp — CTA inteligente Fase 7 */}
               {(() => {
                 const utmCampaign = `produto_${product.slug}`;
-                const waMsg = `Olá! Gostaria de fazer um orçamento do produto: *${product.name}*
+                const ctxParts: string[] = [];
+                if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
+                if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
+                if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
+                const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
+                const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
 
 📝 *Detalhes:*
 - Quantidade: ${quantity} unidades
-${personalization ? `- Personalização: ${personalization}` : ''}
-- Link: ${window.location.href}
+${personalization ? `- Personalização: ${personalization}` : ''}- Link: ${window.location.href}
 
 Poderia me ajudar com o valor do frete e prazos?`;
                 const waUrl = buildWhatsAppUrl({
