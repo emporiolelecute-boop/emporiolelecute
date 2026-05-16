@@ -246,7 +246,7 @@ export default function AdminSeoCommandCenter() {
               <TabsTrigger value="thin">Thin content</TabsTrigger>
               <TabsTrigger value="connectivity"><Network className="h-3.5 w-3.5 mr-1" />Conectividade</TabsTrigger>
               <TabsTrigger value="queue">Fila execução</TabsTrigger>
-              <TabsTrigger value="orphans"><Map className="h-3.5 w-3.5 mr-1" />Órfãos</TabsTrigger>
+              <TabsTrigger value="orphans"><MapIcon className="h-3.5 w-3.5 mr-1" />Órfãos</TabsTrigger>
               <TabsTrigger value="coverage">Cobertura</TabsTrigger>
             </TabsList>
 
