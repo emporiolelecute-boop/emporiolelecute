@@ -533,6 +533,7 @@ const Produtos = () => {
                    occasion.slug === 'batizado' ? '⛪' : 
                    occasion.slug === 'casamento' ? '💒' : 
                    occasion.slug === 'aniversario' ? '🎂' : '🏢'} {occasion.name}
+                  {counts.occ[occasion.id] ? <span className="ml-1 opacity-70">({counts.occ[occasion.id]})</span> : null}
                 </Badge>
               ))}
             </div>
