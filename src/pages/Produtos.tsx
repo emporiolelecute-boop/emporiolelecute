@@ -504,6 +504,7 @@ const Produtos = () => {
                   onClick={() => handleCategoryChange(category.slug)}
                 >
                   {category.slug === 'sabonetes' ? '🧼' : category.slug === 'velas' ? '🕯️' : category.slug === 'kits' ? '🎁' : '✨'} {category.name}
+                  {counts.cat[category.id] ? <span className="ml-1 opacity-70">({counts.cat[category.id]})</span> : null}
                 </Badge>
               ))}
             </div>
