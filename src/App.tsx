@@ -89,6 +89,8 @@ const AdminAuthority = lazyWithRetry(() => import("./pages/admin/AdminAuthority"
 const AdminEditorialExecution = lazyWithRetry(() => import("./pages/admin/AdminEditorialExecution"), "AdminEditorialExecution");
 const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOperations"), "AdminSeoOperations");
 const AdminLinkHealth = lazyWithRetry(() => import("./pages/admin/AdminLinkHealth"), "AdminLinkHealth");
+const AdminContentGaps = lazyWithRetry(() => import("./pages/admin/AdminContentGaps"), "AdminContentGaps");
+const AdminSeoCommandCenter = lazyWithRetry(() => import("./pages/admin/AdminSeoCommandCenter"), "AdminSeoCommandCenter");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
