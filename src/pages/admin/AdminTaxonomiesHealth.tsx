@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDbCategories, useDbOccasions } from '@/hooks/useProducts';
 import { useSegments } from '@/hooks/useSegments';
 import { useTags } from '@/hooks/useTags';
-import { evaluateSeo, hasAnyIssue, TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind } from '@/lib/taxonomy';
+import { evaluateSeo, hasAnyIssue, scoreSeo, TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind } from '@/lib/taxonomy';
 
 interface ConsolidationRow {
   route_slug: string;
