@@ -560,6 +560,16 @@ const App = () => {
                       <AdminLinkHealth />
                     </Suspense>
                   } />
+                  <Route path="content-gaps" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminContentGaps />
+                    </Suspense>
+                  } />
+                  <Route path="seo-command" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoCommandCenter />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
