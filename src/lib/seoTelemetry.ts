@@ -42,6 +42,15 @@ export interface TelemetrySnapshot {
   content_decay_score: number;
   cluster_growth_score: number;
   orphan_recovery_rate: number;
+  // Fase 13 — decision/intent/forecast
+  semantic_roi_avg: number;
+  authority_growth_projection: number;
+  execution_efficiency: number;
+  quick_win_score: number;
+  business_intent_score: number;
+  fragile_cluster_count: number;
+  authority_dependency_risk: number;
+  under_monetized_score: number;
 }
 
 export interface KnowledgeTelemetryInput {
@@ -52,6 +61,17 @@ export interface KnowledgeTelemetryInput {
   contentDecay?: number;
   clusterGrowth?: number;
   orphanRecoveryRate?: number;
+}
+
+export interface DecisionTelemetryInput {
+  semanticROIAvg?: number;
+  authorityGrowthProjection?: number;
+  executionEfficiency?: number;
+  quickWinScore?: number;
+  businessIntentScore?: number;
+  fragileClusterCount?: number;
+  authorityDependencyRisk?: number;
+  underMonetizedScore?: number;
 }
 
 function avg(vals: number[]): number {
@@ -83,6 +103,7 @@ export function computeTelemetry(
   linking?: LinkingTelemetryInput,
   editorial?: EditorialTelemetryInput,
   knowledge?: KnowledgeTelemetryInput,
+  decision?: DecisionTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
@@ -160,5 +181,13 @@ export function computeTelemetry(
     content_decay_score:          knowledge?.contentDecay ?? 0,
     cluster_growth_score:         knowledge?.clusterGrowth ?? 0,
     orphan_recovery_rate:         knowledge?.orphanRecoveryRate ?? 0,
+    semantic_roi_avg:             decision?.semanticROIAvg ?? 0,
+    authority_growth_projection:  decision?.authorityGrowthProjection ?? 0,
+    execution_efficiency:         decision?.executionEfficiency ?? 0,
+    quick_win_score:              decision?.quickWinScore ?? 0,
+    business_intent_score:        decision?.businessIntentScore ?? 0,
+    fragile_cluster_count:        decision?.fragileClusterCount ?? 0,
+    authority_dependency_risk:    decision?.authorityDependencyRisk ?? 0,
+    under_monetized_score:        decision?.underMonetizedScore ?? 0,
   };
 }
