@@ -67,6 +67,7 @@ const menuItems = [
   { icon: Rocket, label: 'SEO Autonomy', path: '/admin/seo-autonomy' },
   { icon: Rocket, label: 'SEO Operating System', path: '/admin/seo-os' },
   { icon: Rocket, label: 'SEO Control Tower', path: '/admin/seo-control-tower' },
+  { icon: Rocket, label: 'SEO Simulation Lab', path: '/admin/seo-simulation-lab' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
