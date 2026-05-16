@@ -63,6 +63,7 @@ const ProductPage = () => {
   const { data: reviews = [] } = useProductReviews(dbProduct?.id);
   const { data: reviewStats } = useProductReviewStats(dbProduct?.id);
   const { addItem } = useCart();
+  const { data: semanticCtx } = useSemanticContext();
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
