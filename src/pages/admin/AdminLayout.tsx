@@ -69,6 +69,7 @@ const menuItems = [
   { icon: Rocket, label: 'SEO Control Tower', path: '/admin/seo-control-tower' },
   { icon: Rocket, label: 'SEO Simulation Lab', path: '/admin/seo-simulation-lab' },
   { icon: Rocket, label: 'Strategic Simulation', path: '/admin/seo-strategic-simulation' },
+  { icon: Rocket, label: 'SEO Singularity', path: '/admin/seo-singularity' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

@@ -99,6 +99,7 @@ const AdminSeoOS = lazyWithRetry(() => import("./pages/admin/AdminSeoOS"), "Admi
 const AdminSeoControlTower = lazyWithRetry(() => import("./pages/admin/AdminSeoControlTower"), "AdminSeoControlTower");
 const AdminSeoSimulationLab = lazyWithRetry(() => import("./pages/admin/AdminSeoSimulationLab"), "AdminSeoSimulationLab");
 const AdminStrategicSimulation = lazyWithRetry(() => import("./pages/admin/AdminStrategicSimulation"), "AdminStrategicSimulation");
+const AdminSeoSingularity = lazyWithRetry(() => import("./pages/admin/AdminSeoSingularity"), "AdminSeoSingularity");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -616,6 +617,11 @@ const App = () => {
                   <Route path="seo-strategic-simulation" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminStrategicSimulation />
+                    </Suspense>
+                  } />
+                  <Route path="seo-singularity" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoSingularity />
                     </Suspense>
                   } />
                 </Route>
