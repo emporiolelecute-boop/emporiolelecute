@@ -23,6 +23,9 @@ import { Loader2, RefreshCw, AlertTriangle, Sparkles, TrendingUp } from "lucide-
 import { useAuthorityRefresh } from "@/hooks/useAuthorityRefresh";
 import { toast } from "sonner";
 import { calculateIndexReadiness } from "@/lib/authorityEngine";
+import { canBeIndexed, canEnterSitemap, type IndexableEntity } from "@/lib/indexationGovernance";
+import { computeTelemetry } from "@/lib/seoTelemetry";
+import { SeoReadinessBadge } from "@/components/admin/SeoReadinessBadge";
 
 interface ThemeRow {
   id: string;
