@@ -41,6 +41,8 @@ import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import TrustBadges from "@/components/TrustBadges";
 import FAQSection from "@/components/FAQSection";
 import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
+import { useProductReviews, useProductReviewStats } from "@/hooks/useProductReviews";
+import ProductReviews from "@/components/ProductReviews";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
@@ -55,6 +57,8 @@ const ProductPage = () => {
   const { data: dbProduct, isLoading } = useDbProduct(slug || "");
   const { data: allProducts } = useDbProducts();
   const { data: paymentConfig } = usePaymentConfig();
+  const { data: reviews = [] } = useProductReviews(dbProduct?.id);
+  const { data: reviewStats } = useProductReviewStats(dbProduct?.id);
   const { addItem } = useCart();
   
   const [isFavorite, setIsFavorite] = useState(false);
@@ -199,10 +203,15 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* SEO and Structured Data */}
+      {/* SEO and Structured Data — Fase 7 */}
       <DynamicSEO
         title={`${product.name} | Empório LeleCute`}
-        description={product.description || `Lembrancinha artesanal ${product.name}. Personalizada para ocasiões especiais.`}
+        description={(() => {
+          const raw = product.description
+            || (product.longDescription ? product.longDescription.replace(/\s+/g, ' ').trim() : '')
+            || `Lembrancinha artesanal ${product.name}, feita à mão e personalizada para ocasiões especiais. Empório LeleCute envia para todo o Brasil.`;
+          return raw.length > 160 ? raw.slice(0, 157).trimEnd() + '…' : raw;
+        })()}
         image={product.images[0] || undefined}
         url={`https://emporiolelecute.com.br/produto/${product.slug}`}
         type="product"
@@ -213,9 +222,18 @@ const ProductPage = () => {
         price={product.price}
         images={product.images}
         slug={product.slug}
-        rating={product.rating}
+        rating={reviewStats?.avg_rating ? Number(reviewStats.avg_rating) : undefined}
+        reviewCount={reviewStats?.review_count}
         productionDays={product.productionDays}
         category={dbProduct?.category?.name}
+        material="Artesanal — produzido à mão no Brasil"
+        reviews={reviews.map((r) => ({
+          author_name: r.author_name,
+          rating: r.rating,
+          comment: r.comment,
+          review_date: r.review_date,
+          source: r.source,
+        }))}
       />
       <BreadcrumbStructuredData
         items={[
@@ -612,15 +630,19 @@ const ProductPage = () => {
                 </div>
               )}
 
-              {/* WhatsApp */}
+              {/* WhatsApp — CTA inteligente Fase 7 */}
               {(() => {
                 const utmCampaign = `produto_${product.slug}`;
-                const waMsg = `Olá! Gostaria de fazer um orçamento do produto: *${product.name}*
+                const ctxParts: string[] = [];
+                if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
+                if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
+                if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
+                const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
+                const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
 
 📝 *Detalhes:*
 - Quantidade: ${quantity} unidades
-${personalization ? `- Personalização: ${personalization}` : ''}
-- Link: ${window.location.href}
+${personalization ? `- Personalização: ${personalization}` : ''}- Link: ${window.location.href}
 
 Poderia me ajudar com o valor do frete e prazos?`;
                 const waUrl = buildWhatsAppUrl({
@@ -651,7 +673,7 @@ Poderia me ajudar com o valor do frete e prazos?`;
           </div>
 
           {/* Description Section */}
-          <div className="mb-16">
+          <div className="mb-12">
             <h2 className="font-display text-2xl text-foreground mb-6">Descrição do produto</h2>
             <div className="bg-card rounded-xl border border-border p-6">
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -663,6 +685,52 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
               </p>
             </div>
           </div>
+
+          {/* Fase 7 — Conteúdo editorial opcional (rich text humano) */}
+          {dbProduct?.editorial_content && (
+            <section className="mb-12" aria-labelledby="editorial-title">
+              <h2 id="editorial-title" className="font-display text-2xl text-foreground mb-6">
+                Sobre esta lembrancinha
+              </h2>
+              <div className="bg-primary/5 rounded-xl border border-primary/10 p-6 prose prose-sm md:prose-base max-w-none text-muted-foreground">
+                <div className="whitespace-pre-line leading-relaxed">
+                  {dbProduct.editorial_content}
+                </div>
+              </div>
+              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Article",
+                headline: `Sobre ${product.name}`,
+                articleBody: dbProduct.editorial_content.slice(0, 4000),
+                mainEntityOfPage: `https://emporiolelecute.com.br/produto/${product.slug}`,
+                author: { "@type": "Organization", name: "Empório LeleCute" },
+              }) }} />
+            </section>
+          )}
+
+          {/* Fase 7 — Avaliações */}
+          {dbProduct?.id && <ProductReviews productId={dbProduct.id} />}
+
+          {/* Fase 7 — Temas relacionados (descoberta visual; tags não-indexáveis) */}
+          {dbProduct?.tags && dbProduct.tags.length > 0 && (
+            <section className="mb-12" aria-labelledby="themes-title">
+              <h2 id="themes-title" className="font-display text-xl text-foreground mb-4">
+                Temas relacionados
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {dbProduct.tags.slice(0, 12).map((t) => (
+                  <Link
+                    key={t.id}
+                    to={`/produtos?tag=${t.slug}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-full text-sm text-muted-foreground transition-colors"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Internal linking by taxonomy (Fase 4) */}
           {dbProduct?.occasions?.[0] && (

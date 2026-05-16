@@ -1,5 +1,13 @@
 import { Helmet } from 'react-helmet';
 
+interface ReviewItem {
+  author_name: string;
+  rating: number;
+  comment?: string | null;
+  review_date?: string | null;
+  source?: string | null;
+}
+
 interface ProductStructuredDataProps {
   name: string;
   description: string;
@@ -11,6 +19,12 @@ interface ProductStructuredDataProps {
   productionDays?: number;
   category?: string;
   brand?: string;
+  /** Optional: array of recent reviews to embed as schema.org Review nodes */
+  reviews?: ReviewItem[];
+  /** Optional: material/composition (e.g. "Sabonete artesanal vegetal") */
+  material?: string;
+  /** Optional: explicit SKU/MPN; falls back to slug */
+  sku?: string;
 }
 
 const ProductStructuredData = ({
@@ -24,10 +38,13 @@ const ProductStructuredData = ({
   productionDays = 7,
   category = "Lembrancinhas Artesanais",
   brand = "Empório LeleCute",
+  reviews,
+  material,
+  sku,
 }: ProductStructuredDataProps) => {
   const baseUrl = "https://emporiolelecute.com.br";
   const productUrl = `${baseUrl}/produto/${slug}`;
-  
+
   // Calculate priceValidUntil - one year from now in YYYY-MM-DD format
   const priceValidUntil = new Date();
   priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
@@ -39,13 +56,19 @@ const ProductStructuredData = ({
     "name": name,
     "description": description,
     "image": images.length > 0 ? images : [`${baseUrl}/placeholder.svg`],
-    "sku": slug,
-    "mpn": slug.toUpperCase(),
+    "sku": sku || slug,
+    "mpn": (sku || slug).toUpperCase(),
     "brand": {
       "@type": "Brand",
       "name": brand
     },
     "category": category,
+    ...(material ? { "material": material } : {}),
+    "additionalProperty": [
+      { "@type": "PropertyValue", "name": "Feito à mão", "value": "Sim" },
+      { "@type": "PropertyValue", "name": "Personalizado", "value": "Sim" },
+      { "@type": "PropertyValue", "name": "Origem", "value": "Brasil" },
+    ],
     "url": productUrl,
     "offers": {
       "@type": "Offer",
@@ -105,6 +128,23 @@ const ProductStructuredData = ({
             bestRating: 5,
             worstRating: 1,
           },
+        }
+      : {}),
+    ...(reviews && reviews.length > 0
+      ? {
+          review: reviews.slice(0, 5).map((r) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: r.author_name },
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: r.rating,
+              bestRating: 5,
+              worstRating: 1,
+            },
+            ...(r.comment ? { reviewBody: r.comment } : {}),
+            ...(r.review_date ? { datePublished: r.review_date.slice(0, 10) } : {}),
+            ...(r.source ? { publisher: { "@type": "Organization", name: r.source } } : {}),
+          })),
         }
       : {}),
   };

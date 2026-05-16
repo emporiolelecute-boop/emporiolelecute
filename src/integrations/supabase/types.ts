@@ -1010,6 +1010,62 @@ export type Database = {
           },
         ]
       }
+      product_reviews: {
+        Row: {
+          author_name: string
+          comment: string | null
+          created_at: string
+          id: string
+          is_featured: boolean
+          is_verified: boolean
+          is_visible: boolean
+          product_id: string
+          rating: number
+          review_date: string | null
+          source: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          is_verified?: boolean
+          is_visible?: boolean
+          product_id: string
+          rating: number
+          review_date?: string | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          is_verified?: boolean
+          is_visible?: boolean
+          product_id?: string
+          rating?: number
+          review_date?: string | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_segments: {
         Row: {
           product_id: string
@@ -1076,6 +1132,7 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string | null
+          editorial_content: string | null
           features: string[] | null
           google_product_category: string | null
           id: string
@@ -1103,6 +1160,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          editorial_content?: string | null
           features?: string[] | null
           google_product_category?: string | null
           id?: string
@@ -1130,6 +1188,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          editorial_content?: string | null
           features?: string[] | null
           google_product_category?: string | null
           id?: string
@@ -1687,6 +1746,22 @@ export type Database = {
           target_user_id: string | null
         }
         Relationships: []
+      }
+      product_review_stats: {
+        Row: {
+          avg_rating: number | null
+          product_id: string | null
+          review_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       taxonomy_registry: {
         Row: {
