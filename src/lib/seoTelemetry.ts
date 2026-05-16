@@ -51,6 +51,34 @@ export interface TelemetrySnapshot {
   fragile_cluster_count: number;
   authority_dependency_risk: number;
   under_monetized_score: number;
+  // Fase 13.1 — autonomy layer
+  semantic_stability_score: number;
+  saturation_score: number;
+  cluster_dependency_score: number;
+  authority_entropy: number;
+  commercial_diversity_score: number;
+  strategic_consistency_score: number;
+  volatility_score: number;
+  recovery_difficulty_avg: number;
+  semantic_balance_score: number;
+  overcentralization_risk: number;
+  topic_exhaustion_score: number;
+  momentum_growth_score: number;
+}
+
+export interface AutonomyTelemetryInput {
+  semanticStability?: number;
+  saturation?: number;
+  clusterDependency?: number;
+  authorityEntropy?: number;
+  commercialDiversity?: number;
+  strategicConsistency?: number;
+  volatility?: number;
+  recoveryDifficulty?: number;
+  semanticBalance?: number;
+  overcentralizationRisk?: number;
+  topicExhaustion?: number;
+  momentumGrowth?: number;
 }
 
 export interface KnowledgeTelemetryInput {
