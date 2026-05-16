@@ -24,6 +24,10 @@ type StatusRow = {
 const RICH_RESULTS = (url: string) =>
   `https://search.google.com/test/rich-results?url=${encodeURIComponent(url)}`;
 
+// Forward declaration so JSX usage type-checks before the function body below.
+// eslint-disable-next-line @typescript-eslint/no-use-before-define
+const CoverageFunnelRef = (props: { rows: StatusRow[]; onFilterIssues: () => void }) => CoverageFunnel(props);
+
 export default function SEOIndexationPanel() {
   const [rows, setRows] = useState<StatusRow[]>([]);
   const [history, setHistory] = useState<Array<{ url: string; has_issue: boolean; coverage_state: string | null; checked_at: string }>>([]);
