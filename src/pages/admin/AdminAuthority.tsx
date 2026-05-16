@@ -174,6 +174,10 @@ export default function AdminAuthority() {
           <TabsTrigger value="themes">Temas</TabsTrigger>
           <TabsTrigger value="combinations">Combinações</TabsTrigger>
           <TabsTrigger value="gaps">Coverage Gaps</TabsTrigger>
+          <TabsTrigger value="sitemap">Sitemap Eligible</TabsTrigger>
+          <TabsTrigger value="blocked">Blocked Candidates</TabsTrigger>
+          <TabsTrigger value="islands">Islands</TabsTrigger>
+          <TabsTrigger value="weak">Weak Clusters</TabsTrigger>
         </TabsList>
 
         <TabsContent value="themes">
