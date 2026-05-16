@@ -29,6 +29,7 @@ const LembrancinhasLanding = lazy(() => import("./pages/LembrancinhasLanding"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SitemapCheck = lazy(() => import("./pages/SitemapCheck"));
+const TaxonomyPage = lazy(() => import("./pages/TaxonomyPage"));
 
 // Admin pages - lazy loaded with retry + telemetry
 import { lazyWithRetry } from "./lib/lazyWithRetry";
@@ -215,6 +216,23 @@ const App = () => {
                 <Route path="/sitemap-check" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <SitemapCheck />
+                  </Suspense>
+                } />
+
+                {/* Public Taxonomy Pages — Fase 3.1 */}
+                <Route path="/categoria/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <TaxonomyPage kind="categoria" />
+                  </Suspense>
+                } />
+                <Route path="/ocasiao/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <TaxonomyPage kind="ocasiao" />
+                  </Suspense>
+                } />
+                <Route path="/segmento/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <TaxonomyPage kind="segmento" />
                   </Suspense>
                 } />
 

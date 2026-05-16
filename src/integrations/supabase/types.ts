@@ -98,21 +98,42 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          description: string | null
+          description_seo: string | null
+          h1_override: string | null
           id: string
+          image_url: string | null
+          is_indexed: boolean
+          meta_description: string | null
+          meta_title: string | null
           name: string
           position: number
           slug: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          description_seo?: string | null
+          h1_override?: string | null
           id?: string
+          image_url?: string | null
+          is_indexed?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name: string
           position?: number
           slug: string
         }
         Update: {
           created_at?: string
+          description?: string | null
+          description_seo?: string | null
+          h1_override?: string | null
           id?: string
+          image_url?: string | null
+          is_indexed?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name?: string
           position?: number
           slug?: string
@@ -664,21 +685,42 @@ export type Database = {
       occasions: {
         Row: {
           created_at: string
+          description: string | null
+          description_seo: string | null
+          h1_override: string | null
           id: string
+          image_url: string | null
+          is_indexed: boolean
+          meta_description: string | null
+          meta_title: string | null
           name: string
           position: number
           slug: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          description_seo?: string | null
+          h1_override?: string | null
           id?: string
+          image_url?: string | null
+          is_indexed?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name: string
           position?: number
           slug: string
         }
         Update: {
           created_at?: string
+          description?: string | null
+          description_seo?: string | null
+          h1_override?: string | null
           id?: string
+          image_url?: string | null
+          is_indexed?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name?: string
           position?: number
           slug?: string

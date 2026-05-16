@@ -57,22 +57,34 @@ Deno.serve(async (req) => {
     
     console.log(`Found ${products?.length || 0} active products`)
     
-    // Fetch all occasions
+    // Fetch all occasions (apenas indexáveis)
     const { data: occasions, error: occasionsError } = await supabase
       .from('occasions')
-      .select('slug, name')
+      .select('slug, name, is_indexed')
+      .eq('is_indexed', true)
     
     if (occasionsError) {
       console.error('Error fetching occasions:', occasionsError)
     }
     
-    // Fetch all categories
+    // Fetch all categories (apenas indexáveis)
     const { data: categories, error: categoriesError } = await supabase
       .from('categories')
-      .select('slug, name')
+      .select('slug, name, is_indexed')
+      .eq('is_indexed', true)
     
     if (categoriesError) {
       console.error('Error fetching categories:', categoriesError)
+    }
+
+    // Fetch all segments (apenas indexáveis)
+    const { data: segments, error: segmentsError } = await supabase
+      .from('segments')
+      .select('slug, name, is_indexed')
+      .eq('is_indexed', true)
+
+    if (segmentsError) {
+      console.error('Error fetching segments:', segmentsError)
     }
     
     const today = new Date().toISOString().split('T')[0]
@@ -131,11 +143,11 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Add occasions pages
+    // Occasions — canonical /ocasiao/:slug (Fase 3.1)
     if (occasions && occasions.length > 0) {
       for (const occasion of occasions) {
         sitemap += `  <url>
-    <loc>${siteUrl}/ocasioes/${occasion.slug}</loc>
+    <loc>${siteUrl}/ocasiao/${occasion.slug}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -143,12 +155,25 @@ Deno.serve(async (req) => {
 `
       }
     }
-    
-    // Add category pages
+
+    // Categories — canonical /categoria/:slug (Fase 3.1)
     if (categories && categories.length > 0) {
       for (const category of categories) {
         sitemap += `  <url>
-    <loc>${siteUrl}/produtos?categoria=${category.slug}</loc>
+    <loc>${siteUrl}/categoria/${category.slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`
+      }
+    }
+
+    // Segments — canonical /segmento/:slug (Fase 3.1)
+    if (segments && segments.length > 0) {
+      for (const segment of segments) {
+        sitemap += `  <url>
+    <loc>${siteUrl}/segmento/${segment.slug}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -282,7 +307,7 @@ ${[
 
 </urlset>`
     
-    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + (dynamicPages?.length || 0) + 9
+    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + (segments?.length || 0) + (dynamicPages?.length || 0) + 9
     console.log('Sitemap generated successfully')
     console.log(`Total URLs: ${totalUrls}`)
     
