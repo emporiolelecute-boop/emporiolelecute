@@ -631,6 +631,11 @@ const App = () => {
                       <AdminSeoConsciousness />
                     </Suspense>
                   } />
+                  <Route path="seo-executive-grid" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoExecutiveGrid />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
