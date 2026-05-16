@@ -1935,6 +1935,87 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_executive_snapshots: {
+        Row: {
+          adaptability_score: number
+          authority_resilience: number
+          cognitive_pressure: number
+          compounding_capacity: number
+          created_at: string
+          created_by: string | null
+          ecosystem_health: number
+          execution_clarity: number
+          execution_fatigue: number
+          existential_stability: number
+          fragmentation_score: number
+          id: string
+          long_term_survival: number
+          notes: string | null
+          operational_state: number
+          predictive_confidence: number
+          recovery_readiness: number
+          semantic_decay: number
+          semantic_efficiency: number
+          snapshot: Json
+          strategic_alignment: number
+          strategic_noise: number
+          sustainability_score: number
+          systemic_entropy: number
+        }
+        Insert: {
+          adaptability_score?: number
+          authority_resilience?: number
+          cognitive_pressure?: number
+          compounding_capacity?: number
+          created_at?: string
+          created_by?: string | null
+          ecosystem_health?: number
+          execution_clarity?: number
+          execution_fatigue?: number
+          existential_stability?: number
+          fragmentation_score?: number
+          id?: string
+          long_term_survival?: number
+          notes?: string | null
+          operational_state?: number
+          predictive_confidence?: number
+          recovery_readiness?: number
+          semantic_decay?: number
+          semantic_efficiency?: number
+          snapshot?: Json
+          strategic_alignment?: number
+          strategic_noise?: number
+          sustainability_score?: number
+          systemic_entropy?: number
+        }
+        Update: {
+          adaptability_score?: number
+          authority_resilience?: number
+          cognitive_pressure?: number
+          compounding_capacity?: number
+          created_at?: string
+          created_by?: string | null
+          ecosystem_health?: number
+          execution_clarity?: number
+          execution_fatigue?: number
+          existential_stability?: number
+          fragmentation_score?: number
+          id?: string
+          long_term_survival?: number
+          notes?: string | null
+          operational_state?: number
+          predictive_confidence?: number
+          recovery_readiness?: number
+          semantic_decay?: number
+          semantic_efficiency?: number
+          snapshot?: Json
+          strategic_alignment?: number
+          strategic_noise?: number
+          sustainability_score?: number
+          systemic_entropy?: number
+        }
+        Relationships: []
+      }
       seo_operational_snapshots: {
         Row: {
           authority_velocity: number

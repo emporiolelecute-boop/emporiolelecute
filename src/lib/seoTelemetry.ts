@@ -172,6 +172,29 @@ export interface TelemetrySnapshot {
   false_growth_signal_score: number;
   semantic_hallucination_score: number;
   awareness_collapse_risk: number;
+  // Fase 14.4 — executive intelligence grid
+  executive_state_score: number;
+  operational_harmony_score: number;
+  strategic_clarity_score: number;
+  execution_coherence_score: number;
+  long_term_sustainability_score: number;
+  compounding_health_score: number;
+  systemic_entropy_score: number;
+  authority_entropy_score: number;
+  execution_entropy_score: number;
+  strategic_entropy_score: number;
+  fragmentation_risk_score: number;
+  semantic_drift_score: number;
+  authority_instability_score: number;
+  strategic_scatter_score: number;
+  execution_dilution_score: number;
+  resilience_forecast_score: number;
+  collapse_resistance_score: number;
+  semantic_longevity_score: number;
+  operational_durability_score: number;
+  authority_persistence_score: number;
+  ecosystem_integrity_score: number;
+  systemic_noise_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -439,5 +462,27 @@ export function computeTelemetry(
     false_growth_signal_score: 0,
     semantic_hallucination_score: 0,
     awareness_collapse_risk: 0,
+    executive_state_score: 0,
+    operational_harmony_score: 0,
+    strategic_clarity_score: 0,
+    execution_coherence_score: 0,
+    long_term_sustainability_score: 0,
+    compounding_health_score: 0,
+    systemic_entropy_score: 0,
+    authority_entropy_score: 0,
+    execution_entropy_score: 0,
+    strategic_entropy_score: 0,
+    fragmentation_risk_score: 0,
+    semantic_drift_score: 0,
+    authority_instability_score: 0,
+    strategic_scatter_score: 0,
+    execution_dilution_score: 0,
+    resilience_forecast_score: 0,
+    collapse_resistance_score: 0,
+    semantic_longevity_score: 0,
+    operational_durability_score: 0,
+    authority_persistence_score: 0,
+    ecosystem_integrity_score: 0,
+    systemic_noise_score: 0,
   };
 }
