@@ -32,7 +32,8 @@ import {
   Activity,
   Clock,
   Star,
-  BookOpen
+  BookOpen,
+  TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -52,6 +53,7 @@ const menuItems = [
   { icon: ArrowRightLeft, label: 'Páginas Combinatórias', path: '/admin/combination-pages' },
   { icon: Sparkles, label: 'Discovery Engine', path: '/admin/discovery' },
   { icon: Sparkles, label: 'Hubs Temáticos', path: '/admin/themes' },
+  { icon: TrendingUp, label: 'Authority Center', path: '/admin/authority' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

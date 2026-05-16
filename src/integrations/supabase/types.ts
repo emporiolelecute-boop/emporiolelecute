@@ -98,6 +98,7 @@ export type Database = {
       blog_posts: {
         Row: {
           author: string | null
+          authority_contribution: number
           content: string | null
           cover_image: string | null
           cover_image_alt: string | null
@@ -121,10 +122,12 @@ export type Database = {
           related_themes: string[]
           slug: string
           title: string
+          topical_score: number
           updated_at: string
         }
         Insert: {
           author?: string | null
+          authority_contribution?: number
           content?: string | null
           cover_image?: string | null
           cover_image_alt?: string | null
@@ -148,10 +151,12 @@ export type Database = {
           related_themes?: string[]
           slug: string
           title: string
+          topical_score?: number
           updated_at?: string
         }
         Update: {
           author?: string | null
+          authority_contribution?: number
           content?: string | null
           cover_image?: string | null
           cover_image_alt?: string | null
@@ -175,6 +180,7 @@ export type Database = {
           related_themes?: string[]
           slug?: string
           title?: string
+          topical_score?: number
           updated_at?: string
         }
         Relationships: []
@@ -230,6 +236,7 @@ export type Database = {
       combination_pages_registry: {
         Row: {
           auto_discovered: boolean
+          cannibalization_risk: string
           canonical_path: string | null
           confidence_score: number
           created_at: string
@@ -243,7 +250,9 @@ export type Database = {
           has_editorial: boolean
           has_faq: boolean
           id: string
+          internal_links_count: number
           is_indexable: boolean
+          last_authority_refresh: string | null
           last_evaluated_at: string | null
           meta_description: string | null
           meta_title: string | null
@@ -253,14 +262,17 @@ export type Database = {
           product_count: number
           products_count: number
           quality_score: number
+          readiness_score: number
           secondary_slug: string
           secondary_type: string
           seo_score: number
           thin_content_risk: boolean
+          topical_coverage: number
           updated_at: string
         }
         Insert: {
           auto_discovered?: boolean
+          cannibalization_risk?: string
           canonical_path?: string | null
           confidence_score?: number
           created_at?: string
@@ -274,7 +286,9 @@ export type Database = {
           has_editorial?: boolean
           has_faq?: boolean
           id?: string
+          internal_links_count?: number
           is_indexable?: boolean
+          last_authority_refresh?: string | null
           last_evaluated_at?: string | null
           meta_description?: string | null
           meta_title?: string | null
@@ -284,14 +298,17 @@ export type Database = {
           product_count?: number
           products_count?: number
           quality_score?: number
+          readiness_score?: number
           secondary_slug: string
           secondary_type: string
           seo_score?: number
           thin_content_risk?: boolean
+          topical_coverage?: number
           updated_at?: string
         }
         Update: {
           auto_discovered?: boolean
+          cannibalization_risk?: string
           canonical_path?: string | null
           confidence_score?: number
           created_at?: string
@@ -305,7 +322,9 @@ export type Database = {
           has_editorial?: boolean
           has_faq?: boolean
           id?: string
+          internal_links_count?: number
           is_indexable?: boolean
+          last_authority_refresh?: string | null
           last_evaluated_at?: string | null
           meta_description?: string | null
           meta_title?: string | null
@@ -315,10 +334,12 @@ export type Database = {
           product_count?: number
           products_count?: number
           quality_score?: number
+          readiness_score?: number
           secondary_slug?: string
           secondary_type?: string
           seo_score?: number
           thin_content_risk?: boolean
+          topical_coverage?: number
           updated_at?: string
         }
         Relationships: []
@@ -1852,13 +1873,16 @@ export type Database = {
           faqs: Json
           hero_image_url: string | null
           id: string
+          internal_links_count: number
           intro: string | null
           is_approved: boolean
           is_indexed: boolean
+          last_authority_refresh: string | null
           last_evaluated_at: string | null
           meta_description: string | null
           meta_title: string | null
           notes: string | null
+          readiness_score: number
           related_occasions: string[]
           related_posts: string[]
           related_segments: string[]
@@ -1867,6 +1891,7 @@ export type Database = {
           tag_id: string | null
           thin_content_risk: boolean
           title: string
+          topical_coverage: number
           updated_at: string
         }
         Insert: {
@@ -1878,13 +1903,16 @@ export type Database = {
           faqs?: Json
           hero_image_url?: string | null
           id?: string
+          internal_links_count?: number
           intro?: string | null
           is_approved?: boolean
           is_indexed?: boolean
+          last_authority_refresh?: string | null
           last_evaluated_at?: string | null
           meta_description?: string | null
           meta_title?: string | null
           notes?: string | null
+          readiness_score?: number
           related_occasions?: string[]
           related_posts?: string[]
           related_segments?: string[]
@@ -1893,6 +1921,7 @@ export type Database = {
           tag_id?: string | null
           thin_content_risk?: boolean
           title: string
+          topical_coverage?: number
           updated_at?: string
         }
         Update: {
@@ -1904,13 +1933,16 @@ export type Database = {
           faqs?: Json
           hero_image_url?: string | null
           id?: string
+          internal_links_count?: number
           intro?: string | null
           is_approved?: boolean
           is_indexed?: boolean
+          last_authority_refresh?: string | null
           last_evaluated_at?: string | null
           meta_description?: string | null
           meta_title?: string | null
           notes?: string | null
+          readiness_score?: number
           related_occasions?: string[]
           related_posts?: string[]
           related_segments?: string[]
@@ -1919,6 +1951,7 @@ export type Database = {
           tag_id?: string | null
           thin_content_risk?: boolean
           title?: string
+          topical_coverage?: number
           updated_at?: string
         }
         Relationships: []

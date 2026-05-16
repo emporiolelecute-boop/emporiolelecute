@@ -315,3 +315,65 @@ export function runDiscoveryEngine(input: DiscoveryInput): DiscoveryOpportunity[
   opportunities.sort((a, b) => b.qualityScore - a.qualityScore || b.productsCount - a.productsCount);
   return opportunities;
 }
+
+// ---------------- Fase 10.4 — Hub Suggestion Candidates ----------------
+
+/**
+ * Identifica oportunidades fortes para virar HUB temático.
+ * Critérios (SAFE MODE — sugestão apenas, NÃO cria nada):
+ *   produtos >= 10, ocasiões >= 2, segmentos >= 2,
+ *   authority/quality >= 70, thinContentRisk = false.
+ */
+export interface HubSuggestionCandidate {
+  sourceType: DiscoveryOpportunityType;
+  slug: string;
+  label: string;
+  productsCount: number;
+  occasionsCount: number;
+  segmentsCount: number;
+  qualityScore: number;
+  reasons: string[];
+}
+
+export function suggestHubCandidates(
+  opportunities: DiscoveryOpportunity[],
+  perProductTaxonomy: {
+    occasionsByOpportunitySlug?: Map<string, number>;
+    segmentsByOpportunitySlug?: Map<string, number>;
+  } = {}
+): HubSuggestionCandidate[] {
+  const out: HubSuggestionCandidate[] = [];
+  for (const op of opportunities) {
+    const occ = perProductTaxonomy.occasionsByOpportunitySlug?.get(op.slug) ?? 0;
+    const seg = perProductTaxonomy.segmentsByOpportunitySlug?.get(op.slug) ?? 0;
+
+    if (
+      op.productsCount >= 10 &&
+      occ >= 2 &&
+      seg >= 2 &&
+      op.qualityScore >= 70 &&
+      !op.thinContentRisk
+    ) {
+      out.push({
+        sourceType: op.type,
+        slug: op.slug,
+        label:
+          op.entities.tag?.name ??
+          op.entities.segment?.name ??
+          op.entities.category?.name ??
+          op.slug,
+        productsCount: op.productsCount,
+        occasionsCount: occ,
+        segmentsCount: seg,
+        qualityScore: op.qualityScore,
+        reasons: [
+          `Quality ${op.qualityScore}`,
+          `${op.productsCount} produtos`,
+          `${occ} ocasiões`,
+          `${seg} segmentos`,
+        ],
+      });
+    }
+  }
+  return out;
+}
