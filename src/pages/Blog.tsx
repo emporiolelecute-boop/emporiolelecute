@@ -7,11 +7,39 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { Button } from "@/components/ui/button";
 import { getPublishedPosts } from "@/data/blog";
+import { useDbBlogPosts } from "@/hooks/useDbBlogPosts";
 
 const SITE = "https://emporiolelecute.com.br";
 
 const Blog = () => {
-  const posts = getPublishedPosts();
+  const staticPosts = getPublishedPosts();
+  const { data: dbPosts = [] } = useDbBlogPosts();
+
+  // Merge: DB posts primeiro, seguidos de posts estáticos não-duplicados (por slug).
+  const dbSlugs = new Set(dbPosts.map((p) => p.slug));
+  const merged = [
+    ...dbPosts.map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt || "",
+      coverImage: p.cover_image || undefined,
+      category: "Editorial",
+      publishedAt: p.published_at || p.created_at,
+      readingMinutes: p.reading_time || 5,
+    })),
+    ...staticPosts
+      .filter((p) => !dbSlugs.has(p.slug))
+      .map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        excerpt: p.excerpt,
+        coverImage: p.coverImage,
+        category: p.category,
+        publishedAt: p.publishedAt,
+        readingMinutes: p.readingMinutes,
+      })),
+  ];
+  const posts = merged;
 
   return (
     <div className="min-h-screen bg-background">
