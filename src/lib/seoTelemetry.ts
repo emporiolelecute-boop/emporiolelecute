@@ -42,6 +42,15 @@ export interface TelemetrySnapshot {
   content_decay_score: number;
   cluster_growth_score: number;
   orphan_recovery_rate: number;
+  // Fase 13 — decision/intent/forecast
+  semantic_roi_avg: number;
+  authority_growth_projection: number;
+  execution_efficiency: number;
+  quick_win_score: number;
+  business_intent_score: number;
+  fragile_cluster_count: number;
+  authority_dependency_risk: number;
+  under_monetized_score: number;
 }
 
 export interface KnowledgeTelemetryInput {
@@ -52,6 +61,17 @@ export interface KnowledgeTelemetryInput {
   contentDecay?: number;
   clusterGrowth?: number;
   orphanRecoveryRate?: number;
+}
+
+export interface DecisionTelemetryInput {
+  semanticROIAvg?: number;
+  authorityGrowthProjection?: number;
+  executionEfficiency?: number;
+  quickWinScore?: number;
+  businessIntentScore?: number;
+  fragileClusterCount?: number;
+  authorityDependencyRisk?: number;
+  underMonetizedScore?: number;
 }
 
 function avg(vals: number[]): number {
