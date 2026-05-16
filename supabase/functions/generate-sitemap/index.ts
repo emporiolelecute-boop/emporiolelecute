@@ -126,6 +126,69 @@ Deno.serve(async (req) => {
     <priority>0.7</priority>
   </url>`).join('\n');
 
+    // ============================================================
+    // Fase 10.5 — SAFE MODE
+    // only ultra-qualified semantic pages may enter sitemap
+    // gates duros: approved + indexed + readiness>=75 + topical>=60
+    //              + !thin + cannibal!=high + !manipulation
+    //              + internal_links>=3 + authority>=80 + products>=8
+    //              + editorial>=500 + faqs>=2
+    // ============================================================
+    const isHighGate = (e: any, kind: 'theme' | 'combination'): boolean => {
+      if (!e) return false;
+      if (e.thin_content_risk) return false;
+      if (e.cannibalization_risk === 'high') return false;
+      if (e.authority_manipulation === true) return false;
+      if ((e.readiness_score ?? 0) < 75) return false;
+      if ((e.topical_coverage ?? 0) < 60) return false;
+      if ((e.authority_score ?? e.quality_score ?? 0) < 80) return false;
+      if ((e.internal_links_count ?? 0) < 3) return false;
+      if (kind === 'theme') {
+        if (e.is_approved !== true) return false;
+        if (e.is_indexed !== true) return false;
+        // editorial + faq gates (theme)
+        const editorialLen = (e.editorial_content ?? '').length;
+        const faqCount = Array.isArray(e.faqs) ? e.faqs.length : 0;
+        if (editorialLen < 500) return false;
+        if (faqCount < 2) return false;
+      } else {
+        if (e.discovery_status !== 'approved') return false;
+        if (e.is_indexable !== true) return false;
+        if ((e.products_count ?? 0) < 8) return false;
+        const editorialLen = (e.editorial_content ?? '').length;
+        const faqCount = Array.isArray(e.faqs) ? e.faqs.length : 0;
+        if (editorialLen < 500) return false;
+        if (faqCount < 2) return false;
+      }
+      return true;
+    };
+
+    const { data: themeHubs } = await supabase
+      .from('theme_hubs')
+      .select('slug, updated_at, is_approved, is_indexed, readiness_score, topical_coverage, authority_score, internal_links_count, thin_content_risk, cannibalization_risk, authority_manipulation, editorial_content, faqs')
+      .limit(500);
+    const themeHubsXml = (themeHubs ?? [])
+      .filter((h: any) => isHighGate(h, 'theme'))
+      .map((h: any) => `  <url>
+    <loc>${siteUrl}/tema/${h.slug}</loc>
+    <lastmod>${(h.updated_at || '').split('T')[0] || today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>`).join('\n');
+
+    const { data: comboPages } = await supabase
+      .from('combination_pages_registry')
+      .select('path, updated_at, discovery_status, is_indexable, readiness_score, topical_coverage, quality_score, products_count, internal_links_count, thin_content_risk, cannibalization_risk, authority_manipulation, editorial_content, faqs')
+      .limit(500);
+    const comboPagesXml = (comboPages ?? [])
+      .filter((c: any) => isHighGate(c, 'combination'))
+      .map((c: any) => `  <url>
+    <loc>${siteUrl}${c.path}</loc>
+    <lastmod>${(c.updated_at || '').split('T')[0] || today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>`).join('\n');
+
     // Generate sitemap XML
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -314,6 +377,8 @@ ${[
     <priority>0.7</priority>
   </url>`).join('\n')}
 ${dbBlogPostsXml}
+${themeHubsXml}
+${comboPagesXml}
 
 </urlset>`
     

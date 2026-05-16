@@ -23,6 +23,9 @@ import { Loader2, RefreshCw, AlertTriangle, Sparkles, TrendingUp } from "lucide-
 import { useAuthorityRefresh } from "@/hooks/useAuthorityRefresh";
 import { toast } from "sonner";
 import { calculateIndexReadiness } from "@/lib/authorityEngine";
+import { canBeIndexed, canEnterSitemap, type IndexableEntity } from "@/lib/indexationGovernance";
+import { computeTelemetry } from "@/lib/seoTelemetry";
+import { SeoReadinessBadge } from "@/components/admin/SeoReadinessBadge";
 
 interface ThemeRow {
   id: string;
@@ -174,6 +177,10 @@ export default function AdminAuthority() {
           <TabsTrigger value="themes">Temas</TabsTrigger>
           <TabsTrigger value="combinations">Combinações</TabsTrigger>
           <TabsTrigger value="gaps">Coverage Gaps</TabsTrigger>
+          <TabsTrigger value="sitemap">Sitemap Eligible</TabsTrigger>
+          <TabsTrigger value="blocked">Blocked Candidates</TabsTrigger>
+          <TabsTrigger value="islands">Islands</TabsTrigger>
+          <TabsTrigger value="weak">Weak Clusters</TabsTrigger>
         </TabsList>
 
         <TabsContent value="themes">
@@ -313,7 +320,71 @@ export default function AdminAuthority() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="sitemap">
+          <EligibilityList
+            mode="sitemap"
+            themes={themesQ.data ?? []}
+            combos={combosQ.data ?? []}
+          />
+        </TabsContent>
+
+        <TabsContent value="blocked">
+          <EligibilityList
+            mode="blocked"
+            themes={themesQ.data ?? []}
+            combos={combosQ.data ?? []}
+          />
+        </TabsContent>
+
+        <TabsContent value="islands">
+          <Card>
+            <CardHeader><CardTitle>Authority Islands</CardTitle></CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p className="text-muted-foreground">
+                Hubs e combinações com <strong>0 links internos</strong> — isoladas do grafo
+                semântico. Adicione menções a partir de páginas relacionadas.
+              </p>
+              <ul className="space-y-1">
+                {[...(themesQ.data ?? []).map((t) => ({ id: t.id, label: t.title, links: t.internal_links_count })),
+                  ...(combosQ.data ?? []).map((c) => ({ id: c.id, label: c.path, links: c.internal_links_count }))]
+                  .filter((x) => (x.links ?? 0) === 0)
+                  .slice(0, 50)
+                  .map((x) => (
+                    <li key={x.id} className="flex justify-between border-b py-1">
+                      <span>{x.label}</span>
+                      <span className="text-muted-foreground">sem inbound/outbound</span>
+                    </li>
+                  ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="weak">
+          <Card>
+            <CardHeader><CardTitle>Weak Clusters</CardTitle></CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <ul className="space-y-1">
+                {(themesQ.data ?? [])
+                  .filter((t) => t.authority_score < 55 || t.thin_content_risk)
+                  .slice(0, 30)
+                  .map((t) => (
+                    <li key={t.id} className="flex justify-between border-b py-1">
+                      <span>{t.title}</span>
+                      <span className="text-muted-foreground">
+                        auth {t.authority_score} · cov {t.topical_coverage}
+                        {t.thin_content_risk && " · thin"}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      <TelemetryFooter themes={themesQ.data ?? []} combos={combosQ.data ?? []} />
     </div>
   );
 }
@@ -327,6 +398,105 @@ function StatCard({ label, value, icon, warn }: { label: string; value: number; 
           {icon}
         </div>
         <div className={`text-2xl font-semibold ${warn && value > 0 ? "text-destructive" : ""}`}>{value}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface EligibilityProps {
+  mode: "sitemap" | "blocked";
+  themes: ThemeRow[];
+  combos: CombinationRow[];
+}
+
+function toEntity(t: ThemeRow): IndexableEntity {
+  return {
+    id: t.id, slug: t.slug,
+    approved: t.is_approved, is_indexed: t.is_indexed,
+    authority_score: t.authority_score,
+    readiness_score: t.readiness_score,
+    topical_coverage: t.topical_coverage,
+    thin_content_risk: t.thin_content_risk,
+    cannibalization_risk: (t.cannibalization_risk as any) || "unknown",
+    internal_links_count: t.internal_links_count,
+  };
+}
+
+function comboToEntity(c: CombinationRow): IndexableEntity {
+  return {
+    id: c.id, slug: c.path,
+    approved: c.discovery_status === "approved",
+    is_indexed: true,
+    authority_score: c.quality_score,
+    readiness_score: c.readiness_score,
+    topical_coverage: c.topical_coverage,
+    thin_content_risk: c.thin_content_risk,
+    cannibalization_risk: (c.cannibalization_risk as any) || "unknown",
+    internal_links_count: c.internal_links_count,
+    products_count: c.products_count,
+  };
+}
+
+function EligibilityList({ mode, themes, combos }: EligibilityProps) {
+  const filterFn = mode === "sitemap" ? canEnterSitemap : (e: IndexableEntity) => ({ allowed: !canBeIndexed(e).allowed, reasons: canBeIndexed(e).reasons });
+
+  const items = [
+    ...themes.map((t) => ({ id: t.id, label: t.title, href: `/tema/${t.slug}`, entity: toEntity(t) })),
+    ...combos.map((c) => ({ id: c.id, label: c.path, href: c.path, entity: comboToEntity(c) })),
+  ]
+    .map((x) => ({ ...x, verdict: filterFn(x.entity) }))
+    .filter((x) => x.verdict.allowed)
+    .slice(0, 100);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{mode === "sitemap" ? "Elegíveis para sitemap" : "Candidatas bloqueadas"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum item.</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {items.map((x) => (
+              <li key={x.id} className="flex items-center justify-between border-b pb-2 gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <SeoReadinessBadge entity={x.entity} />
+                  <a href={x.href} target="_blank" rel="noreferrer" className="truncate hover:underline">
+                    {x.label}
+                  </a>
+                </div>
+                <span className="text-xs text-muted-foreground truncate max-w-[50%]">
+                  {mode === "blocked" ? x.verdict.reasons.slice(0, 2).join(" · ") : "ok"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function TelemetryFooter({ themes, combos }: { themes: ThemeRow[]; combos: CombinationRow[] }) {
+  const all: IndexableEntity[] = [...themes.map(toEntity), ...combos.map(comboToEntity)];
+  const t = computeTelemetry(all);
+  return (
+    <Card>
+      <CardHeader><CardTitle>Telemetria SEO</CardTitle></CardHeader>
+      <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+        <div><div className="text-muted-foreground text-xs">Total</div><div className="text-xl font-semibold">{t.total}</div></div>
+        <div><div className="text-muted-foreground text-xs">Indexáveis</div><div className="text-xl font-semibold">{t.indexable}</div></div>
+        <div><div className="text-muted-foreground text-xs">Bloqueadas</div><div className="text-xl font-semibold">{t.blocked}</div></div>
+        <div><div className="text-muted-foreground text-xs">Sitemap eligible</div><div className="text-xl font-semibold">{t.sitemapCandidates}</div></div>
+        <div><div className="text-muted-foreground text-xs">Órfãs</div><div className="text-xl font-semibold">{t.orphan}</div></div>
+        <div><div className="text-muted-foreground text-xs">Authority média</div><div className="text-xl font-semibold">{t.averageAuthority}</div></div>
+        <div><div className="text-muted-foreground text-xs">Readiness média</div><div className="text-xl font-semibold">{t.averageReadiness}</div></div>
+        <div><div className="text-muted-foreground text-xs">Thin</div><div className="text-xl font-semibold">{t.thinContent}</div></div>
+        <div><div className="text-muted-foreground text-xs">Canibal</div><div className="text-xl font-semibold">{t.cannibalized}</div></div>
+        <div className="col-span-2"><div className="text-muted-foreground text-xs">Veredictos</div>
+          <div className="text-xs">EX {t.verdicts.EXCELLENT} · ST {t.verdicts.STRONG} · MD {t.verdicts.MEDIUM} · WK {t.verdicts.WEAK} · BL {t.verdicts.BLOCKED}</div>
+        </div>
       </CardContent>
     </Card>
   );
