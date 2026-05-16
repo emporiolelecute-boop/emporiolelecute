@@ -100,16 +100,94 @@ export function suggestInternalLinks(
   return candidates.slice(0, max).map(({ _score, ...rest }) => rest);
 }
 
-/** Detecta overlinking simples a partir de uma lista crua de hrefs. */
-export function detectOverlinking(hrefs: string[]): {
-  overlinked: boolean;
-  duplicates: string[];
+/**
+ * Fase 11.1 — Detecção rica de overlinking visual.
+ *
+ * Recebe os links contextuais já renderizados (com `type`/cluster opcional)
+ * e devolve um veredicto de risco + razões + score 0–100.
+ */
+export interface OverlinkLink {
+  href: string;
+  type?: SemanticNode["type"] | string;
+  /** identificador opcional de cluster (ex.: slug do tema/segmento dominante) */
+  cluster?: string;
+  /** profundidade da URL em hops (split por "/") */
+  depth?: number;
+}
+
+export interface OverlinkVerdict {
+  risk: "low" | "medium" | "high";
+  reasons: string[];
+  score: number;
   total: number;
-} {
-  const counts = new Map<string, number>();
-  for (const h of hrefs) counts.set(h, (counts.get(h) ?? 0) + 1);
-  const duplicates = Array.from(counts.entries())
+  duplicates: string[];
+}
+
+/**
+ * Detecta overlinking. Aceita tanto a forma simples (lista de hrefs)
+ * — para retrocompat — quanto a forma rica (lista de OverlinkLink).
+ */
+export function detectOverlinking(input: string[] | OverlinkLink[]): OverlinkVerdict {
+  const items: OverlinkLink[] = (input as unknown[]).map((x) =>
+    typeof x === "string" ? { href: x } : (x as OverlinkLink)
+  );
+
+  const reasons: string[] = [];
+  const total = items.length;
+
+  // Duplicações por href
+  const hrefCounts = new Map<string, number>();
+  for (const it of items) hrefCounts.set(it.href, (hrefCounts.get(it.href) ?? 0) + 1);
+  const duplicates = Array.from(hrefCounts.entries())
     .filter(([, c]) => c > 1)
     .map(([h]) => h);
-  return { overlinked: hrefs.length > MAX_LINKS, duplicates, total: hrefs.length };
+  if (duplicates.length > 0) reasons.push(`${duplicates.length} duplicações`);
+
+  // Excesso de links totais
+  if (total > 12) reasons.push(`>12 links (${total})`);
+
+  // Repetição de mesma "entidade" (mesmo href base)
+  const repeated = Array.from(hrefCounts.values()).filter((c) => c > 2).length;
+  if (repeated > 0) reasons.push("entidade repetida >2x");
+
+  // Concentração em mesma taxonomia (mesmo prefixo /ocasiao, /categoria, /segmento, /tag)
+  const taxBuckets = new Map<string, number>();
+  for (const it of items) {
+    const m = it.href.match(/^\/(ocasiao|categoria|segmento|tag|tema)\//);
+    if (m) taxBuckets.set(m[1], (taxBuckets.get(m[1]) ?? 0) + 1);
+  }
+  for (const [k, n] of taxBuckets) {
+    if (n > 6) reasons.push(`excesso de links para /${k}/ (${n})`);
+  }
+
+  // Profundidade > 4 hops
+  const deep = items.filter((it) => (it.depth ?? it.href.split("/").filter(Boolean).length) > 4).length;
+  if (deep > 0) reasons.push(`${deep} links com profundidade >4`);
+
+  // Concentração >60% em um único cluster
+  const clusters = new Map<string, number>();
+  for (const it of items) {
+    if (!it.cluster) continue;
+    clusters.set(it.cluster, (clusters.get(it.cluster) ?? 0) + 1);
+  }
+  const clusterTotal = Array.from(clusters.values()).reduce((a, b) => a + b, 0);
+  if (clusterTotal > 0) {
+    const maxCluster = Math.max(...clusters.values());
+    if (maxCluster / clusterTotal > 0.6) reasons.push("concentração >60% em um cluster");
+  }
+
+  // Score (100 = saudável)
+  let score = 100;
+  score -= Math.max(0, total - 8) * 4;       // penaliza volume
+  score -= duplicates.length * 6;
+  score -= repeated * 8;
+  score -= deep * 5;
+  score -= reasons.filter((r) => r.startsWith("excesso de links")).length * 8;
+  score = Math.max(0, Math.min(100, score));
+
+  let risk: OverlinkVerdict["risk"] = "low";
+  if (score < 55 || reasons.length >= 3) risk = "high";
+  else if (score < 75 || reasons.length >= 1) risk = "medium";
+
+  return { risk, reasons, score, total, duplicates };
 }
