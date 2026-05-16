@@ -167,3 +167,53 @@ export function buildOperationalReport(t: TelemetrySnapshot): OperationalReport 
     blockers, strengths, recommendations,
   };
 }
+
+// Fase 13.3 — extensões sistêmicas
+import type { TelemetrySnapshot as _T } from "./seoTelemetry";
+
+const _v = (x?: number) => (typeof x === "number" && isFinite(x) ? x : 0);
+const _c = (n: number) => Math.max(0, Math.min(100, n));
+
+export function calculateSystemSustainability(t: _T): number {
+  return _c(Math.round(
+    _v(t.strategic_consistency_score) * 0.3 +
+    _v(t.semantic_balance_score) * 0.2 +
+    _v(t.cluster_growth_score) * 0.2 +
+    (100 - _v(t.content_decay_score)) * 0.15 +
+    (100 - _v(t.regression_risk_score)) * 0.15
+  ));
+}
+
+export function estimateOperationalCollapseRisk(t: _T): number {
+  return _c(Math.round(
+    _v(t.regression_risk_score) * 0.35 +
+    _v(t.authority_dependency_risk) * 0.25 +
+    _v(t.fragile_cluster_count) * 4 +
+    _v(t.volatility_score) * 0.2
+  ));
+}
+
+export function estimateMaintenanceExplosionRisk(t: _T): number {
+  return _c(Math.round(
+    _v(t.content_decay_score) * 0.4 +
+    _v(t.thinContent) * 1.5 +
+    _v(t.orphan_entities) * 0.8 +
+    _v(t.overlinked_pages) * 0.6
+  ));
+}
+
+export function estimateExecutionDrift(t: _T): number {
+  return _c(Math.round(
+    (100 - _v(t.strategic_consistency_score)) * 0.5 +
+    _v(t.volatility_score) * 0.3 +
+    _v(t.fragile_cluster_count) * 4
+  ));
+}
+
+export function estimateSemanticFatigue(t: _T): number {
+  return _c(Math.round(
+    _v(t.topic_exhaustion_score) * 0.4 +
+    _v(t.saturation_score) * 0.3 +
+    (100 - _v(t.cluster_growth_score)) * 0.3
+  ));
+}
