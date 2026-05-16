@@ -31,6 +31,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SitemapCheck = lazy(() => import("./pages/SitemapCheck"));
 const TaxonomyPage = lazy(() => import("./pages/TaxonomyPage"));
 const CombinationPage = lazy(() => import("./pages/CombinationPage"));
+const ThemePage = lazy(() => import("./pages/ThemePage"));
 
 // Admin pages - lazy loaded with retry + telemetry
 import { lazyWithRetry } from "./lib/lazyWithRetry";
@@ -83,6 +84,7 @@ const AdminBlogHealth = lazyWithRetry(() => import("./pages/admin/AdminBlogHealt
 const AdminImageHealth = lazyWithRetry(() => import("./pages/admin/AdminImageHealth"), "AdminImageHealth");
 const AdminCombinationPages = lazyWithRetry(() => import("./pages/admin/AdminCombinationPages"), "AdminCombinationPages");
 const AdminDiscovery = lazyWithRetry(() => import("./pages/admin/AdminDiscovery"), "AdminDiscovery");
+const AdminThemes = lazyWithRetry(() => import("./pages/admin/AdminThemes"), "AdminThemes");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -252,6 +254,13 @@ const App = () => {
                 <Route path="/segmento/:segmentSlug/ocasiao/:occasionSlug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <CombinationPage />
+                  </Suspense>
+                } />
+
+                {/* Fase 10.3 — Hub temático SAFE MODE */}
+                <Route path="/tema/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <ThemePage />
                   </Suspense>
                 } />
 
@@ -518,6 +527,11 @@ const App = () => {
                   <Route path="discovery" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminDiscovery />
+                    </Suspense>
+                  } />
+                  <Route path="themes" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminThemes />
                     </Suspense>
                   } />
                 </Route>

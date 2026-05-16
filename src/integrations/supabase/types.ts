@@ -118,6 +118,7 @@ export type Database = {
           related_products: string[]
           related_segments: string[]
           related_tags: string[]
+          related_themes: string[]
           slug: string
           title: string
           updated_at: string
@@ -144,6 +145,7 @@ export type Database = {
           related_products?: string[]
           related_segments?: string[]
           related_tags?: string[]
+          related_themes?: string[]
           slug: string
           title: string
           updated_at?: string
@@ -170,6 +172,7 @@ export type Database = {
           related_products?: string[]
           related_segments?: string[]
           related_tags?: string[]
+          related_themes?: string[]
           slug?: string
           title?: string
           updated_at?: string
@@ -1835,6 +1838,87 @@ export type Database = {
           product_name?: string | null
           rating?: number
           testimonial_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      theme_hubs: {
+        Row: {
+          authority_score: number
+          cannibalization_risk: string
+          created_at: string
+          discovery_status: string
+          editorial_content: string | null
+          faqs: Json
+          hero_image_url: string | null
+          id: string
+          intro: string | null
+          is_approved: boolean
+          is_indexed: boolean
+          last_evaluated_at: string | null
+          meta_description: string | null
+          meta_title: string | null
+          notes: string | null
+          related_occasions: string[]
+          related_posts: string[]
+          related_segments: string[]
+          related_themes: string[]
+          slug: string
+          tag_id: string | null
+          thin_content_risk: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          authority_score?: number
+          cannibalization_risk?: string
+          created_at?: string
+          discovery_status?: string
+          editorial_content?: string | null
+          faqs?: Json
+          hero_image_url?: string | null
+          id?: string
+          intro?: string | null
+          is_approved?: boolean
+          is_indexed?: boolean
+          last_evaluated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          notes?: string | null
+          related_occasions?: string[]
+          related_posts?: string[]
+          related_segments?: string[]
+          related_themes?: string[]
+          slug: string
+          tag_id?: string | null
+          thin_content_risk?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          authority_score?: number
+          cannibalization_risk?: string
+          created_at?: string
+          discovery_status?: string
+          editorial_content?: string | null
+          faqs?: Json
+          hero_image_url?: string | null
+          id?: string
+          intro?: string | null
+          is_approved?: boolean
+          is_indexed?: boolean
+          last_evaluated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          notes?: string | null
+          related_occasions?: string[]
+          related_posts?: string[]
+          related_segments?: string[]
+          related_themes?: string[]
+          slug?: string
+          tag_id?: string | null
+          thin_content_risk?: boolean
+          title?: string
           updated_at?: string
         }
         Relationships: []
