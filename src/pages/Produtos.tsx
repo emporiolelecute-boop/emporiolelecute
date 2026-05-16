@@ -14,6 +14,7 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
+import { useSegments } from "@/hooks/useSegments";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   Pagination,
