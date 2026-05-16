@@ -257,6 +257,13 @@ const App = () => {
                   </Suspense>
                 } />
 
+                {/* Fase 10.3 — Hub temático SAFE MODE */}
+                <Route path="/tema/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <ThemePage />
+                  </Suspense>
+                } />
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <Suspense fallback={<AdminSkeleton />}>
