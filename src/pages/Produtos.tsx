@@ -350,8 +350,8 @@ const Produtos = () => {
   // Dynamic title/description
   const seoTitle = (() => {
     if (structuralCount >= 2 || resolvedTag) return "Produtos Personalizados | Empório LeleCute";
-    if (resolvedCategory?.meta_title) return resolvedCategory.meta_title;
-    if (resolvedOccasion?.meta_title) return resolvedOccasion.meta_title;
+    if ((resolvedCategory as any)?.meta_title) return (resolvedCategory as any).meta_title;
+    if ((resolvedOccasion as any)?.meta_title) return (resolvedOccasion as any).meta_title;
     if (resolvedSegment?.meta_title) return resolvedSegment.meta_title;
     if (resolvedCategory) return `${resolvedCategory.name} | Empório LeleCute`;
     if (resolvedOccasion) return `${resolvedOccasion.name} | Empório LeleCute`;
@@ -362,8 +362,8 @@ const Produtos = () => {
 
   const seoDescription = (() => {
     if (structuralCount >= 2 || resolvedTag) return "Explore produtos artesanais personalizados por categoria, ocasião e segmento.";
-    if (resolvedCategory?.meta_description) return resolvedCategory.meta_description;
-    if (resolvedOccasion?.meta_description) return resolvedOccasion.meta_description;
+    if ((resolvedCategory as any)?.meta_description) return (resolvedCategory as any).meta_description;
+    if ((resolvedOccasion as any)?.meta_description) return (resolvedOccasion as any).meta_description;
     if (resolvedSegment?.meta_description) return resolvedSegment.meta_description;
     return "Sabonetes, lembrancinhas, brindes e presentes artesanais personalizados para maternidade, casamento, chá de bebê, batizado e eventos especiais.";
   })();
