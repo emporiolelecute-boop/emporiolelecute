@@ -70,3 +70,41 @@ export function averageSemanticROI(items: ROIInput[]): number {
   const all = items.flatMap(calculateSemanticROI).map((s) => s.score);
   return Math.round(all.reduce((a, b) => a + b, 0) / all.length);
 }
+
+// Fase 13.2 — projeções extras
+export function estimateMaintenanceROI(i: ROIInput): number {
+  const auth = i.authority ?? 0;
+  const decayPenalty = i.thinContent ? 25 : 0;
+  return Math.max(0, Math.min(100, Math.round(auth * 0.6 - decayPenalty + 25)));
+}
+
+export function estimateRecoveryROI(i: ROIInput): number {
+  const base = (i.orphan ? 60 : 30) + (i.thinContent ? 25 : 0);
+  const authBoost = (i.authority ?? 0) * 0.2;
+  return Math.max(0, Math.min(100, Math.round(base + authBoost)));
+}
+
+export function estimateAuthorityCompounding(i: ROIInput): number {
+  const auth = i.authority ?? 0;
+  const links = i.links ?? 0;
+  return Math.min(100, Math.round(auth * 0.5 + Math.min(50, links * 4)));
+}
+
+export function estimateSemanticLongevity(i: ROIInput): number {
+  const cov = i.coverage ?? 0;
+  const maturity = i.maturity ?? 0;
+  return Math.min(100, Math.round(cov * 0.5 + maturity * 0.5));
+}
+
+export interface ClusterLifetimeInput {
+  authority: number;
+  maturity: number;
+  coverage: number;
+  size: number;
+}
+export function estimateClusterLifetimeValue(c: ClusterLifetimeInput): number {
+  const base = (c.authority + c.maturity + c.coverage) / 3;
+  const sizeMultiplier = Math.min(2, 1 + c.size / 50);
+  return Math.round(base * sizeMultiplier);
+}
+

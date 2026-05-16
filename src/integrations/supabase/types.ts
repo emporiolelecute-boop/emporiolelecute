@@ -1773,6 +1773,81 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_operational_snapshots: {
+        Row: {
+          authority_velocity: number
+          blocked_entities: number
+          collapsing_clusters: number
+          created_at: string
+          editorial_backlog: number
+          editorial_velocity: number
+          execution_capacity: number
+          fragmentation_score: number
+          high_potential_entities: number
+          id: string
+          notes: string | null
+          operational_debt: number
+          operational_score: number
+          orphan_entities: number
+          recovery_capacity: number
+          risk_pressure: number
+          saturation_pressure: number
+          semantic_velocity: number
+          snapshot_date: string
+          strong_clusters: number
+          thin_content_entities: number
+          weak_clusters: number
+        }
+        Insert: {
+          authority_velocity?: number
+          blocked_entities?: number
+          collapsing_clusters?: number
+          created_at?: string
+          editorial_backlog?: number
+          editorial_velocity?: number
+          execution_capacity?: number
+          fragmentation_score?: number
+          high_potential_entities?: number
+          id?: string
+          notes?: string | null
+          operational_debt?: number
+          operational_score?: number
+          orphan_entities?: number
+          recovery_capacity?: number
+          risk_pressure?: number
+          saturation_pressure?: number
+          semantic_velocity?: number
+          snapshot_date?: string
+          strong_clusters?: number
+          thin_content_entities?: number
+          weak_clusters?: number
+        }
+        Update: {
+          authority_velocity?: number
+          blocked_entities?: number
+          collapsing_clusters?: number
+          created_at?: string
+          editorial_backlog?: number
+          editorial_velocity?: number
+          execution_capacity?: number
+          fragmentation_score?: number
+          high_potential_entities?: number
+          id?: string
+          notes?: string | null
+          operational_debt?: number
+          operational_score?: number
+          orphan_entities?: number
+          recovery_capacity?: number
+          risk_pressure?: number
+          saturation_pressure?: number
+          semantic_velocity?: number
+          snapshot_date?: string
+          strong_clusters?: number
+          thin_content_entities?: number
+          weak_clusters?: number
+        }
+        Relationships: []
+      }
       seo_snapshots: {
         Row: {
           authority_score: number | null

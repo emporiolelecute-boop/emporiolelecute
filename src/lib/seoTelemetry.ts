@@ -64,6 +64,21 @@ export interface TelemetrySnapshot {
   overcentralization_risk: number;
   topic_exhaustion_score: number;
   momentum_growth_score: number;
+  // Fase 13.2 — operating system
+  operational_score: number;
+  execution_capacity_score: number;
+  editorial_velocity_score: number;
+  semantic_velocity_score: number;
+  authority_velocity_score: number;
+  operational_debt_score: number;
+  fragmentation_score: number;
+  risk_pressure_score: number;
+  bottleneck_score: number;
+  recovery_capacity_score: number;
+  maintenance_pressure_score: number;
+  execution_efficiency_score: number;
+  cluster_resilience_score: number;
+  semantic_resilience_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -230,5 +245,19 @@ export function computeTelemetry(
     overcentralization_risk:      autonomy?.overcentralizationRisk ?? 0,
     topic_exhaustion_score:       autonomy?.topicExhaustion ?? 0,
     momentum_growth_score:        autonomy?.momentumGrowth ?? 0,
+    operational_score: 0,
+    execution_capacity_score: 0,
+    editorial_velocity_score: 0,
+    semantic_velocity_score: 0,
+    authority_velocity_score: 0,
+    operational_debt_score: 0,
+    fragmentation_score: 0,
+    risk_pressure_score: 0,
+    bottleneck_score: 0,
+    recovery_capacity_score: 0,
+    maintenance_pressure_score: 0,
+    execution_efficiency_score: 0,
+    cluster_resilience_score: 0,
+    semantic_resilience_score: 0,
   };
 }
