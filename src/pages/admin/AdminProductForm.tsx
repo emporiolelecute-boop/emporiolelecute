@@ -29,7 +29,12 @@ import { useTags, useUpdateProductTags } from '@/hooks/useTags';
 import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateProductSeo } from '@/lib/productSeo';
+import { buildProductChecklist } from '@/lib/thinContent';
 import ProductSeoScoreBadge from '@/components/admin/ProductSeoScoreBadge';
+import ProductSeoChecklist from '@/components/admin/ProductSeoChecklist';
+import SocialSeoPreviews from '@/components/admin/SocialSeoPreviews';
+import EditorialTemplatesPicker from '@/components/admin/EditorialTemplatesPicker';
+import TaxonomySuggestionsHints from '@/components/admin/TaxonomySuggestionsHints';
 import { Link } from 'react-router-dom';
 import { FileText, ExternalLink } from 'lucide-react';
 
@@ -791,6 +796,63 @@ const AdminProductForm = () => {
             </p>
           </CardContent>
         </Card>
+
+        {/* Fase 8 — Checklist + Previews + Templates + Sugestões */}
+        {(() => {
+          const categorySlug = categories?.find((c) => c.id === formData.category_id)?.slug || null;
+          const occasionSlugs = (occasions || [])
+            .filter((o) => selectedOccasions.includes(o.id))
+            .map((o) => o.slug);
+          const segmentSlugs = (segments || [])
+            .filter((s) => selectedSegments.includes(s.id))
+            .map((s) => s.slug);
+          const tagSlugs = (tags || [])
+            .filter((t) => selectedTags.includes(t.id))
+            .map((t) => t.slug);
+          const checklist = buildProductChecklist({
+            ...formData,
+            occasionsCount: selectedOccasions.length,
+            segmentsCount: selectedSegments.length,
+            tagsCount: selectedTags.length,
+            reviewsCount: 0,
+            images: formData.images.filter(Boolean),
+          });
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProductSeoChecklist result={checklist} />
+              <SocialSeoPreviews
+                title={formData.name}
+                description={formData.description}
+                slug={formData.slug}
+                imageUrl={formData.images.filter(Boolean)[0]}
+              />
+              <TaxonomySuggestionsHints
+                name={formData.name}
+                description={formData.description}
+                long_description={formData.long_description}
+                editorial_content={formData.editorial_content}
+                keywords={formData.keywords}
+                existingTagSlugs={tagSlugs}
+                existingOccasionSlugs={occasionSlugs}
+                existingSegmentSlugs={segmentSlugs}
+                existingCategorySlug={categorySlug}
+              />
+              <EditorialTemplatesPicker
+                categorySlug={categorySlug}
+                occasionSlugs={occasionSlugs}
+                productName={formData.name}
+                onInsert={(text) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    editorial_content: prev.editorial_content
+                      ? `${prev.editorial_content}\n\n${text}`
+                      : text,
+                  }))
+                }
+              />
+            </div>
+          );
+        })()}
 
         {/* Save Button at bottom */}
         <div className="flex justify-end gap-4 sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
