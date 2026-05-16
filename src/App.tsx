@@ -553,6 +553,11 @@ const App = () => {
                       <AdminSeoOperations />
                     </Suspense>
                   } />
+                  <Route path="link-health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminLinkHealth />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
