@@ -10,13 +10,22 @@ import ProductCard from "@/components/ProductCard";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
+import FAQStructuredData from "@/components/FAQStructuredData";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { optimizeImage } from "@/lib/image";
+import { normalizeFaqs } from "@/lib/taxonomy";
 import type { Product } from "@/data/products";
 
 const SITE_ORIGIN = "https://emporiolelecute.com.br";
 const MAX_PRODUCTS = 24;
+const MAX_RELATED = 8;
 
 type TaxonomyKind = "categoria" | "ocasiao" | "segmento";
 
@@ -31,33 +40,9 @@ interface TaxonomyConfig {
 }
 
 const CONFIGS: Record<TaxonomyKind, TaxonomyConfig> = {
-  categoria: {
-    kind: "categoria",
-    table: "categories",
-    joinTable: "products",
-    joinCol: "category_id",
-    label: "Categoria",
-    hubPath: "/produtos",
-    routePrefix: "/categoria",
-  },
-  ocasiao: {
-    kind: "ocasiao",
-    table: "occasions",
-    joinTable: "product_occasions",
-    joinCol: "occasion_id",
-    label: "Ocasião",
-    hubPath: "/ocasioes",
-    routePrefix: "/ocasiao",
-  },
-  segmento: {
-    kind: "segmento",
-    table: "segments",
-    joinTable: "product_segments",
-    joinCol: "segment_id",
-    label: "Segmento",
-    hubPath: "/produtos",
-    routePrefix: "/segmento",
-  },
+  categoria: { kind: "categoria", table: "categories", joinTable: "products", joinCol: "category_id", label: "Categoria", hubPath: "/produtos", routePrefix: "/categoria" },
+  ocasiao:   { kind: "ocasiao",   table: "occasions",  joinTable: "product_occasions", joinCol: "occasion_id", label: "Ocasião",  hubPath: "/ocasioes", routePrefix: "/ocasiao" },
+  segmento:  { kind: "segmento",  table: "segments",   joinTable: "product_segments",  joinCol: "segment_id",  label: "Segmento", hubPath: "/produtos", routePrefix: "/segmento" },
 };
 
 interface TaxonomyEntity {
@@ -71,24 +56,25 @@ interface TaxonomyEntity {
   h1_override: string | null;
   description_seo: string | null;
   is_indexed: boolean;
+  faqs: unknown;
 }
 
-interface Props {
-  kind: TaxonomyKind;
-}
+interface MiniTaxonomy { id: string; name: string; slug: string }
+
+interface Props { kind: TaxonomyKind }
 
 const TaxonomyPage = ({ kind }: Props) => {
   const { slug = "" } = useParams<{ slug: string }>();
   const cfg = CONFIGS[kind];
 
-  // 1. Carrega entidade
+  // 1. Entidade
   const entityQuery = useQuery({
     queryKey: ["taxonomy", cfg.table, slug],
     enabled: !!slug,
     queryFn: async () => {
       const { data, error } = await supabase
         .from(cfg.table)
-        .select("id, name, slug, description, image_url, meta_title, meta_description, h1_override, description_seo, is_indexed")
+        .select("id, name, slug, description, image_url, meta_title, meta_description, h1_override, description_seo, is_indexed, faqs")
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
@@ -98,7 +84,7 @@ const TaxonomyPage = ({ kind }: Props) => {
 
   const entity = entityQuery.data;
 
-  // 2. Carrega produtos relacionados (sem N+1)
+  // 2. Produtos
   const productsQuery = useQuery({
     queryKey: ["taxonomy-products", cfg.table, entity?.id],
     enabled: !!entity?.id,
@@ -114,24 +100,12 @@ const TaxonomyPage = ({ kind }: Props) => {
         if (error) throw error;
         return data ?? [];
       }
-
-      // ocasiao / segmento — query via tabela de junção
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase.from(cfg.joinTable) as any)
-        .select(`
-          product:products(
-            id, slug, name, description, price, original_price,
-            images, badge, rating, min_quantity, keywords, is_active, created_at
-          )
-        `)
+        .select(`product:products(id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active, created_at)`)
         .eq(cfg.joinCol, entity!.id);
       if (error) throw error;
-      type Row = { product: {
-        id: string; slug: string; name: string; description: string | null;
-        price: number; original_price: number | null; images: string[];
-        badge: string | null; rating: number; min_quantity: number;
-        keywords: string[]; is_active: boolean; created_at: string;
-      } | null };
+      type Row = { product: { id: string; slug: string; name: string; description: string | null; price: number; original_price: number | null; images: string[]; badge: string | null; rating: number; min_quantity: number; keywords: string[]; is_active: boolean; created_at: string } | null };
       return ((data as Row[] | null) ?? [])
         .map((r) => r.product)
         .filter((p): p is NonNullable<Row["product"]> => !!p && p.is_active)
@@ -142,26 +116,67 @@ const TaxonomyPage = ({ kind }: Props) => {
 
   const dbProducts = productsQuery.data ?? [];
 
+  // 3. Taxonomias relacionadas (linking cruzado) — uma query por relação
+  const productIds = useMemo(() => dbProducts.map((p) => p.id), [dbProducts]);
+
+  const relatedQuery = useQuery({
+    queryKey: ["taxonomy-related", cfg.kind, entity?.id, productIds.slice(0, 24).join(",")],
+    enabled: !!entity?.id && productIds.length > 0,
+    queryFn: async () => {
+      type Agg = { categories: MiniTaxonomy[]; occasions: MiniTaxonomy[]; segments: MiniTaxonomy[] };
+      const [catsRes, occsRes, segsRes] = await Promise.all([
+        // categorias dos produtos
+        supabase
+          .from("products")
+          .select("category:categories(id, name, slug)")
+          .in("id", productIds),
+        // ocasiões via join
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from("product_occasions") as any)
+          .select("occasion:occasions(id, name, slug)")
+          .in("product_id", productIds),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from("product_segments") as any)
+          .select("segment:segments(id, name, slug)")
+          .in("product_id", productIds),
+      ]);
+
+      const tally = <T extends MiniTaxonomy>(rows: { [k: string]: T | null }[] | null | undefined, key: string, excludeId?: string): T[] => {
+        const counts = new Map<string, { item: T; n: number }>();
+        (rows ?? []).forEach((r) => {
+          const it = r?.[key];
+          if (!it || !it.id || it.id === excludeId) return;
+          const prev = counts.get(it.id);
+          if (prev) prev.n += 1;
+          else counts.set(it.id, { item: it, n: 1 });
+        });
+        return [...counts.values()]
+          .sort((a, b) => b.n - a.n)
+          .slice(0, MAX_RELATED)
+          .map((x) => x.item);
+      };
+
+      const agg: Agg = {
+        categories: tally<MiniTaxonomy>((catsRes.data as unknown) as { category: MiniTaxonomy | null }[], "category", cfg.kind === "categoria" ? entity!.id : undefined),
+        occasions:  tally<MiniTaxonomy>((occsRes.data as unknown) as { occasion: MiniTaxonomy | null }[], "occasion", cfg.kind === "ocasiao"  ? entity!.id : undefined),
+        segments:   tally<MiniTaxonomy>((segsRes.data as unknown) as { segment: MiniTaxonomy | null }[], "segment", cfg.kind === "segmento" ? entity!.id : undefined),
+      };
+      return agg;
+    },
+  });
+
+  const related = relatedQuery.data;
+
   const products: Product[] = useMemo(
     () =>
       dbProducts.map((p) => ({
-        id: p.id,
-        slug: p.slug,
-        name: p.name,
-        description: p.description || "",
+        id: p.id, slug: p.slug, name: p.name, description: p.description || "",
         price: `R$ ${Number(p.price).toFixed(2).replace(".", ",")}`,
-        originalPrice: p.original_price
-          ? `R$ ${Number(p.original_price).toFixed(2).replace(".", ",")}`
-          : undefined,
+        originalPrice: p.original_price ? `R$ ${Number(p.original_price).toFixed(2).replace(".", ",")}` : undefined,
         image: p.images?.[0] || "/placeholder.svg",
-        images: p.images ?? [],
-        link: "",
-        badge: p.badge || undefined,
-        rating: Math.round(p.rating ?? 5),
-        category: "outros" as const,
-        occasions: [],
-        keywords: p.keywords ?? [],
-        min_quantity: p.min_quantity || undefined,
+        images: p.images ?? [], link: "", badge: p.badge || undefined,
+        rating: Math.round(p.rating ?? 5), category: "outros" as const,
+        occasions: [], keywords: p.keywords ?? [], min_quantity: p.min_quantity || undefined,
       })),
     [dbProducts]
   );
@@ -177,13 +192,12 @@ const TaxonomyPage = ({ kind }: Props) => {
   const fallbackDesc = entity
     ? `Conheça nossos produtos da ${cfg.label.toLowerCase()} ${entity.name}. Lembrancinhas artesanais personalizadas com entrega para todo Brasil.`
     : undefined;
-
   const seoTitle = entity?.meta_title?.trim() || fallbackTitle;
   const seoDesc = entity?.meta_description?.trim() || fallbackDesc;
   const h1 = entity?.h1_override?.trim() || entity?.name || "";
   const isIndexed = entity?.is_indexed !== false;
+  const faqs = normalizeFaqs(entity?.faqs);
 
-  // ============ Breadcrumb ============
   const breadcrumbItems = entity
     ? [
         { name: "Início", url: `${SITE_ORIGIN}/` },
@@ -191,6 +205,19 @@ const TaxonomyPage = ({ kind }: Props) => {
         { name: entity.name, url: pageUrl },
       ]
     : [];
+
+  // CollectionPage JSON-LD
+  const collectionSchema = entity
+    ? {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: entity.name,
+        description: seoDesc,
+        url: pageUrl,
+        inLanguage: "pt-BR",
+        isPartOf: { "@type": "WebSite", name: "Empório LeleCute", url: SITE_ORIGIN },
+      }
+    : null;
 
   if (notFound) {
     return (
@@ -201,15 +228,9 @@ const TaxonomyPage = ({ kind }: Props) => {
         </Helmet>
         <Header />
         <main className="flex-1 container mx-auto px-4 py-24 text-center">
-          <h1 className="text-3xl font-display font-semibold mb-3">
-            {cfg.label} não encontrada
-          </h1>
-          <p className="text-muted-foreground mb-6">
-            A página que você procura não existe ou foi removida.
-          </p>
-          <Button asChild>
-            <Link to="/produtos">Ver todos os produtos</Link>
-          </Button>
+          <h1 className="text-3xl font-display font-semibold mb-3">{cfg.label} não encontrada</h1>
+          <p className="text-muted-foreground mb-6">A página que você procura não existe ou foi removida.</p>
+          <Button asChild><Link to="/produtos">Ver todos os produtos</Link></Button>
         </main>
         <Footer />
         <WhatsAppButton />
@@ -217,38 +238,48 @@ const TaxonomyPage = ({ kind }: Props) => {
     );
   }
 
+  const RelatedBlock = ({ title, items, prefix }: { title: string; items: MiniTaxonomy[]; prefix: string }) => {
+    if (!items?.length) return null;
+    return (
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">{title}</h3>
+        <div className="flex flex-wrap gap-2">
+          {items.map((it) => (
+            <Link
+              key={it.id}
+              to={`${prefix}/${it.slug}`}
+              className="inline-flex items-center px-3 py-1.5 rounded-full bg-secondary/60 hover:bg-secondary text-sm text-foreground transition-colors"
+            >
+              {it.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* SEO core */}
-      <DynamicSEO
-        title={seoTitle}
-        description={seoDesc}
-        image={entity?.image_url || undefined}
-        url={pageUrl}
-        type="website"
-      />
+      <DynamicSEO title={seoTitle} description={seoDesc} image={entity?.image_url || undefined} url={pageUrl} type="website" />
       <Helmet>
-        <meta
-          name="robots"
-          content={isIndexed ? "index,follow" : "noindex,follow"}
-        />
+        <meta name="robots" content={isIndexed ? "index,follow" : "noindex,follow"} />
+        {collectionSchema && (
+          <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
+        )}
       </Helmet>
 
-      {entity && breadcrumbItems.length > 0 && (
-        <BreadcrumbStructuredData items={breadcrumbItems} />
-      )}
+      {entity && breadcrumbItems.length > 0 && <BreadcrumbStructuredData items={breadcrumbItems} />}
       {entity && products.length > 0 && (
         <ItemListStructuredData
           listName={entity.name}
           products={products.map((p) => ({
-            name: p.name,
-            description: p.description,
-            image: p.image,
+            name: p.name, description: p.description, image: p.image,
             price: Number(String(p.price).replace(/[^0-9,]/g, "").replace(",", ".")) || 0,
             slug: p.slug,
           }))}
         />
       )}
+      {faqs.length > 0 && <FAQStructuredData faqs={faqs.map((f, i) => ({ id: String(i), ...f }))} />}
 
       <Header />
 
@@ -268,16 +299,10 @@ const TaxonomyPage = ({ kind }: Props) => {
 
             <div className="flex flex-col-reverse lg:flex-row gap-8 items-start lg:items-center">
               <div className="flex-1 min-w-0">
-                <span className="inline-block text-xs uppercase tracking-wider text-primary font-semibold mb-2">
-                  {cfg.label}
-                </span>
-                <h1 className="text-3xl lg:text-4xl font-display font-semibold text-foreground mb-3">
-                  {h1}
-                </h1>
-                {(entity?.description_seo || entity?.description) && (
-                  <p className="text-muted-foreground text-base lg:text-lg max-w-2xl">
-                    {entity?.description_seo || entity?.description}
-                  </p>
+                <span className="inline-block text-xs uppercase tracking-wider text-primary font-semibold mb-2">{cfg.label}</span>
+                <h1 className="text-3xl lg:text-4xl font-display font-semibold text-foreground mb-3">{h1}</h1>
+                {entity?.description && (
+                  <p className="text-muted-foreground text-base lg:text-lg max-w-2xl">{entity.description}</p>
                 )}
               </div>
 
@@ -295,25 +320,29 @@ const TaxonomyPage = ({ kind }: Props) => {
           </div>
         </section>
 
+        {/* Editorial intro long (description_seo) */}
+        {entity?.description_seo && (
+          <section className="container mx-auto px-4 pt-10">
+            <div className="max-w-3xl prose prose-sm md:prose-base prose-neutral dark:prose-invert">
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {entity.description_seo}
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Grid */}
         <section className="container mx-auto px-4 py-10 lg:py-14">
           {loading ? (
-            <div className="flex items-center justify-center py-24">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            </div>
+            <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
           ) : products.length === 0 ? (
             <div className="text-center py-20 max-w-md mx-auto">
               <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-display font-semibold mb-2">
-                Em breve novos produtos
-              </h2>
+              <h2 className="text-xl font-display font-semibold mb-2">Em breve novos produtos</h2>
               <p className="text-muted-foreground mb-6">
-                Ainda não temos produtos cadastrados nesta {cfg.label.toLowerCase()}.
-                Explore nosso catálogo completo enquanto isso.
+                Ainda não temos produtos cadastrados nesta {cfg.label.toLowerCase()}. Explore nosso catálogo completo enquanto isso.
               </p>
-              <Button asChild>
-                <Link to="/produtos">Ver todos os produtos</Link>
-              </Button>
+              <Button asChild><Link to="/produtos">Ver todos os produtos</Link></Button>
             </div>
           ) : (
             <>
@@ -330,6 +359,45 @@ const TaxonomyPage = ({ kind }: Props) => {
             </>
           )}
         </section>
+
+        {/* Internal linking — taxonomias relacionadas */}
+        {related && (related.categories.length + related.occasions.length + related.segments.length) > 0 && (
+          <section className="border-t bg-secondary/20">
+            <div className="container mx-auto px-4 py-10 lg:py-14 space-y-8">
+              <h2 className="text-2xl font-display font-semibold">Explore também</h2>
+              <div className="grid md:grid-cols-3 gap-8">
+                {cfg.kind !== "categoria" && <RelatedBlock title="Categorias relacionadas" items={related.categories} prefix="/categoria" />}
+                {cfg.kind !== "ocasiao"   && <RelatedBlock title="Ocasiões relacionadas"   items={related.occasions}  prefix="/ocasiao" />}
+                {cfg.kind !== "segmento"  && <RelatedBlock title="Segmentos relacionados"  items={related.segments}   prefix="/segmento" />}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* FAQ editorial */}
+        {faqs.length > 0 && (
+          <section className="border-t">
+            <div className="container mx-auto px-4 py-10 lg:py-14 max-w-3xl">
+              <h2 className="text-2xl font-display font-semibold mb-6">Perguntas frequentes</h2>
+              <Accordion type="single" collapsible className="space-y-3">
+                {faqs.map((f, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`faq-${i}`}
+                    className="bg-card border border-border rounded-xl px-5 data-[state=open]:border-primary/30"
+                  >
+                    <AccordionTrigger className="hover:no-underline py-4 text-left">
+                      <span className="font-medium text-foreground pr-4">{f.question}</span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4 text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {f.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />
