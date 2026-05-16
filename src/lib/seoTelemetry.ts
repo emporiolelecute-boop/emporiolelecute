@@ -132,6 +132,7 @@ export function computeTelemetry(
   editorial?: EditorialTelemetryInput,
   knowledge?: KnowledgeTelemetryInput,
   decision?: DecisionTelemetryInput,
+  autonomy?: AutonomyTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
@@ -217,5 +218,17 @@ export function computeTelemetry(
     fragile_cluster_count:        decision?.fragileClusterCount ?? 0,
     authority_dependency_risk:    decision?.authorityDependencyRisk ?? 0,
     under_monetized_score:        decision?.underMonetizedScore ?? 0,
+    semantic_stability_score:     autonomy?.semanticStability ?? 0,
+    saturation_score:             autonomy?.saturation ?? 0,
+    cluster_dependency_score:     autonomy?.clusterDependency ?? 0,
+    authority_entropy:            autonomy?.authorityEntropy ?? 0,
+    commercial_diversity_score:   autonomy?.commercialDiversity ?? 0,
+    strategic_consistency_score:  autonomy?.strategicConsistency ?? 0,
+    volatility_score:             autonomy?.volatility ?? 0,
+    recovery_difficulty_avg:      autonomy?.recoveryDifficulty ?? 0,
+    semantic_balance_score:       autonomy?.semanticBalance ?? 0,
+    overcentralization_risk:      autonomy?.overcentralizationRisk ?? 0,
+    topic_exhaustion_score:       autonomy?.topicExhaustion ?? 0,
+    momentum_growth_score:        autonomy?.momentumGrowth ?? 0,
   };
 }
