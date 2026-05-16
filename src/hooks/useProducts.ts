@@ -32,6 +32,13 @@ export interface DbProduct {
   category?: DbCategory | null;
   occasions?: DbOccasion[];
   tags?: DbTag[];
+  segments?: DbSegment[];
+}
+
+export interface DbSegment {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export interface DbCategory {
