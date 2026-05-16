@@ -91,18 +91,70 @@ export function editorialLinkSuggestions(
     .slice(0, limit);
 }
 
+/**
+ * Fase 11.1 — Modo "authority": prioriza maior authority + readiness,
+ * penaliza thin/órfãos/baixa autoridade, e força dedupe por URL.
+ */
+export function authorityLinkSuggestions(
+  candidates: RelatedItem[],
+  opts: { limit?: number; minAuthority?: number; excludePaths?: string[] } = {},
+): RelatedItem[] {
+  const limit = opts.limit ?? 9;
+  const minAuthority = opts.minAuthority ?? 50;
+  const exclude = new Set(opts.excludePaths ?? []);
+
+  const filtered = candidates.filter((c) => {
+    const url = `${ROUTE_PREFIX[c.type]}${c.slug}`;
+    if (exclude.has(url)) return false;
+    const a = c.authority ?? 0;
+    const r = c.readiness ?? 0;
+    if (c.type === "post") return true;
+    if (c.isStrongHub) return true;
+    return a >= minAuthority && r >= 50;
+  });
+
+  const score = (c: RelatedItem): number =>
+    (c.authority ?? 0) * 1.2 + (c.readiness ?? 0) * 0.8 + (c.isStrongHub ? 40 : 0);
+
+  const seen = new Set<string>(exclude);
+  const out: RelatedItem[] = [];
+  for (const c of [...filtered].sort((a, b) => score(b) - score(a))) {
+    const url = `${ROUTE_PREFIX[c.type]}${c.slug}`;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push(c);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 export default function RelatedContent({
   title = "Conteúdo relacionado",
   items,
   className = "",
   mode = "default",
   max,
+  excludePaths,
 }: RelatedContentProps) {
   if (!items || items.length === 0) return null;
 
   const list = mode === "editorial"
     ? editorialLinkSuggestions(items, { limit: max ?? 9 })
-    : items.slice(0, max ?? 9);
+    : mode === "authority"
+      ? authorityLinkSuggestions(items, { limit: max ?? 9, excludePaths })
+      : (() => {
+          // dedupe simples por URL no modo default
+          const seen = new Set<string>(excludePaths ?? []);
+          const out: RelatedItem[] = [];
+          for (const it of items) {
+            const url = `${ROUTE_PREFIX[it.type]}${it.slug}`;
+            if (seen.has(url)) continue;
+            seen.add(url);
+            out.push(it);
+            if (out.length >= (max ?? 9)) break;
+          }
+          return out;
+        })();
 
   if (list.length === 0) return null;
 
