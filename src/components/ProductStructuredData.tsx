@@ -1,5 +1,13 @@
 import { Helmet } from 'react-helmet';
 
+interface ReviewItem {
+  author_name: string;
+  rating: number;
+  comment?: string | null;
+  review_date?: string | null;
+  source?: string | null;
+}
+
 interface ProductStructuredDataProps {
   name: string;
   description: string;
@@ -11,6 +19,12 @@ interface ProductStructuredDataProps {
   productionDays?: number;
   category?: string;
   brand?: string;
+  /** Optional: array of recent reviews to embed as schema.org Review nodes */
+  reviews?: ReviewItem[];
+  /** Optional: material/composition (e.g. "Sabonete artesanal vegetal") */
+  material?: string;
+  /** Optional: explicit SKU/MPN; falls back to slug */
+  sku?: string;
 }
 
 const ProductStructuredData = ({
