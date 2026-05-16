@@ -21,10 +21,12 @@ interface RelatedContentProps {
   title?: string;
   items: RelatedItem[];
   className?: string;
-  /** Fase 11 — "editorial" prioriza autoridade real, reduz links borderline. */
-  mode?: "default" | "editorial";
+  /** Fase 11/11.1 — "editorial" prioriza autoridade real; "authority" maximiza authority+readiness. */
+  mode?: "default" | "editorial" | "authority";
   /** máximo de itens renderizados. */
   max?: number;
+  /** Fase 11.1 — paths já exibidos em outros blocos (dedupe global). */
+  excludePaths?: string[];
 }
 
 const ROUTE_PREFIX: Record<RelatedItem["type"], string> = {
