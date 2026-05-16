@@ -148,7 +148,7 @@ const Produtos = () => {
   const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedTag, debouncedSearch].filter(Boolean).length;
 
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; occasionIds: string[]; tagIds: string[] })[] = useMemo(() => {
+  const products: (Product & { categoryId?: string; categoryName?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[] })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
