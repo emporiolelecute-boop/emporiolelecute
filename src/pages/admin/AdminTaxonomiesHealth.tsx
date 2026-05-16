@@ -3,12 +3,21 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, AlertTriangle, EyeOff, ImageOff, FileQuestion, Link2Off } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, EyeOff, ImageOff, FileQuestion, Link2Off, ArrowRightLeft, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDbCategories, useDbOccasions } from '@/hooks/useProducts';
 import { useSegments } from '@/hooks/useSegments';
 import { useTags } from '@/hooks/useTags';
 import { evaluateSeo, hasAnyIssue, TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind } from '@/lib/taxonomy';
+
+interface ConsolidationRow {
+  route_slug: string;
+  occasion_slug: string;
+  is_published: boolean;
+  has_redirect: boolean;
+  occasion_exists: boolean;
+  occasion_has_seo: boolean;
+}
 
 type CountMap = Record<string, number>;
 
@@ -22,13 +31,18 @@ const AdminTaxonomiesHealth = () => {
     categoria: CountMap; ocasiao: CountMap; segmento: CountMap; tag: CountMap;
   }>({ categoria: {}, ocasiao: {}, segmento: {}, tag: {} });
 
+  const [consolidation, setConsolidation] = useState<ConsolidationRow[]>([]);
+
   useEffect(() => {
     (async () => {
-      const [pc, po, ps, pt] = await Promise.all([
+      const [pc, po, ps, pt, landings, redirects, occs2] = await Promise.all([
         supabase.from('products').select('category_id').eq('is_active', true),
         supabase.from('product_occasions').select('occasion_id'),
         supabase.from('product_segments').select('segment_id'),
         supabase.from('product_tags').select('tag_id'),
+        supabase.from('occasion_landings').select('route_slug, occasion_slug, is_published'),
+        supabase.from('redirects').select('from_path, is_active').like('from_path', '/lembrancinhas-%'),
+        supabase.from('occasions').select('slug, meta_title, meta_description, h1_override, description_seo'),
       ]);
       const reduce = <T extends string>(rows: { [k in T]: string | null }[] | null, key: T): CountMap => {
         const m: CountMap = {};
@@ -44,6 +58,21 @@ const AdminTaxonomiesHealth = () => {
         segmento:  reduce(ps.data as { segment_id: string | null }[] | null, 'segment_id'),
         tag:       reduce(pt.data as { tag_id: string | null }[] | null, 'tag_id'),
       });
+
+      const redirectSet = new Set((redirects.data ?? []).filter((r) => r.is_active).map((r) => r.from_path));
+      const occBySlug = new Map((occs2.data ?? []).map((o) => [o.slug, o]));
+      const rows: ConsolidationRow[] = (landings.data ?? []).map((l) => {
+        const occ = occBySlug.get(l.occasion_slug);
+        return {
+          route_slug: l.route_slug,
+          occasion_slug: l.occasion_slug,
+          is_published: !!l.is_published,
+          has_redirect: redirectSet.has(`/lembrancinhas-${l.route_slug}`),
+          occasion_exists: !!occ,
+          occasion_has_seo: !!(occ && (occ.meta_title || occ.meta_description || occ.h1_override || occ.description_seo)),
+        };
+      });
+      setConsolidation(rows);
     })();
   }, []);
 
@@ -119,6 +148,48 @@ const AdminTaxonomiesHealth = () => {
           );
         })}
       </div>
+
+      {/* Fase 3.3 — Consolidação SEO do legado /lembrancinhas-* */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ArrowRightLeft className="w-4 h-4" />
+            Consolidação SEO — landings legadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {consolidation.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma landing legada encontrada.</p>
+          ) : (
+            <ul className="divide-y divide-border text-sm">
+              {consolidation.map((r) => {
+                const ok = r.has_redirect && r.occasion_exists && r.occasion_has_seo;
+                return (
+                  <li key={r.route_slug} className="py-2 flex flex-wrap items-center gap-2">
+                    {ok ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    )}
+                    <span className="font-mono text-xs">/lembrancinhas-{r.route_slug}</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span className="font-mono text-xs">/ocasiao/{r.occasion_slug}</span>
+                    {!r.occasion_exists && <Badge variant="destructive" className="text-xs">ocasião ausente</Badge>}
+                    {!r.has_redirect && <Badge variant="outline" className="text-xs">sem redirect</Badge>}
+                    {!r.occasion_has_seo && <Badge variant="outline" className="text-xs">SEO não migrado</Badge>}
+                    {!r.is_published && <Badge variant="outline" className="text-xs">não publicada</Badge>}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="text-xs text-muted-foreground mt-3">
+            URLs legadas marcadas como <strong>DEPRECATED</strong>. Conteúdo SEO consolidado em <code>/ocasiao/:slug</code>;
+            redirects 301 ativos via tabela <code>redirects</code>. As tabelas <code>occasion_landings</code> e o arquivo
+            <code> src/data/lembrancinhasLandings.ts</code> são mantidos apenas como backup reversível.
+          </p>
+        </CardContent>
+      </Card>
 
       {allKinds.map((k) => {
         const items = (

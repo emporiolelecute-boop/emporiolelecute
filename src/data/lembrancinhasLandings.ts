@@ -1,9 +1,12 @@
 /**
- * Configuração das 6 landing pages SEO do Horizonte 2.
- * Cada entry vira uma rota /lembrancinhas-<slug> renderizada por <LembrancinhasLanding>.
+ * @deprecated FASE 3.3 — Arquivo legado mantido apenas como backup reversível.
  *
- * Para editar copy/FAQs/relacionadas no futuro: alterar este arquivo.
- * Para promover ao admin com CMS: migrar para tabela `occasion_landings` + hook.
+ * As 6 landings /lembrancinhas-* foram consolidadas em /ocasiao/:slug.
+ * Conteúdo SEO oficial agora vive na tabela `occasions` (campos meta_title,
+ * meta_description, h1_override, description_seo, image_url) e é editado em
+ * /admin/taxonomias. URLs antigas respondem via redirect 301 (tabela `redirects`).
+ *
+ * NÃO adicionar novas entradas aqui. Para alterar conteúdo SEO, use o admin.
  */
 
 export interface LandingFAQ {
