@@ -56,6 +56,7 @@ const menuItems = [
   { icon: TrendingUp, label: 'Authority Center', path: '/admin/authority' },
   { icon: Sparkles, label: 'Editorial Execution', path: '/admin/editorial-execution' },
   { icon: BarChart3, label: 'SEO Operations', path: '/admin/seo-operations' },
+  { icon: Activity, label: 'Saúde de Links', path: '/admin/link-health' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
