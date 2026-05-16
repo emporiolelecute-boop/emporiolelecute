@@ -251,6 +251,47 @@ const TaxonomyForm = ({
               </div>
             )}
           </div>
+
+          <div className="rounded-md border border-border p-4 space-y-4">
+            <div>
+              <h4 className="font-medium text-sm">FAQ desta página (opcional)</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Até 3 perguntas curtas, humanas e específicas. Deixe em branco para ocultar.
+                Gera schema FAQPage automaticamente.
+              </p>
+            </div>
+            {faqs.map((f, idx) => (
+              <div key={idx} className="space-y-2 border-l-2 border-border pl-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor={`tx-faq-q-${idx}`}>Pergunta {idx + 1}</Label>
+                  <Input
+                    id={`tx-faq-q-${idx}`}
+                    value={f.question}
+                    onChange={(e) => {
+                      const next = [...faqs];
+                      next[idx] = { ...next[idx], question: e.target.value };
+                      setFaqs(next);
+                    }}
+                    maxLength={200}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`tx-faq-a-${idx}`}>Resposta {idx + 1}</Label>
+                  <Textarea
+                    id={`tx-faq-a-${idx}`}
+                    value={f.answer}
+                    onChange={(e) => {
+                      const next = [...faqs];
+                      next[idx] = { ...next[idx], answer: e.target.value };
+                      setFaqs(next);
+                    }}
+                    rows={2}
+                    maxLength={600}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </>
       )}
 
