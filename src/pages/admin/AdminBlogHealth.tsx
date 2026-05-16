@@ -121,7 +121,39 @@ const AdminBlogHealth = () => {
         </Card>
       </div>
 
-      <Card>
+      {/* Fase 11 — Blog consolidation */}
+      <Card className="border-primary/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center justify-between">
+            Blog Authority Score
+            <Badge
+              variant={stats.authorityScore >= 70 ? "default" : stats.authorityScore >= 50 ? "secondary" : "destructive"}
+            >
+              {stats.authorityScore}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            {[
+              { label: "Posts órfãos (sem relações)", value: stats.orphans.length },
+              { label: "Sem links internos", value: stats.noInternalLinks.length },
+              { label: "Sem conexão temática", value: stats.noThematic.length },
+              { label: "Sem CTA", value: stats.noCta.length },
+              { label: "Sem relação com taxonomias fortes", value: stats.noStrongTax.length },
+              { label: "Sem produtos relacionados", value: stats.noRelatedProducts.length },
+            ].map((b) => (
+              <div key={b.label} className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">{b.label}</p>
+                <p className={`text-2xl font-bold ${b.value > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+                  {b.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
         <CardHeader>
           <CardTitle>Posts com menor score</CardTitle>
         </CardHeader>
