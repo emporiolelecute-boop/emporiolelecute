@@ -377,6 +377,8 @@ ${[
     <priority>0.7</priority>
   </url>`).join('\n')}
 ${dbBlogPostsXml}
+${themeHubsXml}
+${comboPagesXml}
 
 </urlset>`
     
