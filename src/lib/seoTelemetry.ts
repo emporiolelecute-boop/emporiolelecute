@@ -128,6 +128,27 @@ export interface TelemetrySnapshot {
   strategic_future_health: number;
   simulation_reliability_score: number;
   future_stability_score_v2: number;
+  // Fase 14.2 — singularity / adaptive intelligence
+  strategic_singularity_score: number;
+  adaptive_intelligence_score: number;
+  semantic_entropy_score: number;
+  entropy_acceleration_score: number;
+  strategic_elasticity_score: number;
+  adaptive_capacity_score: number;
+  collapse_probability_score: number;
+  cascade_collapse_risk: number;
+  semantic_mutation_rate: number;
+  semantic_aging_score: number;
+  strategic_rigidity_score: number;
+  semantic_gravity_score: number;
+  authority_dispersion_score: number;
+  semantic_noise_score: number;
+  meaning_dilution_score: number;
+  adaptive_recovery_score: number;
+  future_dominance_score: number;
+  evolution_velocity_score: number;
+  semantic_plateau_score: number;
+  strategic_blackhole_score: number;
 }
 
 export interface AutonomyTelemetryInput {
