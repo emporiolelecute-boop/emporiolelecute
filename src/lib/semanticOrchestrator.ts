@@ -9,7 +9,12 @@
 import type { EditorialTarget } from "./editorialPriorities";
 import type { GapResult } from "./contentGapEngine";
 
-export type OrchestratorEntityType = EditorialTarget["type"] | "combination" | "product" | "blog_post";
+export type OrchestratorEntityType =
+  | EditorialTarget["type"]
+  | "combination"
+  | "product"
+  | "blog_post"
+  | "tag";
 
 export interface OrchestratorItem {
   entityType: OrchestratorEntityType;
