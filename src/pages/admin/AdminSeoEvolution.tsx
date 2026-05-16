@@ -164,7 +164,7 @@ export default function AdminSeoEvolution() {
       });
     });
     const gains = series
-      .map((s) => ({ s, delta: (s.snapshots.at(-1)!.authority_score ?? 0) - (s.snapshots[0].authority_score ?? 0) }))
+      .map((s) => ({ s, delta: (s.snapshots[s.snapshots.length - 1].authority_score ?? 0) - (s.snapshots[0].authority_score ?? 0) }))
       .sort((a, b) => b.delta - a.delta);
     return {
       series, regressions,
