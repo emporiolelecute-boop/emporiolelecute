@@ -20,6 +20,7 @@ export interface DbProduct {
   features: string[];
   keywords: string[];
   
+  editorial_content: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
