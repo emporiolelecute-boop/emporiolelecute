@@ -1015,6 +1015,7 @@ export type Database = {
           author_name: string
           comment: string | null
           created_at: string
+          external_review_id: string | null
           id: string
           is_featured: boolean
           is_verified: boolean
@@ -1030,6 +1031,7 @@ export type Database = {
           author_name: string
           comment?: string | null
           created_at?: string
+          external_review_id?: string | null
           id?: string
           is_featured?: boolean
           is_verified?: boolean
@@ -1045,6 +1047,7 @@ export type Database = {
           author_name?: string
           comment?: string | null
           created_at?: string
+          external_review_id?: string | null
           id?: string
           is_featured?: boolean
           is_verified?: boolean

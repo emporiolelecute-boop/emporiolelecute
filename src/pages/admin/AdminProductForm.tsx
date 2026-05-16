@@ -28,6 +28,10 @@ import {
 import { useTags, useUpdateProductTags } from '@/hooks/useTags';
 import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
+import { evaluateProductSeo } from '@/lib/productSeo';
+import ProductSeoScoreBadge from '@/components/admin/ProductSeoScoreBadge';
+import { Link } from 'react-router-dom';
+import { FileText, ExternalLink } from 'lucide-react';
 
 const AdminProductForm = () => {
   const { id } = useParams();
@@ -68,6 +72,7 @@ const AdminProductForm = () => {
     personalization_label: 'Personalização',
     personalization_placeholder: 'Digite o nome, data ou mensagem para personalização...',
     google_product_category: '',
+    editorial_content: '',
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -100,6 +105,7 @@ const AdminProductForm = () => {
         personalization_label: existingProduct.personalization_label || 'Personalização',
         personalization_placeholder: existingProduct.personalization_placeholder || 'Digite o nome, data ou mensagem para personalização...',
         google_product_category: (existingProduct as any).google_product_category || '',
+        editorial_content: (existingProduct as any).editorial_content || '',
       });
       setKeywordsInput(keywords.join(', '));
 
@@ -238,6 +244,7 @@ const AdminProductForm = () => {
         personalization_label: formData.personalization_label || null,
         personalization_placeholder: formData.personalization_placeholder || null,
         google_product_category: formData.google_product_category || null,
+        editorial_content: formData.editorial_content || null,
       } as any;
 
       let productId: string;
@@ -296,9 +303,34 @@ const AdminProductForm = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar
         </Button>
-        <h1 className="text-3xl font-display font-semibold text-foreground">
-          {isEditing ? 'Editar Produto' : 'Novo Produto'}
-        </h1>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <h1 className="text-3xl font-display font-semibold text-foreground">
+            {isEditing ? 'Editar Produto' : 'Novo Produto'}
+          </h1>
+          {isEditing && (() => {
+            const seo = evaluateProductSeo({
+              ...formData,
+              price: parseFloat(formData.price) || 0,
+              images: formData.images.filter(Boolean),
+              occasionsCount: selectedOccasions.length,
+              segmentsCount: selectedSegments.length,
+              tagsCount: selectedTags.length,
+            });
+            return (
+              <div className="flex items-center gap-2">
+                <ProductSeoScoreBadge evaluation={seo} />
+                {seo.issues.filter((i) => i.level === 'error').length > 0 && (
+                  <span className="text-xs text-rose-700">
+                    {seo.issues.filter((i) => i.level === 'error').length} crítico(s)
+                  </span>
+                )}
+                <Link to="/admin/produtos/health" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                  Auditoria <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
+            );
+          })()}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -733,6 +765,30 @@ const AdminProductForm = () => {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Editorial Content (Fase 7.1) */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg font-display flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Conteúdo Editorial
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Label htmlFor="editorial_content">Texto editorial (opcional)</Label>
+            <Textarea
+              id="editorial_content"
+              rows={8}
+              value={formData.editorial_content}
+              onChange={(e) => setFormData((prev) => ({ ...prev, editorial_content: e.target.value }))}
+              placeholder={
+                'Conte a história da peça: inspiração, contexto, dicas de uso, decoração, apresentação, significado emocional...\n\nMarkdown simples (parágrafos) é suportado e enriquece o SEO como Article.'
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Esse conteúdo é renderizado abaixo da descrição no site público como uma seção editorial e gera schema <code>Article</code>.
+            </p>
           </CardContent>
         </Card>
 

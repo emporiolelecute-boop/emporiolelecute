@@ -58,6 +58,8 @@ const AdminFeedInstagram = lazyWithRetry(() => import("./pages/admin/AdminFeedIn
 const AdminOccasionLandings = lazyWithRetry(() => import("./pages/admin/AdminOccasionLandings"), "AdminOccasionLandings");
 const AdminHeroSlides = lazyWithRetry(() => import("./pages/admin/AdminHeroSlides"), "AdminHeroSlides");
 const AdminTestimonials = lazyWithRetry(() => import("./pages/admin/AdminTestimonials"), "AdminTestimonials");
+const AdminProductReviews = lazyWithRetry(() => import("./pages/admin/AdminProductReviews"), "AdminProductReviews");
+const AdminProductsHealth = lazyWithRetry(() => import("./pages/admin/AdminProductsHealth"), "AdminProductsHealth");
 const AdminCoupons = lazyWithRetry(() => import("./pages/admin/AdminCoupons"), "AdminCoupons");
 const AdminRedirects = lazyWithRetry(() => import("./pages/admin/AdminRedirects"), "AdminRedirects");
 const AdminRobots = lazyWithRetry(() => import("./pages/admin/AdminRobots"), "AdminRobots");
@@ -451,6 +453,16 @@ const App = () => {
                   <Route path="taxonomias/health" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminTaxonomiesHealth />
+                    </Suspense>
+                  } />
+                  <Route path="produtos/health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminProductsHealth />
+                    </Suspense>
+                  } />
+                  <Route path="reviews" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminProductReviews />
                     </Suspense>
                   } />
                   <Route path="auditoria" element={
