@@ -1848,6 +1848,81 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_simulation_runs: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          created_by: string | null
+          id: string
+          input_snapshot: Json
+          predicted_authority: number
+          predicted_cluster_health: number
+          predicted_collapse_risk: number
+          predicted_decay_risk: number
+          predicted_execution_cost: number
+          predicted_growth_velocity: number
+          predicted_operational_load: number
+          predicted_recovery_time: number
+          predicted_resilience: number
+          predicted_roi: number
+          predicted_saturation: number
+          predicted_semantic_coverage: number
+          scenario_type: string
+          simulation_inputs: Json
+          simulation_name: string
+          simulation_notes: string | null
+          simulation_type: string
+        }
+        Insert: {
+          confidence_score?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          input_snapshot?: Json
+          predicted_authority?: number
+          predicted_cluster_health?: number
+          predicted_collapse_risk?: number
+          predicted_decay_risk?: number
+          predicted_execution_cost?: number
+          predicted_growth_velocity?: number
+          predicted_operational_load?: number
+          predicted_recovery_time?: number
+          predicted_resilience?: number
+          predicted_roi?: number
+          predicted_saturation?: number
+          predicted_semantic_coverage?: number
+          scenario_type: string
+          simulation_inputs?: Json
+          simulation_name: string
+          simulation_notes?: string | null
+          simulation_type: string
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          input_snapshot?: Json
+          predicted_authority?: number
+          predicted_cluster_health?: number
+          predicted_collapse_risk?: number
+          predicted_decay_risk?: number
+          predicted_execution_cost?: number
+          predicted_growth_velocity?: number
+          predicted_operational_load?: number
+          predicted_recovery_time?: number
+          predicted_resilience?: number
+          predicted_roi?: number
+          predicted_saturation?: number
+          predicted_semantic_coverage?: number
+          scenario_type?: string
+          simulation_inputs?: Json
+          simulation_name?: string
+          simulation_notes?: string | null
+          simulation_type?: string
+        }
+        Relationships: []
+      }
       seo_snapshots: {
         Row: {
           authority_score: number | null
