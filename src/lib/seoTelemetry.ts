@@ -82,7 +82,7 @@ export interface TelemetrySnapshot {
   // Fase 13.3 — control tower
   system_health_score: number;
   sustainability_score: number;
-  execution_efficiency: number;
+  // execution_efficiency reused from Fase 13
   semantic_efficiency: number;
   authority_efficiency: number;
   operational_waste_score: number;
