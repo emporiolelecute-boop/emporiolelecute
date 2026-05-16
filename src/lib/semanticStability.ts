@@ -76,7 +76,7 @@ export function calculateClusterDependency(items: StabilityEntity[]): Array<{ cl
   }
   return Array.from(map.entries()).map(([cluster, sum]) => {
     const share = Math.round((sum / total) * 100);
-    const risk = share > 65 ? "high" : share > 40 ? "medium" : "low";
+    const risk: "low" | "medium" | "high" = share > 65 ? "high" : share > 40 ? "medium" : "low";
     return { cluster, share, risk };
   }).sort((a, b) => b.share - a.share);
 }
