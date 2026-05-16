@@ -124,6 +124,17 @@ const AdminProductForm = () => {
             setSelectedTags(data.map((t) => t.tag_id));
           }
         });
+
+      // Load product segments
+      supabase
+        .from('product_segments')
+        .select('segment_id')
+        .eq('product_id', existingProduct.id)
+        .then(({ data }) => {
+          if (data) {
+            setSelectedSegments(data.map((s) => s.segment_id));
+          }
+        });
     }
   }, [existingProduct, isEditing]);
 
