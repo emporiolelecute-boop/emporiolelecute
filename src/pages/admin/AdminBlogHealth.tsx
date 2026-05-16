@@ -17,7 +17,56 @@ const AdminBlogHealth = () => {
     const critical = scored.filter((x) => x.seo.classification === "critical").length;
     const needs = scored.filter((x) => x.seo.classification === "needs-work").length;
     const sorted = [...scored].sort((a, b) => a.seo.score - b.seo.score);
-    return { scored, avg, critical, needs, worst: sorted.slice(0, 20) };
+
+    // Fase 11 — Blog consolidation signals
+    const hasLinks = (p: any) => {
+      const rel = [
+        ...(p.related_categories || []),
+        ...(p.related_occasions || []),
+        ...(p.related_segments || []),
+        ...(p.related_themes || []),
+        ...(p.related_products || []),
+        ...(p.related_tags || []),
+      ];
+      return rel.length > 0;
+    };
+    const orphans = posts.filter((p: any) => !hasLinks(p));
+    const noInternalLinks = posts.filter((p: any) => {
+      const c = String(p.content || "");
+      return !/<a\s+[^>]*href=/.test(c);
+    });
+    const noThematic = posts.filter((p: any) =>
+      (p.related_themes || []).length === 0 && (p.related_segments || []).length === 0,
+    );
+    const noCta = posts.filter((p: any) => {
+      const c = String(p.content || "").toLowerCase();
+      return !/(whatsapp|orçamento|orcamento|compre|peça|encomende|conheça)/i.test(c);
+    });
+    const noStrongTax = posts.filter((p: any) =>
+      (p.related_categories || []).length === 0 && (p.related_occasions || []).length === 0,
+    );
+    const noRelatedProducts = posts.filter((p: any) => (p.related_products || []).length === 0);
+
+    // Blog Authority Score 0..100
+    const totalPosts = posts.length || 1;
+    const withLinks = posts.length - orphans.length;
+    const withCta = totalPosts - noCta.length;
+    const withTax = totalPosts - noStrongTax.length;
+    const withProducts = totalPosts - noRelatedProducts.length;
+    const authorityScore = Math.round(
+      (withLinks / totalPosts) * 30 +
+      (withCta / totalPosts) * 20 +
+      (withTax / totalPosts) * 25 +
+      (withProducts / totalPosts) * 15 +
+      Math.min(10, avg / 10)
+    );
+
+    return {
+      scored, avg, critical, needs,
+      worst: sorted.slice(0, 20),
+      orphans, noInternalLinks, noThematic, noCta, noStrongTax, noRelatedProducts,
+      authorityScore,
+    };
   }, [posts]);
 
   return (
@@ -71,6 +120,39 @@ const AdminBlogHealth = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Fase 11 — Blog consolidation */}
+      <Card className="border-primary/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center justify-between">
+            Blog Authority Score
+            <Badge
+              variant={stats.authorityScore >= 70 ? "default" : stats.authorityScore >= 50 ? "secondary" : "destructive"}
+            >
+              {stats.authorityScore}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            {[
+              { label: "Posts órfãos (sem relações)", value: stats.orphans.length },
+              { label: "Sem links internos", value: stats.noInternalLinks.length },
+              { label: "Sem conexão temática", value: stats.noThematic.length },
+              { label: "Sem CTA", value: stats.noCta.length },
+              { label: "Sem relação com taxonomias fortes", value: stats.noStrongTax.length },
+              { label: "Sem produtos relacionados", value: stats.noRelatedProducts.length },
+            ].map((b) => (
+              <div key={b.label} className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground">{b.label}</p>
+                <p className={`text-2xl font-bold ${b.value > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+                  {b.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

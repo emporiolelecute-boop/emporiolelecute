@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Star, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ProductReviewForm from '@/components/admin/ProductReviewForm';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const SOURCES = ['manual', 'elo7', 'whatsapp', 'instagram', 'google', 'site', 'outros'];
 
@@ -80,6 +82,8 @@ const AdminProductReviews = () => {
         </div>
         <Button onClick={startNew}><Plus className="h-4 w-4 mr-2" /> Nova avaliação</Button>
       </div>
+
+      <ReviewStrategicGaps />
 
       {/* Filtros */}
       <Card className="mb-4">
@@ -211,3 +215,69 @@ const AdminProductReviews = () => {
 };
 
 export default AdminProductReviews;
+
+// Fase 11 — Strategic gaps for review acquisition (Elo7/manual).
+
+function ReviewStrategicGaps() {
+  const { data } = useQuery({
+    queryKey: ['admin', 'review-gaps'],
+    queryFn: async () => {
+      const [productsRes, reviewsRes, occRes] = await Promise.all([
+        supabase.from('products').select('id, name, slug, price, images, category_id').eq('is_active', true),
+        supabase.from('product_reviews').select('product_id, rating').eq('is_visible', true),
+        supabase.from('product_occasions').select('product_id, occasion_id'),
+      ]);
+      const products = productsRes.data || [];
+      const reviews = reviewsRes.data || [];
+      const occ = occRes.data || [];
+      const byProduct = new Map<string, number>();
+      reviews.forEach((r: any) => byProduct.set(r.product_id, (byProduct.get(r.product_id) || 0) + 1));
+      const occByProduct = new Map<string, number>();
+      occ.forEach((o: any) => occByProduct.set(o.product_id, (occByProduct.get(o.product_id) || 0) + 1));
+
+      const strategicNoReviews = products
+        .filter((p: any) => !byProduct.has(p.id) && (occByProduct.get(p.id) || 0) >= 2)
+        .slice(0, 12);
+      const premiumNoSocial = products
+        .filter((p: any) => (p.price || 0) >= 50 && (byProduct.get(p.id) || 0) < 2)
+        .slice(0, 12);
+      // taxonomias fortes (proxy: muitos produtos) com poucas reviews
+      const byCategory = new Map<string, { products: number; reviews: number }>();
+      products.forEach((p: any) => {
+        if (!p.category_id) return;
+        const e = byCategory.get(p.category_id) || { products: 0, reviews: 0 };
+        e.products += 1;
+        e.reviews += byProduct.get(p.id) || 0;
+        byCategory.set(p.category_id, e);
+      });
+      const weakTaxonomies = Array.from(byCategory.entries())
+        .filter(([, e]) => e.products >= 5 && e.reviews < e.products * 0.3)
+        .map(([id, e]) => ({ id, ...e }));
+
+      return { strategicNoReviews, premiumNoSocial, weakTaxonomies };
+    },
+  });
+  if (!data) return null;
+  const blocks = [
+    { title: 'Produtos estratégicos sem reviews', items: data.strategicNoReviews.map((p: any) => p.name) },
+    { title: 'Produtos premium sem social proof', items: data.premiumNoSocial.map((p: any) => p.name) },
+    { title: 'Taxonomias fortes com poucas reviews', items: data.weakTaxonomies.map((t) => `cat ${t.id.slice(0, 6)} · ${t.reviews}/${t.products}`) },
+  ];
+  return (
+    <Card className="mb-4 border-primary/30">
+      <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {blocks.map((b) => (
+          <div key={b.title}>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">{b.title}</p>
+            <p className="text-2xl font-bold">{b.items.length}</p>
+            <div className="text-xs text-muted-foreground mt-2 max-h-28 overflow-y-auto space-y-0.5">
+              {b.items.slice(0, 6).map((n, i) => <div key={i} className="truncate">• {n}</div>)}
+              {b.items.length === 0 && <span>— nenhum gap detectado</span>}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
