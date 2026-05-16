@@ -29,6 +29,7 @@ const LembrancinhasLanding = lazy(() => import("./pages/LembrancinhasLanding"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SitemapCheck = lazy(() => import("./pages/SitemapCheck"));
+const TaxonomyPage = lazy(() => import("./pages/TaxonomyPage"));
 
 // Admin pages - lazy loaded with retry + telemetry
 import { lazyWithRetry } from "./lib/lazyWithRetry";
