@@ -153,5 +153,12 @@ export function computeTelemetry(
     internal_link_quality: Math.min(100, Math.round(avg_links_per_page * 12)),
     orphan_cluster_count: editorial?.orphanClusters ?? 0,
     content_gap_count: editorial?.contentGaps ?? 0,
+    knowledge_health_score:       knowledge?.knowledgeHealth ?? 0,
+    authority_distribution_score: knowledge?.authorityDistribution ?? 0,
+    semantic_loop_count:          knowledge?.semanticLoops ?? 0,
+    regression_risk_score:        knowledge?.regressionRisk ?? 0,
+    content_decay_score:          knowledge?.contentDecay ?? 0,
+    cluster_growth_score:         knowledge?.clusterGrowth ?? 0,
+    orphan_recovery_rate:         knowledge?.orphanRecoveryRate ?? 0,
   };
 }
