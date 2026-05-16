@@ -15,6 +15,9 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
 import RelatedContent, { type RelatedItem } from "@/components/RelatedContent";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
+import { buildContextualLinksForTheme } from "@/lib/linkOrchestrator";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +44,7 @@ const ThemePage = () => {
   const { buildWhatsappUrl } = useContactInfo();
   const hubQuery = useThemeHubBySlug(slug);
   const hub = hubQuery.data ?? null;
+  const { data: semanticCtx } = useSemanticContext();
 
   // Produtos relacionados ao tema: via tag_id (se houver) → product_tags
   const productsQuery = useQuery({
@@ -413,7 +417,42 @@ const ThemePage = () => {
           </section>
         )}
 
-        {/* CTA WhatsApp */}
+        {/* Fase 11.1 — Descubra também (autoridade filtrada, max 10, sem hubs fracos) */}
+        {(() => {
+          const used = new Set<string>([`/tema/${slug}`]);
+          dedupedLinks.forEach((l) => {
+            const prefix =
+              l.type === "occasion" ? "/ocasiao/"
+              : l.type === "segment" ? "/segmento/"
+              : l.type === "post" ? "/blog/"
+              : l.type === "category" ? "/categoria/"
+              : l.type === "tag" ? "/tag/"
+              : l.type === "theme" ? "/tema/" : "/";
+            used.add(`${prefix}${l.slug}`);
+          });
+          occs.forEach((o) => used.add(`/ocasiao/${o.item.slug}`));
+          segs.forEach((s) => used.add(`/segmento/${s.item.slug}`));
+
+          const strongThemes = semanticCtx.themes.filter((t) => (t.authority_score ?? 0) >= 70);
+          const links = buildContextualLinksForTheme(
+            { slug },
+            {
+              themes: strongThemes,
+              combinations: semanticCtx.combinations,
+              posts: semanticCtx.posts,
+            }
+          )
+            .filter((l) => !used.has(l.path))
+            .slice(0, 10);
+
+          if (links.length < 3) return null;
+          return (
+            <section className="container mx-auto px-4">
+              <SemanticLinkingBlock title="Descubra também" links={links} />
+            </section>
+          );
+        })()}
+
         {whatsappHref && (
           <section className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

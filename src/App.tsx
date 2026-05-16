@@ -88,6 +88,7 @@ const AdminThemes = lazyWithRetry(() => import("./pages/admin/AdminThemes"), "Ad
 const AdminAuthority = lazyWithRetry(() => import("./pages/admin/AdminAuthority"), "AdminAuthority");
 const AdminEditorialExecution = lazyWithRetry(() => import("./pages/admin/AdminEditorialExecution"), "AdminEditorialExecution");
 const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOperations"), "AdminSeoOperations");
+const AdminLinkHealth = lazyWithRetry(() => import("./pages/admin/AdminLinkHealth"), "AdminLinkHealth");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -550,6 +551,11 @@ const App = () => {
                   <Route path="seo-operations" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSeoOperations />
+                    </Suspense>
+                  } />
+                  <Route path="link-health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminLinkHealth />
                     </Suspense>
                   } />
                 </Route>

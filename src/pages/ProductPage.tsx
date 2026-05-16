@@ -47,6 +47,9 @@ import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useCart } from "@/contexts/CartContext";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
+import { buildContextualLinksForProduct } from "@/lib/linkOrchestrator";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 
 const ProductPage = () => {
@@ -60,6 +63,7 @@ const ProductPage = () => {
   const { data: reviews = [] } = useProductReviews(dbProduct?.id);
   const { data: reviewStats } = useProductReviewStats(dbProduct?.id);
   const { addItem } = useCart();
+  const { data: semanticCtx } = useSemanticContext();
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
@@ -774,6 +778,34 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
               </div>
             </div>
           )}
+
+          {/* Fase 11.1 — Linking semântico contextual (SAFE MODE) */}
+          {(() => {
+            const usedPaths = new Set<string>();
+            // Paths já exibidos: breadcrumb, badges, RelatedByTaxonomy, tags relacionadas
+            if (dbProduct?.category) usedPaths.add(`/categoria/${dbProduct.category.slug}`);
+            (dbProduct?.occasions ?? []).forEach((o) => usedPaths.add(`/ocasiao/${o.slug}`));
+            (dbProduct?.segments ?? []).forEach((s) => usedPaths.add(`/segmento/${s.slug}`));
+            (dbProduct?.tags ?? []).forEach((t) => usedPaths.add(`/tag/${t.slug}`));
+
+            const links = buildContextualLinksForProduct(
+              { slug: product.slug },
+              {
+                themes: semanticCtx.themes,
+                combinations: semanticCtx.combinations,
+                posts: semanticCtx.posts,
+              }
+            )
+              .filter((l) => !usedPaths.has(l.path))
+              .slice(0, 8); // hard cap absoluto
+
+            if (links.length < 3) return null;
+            return (
+              <div className="container mx-auto">
+                <SemanticLinkingBlock title="Explore mais ideias relacionadas" links={links} />
+              </div>
+            );
+          })()}
         </div>
       </main>
 

@@ -21,6 +21,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { optimizeImage } from "@/lib/image";
 import { normalizeFaqs, metaTitleFallback, metaDescriptionFallback, buildBreadcrumbs, type TaxonomyKind as TaxKind } from "@/lib/taxonomy";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
+import { buildContextualLinksForTaxonomy } from "@/lib/linkOrchestrator";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 
 const SITE_ORIGIN = "https://emporiolelecute.com.br";
@@ -166,6 +169,7 @@ const TaxonomyPage = ({ kind }: Props) => {
   });
 
   const related = relatedQuery.data;
+  const { data: semanticCtx } = useSemanticContext();
 
   const products: Product[] = useMemo(
     () =>
@@ -393,6 +397,35 @@ const TaxonomyPage = ({ kind }: Props) => {
             </div>
           </section>
         )}
+
+        {/* Fase 11.1 — Linking semântico contextual (após FAQ) */}
+        {(() => {
+          const used = new Set<string>([`${cfg.routePrefix}/${slug}`]);
+          related?.categories.forEach((c) => used.add(`/categoria/${c.slug}`));
+          related?.occasions.forEach((o) => used.add(`/ocasiao/${o.slug}`));
+          related?.segments.forEach((s) => used.add(`/segmento/${s.slug}`));
+
+          const kindMap: Record<TaxonomyKind, "occasion" | "segment" | "category"> = {
+            categoria: "category", ocasiao: "occasion", segmento: "segment",
+          };
+          const links = buildContextualLinksForTaxonomy(
+            { slug, kind: kindMap[cfg.kind] },
+            {
+              themes: semanticCtx.themes,
+              combinations: semanticCtx.combinations,
+              posts: semanticCtx.posts,
+            }
+          )
+            .filter((l) => !used.has(l.path))
+            .slice(0, 8);
+
+          if (links.length < 3) return null;
+          return (
+            <section className="container mx-auto px-4 pb-10">
+              <SemanticLinkingBlock title="Conexões temáticas" links={links} />
+            </section>
+          );
+        })()}
       </main>
 
       <Footer />

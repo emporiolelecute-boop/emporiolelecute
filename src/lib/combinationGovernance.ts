@@ -31,6 +31,11 @@ export interface RegistryEntry {
   meta_title?: string | null;
   meta_description?: string | null;
   editorial_content?: string | null;
+  /** Fase 10.4/10.5 */
+  readiness_score?: number;
+  topical_coverage?: number;
+  cannibalization_risk?: "none" | "low" | "medium" | "high" | "unknown";
+  internal_links_count?: number;
 }
 
 export interface IndexabilityVerdict {

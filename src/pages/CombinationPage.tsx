@@ -23,6 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
+import { buildContextualLinksForCombination } from "@/lib/linkOrchestrator";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import {
   SITE_ORIGIN,
   buildCombinationCanonicalPath,
@@ -42,6 +45,7 @@ const CombinationPage = () => {
   const { segmentSlug = "", occasionSlug = "" } = useParams<{ segmentSlug: string; occasionSlug: string }>();
   const canonicalPath = buildCombinationCanonicalPath(segmentSlug, occasionSlug);
   const { buildWhatsappUrl } = useContactInfo();
+  const { data: semanticCtx } = useSemanticContext();
 
   // 1. Entidades em paralelo
   const entitiesQuery = useQuery({
@@ -391,7 +395,40 @@ const CombinationPage = () => {
           </section>
         )}
 
-        {/* CTA WhatsApp */}
+        {/* Fase 11.1 — Linking semântico (somente combinações aprovadas com score forte) */}
+        {(() => {
+          const reg = registryQuery.data;
+          if (!reg) return null;
+          const approved = reg.discovery_status === "approved" && reg.is_indexable !== false;
+          const readiness = reg.readiness_score ?? 0;
+          const coverage = reg.topical_coverage ?? 0;
+          if (!approved || readiness < 75 || coverage < 60) return null;
+          if (!verdict.indexable) return null;
+
+          const used = new Set<string>([canonicalPath]);
+          if (segment) used.add(`/segmento/${segment.slug}`);
+          if (occasion) used.add(`/ocasiao/${occasion.slug}`);
+          relatedCategories.forEach((c) => used.add(`/categoria/${c.slug}`));
+
+          const links = buildContextualLinksForCombination(
+            { path: canonicalPath },
+            {
+              themes: semanticCtx.themes,
+              combinations: semanticCtx.combinations,
+              posts: semanticCtx.posts,
+            }
+          )
+            .filter((l) => !used.has(l.path))
+            .slice(0, 6);
+
+          if (links.length < 3) return null;
+          return (
+            <section className="container mx-auto px-4">
+              <SemanticLinkingBlock title="Conexões relacionadas" links={links} />
+            </section>
+          );
+        })()}
+
         {whatsappHref && (
           <section className="container mx-auto px-4 py-12">
             <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
