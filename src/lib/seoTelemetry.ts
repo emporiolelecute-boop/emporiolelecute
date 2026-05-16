@@ -109,6 +109,25 @@ export interface TelemetrySnapshot {
   sustainability_forecast: number;
   authority_compounding_score: number;
   recovery_projection_score: number;
+  // Fase 14.1 — strategic simulation / forecast
+  simulation_confidence_avg: number;
+  semantic_projection_score: number;
+  future_authority_score: number;
+  cluster_longevity_score: number;
+  projected_decay_pressure: number;
+  projected_execution_pressure: number;
+  strategic_resilience_score: number;
+  semantic_future_score: number;
+  operational_future_score: number;
+  commercial_projection_score: number;
+  authority_compounding_projection: number;
+  future_semantic_connectivity: number;
+  projected_maintenance_explosion: number;
+  projected_fragmentation_risk: number;
+  projected_cluster_dependency: number;
+  strategic_future_health: number;
+  simulation_reliability_score: number;
+  future_stability_score_v2: number;
 }
 
 export interface AutonomyTelemetryInput {
