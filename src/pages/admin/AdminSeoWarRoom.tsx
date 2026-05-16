@@ -28,8 +28,8 @@ import {
 
 export default function AdminSeoWarRoom() {
   const { data: hubs = [] } = useThemeHubs();
-  const { data: products = [] } = useProducts();
-  const { data: landings = [] } = useOccasionLandings();
+  const { data: products = [] } = useDbProducts();
+  const { data: landings = [] } = usePublishedOccasionLandings();
   const { data: posts = [] } = useDbBlogPosts();
 
   const decisionInputs = useMemo<DecisionInput[]>(() => {
