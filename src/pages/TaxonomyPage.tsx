@@ -397,6 +397,35 @@ const TaxonomyPage = ({ kind }: Props) => {
             </div>
           </section>
         )}
+
+        {/* Fase 11.1 — Linking semântico contextual (após FAQ) */}
+        {(() => {
+          const used = new Set<string>([`${cfg.routePrefix}/${slug}`]);
+          related?.categories.forEach((c) => used.add(`/categoria/${c.slug}`));
+          related?.occasions.forEach((o) => used.add(`/ocasiao/${o.slug}`));
+          related?.segments.forEach((s) => used.add(`/segmento/${s.slug}`));
+
+          const kindMap: Record<TaxonomyKind, "occasion" | "segment" | "category"> = {
+            categoria: "category", ocasiao: "occasion", segmento: "segment",
+          };
+          const links = buildContextualLinksForTaxonomy(
+            { slug, kind: kindMap[cfg.kind] },
+            {
+              themes: semanticCtx.themes,
+              combinations: semanticCtx.combinations,
+              posts: semanticCtx.posts,
+            }
+          )
+            .filter((l) => !used.has(l.path))
+            .slice(0, 8);
+
+          if (links.length < 3) return null;
+          return (
+            <section className="container mx-auto px-4 pb-10">
+              <SemanticLinkingBlock title="Conexões temáticas" links={links} />
+            </section>
+          );
+        })()}
       </main>
 
       <Footer />
