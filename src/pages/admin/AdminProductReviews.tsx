@@ -217,8 +217,6 @@ const AdminProductReviews = () => {
 export default AdminProductReviews;
 
 // Fase 11 — Strategic gaps for review acquisition (Elo7/manual).
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 
 function ReviewStrategicGaps() {
   const { data } = useQuery({
