@@ -34,7 +34,8 @@ import {
   Star,
   BookOpen,
   TrendingUp,
-  Network
+  Network,
+  Rocket
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,7 @@ const menuItems = [
   { icon: BarChart3, label: 'SEO Command Center', path: '/admin/seo-command' },
   { icon: Network, label: 'Knowledge Graph', path: '/admin/knowledge-graph' },
   { icon: TrendingUp, label: 'SEO Evolution', path: '/admin/seo-evolution' },
+  { icon: Rocket, label: 'SEO War Room', path: '/admin/seo-war-room' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
