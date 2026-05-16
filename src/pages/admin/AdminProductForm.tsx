@@ -39,9 +39,11 @@ const AdminProductForm = () => {
   const { data: categories } = useDbCategories();
   const { data: occasions } = useDbOccasions();
   const { data: tags } = useTags();
+  const { data: segments } = useSegments();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const updateProductTags = useUpdateProductTags();
+  const updateProductSegments = useUpdateProductSegments();
 
   const [formData, setFormData] = useState({
     name: '',
