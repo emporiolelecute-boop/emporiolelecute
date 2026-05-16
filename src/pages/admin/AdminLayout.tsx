@@ -43,6 +43,7 @@ const menuItems = [
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
+  { icon: Sparkles, label: 'Taxonomias (novo)', path: '/admin/taxonomias' },
   { icon: Tag, label: 'Cupons', path: '/admin/cupons' },
   
   { icon: Image, label: 'Slides do Hero', path: '/admin/hero-slides' },

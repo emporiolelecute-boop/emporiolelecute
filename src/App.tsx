@@ -71,6 +71,8 @@ const AdminUsers = lazyWithRetry(() => import("./pages/admin/AdminUsers"), "Admi
 const AdminAccessRequests = lazyWithRetry(() => import("./pages/admin/AdminAccessRequests"), "AdminAccessRequests");
 const AdminAccessRequestDetail = lazyWithRetry(() => import("./pages/admin/AdminAccessRequestDetail"), "AdminAccessRequestDetail");
 const AdminAudit = lazyWithRetry(() => import("./pages/admin/AdminAudit"), "AdminAudit");
+const AdminTaxonomies = lazyWithRetry(() => import("./pages/admin/AdminTaxonomies"), "AdminTaxonomies");
+const AdminTaxonomiesHealth = lazyWithRetry(() => import("./pages/admin/AdminTaxonomiesHealth"), "AdminTaxonomiesHealth");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -439,6 +441,16 @@ const App = () => {
                   <Route path="usuarios/solicitacoes/:id" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminAccessRequestDetail />
+                    </Suspense>
+                  } />
+                  <Route path="taxonomias" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminTaxonomies />
+                    </Suspense>
+                  } />
+                  <Route path="taxonomias/health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminTaxonomiesHealth />
                     </Suspense>
                   } />
                   <Route path="auditoria" element={
