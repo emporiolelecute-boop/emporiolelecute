@@ -302,9 +302,9 @@ ${[
 
 </urlset>`
     
-    const totalUrls = (products?.length || 0) + (occasions?.length || 0) + (categories?.length || 0) + (segments?.length || 0) + (dynamicPages?.length || 0) + 9
+    const totalUrls = (products?.length || 0) + catBlock.kept + occBlock.kept + segBlock.kept + (dynamicPages?.length || 0) + 9
     console.log('Sitemap generated successfully')
-    console.log(`Total URLs: ${totalUrls}`)
+    console.log(`Total URLs: ${totalUrls} (cats=${catBlock.kept}, occs=${occBlock.kept}, segs=${segBlock.kept})`)
     
     // Update last sitemap generation time
     await supabase
