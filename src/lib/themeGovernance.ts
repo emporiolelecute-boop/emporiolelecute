@@ -106,13 +106,15 @@ export function classifyTheme(score: number): ThemeVerdict["classification"] {
  * - Hub cujo nome coincide com ocasião/segmento → competição alta.
  * - Hub cobrindo > 70% dos produtos de uma ocasião → redundante.
  */
+export type CannibalRisk = "none" | "low" | "medium" | "high";
+
 export function detectThemeCannibalization(params: {
   hubSlug: string;
   occasionSlugs: string[];
   segmentSlugs: string[];
   productsCount: number;
   largestOccasionShare?: number; // 0..1
-}): ThemeVerdict["classification"] extends infer _U ? "none" | "low" | "medium" | "high" : never {
+}): CannibalRisk {
   const slug = params.hubSlug.toLowerCase();
   if (params.occasionSlugs.includes(slug)) return "high";
   if (params.segmentSlugs.includes(slug)) return "high";
