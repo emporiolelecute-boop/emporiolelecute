@@ -535,6 +535,11 @@ const App = () => {
                       <AdminThemes />
                     </Suspense>
                   } />
+                  <Route path="authority" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminAuthority />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
