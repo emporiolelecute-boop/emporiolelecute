@@ -64,6 +64,21 @@ export interface TelemetrySnapshot {
   overcentralization_risk: number;
   topic_exhaustion_score: number;
   momentum_growth_score: number;
+  // Fase 13.2 — operating system
+  operational_score: number;
+  execution_capacity_score: number;
+  editorial_velocity_score: number;
+  semantic_velocity_score: number;
+  authority_velocity_score: number;
+  operational_debt_score: number;
+  fragmentation_score: number;
+  risk_pressure_score: number;
+  bottleneck_score: number;
+  recovery_capacity_score: number;
+  maintenance_pressure_score: number;
+  execution_efficiency_score: number;
+  cluster_resilience_score: number;
+  semantic_resilience_score: number;
 }
 
 export interface AutonomyTelemetryInput {
