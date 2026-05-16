@@ -34,6 +34,24 @@ export interface TelemetrySnapshot {
   internal_link_quality: number; // 0..100
   orphan_cluster_count: number;
   content_gap_count: number;
+  // Fase 12 — knowledge graph + memória
+  knowledge_health_score: number;
+  authority_distribution_score: number;
+  semantic_loop_count: number;
+  regression_risk_score: number;
+  content_decay_score: number;
+  cluster_growth_score: number;
+  orphan_recovery_rate: number;
+}
+
+export interface KnowledgeTelemetryInput {
+  knowledgeHealth?: number;
+  authorityDistribution?: number;
+  semanticLoops?: number;
+  regressionRisk?: number;
+  contentDecay?: number;
+  clusterGrowth?: number;
+  orphanRecoveryRate?: number;
 }
 
 function avg(vals: number[]): number {
@@ -64,6 +82,7 @@ export function computeTelemetry(
   items: IndexableEntity[],
   linking?: LinkingTelemetryInput,
   editorial?: EditorialTelemetryInput,
+  knowledge?: KnowledgeTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
@@ -134,5 +153,12 @@ export function computeTelemetry(
     internal_link_quality: Math.min(100, Math.round(avg_links_per_page * 12)),
     orphan_cluster_count: editorial?.orphanClusters ?? 0,
     content_gap_count: editorial?.contentGaps ?? 0,
+    knowledge_health_score:       knowledge?.knowledgeHealth ?? 0,
+    authority_distribution_score: knowledge?.authorityDistribution ?? 0,
+    semantic_loop_count:          knowledge?.semanticLoops ?? 0,
+    regression_risk_score:        knowledge?.regressionRisk ?? 0,
+    content_decay_score:          knowledge?.contentDecay ?? 0,
+    cluster_growth_score:         knowledge?.clusterGrowth ?? 0,
+    orphan_recovery_rate:         knowledge?.orphanRecoveryRate ?? 0,
   };
 }

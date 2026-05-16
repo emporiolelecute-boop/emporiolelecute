@@ -1611,6 +1611,117 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_entity_snapshots: {
+        Row: {
+          authority_score: number
+          cannibalization_risk: string
+          created_at: string
+          editorial_size: number
+          entity_id: string
+          entity_name: string | null
+          entity_slug: string | null
+          entity_type: string
+          faq_count: number
+          id: string
+          internal_links_count: number
+          maturity_score: number
+          metadata: Json
+          orphan_risk: boolean
+          readiness_score: number
+          reviews_count: number
+          semantic_connectivity: number
+          snapshot_date: string
+          thin_content_risk: boolean
+          topical_coverage: number
+        }
+        Insert: {
+          authority_score?: number
+          cannibalization_risk?: string
+          created_at?: string
+          editorial_size?: number
+          entity_id: string
+          entity_name?: string | null
+          entity_slug?: string | null
+          entity_type: string
+          faq_count?: number
+          id?: string
+          internal_links_count?: number
+          maturity_score?: number
+          metadata?: Json
+          orphan_risk?: boolean
+          readiness_score?: number
+          reviews_count?: number
+          semantic_connectivity?: number
+          snapshot_date?: string
+          thin_content_risk?: boolean
+          topical_coverage?: number
+        }
+        Update: {
+          authority_score?: number
+          cannibalization_risk?: string
+          created_at?: string
+          editorial_size?: number
+          entity_id?: string
+          entity_name?: string | null
+          entity_slug?: string | null
+          entity_type?: string
+          faq_count?: number
+          id?: string
+          internal_links_count?: number
+          maturity_score?: number
+          metadata?: Json
+          orphan_risk?: boolean
+          readiness_score?: number
+          reviews_count?: number
+          semantic_connectivity?: number
+          snapshot_date?: string
+          thin_content_risk?: boolean
+          topical_coverage?: number
+        }
+        Relationships: []
+      }
+      seo_execution_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string | null
+          entity_id: string
+          entity_slug: string | null
+          entity_type: string
+          id: string
+          impact_score: number
+          metadata: Json
+          performed_by: string | null
+          performed_by_email: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description?: string | null
+          entity_id: string
+          entity_slug?: string | null
+          entity_type: string
+          id?: string
+          impact_score?: number
+          metadata?: Json
+          performed_by?: string | null
+          performed_by_email?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string
+          entity_slug?: string | null
+          entity_type?: string
+          id?: string
+          impact_score?: number
+          metadata?: Json
+          performed_by?: string | null
+          performed_by_email?: string | null
+        }
+        Relationships: []
+      }
       seo_snapshots: {
         Row: {
           authority_score: number | null

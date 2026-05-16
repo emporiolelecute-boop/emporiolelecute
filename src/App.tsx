@@ -91,6 +91,8 @@ const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOpe
 const AdminLinkHealth = lazyWithRetry(() => import("./pages/admin/AdminLinkHealth"), "AdminLinkHealth");
 const AdminContentGaps = lazyWithRetry(() => import("./pages/admin/AdminContentGaps"), "AdminContentGaps");
 const AdminSeoCommandCenter = lazyWithRetry(() => import("./pages/admin/AdminSeoCommandCenter"), "AdminSeoCommandCenter");
+const AdminKnowledgeGraph = lazyWithRetry(() => import("./pages/admin/AdminKnowledgeGraph"), "AdminKnowledgeGraph");
+const AdminSeoEvolution = lazyWithRetry(() => import("./pages/admin/AdminSeoEvolution"), "AdminSeoEvolution");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -568,6 +570,16 @@ const App = () => {
                   <Route path="seo-command" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSeoCommandCenter />
+                    </Suspense>
+                  } />
+                  <Route path="knowledge-graph" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminKnowledgeGraph />
+                    </Suspense>
+                  } />
+                  <Route path="seo-evolution" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoEvolution />
                     </Suspense>
                   } />
                 </Route>
