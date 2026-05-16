@@ -32,6 +32,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import RelatedProducts from "@/components/RelatedProducts";
+import RelatedByTaxonomy from "@/components/RelatedByTaxonomy";
 import ProductGallery from "@/components/ProductGallery";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
@@ -219,7 +220,15 @@ const ProductPage = () => {
       <BreadcrumbStructuredData
         items={[
           { name: 'Início', url: 'https://emporiolelecute.com.br/' },
-          { name: 'Produtos', url: 'https://emporiolelecute.com.br/produtos' },
+          ...(dbProduct?.segments?.[0]
+            ? [{ name: dbProduct.segments[0].name, url: `https://emporiolelecute.com.br/segmento/${dbProduct.segments[0].slug}` }]
+            : []),
+          ...(dbProduct?.occasions?.[0]
+            ? [{ name: dbProduct.occasions[0].name, url: `https://emporiolelecute.com.br/ocasiao/${dbProduct.occasions[0].slug}` }]
+            : []),
+          ...(dbProduct?.category && !dbProduct?.segments?.[0] && !dbProduct?.occasions?.[0]
+            ? [{ name: dbProduct.category.name, url: `https://emporiolelecute.com.br/categoria/${dbProduct.category.slug}` }]
+            : []),
           { name: product.name, url: `https://emporiolelecute.com.br/produto/${product.slug}` },
         ]}
       />
@@ -230,21 +239,37 @@ const ProductPage = () => {
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
             <Link to="/" className="hover:text-primary transition-colors">Início</Link>
-            <ChevronRight className="h-4 w-4" />
-            <Link to="/produtos" className="hover:text-primary transition-colors">Produtos</Link>
-            
-            {dbProduct?.category && (
+
+            {dbProduct?.segments?.[0] && (
               <>
                 <ChevronRight className="h-4 w-4" />
-                <Link 
-                  to={`/produtos?categoria=${dbProduct.category.slug}`} 
+                <Link to={`/segmento/${dbProduct.segments[0].slug}`} className="hover:text-primary transition-colors">
+                  {dbProduct.segments[0].name}
+                </Link>
+              </>
+            )}
+
+            {dbProduct?.occasions?.[0] && (
+              <>
+                <ChevronRight className="h-4 w-4" />
+                <Link to={`/ocasiao/${dbProduct.occasions[0].slug}`} className="hover:text-primary transition-colors">
+                  {dbProduct.occasions[0].name}
+                </Link>
+              </>
+            )}
+
+            {dbProduct?.category && !dbProduct?.segments?.[0] && !dbProduct?.occasions?.[0] && (
+              <>
+                <ChevronRight className="h-4 w-4" />
+                <Link
+                  to={`/categoria/${dbProduct.category.slug}`}
                   className="hover:text-primary transition-colors"
                 >
                   {dbProduct.category.name}
                 </Link>
               </>
             )}
-            
+
             <ChevronRight className="h-4 w-4" />
             <span className="text-foreground font-medium">{product.name}</span>
           </nav>
@@ -639,11 +664,40 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
             </div>
           </div>
 
-          {/* Related Products */}
-          {relatedProducts.length > 0 && (
+          {/* Internal linking by taxonomy (Fase 4) */}
+          {dbProduct?.occasions?.[0] && (
+            <RelatedByTaxonomy
+              kind="ocasiao"
+              taxonomyId={dbProduct.occasions[0].id}
+              taxonomySlug={dbProduct.occasions[0].slug}
+              taxonomyName={dbProduct.occasions[0].name}
+              excludeProductId={product.id}
+            />
+          )}
+          {dbProduct?.category && (
+            <RelatedByTaxonomy
+              kind="categoria"
+              taxonomyId={dbProduct.category.id}
+              taxonomySlug={dbProduct.category.slug}
+              taxonomyName={dbProduct.category.name}
+              excludeProductId={product.id}
+            />
+          )}
+          {dbProduct?.segments?.[0] && (
+            <RelatedByTaxonomy
+              kind="segmento"
+              taxonomyId={dbProduct.segments[0].id}
+              taxonomySlug={dbProduct.segments[0].slug}
+              taxonomyName={dbProduct.segments[0].name}
+              excludeProductId={product.id}
+            />
+          )}
+
+          {/* Fallback if nenhuma taxonomia */}
+          {!dbProduct?.occasions?.[0] && !dbProduct?.category && !dbProduct?.segments?.[0] && relatedProducts.length > 0 && (
             <div>
               <h2 className="font-display text-3xl text-foreground text-center mb-8">
-                Produtos <span className="text-primary">Relacionados</span>
+                Você também pode <span className="text-primary">gostar</span>
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map((p) => (

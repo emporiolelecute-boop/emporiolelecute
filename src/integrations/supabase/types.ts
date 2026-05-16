@@ -100,6 +100,7 @@ export type Database = {
           created_at: string
           description: string | null
           description_seo: string | null
+          faqs: Json
           h1_override: string | null
           id: string
           image_url: string | null
@@ -114,6 +115,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_seo?: string | null
+          faqs?: Json
           h1_override?: string | null
           id?: string
           image_url?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_seo?: string | null
+          faqs?: Json
           h1_override?: string | null
           id?: string
           image_url?: string | null
@@ -687,6 +690,7 @@ export type Database = {
           created_at: string
           description: string | null
           description_seo: string | null
+          faqs: Json
           h1_override: string | null
           id: string
           image_url: string | null
@@ -701,6 +705,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_seo?: string | null
+          faqs?: Json
           h1_override?: string | null
           id?: string
           image_url?: string | null
@@ -715,6 +720,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_seo?: string | null
+          faqs?: Json
           h1_override?: string | null
           id?: string
           image_url?: string | null
@@ -1257,6 +1263,7 @@ export type Database = {
           created_at: string
           description: string | null
           description_seo: string | null
+          faqs: Json
           h1_override: string | null
           id: string
           image_url: string | null
@@ -1272,6 +1279,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_seo?: string | null
+          faqs?: Json
           h1_override?: string | null
           id?: string
           image_url?: string | null
@@ -1287,6 +1295,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_seo?: string | null
+          faqs?: Json
           h1_override?: string | null
           id?: string
           image_url?: string | null

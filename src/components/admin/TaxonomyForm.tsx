@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Info } from 'lucide-react';
 import SeoPreview from './SeoPreview';
-import { TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind, slugify } from '@/lib/taxonomy';
+import { TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind, TaxonomyFaq, normalizeFaqs, slugify } from '@/lib/taxonomy';
 
 interface Props {
   kind: TaxonomyKind;
@@ -38,6 +38,12 @@ const TaxonomyForm = ({
   const [metaDescription, setMetaDescription] = useState(initial?.meta_description ?? '');
   const [h1, setH1] = useState(initial?.h1_override ?? '');
   const [descSeo, setDescSeo] = useState(initial?.description_seo ?? '');
+  const [faqs, setFaqs] = useState<TaxonomyFaq[]>(() => {
+    const existing = normalizeFaqs(initial?.faqs);
+    const padded: TaxonomyFaq[] = [...existing];
+    while (padded.length < 3) padded.push({ question: '', answer: '' });
+    return padded.slice(0, 3);
+  });
   const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
 
   useEffect(() => {
@@ -79,6 +85,7 @@ const TaxonomyForm = ({
       payload.meta_description = metaDescription || null;
       payload.h1_override = h1 || null;
       payload.description_seo = descSeo || null;
+      payload.faqs = normalizeFaqs(faqs);
     }
     await onSubmit(payload);
   };
@@ -243,6 +250,47 @@ const TaxonomyForm = ({
                 </ul>
               </div>
             )}
+          </div>
+
+          <div className="rounded-md border border-border p-4 space-y-4">
+            <div>
+              <h4 className="font-medium text-sm">FAQ desta página (opcional)</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Até 3 perguntas curtas, humanas e específicas. Deixe em branco para ocultar.
+                Gera schema FAQPage automaticamente.
+              </p>
+            </div>
+            {faqs.map((f, idx) => (
+              <div key={idx} className="space-y-2 border-l-2 border-border pl-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor={`tx-faq-q-${idx}`}>Pergunta {idx + 1}</Label>
+                  <Input
+                    id={`tx-faq-q-${idx}`}
+                    value={f.question}
+                    onChange={(e) => {
+                      const next = [...faqs];
+                      next[idx] = { ...next[idx], question: e.target.value };
+                      setFaqs(next);
+                    }}
+                    maxLength={200}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`tx-faq-a-${idx}`}>Resposta {idx + 1}</Label>
+                  <Textarea
+                    id={`tx-faq-a-${idx}`}
+                    value={f.answer}
+                    onChange={(e) => {
+                      const next = [...faqs];
+                      next[idx] = { ...next[idx], answer: e.target.value };
+                      setFaqs(next);
+                    }}
+                    rows={2}
+                    maxLength={600}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </>
       )}

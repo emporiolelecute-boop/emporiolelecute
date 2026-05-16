@@ -79,7 +79,7 @@ const AdminTaxonomiesHealth = () => {
   const summary = useMemo(() => {
     const build = (kind: TaxonomyKind, items: TaxonomyEntity[], hasSeo: boolean) => {
       const counts = productCounts[kind];
-      let noSeo = 0, noImage = 0, noDesc = 0, notIndexed = 0, orphans = 0;
+      let noSeo = 0, noImage = 0, noDesc = 0, notIndexed = 0, orphans = 0, noFaq = 0, noDescSeo = 0;
       items.forEach((i) => {
         if (hasSeo) {
           const e = evaluateSeo(i);
@@ -87,10 +87,12 @@ const AdminTaxonomiesHealth = () => {
           if (e.noImage) noImage++;
           if (e.noDescription) noDesc++;
           if (e.notIndexed) notIndexed++;
+          if (e.noFaq) noFaq++;
+          if (e.noDescriptionSeo) noDescSeo++;
         }
         if ((counts[i.id] ?? 0) === 0) orphans++;
       });
-      return { total: items.length, noSeo, noImage, noDesc, notIndexed, orphans };
+      return { total: items.length, noSeo, noImage, noDesc, notIndexed, orphans, noFaq, noDescSeo };
     };
     return {
       categoria: build('categoria', (cats.data ?? []) as TaxonomyEntity[], true),
@@ -138,6 +140,12 @@ const AdminTaxonomiesHealth = () => {
                   )}
                   {k !== 'tag' && s.notIndexed > 0 && (
                     <Badge variant="outline" className="gap-1"><EyeOff className="w-3 h-3" /> noindex: {s.notIndexed}</Badge>
+                  )}
+                  {k !== 'tag' && s.noDescSeo > 0 && (
+                    <Badge variant="outline" className="gap-1">sem texto SEO: {s.noDescSeo}</Badge>
+                  )}
+                  {k !== 'tag' && s.noFaq > 0 && (
+                    <Badge variant="outline" className="gap-1">sem FAQ: {s.noFaq}</Badge>
                   )}
                   {s.orphans > 0 && (
                     <Badge variant="outline" className="gap-1"><Link2Off className="w-3 h-3" /> órfãos: {s.orphans}</Badge>
@@ -225,6 +233,8 @@ const AdminTaxonomiesHealth = () => {
                       {seo?.noMetaDescription && <Badge variant="outline" className="text-xs">sem meta_description</Badge>}
                       {seo?.noImage && <Badge variant="outline" className="text-xs">sem imagem</Badge>}
                       {seo?.noDescription && <Badge variant="outline" className="text-xs">sem descrição</Badge>}
+                      {seo?.noDescriptionSeo && <Badge variant="outline" className="text-xs">sem texto SEO</Badge>}
+                      {seo?.noFaq && <Badge variant="outline" className="text-xs">sem FAQ</Badge>}
                     </li>
                   );
                 })}

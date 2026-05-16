@@ -17,6 +17,8 @@ export function slugify(name: string) {
     .replace(/(^-|-$)/g, '');
 }
 
+export interface TaxonomyFaq { question: string; answer: string; [key: string]: string }
+
 export interface TaxonomyEntity {
   id: string;
   name: string;
@@ -29,6 +31,7 @@ export interface TaxonomyEntity {
   h1_override?: string | null;
   description_seo?: string | null;
   is_indexed?: boolean;
+  faqs?: TaxonomyFaq[] | null;
 }
 
 export interface SeoIssues {
@@ -39,11 +42,27 @@ export interface SeoIssues {
   noImage: boolean;
   noDescription: boolean;
   notIndexed: boolean;
+  noDescriptionSeo: boolean;
+  noFaq: boolean;
+}
+
+export function normalizeFaqs(raw: unknown): TaxonomyFaq[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((r) => {
+      const o = r as { question?: unknown; answer?: unknown };
+      const q = typeof o?.question === 'string' ? o.question.trim() : '';
+      const a = typeof o?.answer === 'string' ? o.answer.trim() : '';
+      return q && a ? { question: q, answer: a } : null;
+    })
+    .filter((x): x is TaxonomyFaq => !!x);
 }
 
 export function evaluateSeo(e: TaxonomyEntity): SeoIssues {
   const mt = (e.meta_title || '').trim();
   const md = (e.meta_description || '').trim();
+  const ds = (e.description_seo || '').trim();
+  const faqs = normalizeFaqs(e.faqs);
   return {
     noMetaTitle: mt.length === 0,
     shortMetaTitle: mt.length > 0 && mt.length < 30,
@@ -52,6 +71,8 @@ export function evaluateSeo(e: TaxonomyEntity): SeoIssues {
     noImage: !e.image_url,
     noDescription: !(e.description && e.description.trim().length > 0),
     notIndexed: e.is_indexed === false,
+    noDescriptionSeo: ds.length < 120,
+    noFaq: faqs.length === 0,
   };
 }
 
