@@ -40,6 +40,8 @@ const menuItems = [
   { icon: ShoppingCart, label: 'Pedidos', path: '/admin/pedidos' },
   { icon: Users, label: 'Clientes', path: '/admin/clientes' },
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
+  { icon: ShieldCheck, label: 'Saúde SEO Produtos', path: '/admin/produtos/health' },
+  { icon: Star, label: 'Avaliações', path: '/admin/reviews' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
