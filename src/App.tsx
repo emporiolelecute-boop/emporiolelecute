@@ -219,6 +219,23 @@ const App = () => {
                   </Suspense>
                 } />
 
+                {/* Public Taxonomy Pages — Fase 3.1 */}
+                <Route path="/categoria/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <TaxonomyPage kind="categoria" />
+                  </Suspense>
+                } />
+                <Route path="/ocasiao/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <TaxonomyPage kind="ocasiao" />
+                  </Suspense>
+                } />
+                <Route path="/segmento/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <TaxonomyPage kind="segmento" />
+                  </Suspense>
+                } />
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <Suspense fallback={<AdminSkeleton />}>
