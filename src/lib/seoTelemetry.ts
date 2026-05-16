@@ -181,5 +181,13 @@ export function computeTelemetry(
     content_decay_score:          knowledge?.contentDecay ?? 0,
     cluster_growth_score:         knowledge?.clusterGrowth ?? 0,
     orphan_recovery_rate:         knowledge?.orphanRecoveryRate ?? 0,
+    semantic_roi_avg:             decision?.semanticROIAvg ?? 0,
+    authority_growth_projection:  decision?.authorityGrowthProjection ?? 0,
+    execution_efficiency:         decision?.executionEfficiency ?? 0,
+    quick_win_score:              decision?.quickWinScore ?? 0,
+    business_intent_score:        decision?.businessIntentScore ?? 0,
+    fragile_cluster_count:        decision?.fragileClusterCount ?? 0,
+    authority_dependency_risk:    decision?.authorityDependencyRisk ?? 0,
+    under_monetized_score:        decision?.underMonetizedScore ?? 0,
   };
 }
