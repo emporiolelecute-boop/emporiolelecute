@@ -94,6 +94,7 @@ const AdminSeoCommandCenter = lazyWithRetry(() => import("./pages/admin/AdminSeo
 const AdminKnowledgeGraph = lazyWithRetry(() => import("./pages/admin/AdminKnowledgeGraph"), "AdminKnowledgeGraph");
 const AdminSeoEvolution = lazyWithRetry(() => import("./pages/admin/AdminSeoEvolution"), "AdminSeoEvolution");
 const AdminSeoWarRoom = lazyWithRetry(() => import("./pages/admin/AdminSeoWarRoom"), "AdminSeoWarRoom");
+const AdminSeoAutonomy = lazyWithRetry(() => import("./pages/admin/AdminSeoAutonomy"), "AdminSeoAutonomy");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -586,6 +587,11 @@ const App = () => {
                   <Route path="seo-war-room" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSeoWarRoom />
+                    </Suspense>
+                  } />
+                  <Route path="seo-autonomy" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoAutonomy />
                     </Suspense>
                   } />
                 </Route>

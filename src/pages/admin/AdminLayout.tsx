@@ -64,6 +64,7 @@ const menuItems = [
   { icon: Network, label: 'Knowledge Graph', path: '/admin/knowledge-graph' },
   { icon: TrendingUp, label: 'SEO Evolution', path: '/admin/seo-evolution' },
   { icon: Rocket, label: 'SEO War Room', path: '/admin/seo-war-room' },
+  { icon: Rocket, label: 'SEO Autonomy', path: '/admin/seo-autonomy' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
