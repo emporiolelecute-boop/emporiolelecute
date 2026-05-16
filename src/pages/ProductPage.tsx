@@ -57,6 +57,8 @@ const ProductPage = () => {
   const { data: dbProduct, isLoading } = useDbProduct(slug || "");
   const { data: allProducts } = useDbProducts();
   const { data: paymentConfig } = usePaymentConfig();
+  const { data: reviews = [] } = useProductReviews(dbProduct?.id);
+  const { data: reviewStats } = useProductReviewStats(dbProduct?.id);
   const { addItem } = useCart();
   
   const [isFavorite, setIsFavorite] = useState(false);
