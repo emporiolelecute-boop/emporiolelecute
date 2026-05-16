@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Activity, BarChart3, AlertTriangle, Map, ListChecks, Network } from "lucide-react";
+import { Activity, BarChart3, AlertTriangle, Map as MapIcon, ListChecks, Network } from "lucide-react";
 
 import { buildExecutionBuckets, calculateEditorialMaturity, type EditorialTargetInput } from "@/lib/editorialPriorities";
 import { buildGapBuckets, detectGaps, type GapEntityInput } from "@/lib/contentGapEngine";
