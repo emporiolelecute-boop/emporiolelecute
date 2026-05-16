@@ -26,6 +26,7 @@ import {
   DbProduct,
 } from '@/hooks/useProducts';
 import { useTags, useUpdateProductTags } from '@/hooks/useTags';
+import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminProductForm = () => {
