@@ -143,11 +143,11 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Add occasions pages
+    // Occasions — canonical /ocasiao/:slug (Fase 3.1)
     if (occasions && occasions.length > 0) {
       for (const occasion of occasions) {
         sitemap += `  <url>
-    <loc>${siteUrl}/ocasioes/${occasion.slug}</loc>
+    <loc>${siteUrl}/ocasiao/${occasion.slug}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -155,12 +155,25 @@ Deno.serve(async (req) => {
 `
       }
     }
-    
-    // Add category pages
+
+    // Categories — canonical /categoria/:slug (Fase 3.1)
     if (categories && categories.length > 0) {
       for (const category of categories) {
         sitemap += `  <url>
-    <loc>${siteUrl}/produtos?categoria=${category.slug}</loc>
+    <loc>${siteUrl}/categoria/${category.slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`
+      }
+    }
+
+    // Segments — canonical /segmento/:slug (Fase 3.1)
+    if (segments && segments.length > 0) {
+      for (const segment of segments) {
+        sitemap += `  <url>
+    <loc>${siteUrl}/segmento/${segment.slug}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
