@@ -8,7 +8,7 @@
 export type GapSeverity = "critical" | "high" | "medium" | "low";
 
 export interface GapEntityInput {
-  entityType: "category" | "occasion" | "segment" | "tag" | "theme" | "combination" | "product";
+  entityType: "category" | "occasion" | "segment" | "tag" | "theme" | "combination" | "product" | "blog_post";
   slug: string;
   name: string;
   authority?: number;
