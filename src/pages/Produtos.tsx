@@ -134,6 +134,18 @@ const Produtos = () => {
     setSearchParams(newParams);
   };
 
+  const handleSegmentChange = (segmentSlug: string | null) => {
+    setSelectedSegment(segmentSlug);
+    const newParams = new URLSearchParams(searchParams);
+    if (segmentSlug) {
+      newParams.set('segmento', segmentSlug);
+    } else {
+      newParams.delete('segmento');
+    }
+    newParams.delete('pagina');
+    setSearchParams(newParams);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     const newParams = new URLSearchParams(searchParams);
@@ -150,13 +162,18 @@ const Produtos = () => {
     setSearch("");
     setSelectedCategory(null);
     setSelectedOccasion(null);
+    setSelectedSegment(null);
     setSelectedTag(null);
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  // Count active filters
-  const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedTag, debouncedSearch].filter(Boolean).length;
+  // Count active filters (for UI)
+  const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag, debouncedSearch].filter(Boolean).length;
+
+  // Structural filters count (cat + occ + seg) — drives SEO canonical/robots
+  const structuralFilters = [resolvedCategory, resolvedOccasion, resolvedSegment].filter(Boolean);
+  const structuralCount = structuralFilters.length;
 
   // Convert db products to Product format with relations
   const products: (Product & { categoryId?: string; categoryName?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[] })[] = useMemo(() => {
