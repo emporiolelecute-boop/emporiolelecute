@@ -50,6 +50,16 @@ export interface LinkingTelemetryInput {
   orphanEntities?: number;
 }
 
+export interface EditorialTelemetryInput {
+  maturities?: number[];        // editorial maturity scores
+  thematicDepths?: number[];    // theme maturity scores
+  semanticCoverages?: number[]; // topical coverage scores
+  faqCount?: number;            // entidades com FAQ
+  reviewCount?: number;         // entidades com reviews
+  orphanClusters?: number;
+  contentGaps?: number;
+}
+
 export function computeTelemetry(
   items: IndexableEntity[],
   linking?: LinkingTelemetryInput
