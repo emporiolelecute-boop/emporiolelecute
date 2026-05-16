@@ -23,6 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { useSemanticContext } from "@/hooks/useSemanticContext";
+import { buildContextualLinksForCombination } from "@/lib/linkOrchestrator";
+import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import {
   SITE_ORIGIN,
   buildCombinationCanonicalPath,
