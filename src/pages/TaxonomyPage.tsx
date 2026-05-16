@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { optimizeImage } from "@/lib/image";
-import { normalizeFaqs } from "@/lib/taxonomy";
+import { normalizeFaqs, metaTitleFallback, metaDescriptionFallback, buildBreadcrumbs, type TaxonomyKind as TaxKind } from "@/lib/taxonomy";
 import type { Product } from "@/data/products";
 
 const SITE_ORIGIN = "https://emporiolelecute.com.br";
@@ -186,24 +186,19 @@ const TaxonomyPage = ({ kind }: Props) => {
 
   // ============ SEO ============
   const pageUrl = `${SITE_ORIGIN}${cfg.routePrefix}/${slug}`;
-  const fallbackTitle = entity
-    ? `${entity.name} — ${cfg.label === "Categoria" ? "Sabonetes e Lembrancinhas" : cfg.label} | Empório LeleCute`
-    : "Empório LeleCute";
-  const fallbackDesc = entity
-    ? `Conheça nossos produtos da ${cfg.label.toLowerCase()} ${entity.name}. Lembrancinhas artesanais personalizadas com entrega para todo Brasil.`
-    : undefined;
-  const seoTitle = entity?.meta_title?.trim() || fallbackTitle;
-  const seoDesc = entity?.meta_description?.trim() || fallbackDesc;
+  // Fase 6 — fallbacks padronizados (não persistem no banco)
+  const seoTitle = entity?.meta_title?.trim() || (entity ? metaTitleFallback(cfg.kind as TaxKind, entity.name) : "Empório LeleCute");
+  const seoDesc = entity?.meta_description?.trim() || (entity ? metaDescriptionFallback(cfg.kind as TaxKind, entity.name) : undefined);
   const h1 = entity?.h1_override?.trim() || entity?.name || "";
   const isIndexed = entity?.is_indexed !== false;
   const faqs = normalizeFaqs(entity?.faqs);
 
   const breadcrumbItems = entity
-    ? [
-        { name: "Início", url: `${SITE_ORIGIN}/` },
-        { name: cfg.label === "Categoria" ? "Produtos" : cfg.label === "Ocasião" ? "Ocasiões" : "Produtos", url: `${SITE_ORIGIN}${cfg.hubPath}` },
-        { name: entity.name, url: pageUrl },
-      ]
+    ? buildBreadcrumbs({
+        kind: cfg.kind as TaxKind,
+        taxonomyName: entity.name,
+        taxonomySlug: entity.slug,
+      })
     : [];
 
   // CollectionPage JSON-LD
