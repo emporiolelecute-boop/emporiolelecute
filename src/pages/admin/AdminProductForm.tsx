@@ -265,6 +265,9 @@ const AdminProductForm = () => {
       // Update product tags
       await updateProductTags.mutateAsync({ productId, tagIds: selectedTags });
 
+      // Update product segments
+      await updateProductSegments.mutateAsync({ productId, segmentIds: selectedSegments });
+
       toast({ title: isEditing ? 'Produto atualizado!' : 'Produto criado!' });
       // Stay on page after save when editing
       if (!isEditing) {
