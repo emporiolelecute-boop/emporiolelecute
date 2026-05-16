@@ -45,6 +45,7 @@ const CombinationPage = () => {
   const { segmentSlug = "", occasionSlug = "" } = useParams<{ segmentSlug: string; occasionSlug: string }>();
   const canonicalPath = buildCombinationCanonicalPath(segmentSlug, occasionSlug);
   const { buildWhatsappUrl } = useContactInfo();
+  const { data: semanticCtx } = useSemanticContext();
 
   // 1. Entidades em paralelo
   const entitiesQuery = useQuery({
