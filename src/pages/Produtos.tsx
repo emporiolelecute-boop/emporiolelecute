@@ -86,9 +86,15 @@ const Produtos = () => {
     return dbTags.find(t => t.slug === value || t.id === value) || null;
   };
 
+  const findSegmentBySlugOrId = (value: string | null) => {
+    if (!value || !dbSegments) return null;
+    return dbSegments.find(s => s.slug === value || s.id === value) || null;
+  };
+
   // Get resolved filters from URL params
   const resolvedCategory = findCategoryBySlugOrId(selectedCategory);
   const resolvedOccasion = findOccasionBySlugOrId(selectedOccasion);
+  const resolvedSegment = findSegmentBySlugOrId(selectedSegment);
   const resolvedTag = findTagBySlugOrId(selectedTag);
 
   // Update URL when filters change - use SLUG for friendly URLs
