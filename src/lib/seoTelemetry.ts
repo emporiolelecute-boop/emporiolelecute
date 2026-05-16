@@ -51,6 +51,34 @@ export interface TelemetrySnapshot {
   fragile_cluster_count: number;
   authority_dependency_risk: number;
   under_monetized_score: number;
+  // Fase 13.1 — autonomy layer
+  semantic_stability_score: number;
+  saturation_score: number;
+  cluster_dependency_score: number;
+  authority_entropy: number;
+  commercial_diversity_score: number;
+  strategic_consistency_score: number;
+  volatility_score: number;
+  recovery_difficulty_avg: number;
+  semantic_balance_score: number;
+  overcentralization_risk: number;
+  topic_exhaustion_score: number;
+  momentum_growth_score: number;
+}
+
+export interface AutonomyTelemetryInput {
+  semanticStability?: number;
+  saturation?: number;
+  clusterDependency?: number;
+  authorityEntropy?: number;
+  commercialDiversity?: number;
+  strategicConsistency?: number;
+  volatility?: number;
+  recoveryDifficulty?: number;
+  semanticBalance?: number;
+  overcentralizationRisk?: number;
+  topicExhaustion?: number;
+  momentumGrowth?: number;
 }
 
 export interface KnowledgeTelemetryInput {
@@ -104,6 +132,7 @@ export function computeTelemetry(
   editorial?: EditorialTelemetryInput,
   knowledge?: KnowledgeTelemetryInput,
   decision?: DecisionTelemetryInput,
+  autonomy?: AutonomyTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
@@ -189,5 +218,17 @@ export function computeTelemetry(
     fragile_cluster_count:        decision?.fragileClusterCount ?? 0,
     authority_dependency_risk:    decision?.authorityDependencyRisk ?? 0,
     under_monetized_score:        decision?.underMonetizedScore ?? 0,
+    semantic_stability_score:     autonomy?.semanticStability ?? 0,
+    saturation_score:             autonomy?.saturation ?? 0,
+    cluster_dependency_score:     autonomy?.clusterDependency ?? 0,
+    authority_entropy:            autonomy?.authorityEntropy ?? 0,
+    commercial_diversity_score:   autonomy?.commercialDiversity ?? 0,
+    strategic_consistency_score:  autonomy?.strategicConsistency ?? 0,
+    volatility_score:             autonomy?.volatility ?? 0,
+    recovery_difficulty_avg:      autonomy?.recoveryDifficulty ?? 0,
+    semantic_balance_score:       autonomy?.semanticBalance ?? 0,
+    overcentralization_risk:      autonomy?.overcentralizationRisk ?? 0,
+    topic_exhaustion_score:       autonomy?.topicExhaustion ?? 0,
+    momentum_growth_score:        autonomy?.momentumGrowth ?? 0,
   };
 }

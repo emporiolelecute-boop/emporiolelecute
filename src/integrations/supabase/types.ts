@@ -1611,6 +1611,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_cluster_memory: {
+        Row: {
+          avg_authority: number
+          avg_conversion: number
+          avg_readiness: number
+          avg_roi: number
+          cluster_key: string
+          concentration_risk: number
+          created_at: string
+          decline_velocity: number
+          growth_velocity: number
+          id: string
+          orphan_rate: number
+          saturation_score: number
+          snapshot_date: string
+          total_entities: number
+        }
+        Insert: {
+          avg_authority?: number
+          avg_conversion?: number
+          avg_readiness?: number
+          avg_roi?: number
+          cluster_key: string
+          concentration_risk?: number
+          created_at?: string
+          decline_velocity?: number
+          growth_velocity?: number
+          id?: string
+          orphan_rate?: number
+          saturation_score?: number
+          snapshot_date?: string
+          total_entities?: number
+        }
+        Update: {
+          avg_authority?: number
+          avg_conversion?: number
+          avg_readiness?: number
+          avg_roi?: number
+          cluster_key?: string
+          concentration_risk?: number
+          created_at?: string
+          decline_velocity?: number
+          growth_velocity?: number
+          id?: string
+          orphan_rate?: number
+          saturation_score?: number
+          snapshot_date?: string
+          total_entities?: number
+        }
+        Relationships: []
+      }
       seo_entity_snapshots: {
         Row: {
           authority_score: number
@@ -1776,6 +1827,75 @@ export type Database = {
           top_keywords?: Json | null
           total_clicks?: number | null
           total_impressions?: number | null
+        }
+        Relationships: []
+      }
+      seo_strategy_memory: {
+        Row: {
+          authority_score: number
+          business_intent_score: number
+          cannibalization_risk: string
+          conversion_potential: number
+          created_at: string
+          decay_score: number
+          editorial_depth: number
+          entity_id: string
+          entity_type: string
+          execution_priority: number
+          id: string
+          internal_link_strength: number
+          notes: string | null
+          readiness_score: number
+          regression_risk: string
+          review_strength: number
+          semantic_coverage: number
+          snapshot_date: string
+          strategic_value: number
+          updated_at: string
+        }
+        Insert: {
+          authority_score?: number
+          business_intent_score?: number
+          cannibalization_risk?: string
+          conversion_potential?: number
+          created_at?: string
+          decay_score?: number
+          editorial_depth?: number
+          entity_id: string
+          entity_type: string
+          execution_priority?: number
+          id?: string
+          internal_link_strength?: number
+          notes?: string | null
+          readiness_score?: number
+          regression_risk?: string
+          review_strength?: number
+          semantic_coverage?: number
+          snapshot_date?: string
+          strategic_value?: number
+          updated_at?: string
+        }
+        Update: {
+          authority_score?: number
+          business_intent_score?: number
+          cannibalization_risk?: string
+          conversion_potential?: number
+          created_at?: string
+          decay_score?: number
+          editorial_depth?: number
+          entity_id?: string
+          entity_type?: string
+          execution_priority?: number
+          id?: string
+          internal_link_strength?: number
+          notes?: string | null
+          readiness_score?: number
+          regression_risk?: string
+          review_strength?: number
+          semantic_coverage?: number
+          snapshot_date?: string
+          strategic_value?: number
+          updated_at?: string
         }
         Relationships: []
       }
