@@ -768,6 +768,30 @@ const AdminProductForm = () => {
           </CardContent>
         </Card>
 
+        {/* Editorial Content (Fase 7.1) */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg font-display flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Conteúdo Editorial
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Label htmlFor="editorial_content">Texto editorial (opcional)</Label>
+            <Textarea
+              id="editorial_content"
+              rows={8}
+              value={formData.editorial_content}
+              onChange={(e) => setFormData((prev) => ({ ...prev, editorial_content: e.target.value }))}
+              placeholder={
+                'Conte a história da peça: inspiração, contexto, dicas de uso, decoração, apresentação, significado emocional...\n\nMarkdown simples (parágrafos) é suportado e enriquece o SEO como Article.'
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Esse conteúdo é renderizado abaixo da descrição no site público como uma seção editorial e gera schema <code>Article</code>.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Save Button at bottom */}
         <div className="flex justify-end gap-4 sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <Button type="button" variant="outline" onClick={() => navigate('/admin/produtos')}>
