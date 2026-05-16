@@ -26,6 +26,7 @@ import {
   DbProduct,
 } from '@/hooks/useProducts';
 import { useTags, useUpdateProductTags } from '@/hooks/useTags';
+import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminProductForm = () => {
@@ -38,9 +39,11 @@ const AdminProductForm = () => {
   const { data: categories } = useDbCategories();
   const { data: occasions } = useDbOccasions();
   const { data: tags } = useTags();
+  const { data: segments } = useSegments();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const updateProductTags = useUpdateProductTags();
+  const updateProductSegments = useUpdateProductSegments();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -68,6 +71,7 @@ const AdminProductForm = () => {
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [keywordsInput, setKeywordsInput] = useState('');
 
@@ -118,6 +122,17 @@ const AdminProductForm = () => {
         .then(({ data }) => {
           if (data) {
             setSelectedTags(data.map((t) => t.tag_id));
+          }
+        });
+
+      // Load product segments
+      supabase
+        .from('product_segments')
+        .select('segment_id')
+        .eq('product_id', existingProduct.id)
+        .then(({ data }) => {
+          if (data) {
+            setSelectedSegments(data.map((s) => s.segment_id));
           }
         });
     }
@@ -249,6 +264,9 @@ const AdminProductForm = () => {
 
       // Update product tags
       await updateProductTags.mutateAsync({ productId, tagIds: selectedTags });
+
+      // Update product segments
+      await updateProductSegments.mutateAsync({ productId, segmentIds: selectedSegments });
 
       toast({ title: isEditing ? 'Produto atualizado!' : 'Produto criado!' });
       // Stay on page after save when editing
@@ -471,6 +489,34 @@ const AdminProductForm = () => {
                   ))}
                   {!tags?.length && (
                     <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg font-display">Segmentos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {segments?.map((seg) => (
+                    <label key={seg.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1.5 rounded-md transition-colors">
+                      <Checkbox
+                        checked={selectedSegments.includes(seg.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedSegments((prev) => [...prev, seg.id]);
+                          } else {
+                            setSelectedSegments((prev) => prev.filter((id) => id !== seg.id));
+                          }
+                        }}
+                      />
+                      <span className="text-sm">{seg.name}</span>
+                    </label>
+                  ))}
+                  {!segments?.length && (
+                    <p className="text-sm text-muted-foreground">Nenhum segmento cadastrado</p>
                   )}
                 </div>
               </CardContent>

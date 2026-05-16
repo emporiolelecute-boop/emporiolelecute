@@ -32,6 +32,13 @@ export interface DbProduct {
   category?: DbCategory | null;
   occasions?: DbOccasion[];
   tags?: DbTag[];
+  segments?: DbSegment[];
+}
+
+export interface DbSegment {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export interface DbCategory {
@@ -66,7 +73,8 @@ export function useDbProducts() {
           *,
           category:categories(*),
           occasions:product_occasions(occasion:occasions(*)),
-          tags:product_tags(tag:tags(*))
+          tags:product_tags(tag:tags(*)),
+          segments:product_segments(segment:segments(id,name,slug))
         `)
         .order('created_at', { ascending: false });
 
@@ -79,6 +87,9 @@ export function useDbProducts() {
           .filter(Boolean),
         tags: (product.tags || [])
           .map((pt: { tag: DbTag }) => pt.tag)
+          .filter(Boolean),
+        segments: (product.segments || [])
+          .map((ps: { segment: DbSegment }) => ps.segment)
           .filter(Boolean),
       })) as DbProduct[];
     },
@@ -96,7 +107,8 @@ export function useDbProduct(slug: string) {
           *,
           category:categories(*),
           occasions:product_occasions(occasion:occasions(*)),
-          tags:product_tags(tag:tags(*))
+          tags:product_tags(tag:tags(*)),
+          segments:product_segments(segment:segments(id,name,slug))
         `)
         .eq('slug', slug)
         .maybeSingle();
@@ -111,6 +123,9 @@ export function useDbProduct(slug: string) {
           .filter(Boolean),
         tags: (product.tags || [])
           .map((pt: { tag: DbTag }) => pt.tag)
+          .filter(Boolean),
+        segments: (product.segments || [])
+          .map((ps: { segment: DbSegment }) => ps.segment)
           .filter(Boolean),
       } as DbProduct;
     },
