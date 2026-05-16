@@ -73,7 +73,8 @@ export function useDbProducts() {
           *,
           category:categories(*),
           occasions:product_occasions(occasion:occasions(*)),
-          tags:product_tags(tag:tags(*))
+          tags:product_tags(tag:tags(*)),
+          segments:product_segments(segment:segments(id,name,slug))
         `)
         .order('created_at', { ascending: false });
 
@@ -86,6 +87,9 @@ export function useDbProducts() {
           .filter(Boolean),
         tags: (product.tags || [])
           .map((pt: { tag: DbTag }) => pt.tag)
+          .filter(Boolean),
+        segments: (product.segments || [])
+          .map((ps: { segment: DbSegment }) => ps.segment)
           .filter(Boolean),
       })) as DbProduct[];
     },
