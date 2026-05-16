@@ -103,6 +103,7 @@ export function computeTelemetry(
   linking?: LinkingTelemetryInput,
   editorial?: EditorialTelemetryInput,
   knowledge?: KnowledgeTelemetryInput,
+  decision?: DecisionTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
