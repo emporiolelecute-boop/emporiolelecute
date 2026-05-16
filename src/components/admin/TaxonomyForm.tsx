@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Info } from 'lucide-react';
 import SeoPreview from './SeoPreview';
-import { TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind, slugify } from '@/lib/taxonomy';
+import { TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind, TaxonomyFaq, normalizeFaqs, slugify } from '@/lib/taxonomy';
 
 interface Props {
   kind: TaxonomyKind;
