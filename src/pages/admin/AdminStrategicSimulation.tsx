@@ -129,7 +129,7 @@ export default function AdminStrategicSimulation() {
         },
         notes: notes || null,
       };
-      const { error } = await supabase.from("seo_strategy_simulations").insert(payload);
+      const { error } = await supabase.from("seo_strategy_simulations").insert([payload] as any);
       if (error) throw error;
       toast.success("Simulação estratégica registrada");
     } catch (e: any) {
