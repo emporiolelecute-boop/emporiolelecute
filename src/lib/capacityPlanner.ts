@@ -17,7 +17,7 @@ export interface CapacityEstimate {
 const v = (x?: number) => (typeof x === "number" ? x : 0);
 
 export function estimateEditorialLoad(t: TelemetrySnapshot): number {
-  return Math.round(v(t.thinContent) * 0.6 + v(t.content_gap_count) * 0.5 + (v(t.editorial_backlog as number) || 0) * 0.4);
+  return Math.round(v(t.thinContent) * 0.6 + v(t.content_gap_count) * 0.5);
 }
 
 export function estimateRecoveryLoad(t: TelemetrySnapshot): number {

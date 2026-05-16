@@ -157,7 +157,7 @@ export function buildOperationalReport(t: TelemetrySnapshot): OperationalReport 
   if (recoveryCapacity < 50) recommendations.push("Plano de recuperação assistida");
   if (!recommendations.length) recommendations.push("Manter cadência atual e capturar snapshots");
 
-  const executionLoad = clamp(Math.round(operationalDebt * 0.6 + safe(t.editorial_backlog ?? 0) * 0.4));
+  const executionLoad = clamp(Math.round(operationalDebt * 0.6 + safe(t.content_gap_count) * 0.4));
   const recoveryComplexity = clamp(Math.round(safe(t.recovery_difficulty_avg) * 0.7 + fragmentationScore * 0.3));
 
   return {
