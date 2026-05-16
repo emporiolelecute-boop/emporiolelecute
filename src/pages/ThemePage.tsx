@@ -44,6 +44,7 @@ const ThemePage = () => {
   const { buildWhatsappUrl } = useContactInfo();
   const hubQuery = useThemeHubBySlug(slug);
   const hub = hubQuery.data ?? null;
+  const { data: semanticCtx } = useSemanticContext();
 
   // Produtos relacionados ao tema: via tag_id (se houver) → product_tags
   const productsQuery = useQuery({
