@@ -126,5 +126,13 @@ export function computeTelemetry(
     orphan_entities,
     authority_flow_score: flow,
     semantic_connectivity_score,
+    editorial_maturity_avg: avg(editorial?.maturities ?? []),
+    thematic_depth_avg: avg(editorial?.thematicDepths ?? []),
+    semantic_coverage_avg: avg(editorial?.semanticCoverages ?? readinesses.length ? readinesses : []),
+    faq_coverage: total > 0 ? Math.round(((editorial?.faqCount ?? 0) / total) * 100) : 0,
+    review_coverage: total > 0 ? Math.round(((editorial?.reviewCount ?? 0) / total) * 100) : 0,
+    internal_link_quality: Math.min(100, Math.round(avg_links_per_page * 12)),
+    orphan_cluster_count: editorial?.orphanClusters ?? 0,
+    content_gap_count: editorial?.contentGaps ?? 0,
   };
 }
