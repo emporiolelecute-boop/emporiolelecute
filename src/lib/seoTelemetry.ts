@@ -79,6 +79,23 @@ export interface TelemetrySnapshot {
   execution_efficiency_score: number;
   cluster_resilience_score: number;
   semantic_resilience_score: number;
+  // Fase 13.3 — control tower
+  system_health_score: number;
+  sustainability_score: number;
+  execution_efficiency: number;
+  semantic_efficiency: number;
+  authority_efficiency: number;
+  operational_waste_score: number;
+  execution_focus_score: number;
+  execution_noise_score: number;
+  strategic_alignment_score: number;
+  semantic_fatigue_score: number;
+  maintenance_explosion_risk: number;
+  collapse_risk_score: number;
+  resilience_score: number;
+  cascade_failure_risk: number;
+  recovery_elasticity: number;
+  strategic_fatigue_score: number;
 }
 
 export interface AutonomyTelemetryInput {
