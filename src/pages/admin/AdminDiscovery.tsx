@@ -164,42 +164,63 @@ const AdminDiscovery = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-mono text-xs">
-                        {r.canonical_path || r.path}
-                      </TableCell>
-                      <TableCell className="text-xs">{r.discovery_type || "—"}</TableCell>
-                      <TableCell>{r.products_count}</TableCell>
-                      <TableCell>{r.quality_score}</TableCell>
-                      <TableCell>{r.confidence_score}</TableCell>
-                      <TableCell>{classBadge(r.quality_score)}</TableCell>
-                      <TableCell>
-                        {r.thin_content_risk
-                          ? <Badge variant="destructive">Fraco</Badge>
-                          : <Badge variant="outline">OK</Badge>}
-                      </TableCell>
-                      <TableCell>{statusBadge(r.discovery_status)}</TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={setStatus.isPending}
-                          onClick={() => setStatus.mutate({ id: r.id, status: "approved" })}
-                        >
-                          Aprovar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          disabled={setStatus.isPending}
-                          onClick={() => setStatus.mutate({ id: r.id, status: "ignored" })}
-                        >
-                          Ignorar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filtered.map((r) => {
+                    const previewUrl = r.primary_type === "segment" && r.secondary_type === "occasion"
+                      ? `/segmento/${r.primary_slug}/ocasiao/${r.secondary_slug}?admin_preview=1`
+                      : null;
+                    const reasonsList: string[] = Array.isArray(r.discovery_payload?.warnings)
+                      ? r.discovery_payload.warnings
+                      : [];
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-mono text-xs">
+                          {r.canonical_path || r.path}
+                        </TableCell>
+                        <TableCell className="text-xs">{r.discovery_type || "—"}</TableCell>
+                        <TableCell>{r.products_count}</TableCell>
+                        <TableCell>{r.quality_score}</TableCell>
+                        <TableCell>{r.confidence_score}</TableCell>
+                        <TableCell>{classBadge(r.quality_score)}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {r.is_indexable
+                              ? <Badge>indexável</Badge>
+                              : <Badge variant="outline">noindex</Badge>}
+                            {r.thin_content_risk && <Badge variant="destructive">thin content</Badge>}
+                            {reasonsList.length > 0 && (
+                              <span className="text-[10px] text-muted-foreground line-clamp-2 max-w-[180px]">
+                                {reasonsList.slice(0, 2).join(" · ")}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{statusBadge(r.discovery_status)}</TableCell>
+                        <TableCell className="text-right space-x-1">
+                          {previewUrl && (
+                            <Button size="sm" variant="ghost" asChild>
+                              <a href={previewUrl} target="_blank" rel="noopener noreferrer">Preview</a>
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={setStatus.isPending}
+                            onClick={() => setStatus.mutate({ id: r.id, status: "approved" })}
+                          >
+                            Aprovar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={setStatus.isPending}
+                            onClick={() => setStatus.mutate({ id: r.id, status: "ignored" })}
+                          >
+                            Ignorar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
