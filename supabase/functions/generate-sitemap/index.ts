@@ -83,12 +83,35 @@ Deno.serve(async (req) => {
       .select('slug, name, is_indexed')
       .eq('is_indexed', true)
 
-    if (segmentsError) {
-      console.error('Error fetching segments:', segmentsError)
-    }
-    
+    // Fase 6 — Contagem de produtos por taxonomia (para excluir órfãos)
+    const [catProductsRes, occProductsRes, segProductsRes] = await Promise.all([
+      supabase.from('products').select('category_id').eq('is_active', true),
+      supabase.from('product_occasions').select('occasion_id'),
+      supabase.from('product_segments').select('segment_id'),
+    ])
+    const catCount = new Map<string, number>()
+    ;(catProductsRes.data ?? []).forEach((r: { category_id: string | null }) => {
+      if (r.category_id) catCount.set(r.category_id, (catCount.get(r.category_id) ?? 0) + 1)
+    })
+    const occCount = new Map<string, number>()
+    ;(occProductsRes.data ?? []).forEach((r: { occasion_id: string | null }) => {
+      if (r.occasion_id) occCount.set(r.occasion_id, (occCount.get(r.occasion_id) ?? 0) + 1)
+    })
+    const segCount = new Map<string, number>()
+    ;(segProductsRes.data ?? []).forEach((r: { segment_id: string | null }) => {
+      if (r.segment_id) segCount.set(r.segment_id, (segCount.get(r.segment_id) ?? 0) + 1)
+    })
+
+    // Re-fetch taxonomies WITH id para correlacionar com counts
+    const { data: catRows } = await supabase
+      .from('categories').select('id, slug, is_indexed').eq('is_indexed', true)
+    const { data: occRows } = await supabase
+      .from('occasions').select('id, slug, is_indexed').eq('is_indexed', true)
+    const { data: segRows } = await supabase
+      .from('segments').select('id, slug, is_indexed').eq('is_indexed', true)
+
     const today = new Date().toISOString().split('T')[0]
-    
+
     // Generate sitemap XML
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -113,7 +136,7 @@ Deno.serve(async (req) => {
   <!-- Individual Product Pages -->
 `
     
-    // Add products
+    // Add products (prioridade 0.7)
     if (products && products.length > 0) {
       for (const product of products) {
         const lastmod = product.updated_at 
@@ -124,7 +147,7 @@ Deno.serve(async (req) => {
     <loc>${siteUrl}/produtos/${product.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.85</priority>`
+    <priority>0.7</priority>`
         
         // Add image if available
         if (product.images && product.images.length > 0) {
@@ -142,45 +165,36 @@ Deno.serve(async (req) => {
 `
       }
     }
-    
-    // Occasions — canonical /ocasiao/:slug (Fase 3.1)
-    if (occasions && occasions.length > 0) {
-      for (const occasion of occasions) {
-        sitemap += `  <url>
-    <loc>${siteUrl}/ocasiao/${occasion.slug}</loc>
+
+    // Helper: emit taxonomy URL block, skipping orphans
+    const emitTaxonomies = (
+      rows: { id: string; slug: string }[] | null | undefined,
+      prefix: string,
+      counts: Map<string, number>,
+      priority: string,
+      changefreq: string,
+    ) => {
+      let out = ''
+      let kept = 0
+      ;(rows ?? []).forEach((r) => {
+        const n = counts.get(r.id) ?? 0
+        if (n === 0) return // exclui órfãos
+        kept++
+        out += `  <url>
+    <loc>${siteUrl}${prefix}/${r.slug}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
   </url>
 `
-      }
+      })
+      return { xml: out, kept }
     }
 
-    // Categories — canonical /categoria/:slug (Fase 3.1)
-    if (categories && categories.length > 0) {
-      for (const category of categories) {
-        sitemap += `  <url>
-    <loc>${siteUrl}/categoria/${category.slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-`
-      }
-    }
-
-    // Segments — canonical /segmento/:slug (Fase 3.1)
-    if (segments && segments.length > 0) {
-      for (const segment of segments) {
-        sitemap += `  <url>
-    <loc>${siteUrl}/segmento/${segment.slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-`
-      }
-    }
+    const catBlock = emitTaxonomies(catRows, '/categoria', catCount, '0.9', 'weekly')
+    const occBlock = emitTaxonomies(occRows, '/ocasiao',   occCount, '0.8', 'weekly')
+    const segBlock = emitTaxonomies(segRows, '/segmento',  segCount, '0.8', 'weekly')
+    sitemap += catBlock.xml + occBlock.xml + segBlock.xml
     
     // Fetch dynamic pages
     const { data: dynamicPages } = await supabase
