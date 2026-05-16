@@ -1572,6 +1572,81 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_adaptive_memory: {
+        Row: {
+          adaptation_velocity: number
+          adaptive_score: number
+          collapse_risk: number
+          compounding_score: number
+          created_at: string
+          created_by: string | null
+          dependency_risk: number
+          detected_patterns: Json
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          intelligence_snapshot: Json
+          memory_type: string
+          recommendations: Json
+          recovery_potential: number
+          resilience_score: number
+          saturation_score: number
+          semantic_drift: number
+          semantic_entropy: number
+          strategic_pressure: number
+          sustainability_score: number
+          volatility_score: number
+        }
+        Insert: {
+          adaptation_velocity?: number
+          adaptive_score?: number
+          collapse_risk?: number
+          compounding_score?: number
+          created_at?: string
+          created_by?: string | null
+          dependency_risk?: number
+          detected_patterns?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          intelligence_snapshot?: Json
+          memory_type: string
+          recommendations?: Json
+          recovery_potential?: number
+          resilience_score?: number
+          saturation_score?: number
+          semantic_drift?: number
+          semantic_entropy?: number
+          strategic_pressure?: number
+          sustainability_score?: number
+          volatility_score?: number
+        }
+        Update: {
+          adaptation_velocity?: number
+          adaptive_score?: number
+          collapse_risk?: number
+          compounding_score?: number
+          created_at?: string
+          created_by?: string | null
+          dependency_risk?: number
+          detected_patterns?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          intelligence_snapshot?: Json
+          memory_type?: string
+          recommendations?: Json
+          recovery_potential?: number
+          resilience_score?: number
+          saturation_score?: number
+          semantic_drift?: number
+          semantic_entropy?: number
+          strategic_pressure?: number
+          sustainability_score?: number
+          volatility_score?: number
+        }
+        Relationships: []
+      }
       seo_check_runs: {
         Row: {
           alert_error: string | null
