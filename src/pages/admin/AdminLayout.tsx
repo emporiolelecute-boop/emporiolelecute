@@ -31,7 +31,8 @@ import {
   Bot,
   Activity,
   Clock,
-  Star
+  Star,
+  BookOpen
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -45,6 +46,10 @@ const menuItems = [
   { icon: Activity, label: 'Saúde do Conteúdo', path: '/admin/content-health' },
   { icon: Sparkles, label: 'Oportunidades', path: '/admin/opportunities' },
   { icon: Star, label: 'Avaliações', path: '/admin/reviews' },
+  { icon: BookOpen, label: 'Blog', path: '/admin/blog' },
+  { icon: Activity, label: 'Saúde do Blog', path: '/admin/blog/health' },
+  { icon: Image, label: 'Saúde de Imagens', path: '/admin/image-health' },
+  { icon: ArrowRightLeft, label: 'Páginas Combinatórias', path: '/admin/combination-pages' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

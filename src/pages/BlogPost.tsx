@@ -9,6 +9,7 @@ import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { getPostBySlug, getRelatedPosts } from "@/data/blog";
+import { useDbBlogPostBySlug } from "@/hooks/useDbBlogPosts";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
 
@@ -16,11 +17,33 @@ const SITE = "https://emporiolelecute.com.br";
 
 const BlogPost = () => {
   const { slug = "" } = useParams();
-  const post = getPostBySlug(slug);
+  const { data: dbPost, isLoading: dbLoading } = useDbBlogPostBySlug(slug);
+  const staticPost = getPostBySlug(slug);
   const related = getRelatedPosts(slug);
   const { whatsappNumber } = useContactInfo();
   const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
 
+  // Prioriza post do banco; fallback para estático
+  const post = dbPost
+    ? {
+        slug: dbPost.slug,
+        title: dbPost.title,
+        excerpt: dbPost.excerpt || "",
+        contentHtml: dbPost.content || "",
+        coverImage: dbPost.cover_image || undefined,
+        author: dbPost.author || "Empório LeleCute",
+        publishedAt: dbPost.published_at || dbPost.created_at,
+        updatedAt: dbPost.updated_at,
+        readingMinutes: dbPost.reading_time || 5,
+        category: "Editorial",
+        tags: [] as string[],
+        seoTitle: dbPost.meta_title || undefined,
+        seoDescription: dbPost.meta_description || undefined,
+        faqs: dbPost.faqs || [],
+      }
+    : staticPost;
+
+  if (dbLoading && !staticPost) return null;
   if (!post) {
     return <Navigate to="/blog" replace />;
   }

@@ -112,6 +112,20 @@ Deno.serve(async (req) => {
 
     const today = new Date().toISOString().split('T')[0]
 
+    // Fase 9 — Posts editoriais do banco (apenas indexáveis e publicados)
+    const { data: dbBlogPosts } = await supabase
+      .from('blog_posts')
+      .select('slug, updated_at')
+      .eq('is_published', true)
+      .eq('is_indexed', true)
+      .limit(500);
+    const dbBlogPostsXml = (dbBlogPosts || []).map((p: { slug: string; updated_at: string }) => `  <url>
+    <loc>${siteUrl}/blog/${p.slug}</loc>
+    <lastmod>${(p.updated_at || '').split('T')[0] || today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`).join('\n');
+
     // Generate sitemap XML
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -299,6 +313,7 @@ ${[
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`).join('\n')}
+${dbBlogPostsXml}
 
 </urlset>`
     

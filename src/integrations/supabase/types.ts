@@ -95,6 +95,87 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author: string | null
+          content: string | null
+          cover_image: string | null
+          cover_image_alt: string | null
+          created_at: string
+          excerpt: string | null
+          faqs: Json
+          featured: boolean
+          id: string
+          is_indexed: boolean
+          is_published: boolean
+          meta_description: string | null
+          meta_title: string | null
+          position: number
+          published_at: string | null
+          reading_time: number | null
+          related_categories: string[]
+          related_occasions: string[]
+          related_products: string[]
+          related_segments: string[]
+          related_tags: string[]
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          content?: string | null
+          cover_image?: string | null
+          cover_image_alt?: string | null
+          created_at?: string
+          excerpt?: string | null
+          faqs?: Json
+          featured?: boolean
+          id?: string
+          is_indexed?: boolean
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          position?: number
+          published_at?: string | null
+          reading_time?: number | null
+          related_categories?: string[]
+          related_occasions?: string[]
+          related_products?: string[]
+          related_segments?: string[]
+          related_tags?: string[]
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          content?: string | null
+          cover_image?: string | null
+          cover_image_alt?: string | null
+          created_at?: string
+          excerpt?: string | null
+          faqs?: Json
+          featured?: boolean
+          id?: string
+          is_indexed?: boolean
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          position?: number
+          published_at?: string | null
+          reading_time?: number | null
+          related_categories?: string[]
+          related_occasions?: string[]
+          related_products?: string[]
+          related_segments?: string[]
+          related_tags?: string[]
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -140,6 +221,72 @@ export type Database = {
           name?: string
           position?: number
           slug?: string
+        }
+        Relationships: []
+      }
+      combination_pages_registry: {
+        Row: {
+          created_at: string
+          editorial_content: string | null
+          faqs: Json
+          has_custom_meta: boolean
+          has_editorial: boolean
+          has_faq: boolean
+          id: string
+          is_indexable: boolean
+          last_evaluated_at: string | null
+          meta_description: string | null
+          meta_title: string | null
+          path: string
+          primary_slug: string
+          primary_type: string
+          product_count: number
+          secondary_slug: string
+          secondary_type: string
+          seo_score: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          editorial_content?: string | null
+          faqs?: Json
+          has_custom_meta?: boolean
+          has_editorial?: boolean
+          has_faq?: boolean
+          id?: string
+          is_indexable?: boolean
+          last_evaluated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          path: string
+          primary_slug: string
+          primary_type: string
+          product_count?: number
+          secondary_slug: string
+          secondary_type: string
+          seo_score?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          editorial_content?: string | null
+          faqs?: Json
+          has_custom_meta?: boolean
+          has_editorial?: boolean
+          has_faq?: boolean
+          id?: string
+          is_indexable?: boolean
+          last_evaluated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          path?: string
+          primary_slug?: string
+          primary_type?: string
+          product_count?: number
+          secondary_slug?: string
+          secondary_type?: string
+          seo_score?: number
+          updated_at?: string
         }
         Relationships: []
       }
