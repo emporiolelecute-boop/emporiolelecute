@@ -169,6 +169,7 @@ const TaxonomyPage = ({ kind }: Props) => {
   });
 
   const related = relatedQuery.data;
+  const { data: semanticCtx } = useSemanticContext();
 
   const products: Product[] = useMemo(
     () =>
