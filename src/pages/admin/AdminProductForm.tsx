@@ -71,6 +71,7 @@ const AdminProductForm = () => {
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [keywordsInput, setKeywordsInput] = useState('');
 
