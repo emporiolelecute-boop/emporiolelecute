@@ -29,14 +29,14 @@ import { MomentumTimeline } from "@/components/admin/MomentumTimeline";
 import { SemanticEntropyCard } from "@/components/admin/SemanticEntropyCard";
 import { SaturationMatrix } from "@/components/admin/SaturationMatrix";
 import { RecoveryForecastCard } from "@/components/admin/RecoveryForecastCard";
-import { useProducts } from "@/hooks/useProducts";
+import { useDbProducts } from "@/hooks/useProducts";
 
 /**
  * Fase 13.1 — SEO Autonomy Layer.
  * Camada estratégica somente leitura (orientativa, sem alterar SEO público).
  */
 export default function AdminSeoAutonomy() {
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = useDbProducts();
   const [saving, setSaving] = useState(false);
 
   const stabilityItems: StabilityEntity[] = useMemo(
