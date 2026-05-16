@@ -203,10 +203,15 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* SEO and Structured Data */}
+      {/* SEO and Structured Data — Fase 7 */}
       <DynamicSEO
         title={`${product.name} | Empório LeleCute`}
-        description={product.description || `Lembrancinha artesanal ${product.name}. Personalizada para ocasiões especiais.`}
+        description={(() => {
+          const raw = product.description
+            || (product.longDescription ? product.longDescription.replace(/\s+/g, ' ').trim() : '')
+            || `Lembrancinha artesanal ${product.name}, feita à mão e personalizada para ocasiões especiais. Empório LeleCute envia para todo o Brasil.`;
+          return raw.length > 160 ? raw.slice(0, 157).trimEnd() + '…' : raw;
+        })()}
         image={product.images[0] || undefined}
         url={`https://emporiolelecute.com.br/produto/${product.slug}`}
         type="product"
@@ -217,9 +222,18 @@ const ProductPage = () => {
         price={product.price}
         images={product.images}
         slug={product.slug}
-        rating={product.rating}
+        rating={reviewStats?.avg_rating ? Number(reviewStats.avg_rating) : undefined}
+        reviewCount={reviewStats?.review_count}
         productionDays={product.productionDays}
         category={dbProduct?.category?.name}
+        material="Artesanal — produzido à mão no Brasil"
+        reviews={reviews.map((r) => ({
+          author_name: r.author_name,
+          rating: r.rating,
+          comment: r.comment,
+          review_date: r.review_date,
+          source: r.source,
+        }))}
       />
       <BreadcrumbStructuredData
         items={[
