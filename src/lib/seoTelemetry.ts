@@ -79,6 +79,23 @@ export interface TelemetrySnapshot {
   execution_efficiency_score: number;
   cluster_resilience_score: number;
   semantic_resilience_score: number;
+  // Fase 13.3 — control tower
+  system_health_score: number;
+  sustainability_score: number;
+  // execution_efficiency reused from Fase 13
+  semantic_efficiency: number;
+  authority_efficiency: number;
+  operational_waste_score: number;
+  execution_focus_score: number;
+  execution_noise_score: number;
+  strategic_alignment_score: number;
+  semantic_fatigue_score: number;
+  maintenance_explosion_risk: number;
+  collapse_risk_score: number;
+  resilience_score: number;
+  cascade_failure_risk: number;
+  recovery_elasticity: number;
+  strategic_fatigue_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -259,5 +276,20 @@ export function computeTelemetry(
     execution_efficiency_score: 0,
     cluster_resilience_score: 0,
     semantic_resilience_score: 0,
+    system_health_score: 0,
+    sustainability_score: 0,
+    semantic_efficiency: 0,
+    authority_efficiency: 0,
+    operational_waste_score: 0,
+    execution_focus_score: 0,
+    execution_noise_score: 0,
+    strategic_alignment_score: 0,
+    semantic_fatigue_score: 0,
+    maintenance_explosion_risk: 0,
+    collapse_risk_score: 0,
+    resilience_score: 0,
+    cascade_failure_risk: 0,
+    recovery_elasticity: 0,
+    strategic_fatigue_score: 0,
   };
 }

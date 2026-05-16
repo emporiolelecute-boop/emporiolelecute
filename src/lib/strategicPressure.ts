@@ -69,3 +69,23 @@ function mitigationFor(area: PressureReport["area"]): string[] {
     case "authority": return ["Diversificar autoridade", "Reforçar hubs secundários"];
   }
 }
+
+// Fase 13.3 — pressões adicionais
+const _v2 = (x?: number) => (typeof x === "number" ? x : 0);
+const _c2 = (n: number) => Math.max(0, Math.min(100, n));
+
+export function calculateRecoveryPressure(t: TelemetrySnapshot): number {
+  return _c2(Math.round(_v2(t.recovery_difficulty_avg) * 0.5 + _v2(t.orphan_entities) * 0.4 + _v2(t.content_decay_score) * 0.3));
+}
+export function calculateExecutionPressure(t: TelemetrySnapshot): number {
+  return _c2(Math.round(_v2(t.fragile_cluster_count) * 5 + _v2(t.regression_risk_score) * 0.3 + (100 - _v2(t.execution_efficiency)) * 0.3));
+}
+export function calculateMaintenancePressure(t: TelemetrySnapshot): number {
+  return _c2(Math.round(_v2(t.content_decay_score) * 0.5 + _v2(t.overlinked_pages) * 0.6 + _v2(t.thinContent) * 0.8));
+}
+export function calculateEntropyPressure(t: TelemetrySnapshot): number {
+  return _c2(Math.round(_v2(t.authority_entropy) * 0.6 + _v2(t.semantic_loop_count) * 4 + (100 - _v2(t.semantic_balance_score)) * 0.3));
+}
+export function calculateStrategicFatigue(t: TelemetrySnapshot): number {
+  return _c2(Math.round(_v2(t.topic_exhaustion_score) * 0.4 + _v2(t.volatility_score) * 0.3 + (100 - _v2(t.strategic_consistency_score)) * 0.3));
+}
