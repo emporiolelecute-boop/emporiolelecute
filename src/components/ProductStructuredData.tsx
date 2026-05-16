@@ -38,10 +38,13 @@ const ProductStructuredData = ({
   productionDays = 7,
   category = "Lembrancinhas Artesanais",
   brand = "Empório LeleCute",
+  reviews,
+  material,
+  sku,
 }: ProductStructuredDataProps) => {
   const baseUrl = "https://emporiolelecute.com.br";
   const productUrl = `${baseUrl}/produto/${slug}`;
-  
+
   // Calculate priceValidUntil - one year from now in YYYY-MM-DD format
   const priceValidUntil = new Date();
   priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
