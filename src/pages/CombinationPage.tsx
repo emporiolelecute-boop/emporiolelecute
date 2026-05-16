@@ -41,7 +41,7 @@ interface TaxRow { id: string; name: string; slug: string; description: string |
 const CombinationPage = () => {
   const { segmentSlug = "", occasionSlug = "" } = useParams<{ segmentSlug: string; occasionSlug: string }>();
   const canonicalPath = buildCombinationCanonicalPath(segmentSlug, occasionSlug);
-  const { contactInfo } = useContactInfo();
+  const { buildWhatsappUrl } = useContactInfo();
 
   // 1. Entidades em paralelo
   const entitiesQuery = useQuery({
@@ -195,13 +195,11 @@ const CombinationPage = () => {
     : null;
 
   const whatsappHref = useMemo(() => {
-    const phone = (contactInfo?.whatsapp || "").replace(/\D/g, "");
-    if (!phone) return null;
-    const msg = encodeURIComponent(
+    if (!segName || !occName) return null;
+    return buildWhatsappUrl(
       `Olá! Tenho interesse em ${segName.toLowerCase()} para ${occName.toLowerCase()}.`
     );
-    return `https://wa.me/${phone}?text=${msg}`;
-  }, [contactInfo?.whatsapp, segName, occName]);
+  }, [buildWhatsappUrl, segName, occName]);
 
   if (notFound) {
     return (
