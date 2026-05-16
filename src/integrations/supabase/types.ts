@@ -962,6 +962,36 @@ export type Database = {
           },
         ]
       }
+      product_segments: {
+        Row: {
+          product_id: string
+          segment_id: string
+        }
+        Insert: {
+          product_id: string
+          segment_id: string
+        }
+        Update: {
+          product_id?: string
+          segment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_segments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_segments_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_tags: {
         Row: {
           product_id: string
@@ -1177,6 +1207,54 @@ export type Database = {
           status?: string
           target_email?: string
           target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      segments: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_seo: string | null
+          h1_override: string | null
+          id: string
+          image_url: string | null
+          is_indexed: boolean
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          position: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_seo?: string | null
+          h1_override?: string | null
+          id?: string
+          image_url?: string | null
+          is_indexed?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          position?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_seo?: string | null
+          h1_override?: string | null
+          id?: string
+          image_url?: string | null
+          is_indexed?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          position?: number
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
