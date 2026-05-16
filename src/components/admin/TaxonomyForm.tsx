@@ -38,6 +38,12 @@ const TaxonomyForm = ({
   const [metaDescription, setMetaDescription] = useState(initial?.meta_description ?? '');
   const [h1, setH1] = useState(initial?.h1_override ?? '');
   const [descSeo, setDescSeo] = useState(initial?.description_seo ?? '');
+  const [faqs, setFaqs] = useState<TaxonomyFaq[]>(() => {
+    const existing = normalizeFaqs(initial?.faqs);
+    const padded: TaxonomyFaq[] = [...existing];
+    while (padded.length < 3) padded.push({ question: '', answer: '' });
+    return padded.slice(0, 3);
+  });
   const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
 
   useEffect(() => {
@@ -79,6 +85,7 @@ const TaxonomyForm = ({
       payload.meta_description = metaDescription || null;
       payload.h1_override = h1 || null;
       payload.description_seo = descSeo || null;
+      payload.faqs = normalizeFaqs(faqs);
     }
     await onSubmit(payload);
   };
