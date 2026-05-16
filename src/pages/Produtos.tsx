@@ -14,6 +14,7 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
+import { useSegments } from "@/hooks/useSegments";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   Pagination,
@@ -34,10 +35,12 @@ const Produtos = () => {
   const { data: dbCategories } = useDbCategories();
   const { data: dbOccasions } = useDbOccasions();
   const { data: dbTags } = useTags();
-  
+  const { data: dbSegments } = useSegments();
+
   const [search, setSearch] = useState(searchParams.get('busca') || searchParams.get('search') || "");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('categoria') || null);
   const [selectedOccasion, setSelectedOccasion] = useState<string | null>(searchParams.get('ocasiao') || null);
+  const [selectedSegment, setSelectedSegment] = useState<string | null>(searchParams.get('segmento') || null);
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('pagina')) || 1);
@@ -50,20 +53,22 @@ const Produtos = () => {
     const urlSearch = searchParams.get('busca') || searchParams.get('search');
     const urlCategoria = searchParams.get('categoria');
     const urlOcasiao = searchParams.get('ocasiao');
+    const urlSegmento = searchParams.get('segmento');
     const urlTag = searchParams.get('tag');
     const urlPage = searchParams.get('pagina');
-    
-    if (urlSearch !== null) setSearch(urlSearch);
-    if (urlCategoria !== null) setSelectedCategory(urlCategoria);
-    if (urlOcasiao !== null) setSelectedOccasion(urlOcasiao);
-    if (urlTag !== null) setSelectedTag(urlTag);
-    if (urlPage !== null) setCurrentPage(Number(urlPage) || 1);
+
+    setSearch(urlSearch ?? "");
+    setSelectedCategory(urlCategoria);
+    setSelectedOccasion(urlOcasiao);
+    setSelectedSegment(urlSegmento);
+    setSelectedTag(urlTag);
+    setCurrentPage(urlPage ? Number(urlPage) || 1 : 1);
   }, [searchParams]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, selectedCategory, selectedOccasion, selectedTag]);
+  }, [debouncedSearch, selectedCategory, selectedOccasion, selectedSegment, selectedTag]);
 
   // Helper to find category/occasion/tag by slug or ID
   const findCategoryBySlugOrId = (value: string | null) => {
@@ -81,9 +86,15 @@ const Produtos = () => {
     return dbTags.find(t => t.slug === value || t.id === value) || null;
   };
 
+  const findSegmentBySlugOrId = (value: string | null) => {
+    if (!value || !dbSegments) return null;
+    return dbSegments.find(s => s.slug === value || s.id === value) || null;
+  };
+
   // Get resolved filters from URL params
   const resolvedCategory = findCategoryBySlugOrId(selectedCategory);
   const resolvedOccasion = findOccasionBySlugOrId(selectedOccasion);
+  const resolvedSegment = findSegmentBySlugOrId(selectedSegment);
   const resolvedTag = findTagBySlugOrId(selectedTag);
 
   // Update URL when filters change - use SLUG for friendly URLs
@@ -123,6 +134,18 @@ const Produtos = () => {
     setSearchParams(newParams);
   };
 
+  const handleSegmentChange = (segmentSlug: string | null) => {
+    setSelectedSegment(segmentSlug);
+    const newParams = new URLSearchParams(searchParams);
+    if (segmentSlug) {
+      newParams.set('segmento', segmentSlug);
+    } else {
+      newParams.delete('segmento');
+    }
+    newParams.delete('pagina');
+    setSearchParams(newParams);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     const newParams = new URLSearchParams(searchParams);
@@ -139,16 +162,21 @@ const Produtos = () => {
     setSearch("");
     setSelectedCategory(null);
     setSelectedOccasion(null);
+    setSelectedSegment(null);
     setSelectedTag(null);
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  // Count active filters
-  const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedTag, debouncedSearch].filter(Boolean).length;
+  // Count active filters (for UI)
+  const activeFiltersCount = [resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag, debouncedSearch].filter(Boolean).length;
+
+  // Structural filters count (cat + occ + seg) — drives SEO canonical/robots
+  const structuralFilters = [resolvedCategory, resolvedOccasion, resolvedSegment].filter(Boolean);
+  const structuralCount = structuralFilters.length;
 
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; categoryName?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[] })[] = useMemo(() => {
+  const products: (Product & { categoryId?: string; categoryName?: string; longDescriptionRaw?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[]; segmentIds: string[]; segmentNames: string[] })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -157,6 +185,7 @@ const Produtos = () => {
         name: p.name,
         description: p.description || '',
         longDescription: p.long_description || undefined,
+        longDescriptionRaw: p.long_description || '',
         price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
         originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
         image: p.images[0] || '/placeholder.svg',
@@ -174,28 +203,46 @@ const Produtos = () => {
         occasionNames: (p.occasions || []).map(o => o.name),
         tagIds: (p.tags || []).map(t => t.id),
         tagNames: (p.tags || []).map(t => t.name),
+        segmentIds: (p.segments || []).map(s => s.id),
+        segmentNames: (p.segments || []).map(s => s.name),
       }));
   }, [dbProducts]);
 
-  // Filter products with debounced search (now includes category/occasion/tag names)
+  // Filter products — search now also covers long description + segments
   const filteredProducts = useMemo(() => {
-    const q = debouncedSearch.toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return products.filter((product) => {
       const matchesSearch = !q ||
         product.name.toLowerCase().includes(q) ||
         product.description.toLowerCase().includes(q) ||
+        (product.longDescriptionRaw?.toLowerCase().includes(q) ?? false) ||
         product.keywords.some(k => k.toLowerCase().includes(q)) ||
         (product.categoryName?.toLowerCase().includes(q) ?? false) ||
         product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
-        product.tagNames.some(n => n.toLowerCase().includes(q));
+        product.tagNames.some(n => n.toLowerCase().includes(q)) ||
+        product.segmentNames.some(n => n.toLowerCase().includes(q));
 
       const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
       const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
+      const matchesSegment = !resolvedSegment || product.segmentIds.includes(resolvedSegment.id);
       const matchesTag = !resolvedTag || product.tagIds.includes(resolvedTag.id);
 
-      return matchesSearch && matchesCategory && matchesOccasion && matchesTag;
+      return matchesSearch && matchesCategory && matchesOccasion && matchesSegment && matchesTag;
     });
-  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedTag]);
+  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag]);
+
+  // Counts per taxonomy (over all active products, not the filtered list — keeps UI predictable)
+  const counts = useMemo(() => {
+    const cat: Record<string, number> = {};
+    const occ: Record<string, number> = {};
+    const seg: Record<string, number> = {};
+    for (const p of products) {
+      if (p.categoryId) cat[p.categoryId] = (cat[p.categoryId] || 0) + 1;
+      for (const id of p.occasionIds) occ[id] = (occ[id] || 0) + 1;
+      for (const id of p.segmentIds) seg[id] = (seg[id] || 0) + 1;
+    }
+    return { cat, occ, seg };
+  }, [products]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
@@ -279,20 +326,56 @@ const Produtos = () => {
     },
   ];
 
-  // SEO copy otimizada (visível, indexável)
-  const seoCopyVisible = !resolvedCategory && !resolvedOccasion && !resolvedTag && !debouncedSearch;
+  // SEO copy otimizada (visível, indexável) — só na visão sem nenhum filtro
+  const seoCopyVisible = !resolvedCategory && !resolvedOccasion && !resolvedSegment && !resolvedTag && !debouncedSearch;
+
+  // === Anti-canibalização SEO ===
+  // 0 filtros estruturais (+ sem tag/busca) -> indexável, canonical /produtos
+  // 1 filtro estrutural (sem outros)        -> canonical para taxonomia oficial (não duplica)
+  // 2+ filtros / tag / busca / paginação    -> noindex,follow + canonical /produtos
+  const SITE = 'https://emporiolelecute.com.br';
+  let canonicalUrl = `${SITE}/produtos`;
+  let isIndexable = true;
+
+  if (structuralCount === 1 && !resolvedTag && !debouncedSearch && currentPage === 1) {
+    const only = structuralFilters[0]!;
+    if (resolvedCategory) canonicalUrl = `${SITE}/categoria/${only.slug}`;
+    else if (resolvedOccasion) canonicalUrl = `${SITE}/ocasiao/${only.slug}`;
+    else if (resolvedSegment) canonicalUrl = `${SITE}/segmento/${only.slug}`;
+  } else if (structuralCount >= 2 || resolvedTag || debouncedSearch || currentPage > 1) {
+    isIndexable = false;
+    canonicalUrl = `${SITE}/produtos`;
+  }
+
+  // Dynamic title/description
+  const seoTitle = (() => {
+    if (structuralCount >= 2 || resolvedTag) return "Produtos Personalizados | Empório LeleCute";
+    if ((resolvedCategory as any)?.meta_title) return (resolvedCategory as any).meta_title;
+    if ((resolvedOccasion as any)?.meta_title) return (resolvedOccasion as any).meta_title;
+    if (resolvedSegment?.meta_title) return resolvedSegment.meta_title;
+    if (resolvedCategory) return `${resolvedCategory.name} | Empório LeleCute`;
+    if (resolvedOccasion) return `${resolvedOccasion.name} | Empório LeleCute`;
+    if (resolvedSegment) return `${resolvedSegment.name} | Empório LeleCute`;
+    if (debouncedSearch) return `Busca: ${debouncedSearch} | Empório LeleCute`;
+    return "Produtos Artesanais Personalizados | Empório LeleCute";
+  })();
+
+  const seoDescription = (() => {
+    if (structuralCount >= 2 || resolvedTag) return "Explore produtos artesanais personalizados por categoria, ocasião e segmento.";
+    if ((resolvedCategory as any)?.meta_description) return (resolvedCategory as any).meta_description;
+    if ((resolvedOccasion as any)?.meta_description) return (resolvedOccasion as any).meta_description;
+    if (resolvedSegment?.meta_description) return resolvedSegment.meta_description;
+    return "Sabonetes, lembrancinhas, brindes e presentes artesanais personalizados para maternidade, casamento, chá de bebê, batizado e eventos especiais.";
+  })();
 
   return (
     <div className="min-h-screen bg-background">
-      <DynamicSEO
-        title={
-          resolvedCategory
-            ? `${resolvedCategory.name} | Empório LeleCute`
-            : "Sabonete Personalizado Lembrancinha | Artesanal e Sob Medida — Empório LeleCute"
-        }
-        description="Sabonete personalizado lembrancinha artesanal: chá de bebê, maternidade, batizado, casamento. Mais de 100 modelos exclusivos com nome, tema e cores à sua escolha. Envio para todo o Brasil."
-        url="https://emporiolelecute.com.br/produtos"
-      />
+      <DynamicSEO title={seoTitle} description={seoDescription} url={canonicalUrl} />
+      {!isIndexable && (
+        <Helmet>
+          <meta name="robots" content="noindex,follow" />
+        </Helmet>
+      )}
       <BreadcrumbStructuredData items={breadcrumbItems} />
 
       {/* FAQPage JSON-LD para rich snippet no Google */}
@@ -421,6 +504,7 @@ const Produtos = () => {
                   onClick={() => handleCategoryChange(category.slug)}
                 >
                   {category.slug === 'sabonetes' ? '🧼' : category.slug === 'velas' ? '🕯️' : category.slug === 'kits' ? '🎁' : '✨'} {category.name}
+                  {counts.cat[category.id] ? <span className="ml-1 opacity-70">({counts.cat[category.id]})</span> : null}
                 </Badge>
               ))}
             </div>
@@ -449,10 +533,38 @@ const Produtos = () => {
                    occasion.slug === 'batizado' ? '⛪' : 
                    occasion.slug === 'casamento' ? '💒' : 
                    occasion.slug === 'aniversario' ? '🎂' : '🏢'} {occasion.name}
+                  {counts.occ[occasion.id] ? <span className="ml-1 opacity-70">({counts.occ[occasion.id]})</span> : null}
                 </Badge>
               ))}
             </div>
           </div>
+
+          {/* Segment Filters */}
+          {dbSegments && dbSegments.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-foreground mb-3">Segmentos</h3>
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant={!resolvedSegment ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 text-sm"
+                  onClick={() => handleSegmentChange(null)}
+                >
+                  Todos
+                </Badge>
+                {dbSegments.map((segment) => (
+                  <Badge
+                    key={segment.id}
+                    variant={resolvedSegment?.id === segment.id ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 text-sm"
+                    onClick={() => handleSegmentChange(segment.slug)}
+                  >
+                    {segment.name}
+                    {counts.seg[segment.id] ? <span className="ml-1 opacity-70">({counts.seg[segment.id]})</span> : null}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Tag Filters */}
           {dbTags && dbTags.length > 0 && (
@@ -553,7 +665,19 @@ const Produtos = () => {
             </>
           ) : (
             <div className="text-center py-16">
-              <p className="text-muted-foreground mb-4">Nenhum produto encontrado</p>
+              <p className="text-muted-foreground mb-4">
+                Nenhum produto encontrado
+                {(() => {
+                  const parts = [
+                    resolvedCategory?.name,
+                    resolvedOccasion?.name,
+                    resolvedSegment?.name,
+                    resolvedTag?.name,
+                    debouncedSearch ? `"${debouncedSearch}"` : null,
+                  ].filter(Boolean);
+                  return parts.length ? ` para: ${parts.join(' + ')}` : '';
+                })()}
+              </p>
               <Button onClick={handleClearFilters}>
                 Limpar filtros
               </Button>
@@ -677,6 +801,54 @@ const Produtos = () => {
             </div>
           </section>
         )}
+
+        {/* HUB SEMÂNTICO — interlinking para páginas canônicas */}
+        <section className="container mx-auto px-4 mt-20">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+            {(dbCategories || []).length > 0 && (
+              <div>
+                <h2 className="font-display text-xl text-foreground mb-4">Comprar por categoria</h2>
+                <ul className="space-y-2">
+                  {(dbCategories || []).slice(0, 8).map((c) => (
+                    <li key={c.id}>
+                      <Link to={`/categoria/${c.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {c.name}{counts.cat[c.id] ? <span className="ml-1 opacity-60">({counts.cat[c.id]})</span> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(dbOccasions || []).length > 0 && (
+              <div>
+                <h2 className="font-display text-xl text-foreground mb-4">Comprar por ocasião</h2>
+                <ul className="space-y-2">
+                  {(dbOccasions || []).slice(0, 8).map((o) => (
+                    <li key={o.id}>
+                      <Link to={`/ocasiao/${o.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {o.name}{counts.occ[o.id] ? <span className="ml-1 opacity-60">({counts.occ[o.id]})</span> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(dbSegments || []).length > 0 && (
+              <div>
+                <h2 className="font-display text-xl text-foreground mb-4">Comprar por segmento</h2>
+                <ul className="space-y-2">
+                  {(dbSegments || []).slice(0, 8).map((s) => (
+                    <li key={s.id}>
+                      <Link to={`/segmento/${s.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {s.name}{counts.seg[s.id] ? <span className="ml-1 opacity-60">({counts.seg[s.id]})</span> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* WhatsApp CTA — otimizado para conversão */}
         <div className="container mx-auto px-4 mt-20">
