@@ -75,6 +75,8 @@ const AdminAccessRequestDetail = lazyWithRetry(() => import("./pages/admin/Admin
 const AdminAudit = lazyWithRetry(() => import("./pages/admin/AdminAudit"), "AdminAudit");
 const AdminTaxonomies = lazyWithRetry(() => import("./pages/admin/AdminTaxonomies"), "AdminTaxonomies");
 const AdminTaxonomiesHealth = lazyWithRetry(() => import("./pages/admin/AdminTaxonomiesHealth"), "AdminTaxonomiesHealth");
+const AdminContentHealth = lazyWithRetry(() => import("./pages/admin/AdminContentHealth"), "AdminContentHealth");
+const AdminOpportunities = lazyWithRetry(() => import("./pages/admin/AdminOpportunities"), "AdminOpportunities");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -458,6 +460,16 @@ const App = () => {
                   <Route path="produtos/health" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminProductsHealth />
+                    </Suspense>
+                  } />
+                  <Route path="content-health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminContentHealth />
+                    </Suspense>
+                  } />
+                  <Route path="opportunities" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminOpportunities />
                     </Suspense>
                   } />
                   <Route path="reviews" element={

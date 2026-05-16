@@ -42,6 +42,8 @@ const menuItems = [
   { icon: Users, label: 'Clientes', path: '/admin/clientes' },
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
   { icon: ShieldCheck, label: 'Saúde SEO Produtos', path: '/admin/produtos/health' },
+  { icon: Activity, label: 'Saúde do Conteúdo', path: '/admin/content-health' },
+  { icon: Sparkles, label: 'Oportunidades', path: '/admin/opportunities' },
   { icon: Star, label: 'Avaliações', path: '/admin/reviews' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
