@@ -273,7 +273,7 @@ const ThemePage = () => {
             </Badge>
             <Badge variant="outline">Authority: {score}</Badge>
             <Badge variant="outline">{verdict.classification}</Badge>
-            {cannibalRisk !== "none" && cannibalRisk !== "unknown" && (
+            {cannibalRisk !== "none" && (
               <Badge variant={cannibalRisk === "high" ? "destructive" : "outline"}>
                 Canibalização: {cannibalRisk}
               </Badge>
