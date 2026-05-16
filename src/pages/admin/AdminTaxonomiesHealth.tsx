@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDbCategories, useDbOccasions } from '@/hooks/useProducts';
 import { useSegments } from '@/hooks/useSegments';
 import { useTags } from '@/hooks/useTags';
-import { evaluateSeo, hasAnyIssue, TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind } from '@/lib/taxonomy';
+import { evaluateSeo, hasAnyIssue, scoreSeo, TAXONOMY_LABELS, TaxonomyEntity, TaxonomyKind } from '@/lib/taxonomy';
 
 interface ConsolidationRow {
   route_slug: string;
@@ -199,17 +199,75 @@ const AdminTaxonomiesHealth = () => {
         </CardContent>
       </Card>
 
+      {/* Fase 6 — Alertas de canibalização SEO */}
+      {(() => {
+        const all: { kind: TaxonomyKind; name: string; slug: string; title: string }[] = [];
+        const push = (kind: TaxonomyKind, items: TaxonomyEntity[] | undefined) => {
+          (items ?? []).forEach((i) => all.push({
+            kind, name: i.name, slug: i.slug,
+            title: (i.meta_title || i.name || '').trim().toLowerCase(),
+          }));
+        };
+        push('categoria', cats.data as TaxonomyEntity[] | undefined);
+        push('ocasiao',   occs.data as TaxonomyEntity[] | undefined);
+        push('segmento',  segs.data as TaxonomyEntity[] | undefined);
+        push('tag',       tagsQ.data as TaxonomyEntity[] | undefined);
+
+        const alerts: string[] = [];
+        for (let i = 0; i < all.length; i++) {
+          for (let j = i + 1; j < all.length; j++) {
+            const a = all[i], b = all[j];
+            if (a.kind === b.kind) continue;
+            if (a.slug && b.slug && a.slug === b.slug) {
+              alerts.push(`Slug "${a.slug}" usado em ${TAXONOMY_LABELS[a.kind].singular} e ${TAXONOMY_LABELS[b.kind].singular}`);
+            } else if (a.title && b.title && a.title === b.title) {
+              alerts.push(`Título idêntico "${a.title}" em ${TAXONOMY_LABELS[a.kind].singular} e ${TAXONOMY_LABELS[b.kind].singular}`);
+            }
+          }
+        }
+        const unique = Array.from(new Set(alerts));
+        if (unique.length === 0) return null;
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                Possíveis canibalizações SEO ({unique.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="divide-y divide-border text-sm">
+                {unique.map((m) => (
+                  <li key={m} className="py-2 text-amber-900 dark:text-amber-200">⚠️ {m}</li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground mt-3">
+                Novos cadastros com slug duplicado entre taxonomias são bloqueados pelo banco.
+                Conflitos antigos permanecem visíveis aqui para revisão manual.
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {allKinds.map((k) => {
         const items = (
           k === 'categoria' ? cats.data : k === 'ocasiao' ? occs.data : k === 'segmento' ? segs.data : tagsQ.data
         ) as TaxonomyEntity[] | undefined;
         const counts = productCounts[k];
-        const problems = (items ?? []).filter((i) => {
-          const orphan = (counts[i.id] ?? 0) === 0;
-          if (k === 'tag') return orphan;
-          return hasAnyIssue(evaluateSeo(i)) || orphan;
-        });
-        if (problems.length === 0) return null;
+        type Row = { item: TaxonomyEntity; orphan: boolean; score?: number; grade?: string };
+        const rows: Row[] = (items ?? [])
+          .map<Row>((i) => {
+            const orphan = (counts[i.id] ?? 0) === 0;
+            if (k === 'tag') return { item: i, orphan };
+            const s = scoreSeo(i, { productCount: counts[i.id] ?? 0 });
+            return { item: i, orphan, score: s.score, grade: s.grade };
+          })
+          .filter((r) => r.orphan || (k !== 'tag' && hasAnyIssue(evaluateSeo(r.item))));
+        if (rows.length === 0) return null;
+        // Pior score primeiro
+        rows.sort((a, b) => (a.score ?? -1) - (b.score ?? -1));
+        const problems = rows;
         return (
           <Card key={k}>
             <CardHeader>
@@ -219,22 +277,34 @@ const AdminTaxonomiesHealth = () => {
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border">
-                {problems.map((i) => {
-                  const orphan = (counts[i.id] ?? 0) === 0;
+                {problems.map(({ item: i, orphan, score, grade }) => {
                   const seo = k !== 'tag' ? evaluateSeo(i) : null;
+                  const scoreColor = score === undefined ? '' :
+                    score >= 75 ? 'border-emerald-400 text-emerald-700 dark:text-emerald-300' :
+                    score >= 55 ? 'border-amber-400 text-amber-700 dark:text-amber-300' :
+                    'border-rose-400 text-rose-700 dark:text-rose-300';
                   return (
                     <li key={i.id} className="py-2 flex flex-wrap items-center gap-2">
                       <span className="font-medium">{i.name}</span>
                       <span className="text-xs text-muted-foreground">{TAXONOMY_LABELS[k].urlPrefix}{i.slug}</span>
                       <span className="text-xs text-muted-foreground">· {counts[i.id] ?? 0} produto(s)</span>
+                      {score !== undefined && (
+                        <Badge variant="outline" className={`text-xs gap-1 ${scoreColor}`}>
+                          SEO {score}/100 · {grade}
+                        </Badge>
+                      )}
                       {orphan && <Badge variant="outline" className="text-xs">órfão</Badge>}
                       {seo?.notIndexed && <Badge variant="outline" className="text-xs">noindex</Badge>}
                       {seo?.noMetaTitle && <Badge variant="outline" className="text-xs">sem meta_title</Badge>}
+                      {seo?.longMetaTitle && <Badge variant="outline" className="text-xs">title &gt;60</Badge>}
                       {seo?.noMetaDescription && <Badge variant="outline" className="text-xs">sem meta_description</Badge>}
+                      {seo?.longMetaDescription && <Badge variant="outline" className="text-xs">desc &gt;160</Badge>}
                       {seo?.noImage && <Badge variant="outline" className="text-xs">sem imagem</Badge>}
                       {seo?.noDescription && <Badge variant="outline" className="text-xs">sem descrição</Badge>}
                       {seo?.noDescriptionSeo && <Badge variant="outline" className="text-xs">sem texto SEO</Badge>}
+                      {seo?.shortDescriptionSeo && <Badge variant="outline" className="text-xs">texto SEO curto</Badge>}
                       {seo?.noFaq && <Badge variant="outline" className="text-xs">sem FAQ</Badge>}
+                      {seo?.genericSlug && <Badge variant="outline" className="text-xs">slug genérico</Badge>}
                     </li>
                   );
                 })}
