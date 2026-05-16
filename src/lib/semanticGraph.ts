@@ -195,3 +195,87 @@ export function dominantClusters(g: SemanticGraph, top = 10) {
     .sort((a, b) => b.count - a.count)
     .slice(0, top);
 }
+
+// ---------------- Fase 10.5 — Authority Islands & Coverage ----------------
+
+export interface IslandReport {
+  orphans: SemanticNode[];      // sem inbound nem outbound
+  sinkOnly: SemanticNode[];     // sem outbound
+  sourceOnly: SemanticNode[];   // sem inbound
+}
+
+export function detectAuthorityIslands(g: SemanticGraph): IslandReport {
+  const inDeg = new Map<string, number>();
+  const outDeg = new Map<string, number>();
+  for (const r of g.relations) {
+    outDeg.set(r.from, (outDeg.get(r.from) ?? 0) + 1);
+    inDeg.set(r.to,   (inDeg.get(r.to)   ?? 0) + 1);
+  }
+  const orphans: SemanticNode[] = [];
+  const sinkOnly: SemanticNode[] = [];
+  const sourceOnly: SemanticNode[] = [];
+  for (const node of g.nodes.values()) {
+    const i = inDeg.get(node.id) ?? 0;
+    const o = outDeg.get(node.id) ?? 0;
+    if (i === 0 && o === 0) orphans.push(node);
+    else if (o === 0) sinkOnly.push(node);
+    else if (i === 0) sourceOnly.push(node);
+  }
+  return { orphans, sinkOnly, sourceOnly };
+}
+
+/**
+ * BFS de profundidade a partir de uma "raiz" (ex.: 'theme:hero-id' ou nó da home).
+ * Retorna depth por nó. Nós não alcançáveis recebem Infinity.
+ */
+export function calculateLinkDepth(g: SemanticGraph, rootId: string): Map<string, number> {
+  const depth = new Map<string, number>();
+  if (!g.nodes.has(rootId)) return depth;
+  depth.set(rootId, 0);
+  const queue: string[] = [rootId];
+  const adjacency = new Map<string, Set<string>>();
+  for (const r of g.relations) {
+    if (!adjacency.has(r.from)) adjacency.set(r.from, new Set());
+    if (!adjacency.has(r.to))   adjacency.set(r.to,   new Set());
+    adjacency.get(r.from)!.add(r.to);
+    adjacency.get(r.to)!.add(r.from);
+  }
+  while (queue.length) {
+    const cur = queue.shift()!;
+    const d = depth.get(cur)!;
+    for (const next of adjacency.get(cur) ?? []) {
+      if (!depth.has(next)) {
+        depth.set(next, d + 1);
+        queue.push(next);
+      }
+    }
+  }
+  return depth;
+}
+
+export interface WeakClusterInput {
+  nodeId: string;
+  productsCount: number;
+  diversity: number;
+  blogSupportCount: number;
+  internalLinksCount: number;
+}
+
+export interface WeakCluster {
+  nodeId: string;
+  reasons: string[];
+}
+
+/** Detecta clusters fracos: poucos produtos, diversidade baixa, sem blog, sem links. */
+export function findWeakClusters(items: WeakClusterInput[]): WeakCluster[] {
+  const out: WeakCluster[] = [];
+  for (const it of items) {
+    const reasons: string[] = [];
+    if (it.productsCount < 6) reasons.push("poucos produtos");
+    if (it.diversity < 2) reasons.push("baixa diversidade");
+    if (it.blogSupportCount === 0) reasons.push("sem blog support");
+    if (it.internalLinksCount < 2) reasons.push("sem links internos");
+    if (reasons.length >= 2) out.push({ nodeId: it.nodeId, reasons });
+  }
+  return out;
+}
