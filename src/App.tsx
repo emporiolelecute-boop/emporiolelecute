@@ -77,6 +77,10 @@ const AdminTaxonomies = lazyWithRetry(() => import("./pages/admin/AdminTaxonomie
 const AdminTaxonomiesHealth = lazyWithRetry(() => import("./pages/admin/AdminTaxonomiesHealth"), "AdminTaxonomiesHealth");
 const AdminContentHealth = lazyWithRetry(() => import("./pages/admin/AdminContentHealth"), "AdminContentHealth");
 const AdminOpportunities = lazyWithRetry(() => import("./pages/admin/AdminOpportunities"), "AdminOpportunities");
+const AdminBlog = lazyWithRetry(() => import("./pages/admin/AdminBlog"), "AdminBlog");
+const AdminBlogHealth = lazyWithRetry(() => import("./pages/admin/AdminBlogHealth"), "AdminBlogHealth");
+const AdminImageHealth = lazyWithRetry(() => import("./pages/admin/AdminImageHealth"), "AdminImageHealth");
+const AdminCombinationPages = lazyWithRetry(() => import("./pages/admin/AdminCombinationPages"), "AdminCombinationPages");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -480,6 +484,26 @@ const App = () => {
                   <Route path="auditoria" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminAudit />
+                    </Suspense>
+                  } />
+                  <Route path="blog" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminBlog />
+                    </Suspense>
+                  } />
+                  <Route path="blog/health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminBlogHealth />
+                    </Suspense>
+                  } />
+                  <Route path="image-health" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminImageHealth />
+                    </Suspense>
+                  } />
+                  <Route path="combination-pages" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCombinationPages />
                     </Suspense>
                   } />
                 </Route>
