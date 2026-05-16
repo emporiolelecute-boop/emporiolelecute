@@ -320,7 +320,71 @@ export default function AdminAuthority() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="sitemap">
+          <EligibilityList
+            mode="sitemap"
+            themes={themesQ.data ?? []}
+            combos={combosQ.data ?? []}
+          />
+        </TabsContent>
+
+        <TabsContent value="blocked">
+          <EligibilityList
+            mode="blocked"
+            themes={themesQ.data ?? []}
+            combos={combosQ.data ?? []}
+          />
+        </TabsContent>
+
+        <TabsContent value="islands">
+          <Card>
+            <CardHeader><CardTitle>Authority Islands</CardTitle></CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p className="text-muted-foreground">
+                Hubs e combinações com <strong>0 links internos</strong> — isoladas do grafo
+                semântico. Adicione menções a partir de páginas relacionadas.
+              </p>
+              <ul className="space-y-1">
+                {[...(themesQ.data ?? []).map((t) => ({ id: t.id, label: t.title, links: t.internal_links_count })),
+                  ...(combosQ.data ?? []).map((c) => ({ id: c.id, label: c.path, links: c.internal_links_count }))]
+                  .filter((x) => (x.links ?? 0) === 0)
+                  .slice(0, 50)
+                  .map((x) => (
+                    <li key={x.id} className="flex justify-between border-b py-1">
+                      <span>{x.label}</span>
+                      <span className="text-muted-foreground">sem inbound/outbound</span>
+                    </li>
+                  ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="weak">
+          <Card>
+            <CardHeader><CardTitle>Weak Clusters</CardTitle></CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <ul className="space-y-1">
+                {(themesQ.data ?? [])
+                  .filter((t) => t.authority_score < 55 || t.thin_content_risk)
+                  .slice(0, 30)
+                  .map((t) => (
+                    <li key={t.id} className="flex justify-between border-b py-1">
+                      <span>{t.title}</span>
+                      <span className="text-muted-foreground">
+                        auth {t.authority_score} · cov {t.topical_coverage}
+                        {t.thin_content_risk && " · thin"}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      <TelemetryFooter themes={themesQ.data ?? []} combos={combosQ.data ?? []} />
     </div>
   );
 }
