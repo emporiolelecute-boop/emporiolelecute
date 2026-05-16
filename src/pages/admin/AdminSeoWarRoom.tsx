@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useThemeHubs } from "@/hooks/useThemeHubs";
-import { useProducts } from "@/hooks/useProducts";
-import { useOccasionLandings } from "@/hooks/useOccasionLandings";
+import { useDbProducts } from "@/hooks/useProducts";
+import { usePublishedOccasionLandings } from "@/hooks/useOccasionLandings";
 import { useDbBlogPosts } from "@/hooks/useDbBlogPosts";
 import {
   buildDecisionEngine,
