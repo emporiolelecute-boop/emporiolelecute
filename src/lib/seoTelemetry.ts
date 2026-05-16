@@ -62,7 +62,8 @@ export interface EditorialTelemetryInput {
 
 export function computeTelemetry(
   items: IndexableEntity[],
-  linking?: LinkingTelemetryInput
+  linking?: LinkingTelemetryInput,
+  editorial?: EditorialTelemetryInput,
 ): TelemetrySnapshot {
   const verdicts: TelemetrySnapshot["verdicts"] = {
     EXCELLENT: 0, STRONG: 0, MEDIUM: 0, WEAK: 0, BLOCKED: 0,
