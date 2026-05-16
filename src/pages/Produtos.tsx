@@ -326,20 +326,56 @@ const Produtos = () => {
     },
   ];
 
-  // SEO copy otimizada (visível, indexável)
-  const seoCopyVisible = !resolvedCategory && !resolvedOccasion && !resolvedTag && !debouncedSearch;
+  // SEO copy otimizada (visível, indexável) — só na visão sem nenhum filtro
+  const seoCopyVisible = !resolvedCategory && !resolvedOccasion && !resolvedSegment && !resolvedTag && !debouncedSearch;
+
+  // === Anti-canibalização SEO ===
+  // 0 filtros estruturais (+ sem tag/busca) -> indexável, canonical /produtos
+  // 1 filtro estrutural (sem outros)        -> canonical para taxonomia oficial (não duplica)
+  // 2+ filtros / tag / busca / paginação    -> noindex,follow + canonical /produtos
+  const SITE = 'https://emporiolelecute.com.br';
+  let canonicalUrl = `${SITE}/produtos`;
+  let isIndexable = true;
+
+  if (structuralCount === 1 && !resolvedTag && !debouncedSearch && currentPage === 1) {
+    const only = structuralFilters[0]!;
+    if (resolvedCategory) canonicalUrl = `${SITE}/categoria/${only.slug}`;
+    else if (resolvedOccasion) canonicalUrl = `${SITE}/ocasiao/${only.slug}`;
+    else if (resolvedSegment) canonicalUrl = `${SITE}/segmento/${only.slug}`;
+  } else if (structuralCount >= 2 || resolvedTag || debouncedSearch || currentPage > 1) {
+    isIndexable = false;
+    canonicalUrl = `${SITE}/produtos`;
+  }
+
+  // Dynamic title/description
+  const seoTitle = (() => {
+    if (structuralCount >= 2 || resolvedTag) return "Produtos Personalizados | Empório LeleCute";
+    if (resolvedCategory?.meta_title) return resolvedCategory.meta_title;
+    if (resolvedOccasion?.meta_title) return resolvedOccasion.meta_title;
+    if (resolvedSegment?.meta_title) return resolvedSegment.meta_title;
+    if (resolvedCategory) return `${resolvedCategory.name} | Empório LeleCute`;
+    if (resolvedOccasion) return `${resolvedOccasion.name} | Empório LeleCute`;
+    if (resolvedSegment) return `${resolvedSegment.name} | Empório LeleCute`;
+    if (debouncedSearch) return `Busca: ${debouncedSearch} | Empório LeleCute`;
+    return "Produtos Artesanais Personalizados | Empório LeleCute";
+  })();
+
+  const seoDescription = (() => {
+    if (structuralCount >= 2 || resolvedTag) return "Explore produtos artesanais personalizados por categoria, ocasião e segmento.";
+    if (resolvedCategory?.meta_description) return resolvedCategory.meta_description;
+    if (resolvedOccasion?.meta_description) return resolvedOccasion.meta_description;
+    if (resolvedSegment?.meta_description) return resolvedSegment.meta_description;
+    return "Sabonetes, lembrancinhas, brindes e presentes artesanais personalizados para maternidade, casamento, chá de bebê, batizado e eventos especiais.";
+  })();
 
   return (
     <div className="min-h-screen bg-background">
-      <DynamicSEO
-        title={
-          resolvedCategory
-            ? `${resolvedCategory.name} | Empório LeleCute`
-            : "Sabonete Personalizado Lembrancinha | Artesanal e Sob Medida — Empório LeleCute"
-        }
-        description="Sabonete personalizado lembrancinha artesanal: chá de bebê, maternidade, batizado, casamento. Mais de 100 modelos exclusivos com nome, tema e cores à sua escolha. Envio para todo o Brasil."
-        url="https://emporiolelecute.com.br/produtos"
-      />
+      <DynamicSEO title={seoTitle} description={seoDescription} url={canonicalUrl} />
+      {!isIndexable && (
+        <Helmet>
+          <meta name="robots" content="noindex,follow" />
+        </Helmet>
+      )}
       <BreadcrumbStructuredData items={breadcrumbItems} />
 
       {/* FAQPage JSON-LD para rich snippet no Google */}
