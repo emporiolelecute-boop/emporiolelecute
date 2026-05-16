@@ -100,18 +100,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          position: number
           slug: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          position?: number
           slug: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          position?: number
           slug?: string
         }
         Relationships: []
@@ -663,18 +666,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          position: number
           slug: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          position?: number
           slug: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          position?: number
           slug?: string
         }
         Relationships: []
@@ -1383,18 +1389,21 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          position: number
           slug: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           name: string
+          position?: number
           slug: string
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string
+          position?: number
           slug?: string
         }
         Relationships: []
