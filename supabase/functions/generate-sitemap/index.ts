@@ -57,22 +57,34 @@ Deno.serve(async (req) => {
     
     console.log(`Found ${products?.length || 0} active products`)
     
-    // Fetch all occasions
+    // Fetch all occasions (apenas indexáveis)
     const { data: occasions, error: occasionsError } = await supabase
       .from('occasions')
-      .select('slug, name')
+      .select('slug, name, is_indexed')
+      .eq('is_indexed', true)
     
     if (occasionsError) {
       console.error('Error fetching occasions:', occasionsError)
     }
     
-    // Fetch all categories
+    // Fetch all categories (apenas indexáveis)
     const { data: categories, error: categoriesError } = await supabase
       .from('categories')
-      .select('slug, name')
+      .select('slug, name, is_indexed')
+      .eq('is_indexed', true)
     
     if (categoriesError) {
       console.error('Error fetching categories:', categoriesError)
+    }
+
+    // Fetch all segments (apenas indexáveis)
+    const { data: segments, error: segmentsError } = await supabase
+      .from('segments')
+      .select('slug, name, is_indexed')
+      .eq('is_indexed', true)
+
+    if (segmentsError) {
+      console.error('Error fetching segments:', segmentsError)
     }
     
     const today = new Date().toISOString().split('T')[0]
