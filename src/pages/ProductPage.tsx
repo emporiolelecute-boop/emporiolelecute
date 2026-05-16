@@ -778,6 +778,34 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
               </div>
             </div>
           )}
+
+          {/* Fase 11.1 — Linking semântico contextual (SAFE MODE) */}
+          {(() => {
+            const usedPaths = new Set<string>();
+            // Paths já exibidos: breadcrumb, badges, RelatedByTaxonomy, tags relacionadas
+            if (dbProduct?.category) usedPaths.add(`/categoria/${dbProduct.category.slug}`);
+            (dbProduct?.occasions ?? []).forEach((o) => usedPaths.add(`/ocasiao/${o.slug}`));
+            (dbProduct?.segments ?? []).forEach((s) => usedPaths.add(`/segmento/${s.slug}`));
+            (dbProduct?.tags ?? []).forEach((t) => usedPaths.add(`/tag/${t.slug}`));
+
+            const links = buildContextualLinksForProduct(
+              { slug: product.slug },
+              {
+                themes: semanticCtx.themes,
+                combinations: semanticCtx.combinations,
+                posts: semanticCtx.posts,
+              }
+            )
+              .filter((l) => !usedPaths.has(l.path))
+              .slice(0, 8); // hard cap absoluto
+
+            if (links.length < 3) return null;
+            return (
+              <div className="container mx-auto">
+                <SemanticLinkingBlock title="Explore mais ideias relacionadas" links={links} />
+              </div>
+            );
+          })()}
         </div>
       </main>
 
