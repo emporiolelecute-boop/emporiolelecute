@@ -1974,6 +1974,81 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_system_health_snapshots: {
+        Row: {
+          authority_efficiency: number
+          cluster_stability: number
+          competitive_pressure: number
+          content_decay_pressure: number
+          created_at: string
+          execution_efficiency: number
+          execution_focus: number
+          execution_noise: number
+          id: string
+          notes: string | null
+          operational_waste: number
+          orphan_pressure: number
+          recovery_backlog: number
+          saturation_pressure: number
+          semantic_efficiency: number
+          semantic_fragmentation: number
+          snapshot_date: string
+          strategic_alignment: number
+          sustainability_score: number
+          system_health_score: number
+          system_resilience: number
+          volatility_pressure: number
+        }
+        Insert: {
+          authority_efficiency?: number
+          cluster_stability?: number
+          competitive_pressure?: number
+          content_decay_pressure?: number
+          created_at?: string
+          execution_efficiency?: number
+          execution_focus?: number
+          execution_noise?: number
+          id?: string
+          notes?: string | null
+          operational_waste?: number
+          orphan_pressure?: number
+          recovery_backlog?: number
+          saturation_pressure?: number
+          semantic_efficiency?: number
+          semantic_fragmentation?: number
+          snapshot_date?: string
+          strategic_alignment?: number
+          sustainability_score?: number
+          system_health_score?: number
+          system_resilience?: number
+          volatility_pressure?: number
+        }
+        Update: {
+          authority_efficiency?: number
+          cluster_stability?: number
+          competitive_pressure?: number
+          content_decay_pressure?: number
+          created_at?: string
+          execution_efficiency?: number
+          execution_focus?: number
+          execution_noise?: number
+          id?: string
+          notes?: string | null
+          operational_waste?: number
+          orphan_pressure?: number
+          recovery_backlog?: number
+          saturation_pressure?: number
+          semantic_efficiency?: number
+          semantic_fragmentation?: number
+          snapshot_date?: string
+          strategic_alignment?: number
+          sustainability_score?: number
+          system_health_score?: number
+          system_resilience?: number
+          volatility_pressure?: number
+        }
+        Relationships: []
+      }
       seo_url_status: {
         Row: {
           alerted: boolean
