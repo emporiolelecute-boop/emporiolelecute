@@ -51,6 +51,7 @@ const menuItems = [
   { icon: Image, label: 'Saúde de Imagens', path: '/admin/image-health' },
   { icon: ArrowRightLeft, label: 'Páginas Combinatórias', path: '/admin/combination-pages' },
   { icon: Sparkles, label: 'Discovery Engine', path: '/admin/discovery' },
+  { icon: Sparkles, label: 'Hubs Temáticos', path: '/admin/themes' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
