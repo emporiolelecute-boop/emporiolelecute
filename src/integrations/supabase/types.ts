@@ -1688,6 +1688,19 @@ export type Database = {
         }
         Relationships: []
       }
+      taxonomy_registry: {
+        Row: {
+          canonical_path: string | null
+          id: string | null
+          image_url: string | null
+          is_indexed: boolean | null
+          name: string | null
+          position: number | null
+          slug: string | null
+          type: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_audit_anomalies: {
