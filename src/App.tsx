@@ -86,6 +86,8 @@ const AdminCombinationPages = lazyWithRetry(() => import("./pages/admin/AdminCom
 const AdminDiscovery = lazyWithRetry(() => import("./pages/admin/AdminDiscovery"), "AdminDiscovery");
 const AdminThemes = lazyWithRetry(() => import("./pages/admin/AdminThemes"), "AdminThemes");
 const AdminAuthority = lazyWithRetry(() => import("./pages/admin/AdminAuthority"), "AdminAuthority");
+const AdminEditorialExecution = lazyWithRetry(() => import("./pages/admin/AdminEditorialExecution"), "AdminEditorialExecution");
+const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOperations"), "AdminSeoOperations");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -538,6 +540,16 @@ const App = () => {
                   <Route path="authority" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminAuthority />
+                    </Suspense>
+                  } />
+                  <Route path="editorial-execution" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminEditorialExecution />
+                    </Suspense>
+                  } />
+                  <Route path="seo-operations" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoOperations />
                     </Suspense>
                   } />
                 </Route>
