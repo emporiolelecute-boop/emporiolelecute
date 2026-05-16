@@ -149,6 +149,48 @@ const AdminTaxonomiesHealth = () => {
         })}
       </div>
 
+      {/* Fase 3.3 — Consolidação SEO do legado /lembrancinhas-* */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ArrowRightLeft className="w-4 h-4" />
+            Consolidação SEO — landings legadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {consolidation.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma landing legada encontrada.</p>
+          ) : (
+            <ul className="divide-y divide-border text-sm">
+              {consolidation.map((r) => {
+                const ok = r.has_redirect && r.occasion_exists && r.occasion_has_seo;
+                return (
+                  <li key={r.route_slug} className="py-2 flex flex-wrap items-center gap-2">
+                    {ok ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    )}
+                    <span className="font-mono text-xs">/lembrancinhas-{r.route_slug}</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span className="font-mono text-xs">/ocasiao/{r.occasion_slug}</span>
+                    {!r.occasion_exists && <Badge variant="destructive" className="text-xs">ocasião ausente</Badge>}
+                    {!r.has_redirect && <Badge variant="outline" className="text-xs">sem redirect</Badge>}
+                    {!r.occasion_has_seo && <Badge variant="outline" className="text-xs">SEO não migrado</Badge>}
+                    {!r.is_published && <Badge variant="outline" className="text-xs">não publicada</Badge>}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="text-xs text-muted-foreground mt-3">
+            URLs legadas marcadas como <strong>DEPRECATED</strong>. Conteúdo SEO consolidado em <code>/ocasiao/:slug</code>;
+            redirects 301 ativos via tabela <code>redirects</code>. As tabelas <code>occasion_landings</code> e o arquivo
+            <code> src/data/lembrancinhasLandings.ts</code> são mantidos apenas como backup reversível.
+          </p>
+        </CardContent>
+      </Card>
+
       {allKinds.map((k) => {
         const items = (
           k === 'categoria' ? cats.data : k === 'ocasiao' ? occs.data : k === 'segmento' ? segs.data : tagsQ.data
