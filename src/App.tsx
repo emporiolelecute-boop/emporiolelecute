@@ -613,6 +613,11 @@ const App = () => {
                       <AdminSeoSimulationLab />
                     </Suspense>
                   } />
+                  <Route path="seo-strategic-simulation" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminStrategicSimulation />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
