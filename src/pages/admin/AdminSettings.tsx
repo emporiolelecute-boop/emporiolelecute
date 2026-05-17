@@ -929,38 +929,6 @@ const AdminSettings = () => {
               </Button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4 pt-4 border-t">
-              <div className="space-y-2">
-                <Label>Texto do botão WhatsApp</Label>
-                <Input
-                  value={settings.trust_badges_config.whatsapp_label}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    trust_badges_config: { ...settings.trust_badges_config, whatsapp_label: e.target.value },
-                  })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Mensagem pré-preenchida no WhatsApp</Label>
-                <Input
-                  value={settings.trust_badges_config.whatsapp_message}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    trust_badges_config: { ...settings.trust_badges_config, whatsapp_message: e.target.value },
-                  })}
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch
-                  checked={settings.trust_badges_config.show_whatsapp}
-                  onCheckedChange={(checked) => setSettings({
-                    ...settings,
-                    trust_badges_config: { ...settings.trust_badges_config, show_whatsapp: checked },
-                  })}
-                />
-                <Label>Exibir botão WhatsApp abaixo dos selos</Label>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>

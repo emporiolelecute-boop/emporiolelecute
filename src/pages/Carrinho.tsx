@@ -611,7 +611,7 @@ const Carrinho = () => {
         </div>
       </main>
 
-      <TrustBadges showWhatsApp={false} />
+      <TrustBadges />
 
       <Footer />
       <WhatsAppButton />
