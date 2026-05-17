@@ -234,9 +234,17 @@ const Header = () => {
         </div>
 
         {isMobileSearchOpen && (
-          <div className="lg:hidden mt-3 pb-2 animate-fade-in">
-            <div className="[&_.max-w-xs]:max-w-full" onClick={(e) => e.stopPropagation()}>
-              <SearchBar />
+          <div
+            ref={mobileSearchRef}
+            className="lg:hidden mt-3 pb-2 animate-fade-in"
+          >
+            <div className="[&_.max-w-xs]:max-w-full">
+              <SearchBar
+                autoFocus
+                searchPath="/buscar"
+                paramKey="q"
+                onResultSelect={() => setIsMobileSearchOpen(false)}
+              />
             </div>
           </div>
         )}
