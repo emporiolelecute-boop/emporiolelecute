@@ -2868,6 +2868,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_final_governance_snapshots: {
+        Row: {
+          cache_pressure_score: number | null
+          commercial_leverage_score: number | null
+          created_at: string
+          created_by: string | null
+          documentation_reliability_score: number | null
+          governance_maturity_score: number | null
+          id: string
+          maintenance_liability_score: number | null
+          notes: string | null
+          operational_bloat_score: number | null
+          operational_sustainability_score: number | null
+          performance_pressure_score: number | null
+          simplification_backlog_score: number | null
+          sustainable_complexity_score: number | null
+        }
+        Insert: {
+          cache_pressure_score?: number | null
+          commercial_leverage_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          documentation_reliability_score?: number | null
+          governance_maturity_score?: number | null
+          id?: string
+          maintenance_liability_score?: number | null
+          notes?: string | null
+          operational_bloat_score?: number | null
+          operational_sustainability_score?: number | null
+          performance_pressure_score?: number | null
+          simplification_backlog_score?: number | null
+          sustainable_complexity_score?: number | null
+        }
+        Update: {
+          cache_pressure_score?: number | null
+          commercial_leverage_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          documentation_reliability_score?: number | null
+          governance_maturity_score?: number | null
+          id?: string
+          maintenance_liability_score?: number | null
+          notes?: string | null
+          operational_bloat_score?: number | null
+          operational_sustainability_score?: number | null
+          performance_pressure_score?: number | null
+          simplification_backlog_score?: number | null
+          sustainable_complexity_score?: number | null
+        }
+        Relationships: []
+      }
       seo_governance_matrix_snapshots: {
         Row: {
           autonomous_stability_score: number | null
