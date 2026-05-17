@@ -43,7 +43,7 @@ const ProductStructuredData = ({
   sku,
 }: ProductStructuredDataProps) => {
   const baseUrl = "https://emporiolelecute.com.br";
-  const productUrl = `${baseUrl}/produto/${slug}`;
+  const productUrl = `${baseUrl}/produtos/${slug}`;
 
   // Calculate priceValidUntil - one year from now in YYYY-MM-DD format
   const priceValidUntil = new Date();

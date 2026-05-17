@@ -352,7 +352,7 @@ function formatProductForFeed(product: Product, config: MerchantFeedConfig, site
     id: product.id,
     title,
     description,
-    link: `${siteUrl}/produto/${product.slug}`,
+    link: `${siteUrl}/produtos/${product.slug}`,
     image_link: mainImage,
     additional_image_links: additionalImages,
     availability: 'in_stock',

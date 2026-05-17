@@ -100,7 +100,7 @@ const BestSellers = () => {
       itemListElement: products.map((p, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `${origin}/produto/${p.slug}`,
+        url: `${origin}/produtos/${p.slug}`,
         name: p.name,
       })),
     };

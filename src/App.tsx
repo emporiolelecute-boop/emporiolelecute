@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import StaleBundleOverlay from "@/components/StaleBundleOverlay";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
 import { CartProvider } from "./contexts/CartContext";
 import { usePageTracking } from "./lib/analytics";
@@ -129,6 +129,19 @@ const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * Fase A — Redirect canônico 1-hop: /produto/:slug → /produtos/:slug
+ * Preserva query string e hash. Usa `replace` para não poluir o histórico
+ * (equivalente client-side de um 301; o hosting Lovable serve sempre
+ * index.html, então não há camada de servidor onde aplicar 301 real).
+ */
+const LegacyProductRedirect = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  if (!slug) return <Navigate to="/produtos" replace />;
+  return <Navigate to={`/produtos/${slug}${location.search}${location.hash}`} replace />;
+};
+
 const App = () => {
   // Analytics carregadas dinamicamente em <TrackingScripts /> via tracking_config.
   useEffect(() => {}, []);
@@ -188,6 +201,9 @@ const App = () => {
                     <ProductPage />
                   </Suspense>
                 } />
+                {/* Fase A — Canonical: /produto/:slug é forma legada; redireciona 1-hop para /produtos/:slug, preservando query/hash. */}
+                <Route path="/produto/:slug" element={<LegacyProductRedirect />} />
+                <Route path="/produto" element={<Navigate to="/produtos" replace />} />
                 <Route path="/carrinho" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <Carrinho />

@@ -217,7 +217,7 @@ const ProductPage = () => {
           return raw.length > 160 ? raw.slice(0, 157).trimEnd() + '…' : raw;
         })()}
         image={product.images[0] || undefined}
-        url={`https://emporiolelecute.com.br/produto/${product.slug}`}
+        url={`https://emporiolelecute.com.br/produtos/${product.slug}`}
         type="product"
       />
       <ProductStructuredData
@@ -251,7 +251,7 @@ const ProductPage = () => {
           ...(dbProduct?.category && !dbProduct?.segments?.[0] && !dbProduct?.occasions?.[0]
             ? [{ name: dbProduct.category.name, url: `https://emporiolelecute.com.br/categoria/${dbProduct.category.slug}` }]
             : []),
-          { name: product.name, url: `https://emporiolelecute.com.br/produto/${product.slug}` },
+          { name: product.name, url: `https://emporiolelecute.com.br/produtos/${product.slug}` },
         ]}
       />
       <Header />
@@ -706,7 +706,7 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
                 "@type": "Article",
                 headline: `Sobre ${product.name}`,
                 articleBody: dbProduct.editorial_content.slice(0, 4000),
-                mainEntityOfPage: `https://emporiolelecute.com.br/produto/${product.slug}`,
+                mainEntityOfPage: `https://emporiolelecute.com.br/produtos/${product.slug}`,
                 author: { "@type": "Organization", name: "Empório LeleCute" },
               }) }} />
             </section>

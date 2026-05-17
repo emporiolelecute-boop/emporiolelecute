@@ -129,7 +129,7 @@ const AdminProductsHealth = () => {
                     <div className="flex items-center gap-3 mb-1 flex-wrap">
                       <Link to={`/admin/produtos/${product.id}`} className="font-medium hover:underline">{product.name}</Link>
                       <ProductSeoScoreBadge evaluation={seo} />
-                      <span className="text-xs text-muted-foreground">/produto/{product.slug}</span>
+                      <span className="text-xs text-muted-foreground">/produtos/{product.slug}</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {criticals.map((i, idx) => (

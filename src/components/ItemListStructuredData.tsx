@@ -36,7 +36,7 @@ const ItemListStructuredData = ({ products, listName = "Produtos em Destaque" }:
         "name": product.name,
         "description": product.description,
         "image": product.image,
-        "url": `${baseUrl}/produto/${product.slug}`,
+        "url": `${baseUrl}/produtos/${product.slug}`,
         "sku": product.slug,
         "brand": {
           "@type": "Brand",
@@ -44,7 +44,7 @@ const ItemListStructuredData = ({ products, listName = "Produtos em Destaque" }:
         },
         "offers": {
           "@type": "Offer",
-          "url": `${baseUrl}/produto/${product.slug}`,
+          "url": `${baseUrl}/produtos/${product.slug}`,
           "priceCurrency": "BRL",
           "price": Number(product.price.toFixed(2)),
           "priceValidUntil": priceValidUntilStr,
