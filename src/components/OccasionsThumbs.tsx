@@ -31,6 +31,7 @@ const OccasionsThumbs = () => {
         <div
           className={cn(
             "flex gap-3 md:gap-4 overflow-x-auto pb-2 -mx-2 px-2",
+            "justify-start md:justify-center",
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             "[-webkit-overflow-scrolling:touch] [touch-action:pan-x] [overscroll-behavior-x:contain]",
             "snap-x snap-mandatory"
