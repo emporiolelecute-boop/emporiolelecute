@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useDbCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/useProducts';
+import { LucideIcon } from '@/components/LucideIcon';
+import LucideIconPicker from '@/components/admin/LucideIconPicker';
 
 const AdminCategories = () => {
   const { data: categories, isLoading } = useDbCategories();
@@ -35,20 +37,21 @@ const AdminCategories = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', slug: '' });
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
+  const [editIcon, setEditIcon] = useState<string | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState('');
 
-  const generateSlug = (name: string) => {
-    return name
+  const generateSlug = (name: string) =>
+    name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-  };
 
   const handleNameChange = (name: string) => {
     setFormData({ name, slug: generateSlug(name) });
@@ -59,7 +62,6 @@ const AdminCategories = () => {
       toast({ title: 'Preencha todos os campos', variant: 'destructive' });
       return;
     }
-
     try {
       await createCategory.mutateAsync(formData);
       toast({ title: 'Categoria criada com sucesso!' });
@@ -81,26 +83,37 @@ const AdminCategories = () => {
     setDeleteId(null);
   };
 
-  const handleStartEdit = (category: { id: string; name: string; slug: string }) => {
+  const handleStartEdit = (category: {
+    id: string;
+    name: string;
+    slug: string;
+    icon?: string | null;
+    image_url?: string | null;
+  }) => {
     setEditingId(category.id);
     setEditName(category.name);
     setEditSlug(category.slug);
+    setEditIcon(category.icon ?? null);
+    setEditImageUrl(category.image_url ?? '');
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditName('');
     setEditSlug('');
+    setEditIcon(null);
+    setEditImageUrl('');
   };
 
   const handleSaveEdit = async () => {
     if (!editingId || !editName.trim() || !editSlug.trim()) return;
-    
     try {
       await updateCategory.mutateAsync({
         id: editingId,
         name: editName.trim(),
         slug: editSlug.trim(),
+        icon: editIcon,
+        image_url: editImageUrl.trim() || null,
       });
       toast({ title: 'Categoria atualizada com sucesso!' });
       handleCancelEdit();
@@ -109,9 +122,10 @@ const AdminCategories = () => {
     }
   };
 
-  const filteredCategories = categories?.filter(cat =>
-    cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCategories = categories?.filter(
+    (cat) =>
+      cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -119,7 +133,9 @@ const AdminCategories = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-display font-semibold text-foreground">Categorias</h1>
-          <p className="text-muted-foreground mt-1">Gerencie as categorias de produtos</p>
+          <p className="text-muted-foreground mt-1">
+            Gerencie nome, slug, ícone (Lucide) e imagem das categorias exibidas no scroll da home.
+          </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -151,6 +167,9 @@ const AdminCategories = () => {
                   placeholder="slug-da-categoria"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Após criar, edite a categoria para definir o ícone Lucide e a imagem.
+              </p>
               <Button onClick={handleCreate} className="w-full" disabled={createCategory.isPending}>
                 {createCategory.isPending ? 'Criando...' : 'Criar Categoria'}
               </Button>
@@ -159,7 +178,6 @@ const AdminCategories = () => {
         </Dialog>
       </div>
 
-      {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
@@ -172,7 +190,9 @@ const AdminCategories = () => {
 
       <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="text-lg font-display">Todas as Categorias ({filteredCategories?.length || 0})</CardTitle>
+          <CardTitle className="text-lg font-display">
+            Todas as Categorias ({filteredCategories?.length || 0})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -184,50 +204,85 @@ const AdminCategories = () => {
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  className="p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                 >
                   {editingId === category.id ? (
-                    <div className="flex-1 flex items-center gap-3">
-                      <Input
-                        value={editName}
-                        onChange={(e) => {
-                          setEditName(e.target.value);
-                          setEditSlug(generateSlug(e.target.value));
-                        }}
-                        className="max-w-xs"
-                        placeholder="Nome"
-                      />
-                      <Input
-                        value={editSlug}
-                        onChange={(e) => setEditSlug(e.target.value)}
-                        className="max-w-xs"
-                        placeholder="Slug"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleSaveEdit}
-                        disabled={updateCategory.isPending}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleCancelEdit}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">Nome</Label>
+                          <Input
+                            value={editName}
+                            onChange={(e) => {
+                              setEditName(e.target.value);
+                              setEditSlug(generateSlug(e.target.value));
+                            }}
+                            placeholder="Nome"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Slug</Label>
+                          <Input
+                            value={editSlug}
+                            onChange={(e) => setEditSlug(e.target.value)}
+                            placeholder="slug"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">Ícone (Lucide)</Label>
+                          <LucideIconPicker value={editIcon} onChange={setEditIcon} />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Imagem (URL)</Label>
+                          <Input
+                            value={editImageUrl}
+                            onChange={(e) => setEditImageUrl(e.target.value)}
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" onClick={handleCancelEdit}>
+                          <X className="w-4 h-4 mr-1" /> Cancelar
+                        </Button>
+                        <Button onClick={handleSaveEdit} disabled={updateCategory.isPending}>
+                          <Check className="w-4 h-4 mr-1" /> Salvar
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <>
-                      <div className="cursor-pointer" onClick={() => handleStartEdit(category)}>
-                        <p className="font-medium text-foreground">{category.name}</p>
-                        <p className="text-sm text-muted-foreground">{category.slug}</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-background ring-2 ring-border flex items-center justify-center shrink-0">
+                          {category.image_url ? (
+                            <img
+                              src={category.image_url}
+                              alt={category.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <LucideIcon name={category.icon} className="w-5 h-5 text-primary" />
+                          )}
+                        </div>
+                        <div
+                          className="cursor-pointer min-w-0"
+                          onClick={() => handleStartEdit(category)}
+                        >
+                          <p className="font-medium text-foreground truncate flex items-center gap-2">
+                            {category.name}
+                            {category.icon && (
+                              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                                <LucideIcon name={category.icon} className="w-3 h-3" />
+                                {category.icon}
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">{category.slug}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -245,7 +300,7 @@ const AdminCategories = () => {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
               ))}

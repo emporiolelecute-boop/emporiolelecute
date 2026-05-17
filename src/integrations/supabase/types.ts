@@ -192,6 +192,7 @@ export type Database = {
           description_seo: string | null
           faqs: Json
           h1_override: string | null
+          icon: string | null
           id: string
           image_url: string | null
           is_indexed: boolean
@@ -207,6 +208,7 @@ export type Database = {
           description_seo?: string | null
           faqs?: Json
           h1_override?: string | null
+          icon?: string | null
           id?: string
           image_url?: string | null
           is_indexed?: boolean
@@ -222,6 +224,7 @@ export type Database = {
           description_seo?: string | null
           faqs?: Json
           h1_override?: string | null
+          icon?: string | null
           id?: string
           image_url?: string | null
           is_indexed?: boolean
