@@ -14,6 +14,7 @@ const Header = () => {
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const navRef = useRef<HTMLElement | null>(null);
+  const mobileSearchRef = useRef<HTMLDivElement | null>(null);
 
   const { data: menuItems } = useMenuItems('header');
 
@@ -66,6 +67,28 @@ const Header = () => {
       document.removeEventListener("keydown", onKey);
     };
   }, [isMenuOpen]);
+
+  // Auto-close mobile search on outside click + ESC (independente do menu)
+  useEffect(() => {
+    if (!isMobileSearchOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(e.target as Node)) {
+        // Ignora cliques no botão de toggle (que já gerencia o estado)
+        const target = e.target as HTMLElement;
+        if (target.closest('[data-mobile-search-toggle]')) return;
+        setIsMobileSearchOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMobileSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [isMobileSearchOpen]);
 
   const socialLinks = [
     { href: "https://www.instagram.com/emporiolelecute", icon: Instagram, label: "Instagram" },
