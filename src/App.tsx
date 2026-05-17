@@ -154,6 +154,16 @@ const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Mount the reduced-motion controller once. Toggles the `motion-reduced` class
+// on <html> based on user preference (localStorage) or system setting.
+const ReducedMotionMount = () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useReducedMotion } = require("@/hooks/useReducedMotion");
+  useReducedMotion();
+  return null;
+};
+
+
 /**
  * Fase A — Redirect canônico 1-hop: /produto/:slug → /produtos/:slug
  * Preserva query string e hash. Usa `replace` para não poluir o histórico
