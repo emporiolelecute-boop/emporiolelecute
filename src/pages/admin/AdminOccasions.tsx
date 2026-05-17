@@ -355,16 +355,40 @@ const AdminOccasions = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="cursor-pointer" onClick={() => handleStartEdit(occasion)}>
-                        <p className="font-medium text-foreground">{occasion.name}</p>
-                        <p className="text-sm text-muted-foreground">{occasion.slug}</p>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted ring-1 ring-border/60 shrink-0 flex items-center justify-center">
+                          {occasion.image_url ? (
+                            <img src={occasion.image_url} alt={occasion.name} className="w-full h-full object-cover" loading="lazy" />
+                          ) : (
+                            <ImageIcon className="w-5 h-5 text-muted-foreground/60" />
+                          )}
+                        </div>
+                        <div className="cursor-pointer min-w-0" onClick={() => handleStartEdit(occasion)}>
+                          <p className="font-medium text-foreground truncate">{occasion.name}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {occasion.slug}
+                            {(!occasion.meta_title || !occasion.meta_description || !occasion.description) && (
+                              <span className="ml-2 text-[10px] uppercase tracking-wider text-amber-600">conteúdo incompleto</span>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openContentEditor(occasion)}
+                          className="gap-2"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                          Imagem & SEO
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleStartEdit(occasion)}
                           className="text-muted-foreground hover:text-primary"
+                          aria-label="Editar nome e slug"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -373,6 +397,7 @@ const AdminOccasions = () => {
                           size="icon"
                           className="text-destructive hover:text-destructive"
                           onClick={() => setDeleteId(occasion.id)}
+                          aria-label="Excluir"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
