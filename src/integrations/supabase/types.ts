@@ -3546,6 +3546,78 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_strategic_reality_snapshots: {
+        Row: {
+          created_at: string
+          dominant_distortion: string | null
+          dominant_truth: string | null
+          execution_credibility_score: number | null
+          id: string
+          illusion_risk_score: number | null
+          long_term_viability_score: number | null
+          notes: string | null
+          operational_fiction_score: number | null
+          operational_truth_score: number | null
+          reality_verdict: string | null
+          resilience_realism_score: number | null
+          semantic_distortion_score: number | null
+          semantic_grounding_score: number | null
+          signal_clarity_score: number | null
+          strategic_authenticity_score: number | null
+          strategic_reality_score: number | null
+          strategic_self_deception_score: number | null
+          survivability_gap_score: number | null
+          sustainability_realism_score: number | null
+          systemic_truth_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          dominant_distortion?: string | null
+          dominant_truth?: string | null
+          execution_credibility_score?: number | null
+          id?: string
+          illusion_risk_score?: number | null
+          long_term_viability_score?: number | null
+          notes?: string | null
+          operational_fiction_score?: number | null
+          operational_truth_score?: number | null
+          reality_verdict?: string | null
+          resilience_realism_score?: number | null
+          semantic_distortion_score?: number | null
+          semantic_grounding_score?: number | null
+          signal_clarity_score?: number | null
+          strategic_authenticity_score?: number | null
+          strategic_reality_score?: number | null
+          strategic_self_deception_score?: number | null
+          survivability_gap_score?: number | null
+          sustainability_realism_score?: number | null
+          systemic_truth_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          dominant_distortion?: string | null
+          dominant_truth?: string | null
+          execution_credibility_score?: number | null
+          id?: string
+          illusion_risk_score?: number | null
+          long_term_viability_score?: number | null
+          notes?: string | null
+          operational_fiction_score?: number | null
+          operational_truth_score?: number | null
+          reality_verdict?: string | null
+          resilience_realism_score?: number | null
+          semantic_distortion_score?: number | null
+          semantic_grounding_score?: number | null
+          signal_clarity_score?: number | null
+          strategic_authenticity_score?: number | null
+          strategic_reality_score?: number | null
+          strategic_self_deception_score?: number | null
+          survivability_gap_score?: number | null
+          sustainability_realism_score?: number | null
+          systemic_truth_score?: number | null
+        }
+        Relationships: []
+      }
       seo_strategy_alignment_registry: {
         Row: {
           alignment_score: number | null

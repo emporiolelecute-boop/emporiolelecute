@@ -42,6 +42,7 @@ import {
   Cpu,
   Orbit,
   Eye,
+  Compass,
   Crown
 } from 'lucide-react';
 import { useState } from 'react';
@@ -90,6 +91,7 @@ const menuItems = [
   { icon: Crown, label: 'Executive Core', path: '/admin/seo-executive-core' },
   { icon: ShieldCheck, label: 'Governance Matrix', path: '/admin/seo-governance-matrix' },
   { icon: Eye, label: 'Consciousness Fabric', path: '/admin/seo-consciousness-fabric' },
+  { icon: Compass, label: 'Strategic Reality', path: '/admin/seo-strategic-reality' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

@@ -113,6 +113,7 @@ const AdminSeoMetaReasoning = lazyWithRetry(() => import("./pages/admin/AdminSeo
 const AdminSeoExecutiveCore = lazyWithRetry(() => import("./pages/admin/AdminSeoExecutiveCore"), "AdminSeoExecutiveCore");
 const AdminSeoGovernanceMatrix = lazyWithRetry(() => import("./pages/admin/AdminSeoGovernanceMatrix"), "AdminSeoGovernanceMatrix");
 const AdminSeoConsciousnessFabric = lazyWithRetry(() => import("./pages/admin/AdminSeoConsciousnessFabric"), "AdminSeoConsciousnessFabric");
+const AdminSeoStrategicReality = lazyWithRetry(() => import("./pages/admin/AdminSeoStrategicReality"), "AdminSeoStrategicReality");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -716,6 +717,11 @@ const App = () => {
                   <Route path="seo-consciousness-fabric" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSeoConsciousnessFabric />
+                    </Suspense>
+                  } />
+                  <Route path="seo-strategic-reality" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoStrategicReality />
                     </Suspense>
                   } />
                 </Route>
