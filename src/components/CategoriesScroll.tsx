@@ -1,14 +1,9 @@
 import { Link } from "react-router-dom";
-import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbCategories } from "@/hooks/useProducts";
+import { useAccessibleCarousel } from "@/hooks/useAccessibleCarousel";
 import { LucideIcon } from "@/components/LucideIcon";
 import { cn } from "@/lib/utils";
-
-const SCROLL_KEY = "categoriesScroll:left";
-// Threshold (px) for the most-visible card to change before we update
-// activeIdx. Avoids flicker on tiny scroll deltas, but stays responsive.
-const ACTIVE_SWITCH_THRESHOLD = 18;
 
 /** Shimmer skeleton block used while categories load. */
 const ShimmerBlock = ({ className }: { className?: string }) => (
@@ -17,7 +12,7 @@ const ShimmerBlock = ({ className }: { className?: string }) => (
       className="absolute inset-0"
       style={{
         background:
-          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.75) 50%, transparent 70%)",
+          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.85) 50%, transparent 70%)",
         backgroundSize: "200% 100%",
         animation: "shimmer 1.4s linear infinite",
       }}
@@ -28,174 +23,28 @@ const ShimmerBlock = ({ className }: { className?: string }) => (
 
 const CategoriesScroll = () => {
   const { data: categories, isLoading } = useDbCategories();
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const itemsRef = useRef<Array<HTMLAnchorElement | null>>([]);
-
   const visible = (categories ?? []).filter((c) => c.is_indexed !== false);
 
-  // ---------- Drag-to-scroll (desktop pointer) ----------
-  const drag = useRef({ active: false, startX: 0, startLeft: 0, moved: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === "touch") return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    drag.current = { active: true, startX: e.clientX, startLeft: el.scrollLeft, moved: 0 };
-    setIsDragging(true);
-    el.setPointerCapture(e.pointerId);
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!drag.current.active) return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    const dx = e.clientX - drag.current.startX;
-    drag.current.moved = Math.abs(dx);
-    el.scrollLeft = drag.current.startLeft - dx;
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!drag.current.active) return;
-    drag.current.active = false;
-    setIsDragging(false);
-    const el = scrollerRef.current;
-    if (el) {
-      try { el.releasePointerCapture(e.pointerId); } catch { /* noop */ }
-    }
-  };
-
-  const onClickCapture = (e: React.MouseEvent) => {
-    if (drag.current.moved > 6) {
-      e.preventDefault();
-      e.stopPropagation();
-      drag.current.moved = 0;
-    }
-  };
-
-  // ---------- Arrow controls, active index, scroll persistence ----------
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(true);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const lastActiveRef = useRef(0);
-  const lastBestDistRef = useRef(Infinity);
-  const persistRaf = useRef<number | null>(null);
-
-  const updateState = useCallback(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-
-    const center = el.scrollLeft + el.clientWidth / 2;
-    let bestIdx = lastActiveRef.current;
-    let bestDist = Infinity;
-    itemsRef.current.forEach((node, i) => {
-      if (!node) return;
-      const c = node.offsetLeft + node.offsetWidth / 2;
-      const d = Math.abs(c - center);
-      if (d < bestDist) {
-        bestDist = d;
-        bestIdx = i;
-      }
-    });
-
-    if (
-      bestIdx !== lastActiveRef.current &&
-      Math.abs(bestDist - lastBestDistRef.current) > ACTIVE_SWITCH_THRESHOLD
-    ) {
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        try { navigator.vibrate?.(8); } catch { /* noop */ }
-      }
-      lastActiveRef.current = bestIdx;
-      lastBestDistRef.current = bestDist;
-      setActiveIdx(bestIdx);
-    } else if (bestIdx === lastActiveRef.current) {
-      lastBestDistRef.current = bestDist;
-    }
-
-    if (persistRaf.current == null) {
-      persistRaf.current = requestAnimationFrame(() => {
-        persistRaf.current = null;
-        const left = String(el.scrollLeft);
-        try { sessionStorage.setItem(SCROLL_KEY, left); } catch { /* noop */ }
-        try { localStorage.setItem(SCROLL_KEY, left); } catch { /* noop */ }
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    updateState();
-    el.addEventListener("scroll", updateState, { passive: true });
-    window.addEventListener("resize", updateState);
-    return () => {
-      el.removeEventListener("scroll", updateState);
-      window.removeEventListener("resize", updateState);
-    };
-  }, [updateState, visible.length]);
-
-  useEffect(() => {
-    if (isLoading || visible.length === 0) return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    try {
-      const saved =
-        sessionStorage.getItem(SCROLL_KEY) ?? localStorage.getItem(SCROLL_KEY);
-      if (saved) {
-        const n = parseInt(saved, 10);
-        if (!Number.isNaN(n)) el.scrollLeft = n;
-      }
-    } catch { /* noop */ }
-  }, [isLoading, visible.length]);
-
-  const scrollToIndex = (i: number, focus = false) => {
-    const node = itemsRef.current[i];
-    const el = scrollerRef.current;
-    if (!node || !el) return;
-    const target = node.offsetLeft - el.clientWidth / 2 + node.offsetWidth / 2;
-    el.scrollTo({ left: target, behavior: "smooth" });
-    if (focus) {
-      requestAnimationFrame(() => node.focus({ preventScroll: true }));
-    }
-  };
-
-  const scrollBy = (dir: 1 | -1) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * Math.min(el.clientWidth * 0.8, 600), behavior: "smooth" });
-  };
-
-  // ---------- Keyboard navigation ----------
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!visible.length) return;
-    let next = activeIdx;
-    switch (e.key) {
-      case "ArrowRight": next = Math.min(activeIdx + 1, visible.length - 1); break;
-      case "ArrowLeft":  next = Math.max(activeIdx - 1, 0); break;
-      case "Home":       next = 0; break;
-      case "End":        next = visible.length - 1; break;
-      default: return;
-    }
-    e.preventDefault();
-    setActiveIdx(next);
-    lastActiveRef.current = next;
-    scrollToIndex(next, true);
-  };
+  const {
+    scrollerRef, itemsRef, activeIdx, canLeft, canRight, isDragging,
+    scrollBy, onKeyDown, pointerHandlers,
+  } = useAccessibleCarousel({
+    storageKey: "categoriesScroll:left",
+    total: visible.length,
+    isLoading,
+    haptic: true,
+  });
 
   const activeName = visible[activeIdx]?.name ?? "";
   const total = visible.length;
 
   return (
-    <section className="py-6 md:py-12 bg-background" aria-label="Categorias">
+    <section className="py-8 md:py-14 bg-background" aria-label="Categorias">
       <div className="container mx-auto px-4">
         <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
 
         <div className="sr-only" aria-live="polite" aria-atomic="true">
-          {activeName
-            ? `Categoria em foco: ${activeName}. Item ${activeIdx + 1} de ${total}.`
-            : ""}
+          {activeName ? `Categoria em foco: ${activeName}. Item ${activeIdx + 1} de ${total}.` : ""}
         </div>
 
         <div className="relative group">
@@ -210,7 +59,7 @@ const CategoriesScroll = () => {
             className={cn(
               "hidden md:flex absolute -left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
               "hover:bg-primary hover:text-primary-foreground hover:scale-110",
-              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary",
               !canLeft && "!opacity-0 pointer-events-none"
             )}
           >
@@ -224,7 +73,7 @@ const CategoriesScroll = () => {
             className={cn(
               "hidden md:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
               "hover:bg-primary hover:text-primary-foreground hover:scale-110",
-              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary",
               !canRight && "!opacity-0 pointer-events-none"
             )}
           >
@@ -233,11 +82,7 @@ const CategoriesScroll = () => {
 
           <div
             ref={scrollerRef}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            onClickCapture={onClickCapture}
+            {...pointerHandlers}
             onKeyDown={onKeyDown}
             role="listbox"
             tabIndex={0}
@@ -284,7 +129,7 @@ const CategoriesScroll = () => {
                     >
                       <div
                         className={cn(
-                          "relative w-16 h-16 md:w-32 md:h-32 transition-transform duration-500 md:animate-pingpong",
+                          "relative w-16 h-16 md:w-32 md:h-32 transition-transform duration-500 animate-pingpong",
                           isActive && "scale-105 md:scale-110"
                         )}
                         style={{ animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }}
