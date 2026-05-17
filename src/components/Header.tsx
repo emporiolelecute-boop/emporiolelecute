@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Instagram, Facebook, ShoppingCart, LogIn } from "lucide-react";
+import { Menu, X, Instagram, Facebook, ShoppingCart, LogIn, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
 import { useCart } from "@/contexts/CartContext";
