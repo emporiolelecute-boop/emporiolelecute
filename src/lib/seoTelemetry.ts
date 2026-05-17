@@ -345,7 +345,7 @@ export interface TelemetrySnapshot {
   signal_redundancy_score?: number;
   signal_overload_score?: number;
   strategic_confusion_score?: number;
-  semantic_confusion_score?: number;
+  
   authority_confusion_score?: number;
   governance_confusion_score?: number;
   cognitive_resilience_score?: number;
