@@ -102,6 +102,7 @@ const menuItems = [
   { icon: Orbit, label: 'Strategic Nexus', path: '/admin/seo-nexus-convergence' },
   { icon: Layers3, label: 'Stability Fabric', path: '/admin/seo-stability-fabric' },
   { icon: ShieldAlert, label: 'Integrity Grid', path: '/admin/seo-integrity-grid' },
+  { icon: Boxes, label: 'Coherence Matrix', path: '/admin/seo-coherence-matrix' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
