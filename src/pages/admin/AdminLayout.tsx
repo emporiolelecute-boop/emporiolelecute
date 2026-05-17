@@ -183,15 +183,44 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5 space-y-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
-          {EXECUTIVE_NAV.map((group) => (
-            <NavGroupSection
-              key={group.id}
-              group={group}
-              pathname={location.pathname}
-              onItemClick={closeMobile}
-            />
-          ))}
+        <div className="shrink-0 px-2.5 pt-2 pb-1">
+          <button
+            type="button"
+            onClick={toggleAdvanced}
+            className={cn(
+              "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors border",
+              advanced
+                ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
+                : "bg-muted/40 text-muted-foreground border-border/60 hover:bg-muted"
+            )}
+            aria-pressed={advanced}
+            title="Expande todos os grupos e revela módulos avançados"
+          >
+            <span className="flex items-center gap-2">
+              <Layers3 className="w-3.5 h-3.5" />
+              Modo avançado
+            </span>
+            <span className={cn(
+              "text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded",
+              advanced ? "bg-primary text-primary-foreground" : "bg-muted-foreground/20 text-muted-foreground"
+            )}>
+              {advanced ? "on" : "off"}
+            </span>
+          </button>
+        </div>
+
+        <nav id="admin-nav-scroller" className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5 space-y-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
+          {EXECUTIVE_NAV
+            .filter((g) => advanced || !g.hiddenByDefault)
+            .map((group) => (
+              <NavGroupSection
+                key={group.id}
+                group={group}
+                pathname={location.pathname}
+                onItemClick={closeMobile}
+                forceOpen={advanced}
+              />
+            ))}
         </nav>
 
         <div className="shrink-0 p-3 border-t border-border/50 space-y-1.5 bg-card/80 backdrop-blur-sm">
