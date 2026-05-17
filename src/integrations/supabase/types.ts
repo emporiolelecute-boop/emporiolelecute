@@ -2163,6 +2163,78 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_continuum_snapshots: {
+        Row: {
+          authority_continuity_score: number | null
+          authority_fragmentation_score: number | null
+          continuity_break_risk_score: number | null
+          continuity_strength_score: number | null
+          continuum_verdict: string | null
+          created_at: string
+          dominant_continuity_signal: string | null
+          dominant_decay_signal: string | null
+          entropy_accumulation_score: number | null
+          entropy_resistance_score: number | null
+          execution_continuity_score: number | null
+          execution_decay_score: number | null
+          id: string
+          notes: string | null
+          operational_persistence_score: number | null
+          resilience_continuity_score: number | null
+          semantic_continuity_score: number | null
+          semantic_instability_score: number | null
+          strategic_continuum_score: number | null
+          strategic_longevity_score: number | null
+          systemic_persistence_score: number | null
+        }
+        Insert: {
+          authority_continuity_score?: number | null
+          authority_fragmentation_score?: number | null
+          continuity_break_risk_score?: number | null
+          continuity_strength_score?: number | null
+          continuum_verdict?: string | null
+          created_at?: string
+          dominant_continuity_signal?: string | null
+          dominant_decay_signal?: string | null
+          entropy_accumulation_score?: number | null
+          entropy_resistance_score?: number | null
+          execution_continuity_score?: number | null
+          execution_decay_score?: number | null
+          id?: string
+          notes?: string | null
+          operational_persistence_score?: number | null
+          resilience_continuity_score?: number | null
+          semantic_continuity_score?: number | null
+          semantic_instability_score?: number | null
+          strategic_continuum_score?: number | null
+          strategic_longevity_score?: number | null
+          systemic_persistence_score?: number | null
+        }
+        Update: {
+          authority_continuity_score?: number | null
+          authority_fragmentation_score?: number | null
+          continuity_break_risk_score?: number | null
+          continuity_strength_score?: number | null
+          continuum_verdict?: string | null
+          created_at?: string
+          dominant_continuity_signal?: string | null
+          dominant_decay_signal?: string | null
+          entropy_accumulation_score?: number | null
+          entropy_resistance_score?: number | null
+          execution_continuity_score?: number | null
+          execution_decay_score?: number | null
+          id?: string
+          notes?: string | null
+          operational_persistence_score?: number | null
+          resilience_continuity_score?: number | null
+          semantic_continuity_score?: number | null
+          semantic_instability_score?: number | null
+          strategic_continuum_score?: number | null
+          strategic_longevity_score?: number | null
+          systemic_persistence_score?: number | null
+        }
+        Relationships: []
+      }
       seo_decision_lineage: {
         Row: {
           affected_engines: Json
