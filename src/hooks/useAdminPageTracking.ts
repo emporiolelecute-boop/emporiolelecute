@@ -27,6 +27,8 @@ export function useAdminPageTracking() {
     trackAdminEvent('page_view', route);
     lastRouteRef.current = route;
     enteredAtRef.current = now;
+    // Opportunistic global sync — throttled (≥5min) + fire-and-forget. Local UX is unaffected.
+    sendUsageBatch();
 
     return () => {
       // On unmount (e.g., leaving admin entirely), flush dwell.
