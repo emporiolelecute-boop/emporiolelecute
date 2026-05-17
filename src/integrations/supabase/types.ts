@@ -3693,6 +3693,60 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_operational_reality_snapshots: {
+        Row: {
+          commercial_opportunity_score: number | null
+          complexity_cost_score: number | null
+          created_at: string
+          created_by: string | null
+          dashboard_utilization_score: number | null
+          documentation_health_score: number | null
+          governance_maturity_score: number | null
+          human_operability_score: number | null
+          id: string
+          maintenance_burden_score: number | null
+          notes: string | null
+          operational_value_score: number | null
+          performance_pressure_score: number | null
+          pruning_readiness_score: number | null
+          sustainability_score: number | null
+        }
+        Insert: {
+          commercial_opportunity_score?: number | null
+          complexity_cost_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          dashboard_utilization_score?: number | null
+          documentation_health_score?: number | null
+          governance_maturity_score?: number | null
+          human_operability_score?: number | null
+          id?: string
+          maintenance_burden_score?: number | null
+          notes?: string | null
+          operational_value_score?: number | null
+          performance_pressure_score?: number | null
+          pruning_readiness_score?: number | null
+          sustainability_score?: number | null
+        }
+        Update: {
+          commercial_opportunity_score?: number | null
+          complexity_cost_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          dashboard_utilization_score?: number | null
+          documentation_health_score?: number | null
+          governance_maturity_score?: number | null
+          human_operability_score?: number | null
+          id?: string
+          maintenance_burden_score?: number | null
+          notes?: string | null
+          operational_value_score?: number | null
+          performance_pressure_score?: number | null
+          pruning_readiness_score?: number | null
+          sustainability_score?: number | null
+        }
+        Relationships: []
+      }
       seo_operational_snapshots: {
         Row: {
           authority_velocity: number
