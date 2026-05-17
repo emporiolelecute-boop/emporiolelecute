@@ -46,13 +46,16 @@ const OccasionsThumbs = () => {
     isLoading,
   });
 
+  // Pause continuous animations when this section leaves the viewport.
+  const sectionRef = usePauseAnimationsOffscreen<HTMLElement>();
+
   if (!isLoading && list.length === 0) return null;
 
   const activeName = list[activeIdx]?.name ?? "";
   const total = list.length;
 
   return (
-    <section className="pb-8 md:pb-10 bg-background" aria-label="Ocasiões especiais">
+    <section ref={sectionRef} className="pb-8 md:pb-10 bg-background" aria-label="Ocasiões especiais">
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-3 md:mb-4">
           <h2 className="font-display text-base md:text-xl text-foreground">
