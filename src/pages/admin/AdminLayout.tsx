@@ -48,9 +48,13 @@ function NavItem({ leaf, active, onClick }: { leaf: NavLeaf; active: boolean; on
   );
 }
 
-function NavGroupSection({ group, pathname, onItemClick }: { group: NavGroup; pathname: string; onItemClick: () => void }) {
+function NavGroupSection({ group, pathname, onItemClick, forceOpen }: { group: NavGroup; pathname: string; onItemClick: () => void; forceOpen?: boolean }) {
   const containsActive = group.items.some((i) => pathname === i.path);
   const [open, setOpen] = useState<boolean>(group.defaultOpen || containsActive);
+
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
 
   if (!group.collapsible) {
     return (
