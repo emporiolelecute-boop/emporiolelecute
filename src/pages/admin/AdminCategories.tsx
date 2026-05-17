@@ -126,7 +126,30 @@ const SortableRow = ({
             </div>
             <div>
               <Label className="text-xs">Slug</Label>
-              <Input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} />
+              <Input
+                value={editSlug}
+                onChange={(e) => setEditSlug(e.target.value)}
+                aria-describedby="edit-slug-status"
+                aria-invalid={slugCheck?.status === 'taken' || slugCheck?.status === 'invalid'}
+              />
+              <p
+                id="edit-slug-status"
+                aria-live="polite"
+                className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                  slugCheck?.status === 'available'
+                    ? 'text-emerald-600'
+                    : slugCheck?.status === 'taken' || slugCheck?.status === 'invalid'
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {slugCheck?.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                {slugCheck?.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                {(slugCheck?.status === 'taken' || slugCheck?.status === 'invalid') && (
+                  <AlertCircle className="h-3 w-3" aria-hidden />
+                )}
+                <span>{slugCheck?.message}</span>
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
