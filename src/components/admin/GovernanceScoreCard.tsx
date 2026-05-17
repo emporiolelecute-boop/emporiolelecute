@@ -19,7 +19,7 @@ export default function GovernanceScoreCard({ report }: { report: GovernanceRepo
     <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-base font-medium">Governance Score</p>
-        <Badge variant={colorFor(report.verdict) as any}>{report.verdict}</Badge>
+        <Badge variant={colorFor(report.verdict)}>{report.verdict}</Badge>
       </div>
       <div className="text-5xl font-bold">{report.score}</div>
       <p className="text-sm text-muted-foreground">{report.summary}</p>
