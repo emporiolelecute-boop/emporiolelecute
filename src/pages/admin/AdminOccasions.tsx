@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { trackAdminEvent } from '@/lib/adminUsage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -11,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -25,6 +27,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useDbOccasions, useCreateOccasion, useDeleteOccasion, useUpdateOccasion } from '@/hooks/useProducts';
 import { useSlugAvailability } from '@/hooks/useSlugAvailability';
+import ImagePickerWithLibrary from '@/components/admin/ImagePickerWithLibrary';
 
 const AdminOccasions = () => {
   const { data: occasions, isLoading } = useDbOccasions();
@@ -37,11 +40,21 @@ const AdminOccasions = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', slug: '' });
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Inline editing state
+
+  // Inline editing state (name/slug)
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
+
+  // Advanced content editor (image + descrição + meta tags)
+  const [contentEditId, setContentEditId] = useState<string | null>(null);
+  const [contentForm, setContentForm] = useState({
+    image_url: '',
+    description: '',
+    meta_title: '',
+    meta_description: '',
+  });
+  const [savingContent, setSavingContent] = useState(false);
 
   const createSlugCheck = useSlugAvailability('occasions', formData.slug, null);
   const editSlugCheck = useSlugAvailability('occasions', editSlug, editingId);
@@ -154,6 +167,36 @@ const AdminOccasions = () => {
     occ.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     occ.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const openContentEditor = (occ: any) => {
+    setContentEditId(occ.id);
+    setContentForm({
+      image_url: occ.image_url || '',
+      description: occ.description || '',
+      meta_title: occ.meta_title || '',
+      meta_description: occ.meta_description || '',
+    });
+  };
+
+  const saveContent = async () => {
+    if (!contentEditId) return;
+    setSavingContent(true);
+    try {
+      await updateOccasion.mutateAsync({
+        id: contentEditId,
+        image_url: contentForm.image_url.trim() || null,
+        description: contentForm.description.trim() || null,
+        meta_title: contentForm.meta_title.trim() || null,
+        meta_description: contentForm.meta_description.trim() || null,
+      });
+      toast({ title: 'Conteúdo atualizado!' });
+      setContentEditId(null);
+    } catch {
+      toast({ title: 'Erro ao salvar', variant: 'destructive' });
+    } finally {
+      setSavingContent(false);
+    }
+  };
 
   return (
     <div className="p-6 lg:p-8">
@@ -312,16 +355,40 @@ const AdminOccasions = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="cursor-pointer" onClick={() => handleStartEdit(occasion)}>
-                        <p className="font-medium text-foreground">{occasion.name}</p>
-                        <p className="text-sm text-muted-foreground">{occasion.slug}</p>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted ring-1 ring-border/60 shrink-0 flex items-center justify-center">
+                          {occasion.image_url ? (
+                            <img src={occasion.image_url} alt={occasion.name} className="w-full h-full object-cover" loading="lazy" />
+                          ) : (
+                            <ImageIcon className="w-5 h-5 text-muted-foreground/60" />
+                          )}
+                        </div>
+                        <div className="cursor-pointer min-w-0" onClick={() => handleStartEdit(occasion)}>
+                          <p className="font-medium text-foreground truncate">{occasion.name}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {occasion.slug}
+                            {(!occasion.meta_title || !occasion.meta_description || !occasion.description) && (
+                              <span className="ml-2 text-[10px] uppercase tracking-wider text-amber-600">conteúdo incompleto</span>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openContentEditor(occasion)}
+                          className="gap-2"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                          Imagem & SEO
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleStartEdit(occasion)}
                           className="text-muted-foreground hover:text-primary"
+                          aria-label="Editar nome e slug"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -330,6 +397,7 @@ const AdminOccasions = () => {
                           size="icon"
                           className="text-destructive hover:text-destructive"
                           onClick={() => setDeleteId(occasion.id)}
+                          aria-label="Excluir"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -364,6 +432,73 @@ const AdminOccasions = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Editor avançado de conteúdo: imagem + descrição + meta SEO */}
+      <Dialog open={!!contentEditId} onOpenChange={(o) => !o && setContentEditId(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Imagem & SEO da ocasião</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            <div className="space-y-2">
+              <Label>Imagem da ocasião</Label>
+              <p className="text-xs text-muted-foreground">
+                Aparece no carrossel da home e na vitrine. Recomendado: quadrada, 600×600px.
+              </p>
+              <ImagePickerWithLibrary
+                value={contentForm.image_url}
+                onChange={(url) => setContentForm((f) => ({ ...f, image_url: url }))}
+                folder="occasions"
+                hint="600x600 recomendado"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="occ-desc">Descrição</Label>
+              <Textarea
+                id="occ-desc"
+                rows={5}
+                value={contentForm.description}
+                onChange={(e) => setContentForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Texto institucional exibido nas páginas da ocasião."
+              />
+              <p className="text-xs text-muted-foreground">{contentForm.description.length} caracteres</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="occ-mt">Meta title (SEO)</Label>
+              <Input
+                id="occ-mt"
+                maxLength={70}
+                value={contentForm.meta_title}
+                onChange={(e) => setContentForm((f) => ({ ...f, meta_title: e.target.value }))}
+                placeholder="Ex.: Lembrancinhas para Casamento Artesanais | Empório Lelê"
+              />
+              <p className="text-xs text-muted-foreground">{contentForm.meta_title.length}/60 ideal</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="occ-md">Meta description (SEO)</Label>
+              <Textarea
+                id="occ-md"
+                rows={3}
+                maxLength={200}
+                value={contentForm.meta_description}
+                onChange={(e) => setContentForm((f) => ({ ...f, meta_description: e.target.value }))}
+                placeholder="Resumo de até 155 caracteres para resultados do Google."
+              />
+              <p className="text-xs text-muted-foreground">{contentForm.meta_description.length}/155 ideal</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setContentEditId(null)} disabled={savingContent}>Cancelar</Button>
+            <Button onClick={saveContent} disabled={savingContent}>
+              {savingContent ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

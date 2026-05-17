@@ -48,9 +48,13 @@ function NavItem({ leaf, active, onClick }: { leaf: NavLeaf; active: boolean; on
   );
 }
 
-function NavGroupSection({ group, pathname, onItemClick }: { group: NavGroup; pathname: string; onItemClick: () => void }) {
+function NavGroupSection({ group, pathname, onItemClick, forceOpen }: { group: NavGroup; pathname: string; onItemClick: () => void; forceOpen?: boolean }) {
   const containsActive = group.items.some((i) => pathname === i.path);
   const [open, setOpen] = useState<boolean>(group.defaultOpen || containsActive);
+
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
 
   if (!group.collapsible) {
     return (
@@ -90,6 +94,23 @@ const AdminLayout = () => {
   const location = useLocation();
   const { user, isAdmin, loading, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [advanced, setAdvanced] = useState<boolean>(() => {
+    try { return localStorage.getItem('admin_advanced_mode') === '1'; } catch { return false; }
+  });
+  // Preserve scroll position across the toggle so the operator does not lose context.
+  const toggleAdvanced = () => {
+    const el = document.getElementById('admin-nav-scroller');
+    const prevTop = el?.scrollTop ?? 0;
+    setAdvanced((v) => {
+      const next = !v;
+      try { localStorage.setItem('admin_advanced_mode', next ? '1' : '0'); } catch { /* noop */ }
+      requestAnimationFrame(() => {
+        const el2 = document.getElementById('admin-nav-scroller');
+        if (el2) el2.scrollTop = prevTop;
+      });
+      return next;
+    });
+  };
   useAdminPageTracking();
 
   useEffect(() => {
@@ -161,15 +182,44 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5 space-y-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
-          {EXECUTIVE_NAV.map((group) => (
-            <NavGroupSection
-              key={group.id}
-              group={group}
-              pathname={location.pathname}
-              onItemClick={closeMobile}
-            />
-          ))}
+        <div className="shrink-0 px-2.5 pt-2 pb-1">
+          <button
+            type="button"
+            onClick={toggleAdvanced}
+            className={cn(
+              "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors border",
+              advanced
+                ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
+                : "bg-muted/40 text-muted-foreground border-border/60 hover:bg-muted"
+            )}
+            aria-pressed={advanced}
+            title="Expande todos os grupos e revela módulos avançados"
+          >
+            <span className="flex items-center gap-2">
+              <Layers3 className="w-3.5 h-3.5" />
+              Modo avançado
+            </span>
+            <span className={cn(
+              "text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded",
+              advanced ? "bg-primary text-primary-foreground" : "bg-muted-foreground/20 text-muted-foreground"
+            )}>
+              {advanced ? "on" : "off"}
+            </span>
+          </button>
+        </div>
+
+        <nav id="admin-nav-scroller" className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5 space-y-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
+          {EXECUTIVE_NAV
+            .filter((g) => advanced || !g.hiddenByDefault)
+            .map((group) => (
+              <NavGroupSection
+                key={group.id}
+                group={group}
+                pathname={location.pathname}
+                onItemClick={closeMobile}
+                forceOpen={advanced}
+              />
+            ))}
         </nav>
 
         <div className="shrink-0 p-3 border-t border-border/50 space-y-1.5 bg-card/80 backdrop-blur-sm">
