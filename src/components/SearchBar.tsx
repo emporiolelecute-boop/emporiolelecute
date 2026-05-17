@@ -6,7 +6,23 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
 import { optimizeImage } from "@/lib/image";
 
-const SearchBar = () => {
+interface SearchBarProps {
+  /** Destination path for "see all" + Enter submit. Default: /produtos */
+  searchPath?: string;
+  /** Query string param name used on submit. Default: busca */
+  paramKey?: string;
+  /** Called after the user selects a suggestion or submits (mobile close hook) */
+  onResultSelect?: () => void;
+  /** Autofocus the input on mount */
+  autoFocus?: boolean;
+}
+
+const SearchBar = ({
+  searchPath = "/produtos",
+  paramKey = "busca",
+  onResultSelect,
+  autoFocus = false,
+}: SearchBarProps = {}) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
