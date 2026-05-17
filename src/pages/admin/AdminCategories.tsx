@@ -428,7 +428,27 @@ const AdminCategories = () => {
                   value={formData.slug}
                   onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                   placeholder="slug-da-categoria"
+                  aria-describedby="create-slug-status"
+                  aria-invalid={createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid'}
                 />
+                <p
+                  id="create-slug-status"
+                  aria-live="polite"
+                  className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                    createSlugCheck.status === 'available'
+                      ? 'text-emerald-600'
+                      : createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid'
+                      ? 'text-destructive'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {createSlugCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                  {createSlugCheck.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                  {(createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid') && (
+                    <AlertCircle className="h-3 w-3" aria-hidden />
+                  )}
+                  <span>{createSlugCheck.message}</span>
+                </p>
               </div>
               <p className="text-xs text-muted-foreground">
                 Após criar, edite a categoria para definir o ícone Lucide e a imagem.
