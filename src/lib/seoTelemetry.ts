@@ -307,10 +307,8 @@ export interface TelemetrySnapshot {
   kernel_consistency_score?: number;
   // Fase 15.2 — Strategic Operating Fabric
   operating_fabric_score?: number;
-  structural_integrity_score?: number;
   strategic_cohesion_score?: number;
   scalability_score?: number;
-  maintenance_explosion_risk?: number;
   architectural_debt_score?: number;
   telemetry_inflation_score?: number;
   semantic_compression_score?: number;
