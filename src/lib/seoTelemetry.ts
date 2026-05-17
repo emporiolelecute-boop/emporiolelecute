@@ -376,6 +376,31 @@ export interface TelemetrySnapshot {
   long_term_reasoning_viability?: number;
   systemic_longevity_score?: number;
   strategic_survival_confidence?: number;
+  // Fase 15.5 — Executive Synthesis Core
+  executive_core_score?: number;
+  systemic_strategy_score?: number;
+  execution_alignment_score?: number;
+  operational_sustainability_score?: number;
+  systemic_stability_score?: number;
+  orchestration_integrity_score?: number;
+  intelligence_integrity_score?: number;
+  governance_integrity_score?: number;
+  semantic_integrity_score?: number;
+  authority_integrity_score?: number;
+  hidden_risk_score?: number;
+  collapse_exposure_score?: number;
+  strategic_fragility_score?: number;
+  execution_fragility_score?: number;
+  governance_fragility_score?: number;
+  semantic_fragility_score?: number;
+  strategic_continuity_score?: number;
+  scalability_viability_score?: number;
+  sustainability_projection_score?: number;
+  future_collapse_probability?: number;
+  strategic_signal_quality?: number;
+  systemic_confidence_score?: number;
+  coherence_depth_score?: number;
+  explainability_depth_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
