@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const testimonials = [
   {

@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { useFaqs } from "@/hooks/useFaqs";
 
 interface FAQ {
