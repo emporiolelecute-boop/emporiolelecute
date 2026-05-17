@@ -86,6 +86,8 @@ const AdminProductForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [keywordsInput, setKeywordsInput] = useState('');
 
+  const slugCheck = useSlugAvailability('products', formData.slug, id ?? null);
+
   useEffect(() => {
     if (existingProduct && isEditing) {
       const keywords = existingProduct.keywords || [];
