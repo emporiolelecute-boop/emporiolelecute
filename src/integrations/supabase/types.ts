@@ -4371,6 +4371,60 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_system_finalization_snapshots: {
+        Row: {
+          created_at: string
+          documentation_completeness_score: number | null
+          executive_clarity_score: number | null
+          finalization_confidence_score: number | null
+          governance_integrity_score: number | null
+          id: string
+          maintainability_score: number | null
+          notes: string | null
+          observability_efficiency_score: number | null
+          operational_overload_score: number | null
+          operational_simplicity_score: number | null
+          performance_pressure_score: number | null
+          runtime_stability_score: number | null
+          scalability_risk_score: number | null
+          telemetry_efficiency_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          documentation_completeness_score?: number | null
+          executive_clarity_score?: number | null
+          finalization_confidence_score?: number | null
+          governance_integrity_score?: number | null
+          id?: string
+          maintainability_score?: number | null
+          notes?: string | null
+          observability_efficiency_score?: number | null
+          operational_overload_score?: number | null
+          operational_simplicity_score?: number | null
+          performance_pressure_score?: number | null
+          runtime_stability_score?: number | null
+          scalability_risk_score?: number | null
+          telemetry_efficiency_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          documentation_completeness_score?: number | null
+          executive_clarity_score?: number | null
+          finalization_confidence_score?: number | null
+          governance_integrity_score?: number | null
+          id?: string
+          maintainability_score?: number | null
+          notes?: string | null
+          observability_efficiency_score?: number | null
+          operational_overload_score?: number | null
+          operational_simplicity_score?: number | null
+          performance_pressure_score?: number | null
+          runtime_stability_score?: number | null
+          scalability_risk_score?: number | null
+          telemetry_efficiency_score?: number | null
+        }
+        Relationships: []
+      }
       seo_system_health_snapshots: {
         Row: {
           authority_efficiency: number
