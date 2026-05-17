@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { trackAdminEvent } from '@/lib/adminUsage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -11,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -25,6 +27,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useDbOccasions, useCreateOccasion, useDeleteOccasion, useUpdateOccasion } from '@/hooks/useProducts';
 import { useSlugAvailability } from '@/hooks/useSlugAvailability';
+import ImagePickerWithLibrary from '@/components/admin/ImagePickerWithLibrary';
 
 const AdminOccasions = () => {
   const { data: occasions, isLoading } = useDbOccasions();
