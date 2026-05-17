@@ -69,6 +69,7 @@ interface SortableRowProps {
   setEditIcon: (v: string | null) => void;
   setEditImageUrl: (v: string) => void;
   generateSlug: (n: string) => string;
+  slugCheck?: SlugCheckState;
 }
 
 const SortableRow = ({
