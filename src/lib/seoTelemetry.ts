@@ -626,6 +626,19 @@ export interface TelemetrySnapshot {
   operational_bloat_score_final?: number;
   simplification_backlog_score_final?: number;
   operational_sustainability_score_final?: number;
+  // Phase: Executive Consolidation & Operational Compression (read-only, optional)
+  executive_usability_score?: number;
+  navigation_compression_score?: number;
+  dashboard_redundancy_score?: number;
+  operational_clarity_score?: number;
+  executive_focus_score_consolidation?: number;
+  menu_entropy_score?: number;
+  governance_pressure_score?: number;
+  admin_cognitive_load_score?: number;
+  dashboard_inflation_score?: number;
+  telemetry_density_score?: number;
+  simplification_readiness_score?: number;
+  advanced_layer_noise_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
