@@ -602,6 +602,19 @@ export interface TelemetrySnapshot {
   simplification_readiness_score_final?: number;
   system_weight_score_final?: number;
   executive_focus_score_final?: number;
+  // Phase: Operational Stabilization & Real-World Validation (read-only, optional)
+  operational_value_score_real?: number;
+  dashboard_utilization_score_real?: number;
+  performance_pressure_score_real?: number;
+  maintenance_burden_score_real?: number;
+  documentation_health_score_real?: number;
+  commercial_opportunity_score_real?: number;
+  pruning_readiness_score_real?: number;
+  complexity_cost_score_real?: number;
+  human_operability_score_real?: number;
+  governance_maturity_score_real?: number;
+  operational_sustainability_score_real?: number;
+  executive_signal_to_noise_score_real?: number;
 }
 
 export interface AutonomyTelemetryInput {
