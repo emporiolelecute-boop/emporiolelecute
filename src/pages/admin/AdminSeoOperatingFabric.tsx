@@ -125,7 +125,7 @@ export default function AdminSeoOperatingFabric() {
   const captureSnapshot = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase.from("seo_operating_fabric_snapshots").insert({
+      const { error } = await supabase.from("seo_operating_fabric_snapshots").insert([{
         operating_fabric_score: fabric.operating_fabric_score,
         strategic_cohesion_score: fabric.strategic_cohesion_score,
         semantic_integrity_score: FABRIC_INPUTS.semanticIntegrity,
