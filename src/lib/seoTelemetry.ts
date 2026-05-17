@@ -401,6 +401,21 @@ export interface TelemetrySnapshot {
   systemic_confidence_score?: number;
   coherence_depth_score?: number;
   explainability_depth_score?: number;
+  // Fase 15.6 — Autonomous Governance Matrix
+  governance_matrix_score?: number;
+  strategic_integrity_score?: number;
+  systemic_alignment_score?: number;
+  autonomous_stability_score?: number;
+  evolutionary_consistency_score?: number;
+  execution_integrity_score?: number;
+  resilience_projection_score?: number;
+  operational_conflict_score?: number;
+  executive_noise_score?: number;
+  governance_resilience_score?: number;
+  governance_predictability_score?: number;
+  governance_recovery_elasticity?: number;
+  narrative_consistency_score?: number;
+  leadership_clarity_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
