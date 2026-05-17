@@ -509,6 +509,7 @@ const AdminCategories = () => {
                         setEditIcon={setEditIcon}
                         setEditImageUrl={setEditImageUrl}
                         generateSlug={generateSlug}
+                        slugCheck={editSlugCheck}
                       />
                     ))}
                   </div>
