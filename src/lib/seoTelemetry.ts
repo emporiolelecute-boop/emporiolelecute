@@ -368,9 +368,7 @@ export interface TelemetrySnapshot {
   governance_coherence?: number;
   reasoning_drift_score?: number;
   strategic_drift_score?: number;
-  semantic_drift_score?: number;
   operational_drift_score?: number;
-  governance_drift_score?: number;
   contradiction_risk_score?: number;
   self_conflict_score?: number;
   strategic_hallucination_risk?: number;
