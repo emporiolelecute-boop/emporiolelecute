@@ -2016,6 +2016,93 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_nervous_system_snapshots: {
+        Row: {
+          adaptive_capacity: number
+          authority_dependence: number
+          cluster_fragility: number
+          cognitive_efficiency: number
+          collapse_probability: number
+          created_at: string
+          created_by: string | null
+          ecosystem_synchronization: number
+          entropy_resistance: number
+          execution_stability: number
+          existential_exposure: number
+          id: string
+          long_term_viability: number
+          nervous_system_score: number
+          notes: string | null
+          operational_resilience: number
+          operational_survival: number
+          recovery_intelligence: number
+          semantic_pressure: number
+          semantic_resilience: number
+          semantic_saturation: number
+          snapshot: Json
+          strategic_fatigue: number
+          strategic_resilience: number
+          sustainability_projection: number
+          systemic_stability: number
+        }
+        Insert: {
+          adaptive_capacity?: number
+          authority_dependence?: number
+          cluster_fragility?: number
+          cognitive_efficiency?: number
+          collapse_probability?: number
+          created_at?: string
+          created_by?: string | null
+          ecosystem_synchronization?: number
+          entropy_resistance?: number
+          execution_stability?: number
+          existential_exposure?: number
+          id?: string
+          long_term_viability?: number
+          nervous_system_score?: number
+          notes?: string | null
+          operational_resilience?: number
+          operational_survival?: number
+          recovery_intelligence?: number
+          semantic_pressure?: number
+          semantic_resilience?: number
+          semantic_saturation?: number
+          snapshot?: Json
+          strategic_fatigue?: number
+          strategic_resilience?: number
+          sustainability_projection?: number
+          systemic_stability?: number
+        }
+        Update: {
+          adaptive_capacity?: number
+          authority_dependence?: number
+          cluster_fragility?: number
+          cognitive_efficiency?: number
+          collapse_probability?: number
+          created_at?: string
+          created_by?: string | null
+          ecosystem_synchronization?: number
+          entropy_resistance?: number
+          execution_stability?: number
+          existential_exposure?: number
+          id?: string
+          long_term_viability?: number
+          nervous_system_score?: number
+          notes?: string | null
+          operational_resilience?: number
+          operational_survival?: number
+          recovery_intelligence?: number
+          semantic_pressure?: number
+          semantic_resilience?: number
+          semantic_saturation?: number
+          snapshot?: Json
+          strategic_fatigue?: number
+          strategic_resilience?: number
+          sustainability_projection?: number
+          systemic_stability?: number
+        }
+        Relationships: []
+      }
       seo_operational_snapshots: {
         Row: {
           authority_velocity: number
