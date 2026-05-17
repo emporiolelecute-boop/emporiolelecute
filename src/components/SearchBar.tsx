@@ -165,6 +165,7 @@ const SearchBar = ({
                       onClick={() => {
                         setQuery("");
                         setIsOpen(false);
+                        onResultSelect?.();
                       }}
                       className={`flex items-center gap-3 px-4 py-2 transition-colors ${
                         index === selectedIndex
@@ -190,8 +191,11 @@ const SearchBar = ({
                 ))}
               </ul>
               <Link
-                to={`/produtos?busca=${encodeURIComponent(query)}`}
-                onClick={() => setIsOpen(false)}
+                to={`${searchPath}?${paramKey}=${encodeURIComponent(query)}`}
+                onClick={() => {
+                  setIsOpen(false);
+                  onResultSelect?.();
+                }}
                 className="block px-4 py-3 text-center text-sm text-primary hover:bg-secondary border-t border-border"
               >
                 Ver todos os resultados para "{query}"
