@@ -174,10 +174,10 @@ export default function AdminSeoCognitiveOrchestration() {
         cognitive_decay_risk: resilience.decay,
         orchestration_scalability_score: clarity.governance,
         strategic_survival_projection: resilience.survival,
-        summary: { verdict: orchestration.verdict, drivers: orchestration.drivers } as object,
-        blockers: orchestration.drivers as unknown as object,
-        recommendations: plan.map((p) => p.action) as unknown as object,
-        warnings: conflicts.map((c) => c.description) as unknown as object,
+        summary: { verdict: orchestration.verdict, drivers: orchestration.drivers },
+        blockers: orchestration.drivers,
+        recommendations: plan.map((p) => p.action),
+        warnings: conflicts.map((c) => c.description),
         notes: `verdict=${orchestration.verdict}`,
       }]);
       if (error) throw error;
