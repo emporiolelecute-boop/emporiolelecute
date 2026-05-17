@@ -200,7 +200,7 @@ const Loja = () => {
                 </Button>
               </a>
               <Link to="/orcamento">
-              <Button size="lg" variant="outline" className="border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 rounded-full px-8 text-lg w-full sm:w-auto">
+              <Button size="lg" variant="ctaOnDark" className="rounded-full px-8 w-full sm:w-auto">
                   Formulário de Orçamento
                 </Button>
               </Link>

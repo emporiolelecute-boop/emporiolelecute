@@ -140,8 +140,8 @@ const OccasionsSection = () => {
               <Link to="/orcamento">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="bg-transparent border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-foreground rounded-full px-8 py-6 text-lg font-medium"
+                  variant="ctaOnDark"
+                  className="rounded-full px-8"
                 >
                   Solicitar Orçamento
                 </Button>
