@@ -217,6 +217,30 @@ export interface TelemetrySnapshot {
   strategic_longevity_score: number;
   entropy_resistance_score: number;
   existential_exposure_score: number;
+  // Fase 14.6 — Meta Governance
+  governance_score: number;
+  systemic_consistency_score: number;
+  strategic_governability_score: number;
+  operational_predictability_score: number;
+  semantic_cohesion_score: number;
+  authority_balance_score: number;
+  resilience_continuity_score: number;
+  contradiction_pressure_score: number;
+  strategic_fragmentation_score: number;
+  operational_noise_score: number;
+  semantic_instability_score: number;
+  authority_distortion_score: number;
+  sustainability_continuity_score: number;
+  adaptability_continuity_score: number;
+  recovery_continuity_score: number;
+  execution_continuity_score: number;
+  long_horizon_survivability_score: number;
+  systemic_trustworthiness_score: number;
+  existential_stability_score: number;
+  governance_entropy_score: number;
+  governance_drift_score: number;
+  continuity_break_risk_score: number;
+  strategic_hallucination_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -527,5 +551,28 @@ export function computeTelemetry(
     strategic_longevity_score: 0,
     entropy_resistance_score: 0,
     existential_exposure_score: 0,
+    governance_score: 0,
+    systemic_consistency_score: 0,
+    strategic_governability_score: 0,
+    operational_predictability_score: 0,
+    semantic_cohesion_score: 0,
+    authority_balance_score: 0,
+    resilience_continuity_score: 0,
+    contradiction_pressure_score: 0,
+    strategic_fragmentation_score: 0,
+    operational_noise_score: 0,
+    semantic_instability_score: 0,
+    authority_distortion_score: 0,
+    sustainability_continuity_score: 0,
+    adaptability_continuity_score: 0,
+    recovery_continuity_score: 0,
+    execution_continuity_score: 0,
+    long_horizon_survivability_score: 0,
+    systemic_trustworthiness_score: 0,
+    existential_stability_score: 0,
+    governance_entropy_score: 0,
+    governance_drift_score: 0,
+    continuity_break_risk_score: 0,
+    strategic_hallucination_score: 0,
   };
 }
