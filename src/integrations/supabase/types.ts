@@ -1965,6 +1965,45 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_coherence_conflicts: {
+        Row: {
+          coherence_loss: number | null
+          conflict_type: string | null
+          contradiction_depth: number | null
+          created_at: string
+          explanation: string | null
+          id: string
+          source_layer: string | null
+          suggested_resolution: string | null
+          systemic_impact: number | null
+          target_layer: string | null
+        }
+        Insert: {
+          coherence_loss?: number | null
+          conflict_type?: string | null
+          contradiction_depth?: number | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          source_layer?: string | null
+          suggested_resolution?: string | null
+          systemic_impact?: number | null
+          target_layer?: string | null
+        }
+        Update: {
+          coherence_loss?: number | null
+          conflict_type?: string | null
+          contradiction_depth?: number | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          source_layer?: string | null
+          suggested_resolution?: string | null
+          systemic_impact?: number | null
+          target_layer?: string | null
+        }
+        Relationships: []
+      }
       seo_consciousness_memory: {
         Row: {
           adaptive_consciousness: number
@@ -2523,6 +2562,132 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_meta_reasoning_snapshots: {
+        Row: {
+          authority_coherence: number
+          blockers: Json
+          cognitive_integrity_score: number
+          cognitive_stability_score: number
+          coherence_collapse_risk: number
+          consensus_stability_score: number
+          contradiction_risk_score: number
+          created_at: string
+          cross_layer_coherence: number
+          decision_reliability_score: number
+          executive_summary: Json
+          forecast_reliability_score: number
+          governance_coherence: number
+          governance_drift_score: number
+          id: string
+          long_term_reasoning_viability: number
+          meta_reasoning_score: number
+          notes: string | null
+          observability_stability_score: number
+          operational_coherence: number
+          operational_drift_score: number
+          orchestration_stability_score: number
+          reasoning_drift_score: number
+          reasoning_reliability_score: number
+          reasoning_stability_score: number
+          recommendations: Json
+          self_conflict_score: number
+          semantic_coherence: number
+          semantic_drift_score: number
+          strategic_coherence: number
+          strategic_confidence_score: number
+          strategic_drift_score: number
+          strategic_hallucination_risk: number
+          strategic_self_awareness_score: number
+          strategic_survival_confidence: number
+          systemic_longevity_score: number
+          systemic_reflection_score: number
+          traceability_integrity_score: number
+          warnings: Json
+        }
+        Insert: {
+          authority_coherence?: number
+          blockers?: Json
+          cognitive_integrity_score?: number
+          cognitive_stability_score?: number
+          coherence_collapse_risk?: number
+          consensus_stability_score?: number
+          contradiction_risk_score?: number
+          created_at?: string
+          cross_layer_coherence?: number
+          decision_reliability_score?: number
+          executive_summary?: Json
+          forecast_reliability_score?: number
+          governance_coherence?: number
+          governance_drift_score?: number
+          id?: string
+          long_term_reasoning_viability?: number
+          meta_reasoning_score?: number
+          notes?: string | null
+          observability_stability_score?: number
+          operational_coherence?: number
+          operational_drift_score?: number
+          orchestration_stability_score?: number
+          reasoning_drift_score?: number
+          reasoning_reliability_score?: number
+          reasoning_stability_score?: number
+          recommendations?: Json
+          self_conflict_score?: number
+          semantic_coherence?: number
+          semantic_drift_score?: number
+          strategic_coherence?: number
+          strategic_confidence_score?: number
+          strategic_drift_score?: number
+          strategic_hallucination_risk?: number
+          strategic_self_awareness_score?: number
+          strategic_survival_confidence?: number
+          systemic_longevity_score?: number
+          systemic_reflection_score?: number
+          traceability_integrity_score?: number
+          warnings?: Json
+        }
+        Update: {
+          authority_coherence?: number
+          blockers?: Json
+          cognitive_integrity_score?: number
+          cognitive_stability_score?: number
+          coherence_collapse_risk?: number
+          consensus_stability_score?: number
+          contradiction_risk_score?: number
+          created_at?: string
+          cross_layer_coherence?: number
+          decision_reliability_score?: number
+          executive_summary?: Json
+          forecast_reliability_score?: number
+          governance_coherence?: number
+          governance_drift_score?: number
+          id?: string
+          long_term_reasoning_viability?: number
+          meta_reasoning_score?: number
+          notes?: string | null
+          observability_stability_score?: number
+          operational_coherence?: number
+          operational_drift_score?: number
+          orchestration_stability_score?: number
+          reasoning_drift_score?: number
+          reasoning_reliability_score?: number
+          reasoning_stability_score?: number
+          recommendations?: Json
+          self_conflict_score?: number
+          semantic_coherence?: number
+          semantic_drift_score?: number
+          strategic_coherence?: number
+          strategic_confidence_score?: number
+          strategic_drift_score?: number
+          strategic_hallucination_risk?: number
+          strategic_self_awareness_score?: number
+          strategic_survival_confidence?: number
+          systemic_longevity_score?: number
+          systemic_reflection_score?: number
+          traceability_integrity_score?: number
+          warnings?: Json
+        }
+        Relationships: []
+      }
       seo_metric_consistency: {
         Row: {
           confidence_score: number
@@ -2946,6 +3111,48 @@ export type Database = {
           resolved?: boolean
           severity?: string | null
           strategic_impact?: number
+        }
+        Relationships: []
+      }
+      seo_reasoning_drift_registry: {
+        Row: {
+          affected_layer: string | null
+          contradiction_probability: number | null
+          created_at: string
+          description: string | null
+          drift_score: number | null
+          drift_type: string | null
+          id: string
+          mitigation_strategy: string | null
+          resolved: boolean
+          severity: string | null
+          stability_impact: number | null
+        }
+        Insert: {
+          affected_layer?: string | null
+          contradiction_probability?: number | null
+          created_at?: string
+          description?: string | null
+          drift_score?: number | null
+          drift_type?: string | null
+          id?: string
+          mitigation_strategy?: string | null
+          resolved?: boolean
+          severity?: string | null
+          stability_impact?: number | null
+        }
+        Update: {
+          affected_layer?: string | null
+          contradiction_probability?: number | null
+          created_at?: string
+          description?: string | null
+          drift_score?: number | null
+          drift_type?: string | null
+          id?: string
+          mitigation_strategy?: string | null
+          resolved?: boolean
+          severity?: string | null
+          stability_impact?: number | null
         }
         Relationships: []
       }
