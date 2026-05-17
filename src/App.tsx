@@ -689,6 +689,11 @@ const App = () => {
                       <AdminSeoOperatingFabric />
                     </Suspense>
                   } />
+                  <Route path="seo-cognitive-orchestration" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoCognitiveOrchestration />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
