@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
-import CategoriesHighlight from "@/components/CategoriesHighlight";
+import CategoriesScroll from "@/components/CategoriesScroll";
 
 import BestSellers from "@/components/BestSellers";
 import OccasionsSection from "@/components/OccasionsSection";
@@ -26,7 +26,7 @@ const Index = () => {
       <Header />
       <main>
         <HeroSlider />
-        <CategoriesHighlight />
+        <CategoriesScroll />
         
         <BestSellers />
         <OccasionsSection />

@@ -47,6 +47,11 @@ export interface DbCategory {
   name: string;
   slug: string;
   created_at: string;
+  image_url?: string | null;
+  icon?: string | null;
+  position?: number | null;
+  is_indexed?: boolean | null;
+  description?: string | null;
 }
 
 export interface DbOccasion {
@@ -329,7 +334,7 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...category }: { id: string; name?: string; slug?: string }) => {
+    mutationFn: async ({ id, ...category }: { id: string; name?: string; slug?: string; icon?: string | null; image_url?: string | null; position?: number | null }) => {
       const { data, error } = await supabase
         .from('categories')
         .update(category)
