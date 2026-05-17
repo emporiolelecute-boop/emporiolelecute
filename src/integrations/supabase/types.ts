@@ -2613,6 +2613,66 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_execution_orchestrator_snapshots: {
+        Row: {
+          cadence_stability_score: number | null
+          compounding_leverage_score: number | null
+          created_at: string
+          created_by: string | null
+          execution_clarity_score: number | null
+          execution_overload_score: number | null
+          execution_sustainability_score: number | null
+          id: string
+          maintenance_pressure_score: number | null
+          notes: string | null
+          operational_drag_score: number | null
+          operational_rhythm_score: number | null
+          payload: Json | null
+          queue_conflict_score: number | null
+          recovery_capacity_score: number | null
+          strategic_fatigue_score: number | null
+          strategic_focus_score: number | null
+        }
+        Insert: {
+          cadence_stability_score?: number | null
+          compounding_leverage_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          execution_clarity_score?: number | null
+          execution_overload_score?: number | null
+          execution_sustainability_score?: number | null
+          id?: string
+          maintenance_pressure_score?: number | null
+          notes?: string | null
+          operational_drag_score?: number | null
+          operational_rhythm_score?: number | null
+          payload?: Json | null
+          queue_conflict_score?: number | null
+          recovery_capacity_score?: number | null
+          strategic_fatigue_score?: number | null
+          strategic_focus_score?: number | null
+        }
+        Update: {
+          cadence_stability_score?: number | null
+          compounding_leverage_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          execution_clarity_score?: number | null
+          execution_overload_score?: number | null
+          execution_sustainability_score?: number | null
+          id?: string
+          maintenance_pressure_score?: number | null
+          notes?: string | null
+          operational_drag_score?: number | null
+          operational_rhythm_score?: number | null
+          payload?: Json | null
+          queue_conflict_score?: number | null
+          recovery_capacity_score?: number | null
+          strategic_fatigue_score?: number | null
+          strategic_focus_score?: number | null
+        }
+        Relationships: []
+      }
       seo_executive_core_snapshots: {
         Row: {
           authority_integrity_score: number | null
