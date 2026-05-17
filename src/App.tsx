@@ -767,6 +767,11 @@ const App = () => {
                       <AdminSeoConsolidation />
                     </Suspense>
                   } />
+                  <Route path="seo-execution-orchestrator" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoExecutionOrchestrator />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
