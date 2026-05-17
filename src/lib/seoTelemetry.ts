@@ -301,6 +301,23 @@ export interface TelemetrySnapshot {
   systemic_deduplication_score?: number;
   observability_bloat_score?: number;
   artificial_complexity_score?: number;
+  // Phase 18 — Execution Orchestrator (all optional)
+  execution_sustainability_score?: number;
+  strategic_execution_clarity?: number;
+  operational_rhythm_score?: number;
+  execution_focus_score?: number;
+  compounding_execution_score?: number;
+  maintenance_drag_score?: number;
+  strategic_fatigue_score?: number;
+  execution_conflict_score?: number;
+  operational_breathing_room?: number;
+  cadence_integrity_score?: number;
+  leverage_efficiency_score?: number;
+  execution_noise_score?: number;
+  queue_fragmentation_score?: number;
+  operational_focus_stability?: number;
+  recovery_cycle_strength?: number;
+  execution_alignment_score?: number;
   // Fase 15.1 — Unified Intelligence Bus
   unified_bus_score?: number;
   engine_consensus_score?: number;

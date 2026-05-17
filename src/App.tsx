@@ -121,6 +121,7 @@ const AdminSeoStabilityFabric = lazyWithRetry(() => import("./pages/admin/AdminS
 const AdminSeoIntegrityGrid = lazyWithRetry(() => import("./pages/admin/AdminSeoIntegrityGrid"), "AdminSeoIntegrityGrid");
 const AdminSeoCoherenceMatrix = lazyWithRetry(() => import("./pages/admin/AdminSeoCoherenceMatrix"), "AdminSeoCoherenceMatrix");
 const AdminSeoConsolidation = lazyWithRetry(() => import("./pages/admin/AdminSeoConsolidation"), "AdminSeoConsolidation");
+const AdminSeoExecutionOrchestrator = lazyWithRetry(() => import("./pages/admin/AdminSeoExecutionOrchestrator"), "AdminSeoExecutionOrchestrator");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
