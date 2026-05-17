@@ -58,6 +58,12 @@ export interface DbOccasion {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
+  image_url?: string | null;
+  icon?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  is_indexed?: boolean | null;
   created_at: string;
 }
 
