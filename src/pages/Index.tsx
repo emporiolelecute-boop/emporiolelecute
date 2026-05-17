@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoriesScroll from "@/components/CategoriesScroll";
+import { useHomepageBlock } from "@/hooks/useHomepageBlocks";
 import OccasionsThumbs from "@/components/OccasionsThumbs";
 
 import BestSellers from "@/components/BestSellers";
@@ -17,6 +18,9 @@ import WebSiteStructuredData from "@/components/WebSiteStructuredData";
 import LocalBusinessStructuredData from "@/components/LocalBusinessStructuredData";
 
 const Index = () => {
+  const { data: categoriesScrollBlock } = useHomepageBlock("section_categories_scroll");
+  const showCategoriesScroll = categoriesScrollBlock?.is_visible === true;
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicSEO />
@@ -26,7 +30,7 @@ const Index = () => {
       <Header />
       <main>
         <HeroSlider />
-        <CategoriesScroll />
+        {showCategoriesScroll && <CategoriesScroll />}
         <OccasionsThumbs />
 
         <BestSellers />

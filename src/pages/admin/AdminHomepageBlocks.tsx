@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/select';
 
 const blockTypeLabels: Record<string, string> = {
+  section: 'Seções da Home',
   category: 'Categorias',
   about: 'Sobre Nós',
   hero: 'Hero/Banner',
