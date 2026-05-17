@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbOccasions } from "@/hooks/useProducts";
 import { useAccessibleCarousel } from "@/hooks/useAccessibleCarousel";
+import { usePauseAnimationsOffscreen } from "@/hooks/usePauseAnimationsOffscreen";
 import { LucideIcon } from "@/components/LucideIcon";
 import { LazyImage } from "@/components/LazyImage";
 import { cn } from "@/lib/utils";
@@ -18,14 +19,14 @@ const pickIcon = (o: { icon?: string | null }, i: number) =>
   o.icon && o.icon.length > 0 ? o.icon : FALLBACK_ICONS[i % FALLBACK_ICONS.length];
 
 const ShimmerBlock = ({ className }: { className?: string }) => (
-  <div className={cn("relative overflow-hidden bg-muted/70", className)}>
+  <div className={cn("relative overflow-hidden bg-muted/70 skeleton-light", className)}>
     <div
-      className="absolute inset-0"
+      className="absolute inset-0 shimmer"
       style={{
         background:
-          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.85) 50%, transparent 70%)",
+          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.7) 50%, transparent 70%)",
         backgroundSize: "200% 100%",
-        animation: "shimmer 1.4s linear infinite",
+        animation: "shimmer 1.6s linear infinite",
       }}
       aria-hidden
     />
@@ -45,13 +46,16 @@ const OccasionsThumbs = () => {
     isLoading,
   });
 
+  // Pause continuous animations when this section leaves the viewport.
+  const sectionRef = usePauseAnimationsOffscreen<HTMLElement>();
+
   if (!isLoading && list.length === 0) return null;
 
   const activeName = list[activeIdx]?.name ?? "";
   const total = list.length;
 
   return (
-    <section className="pb-8 md:pb-10 bg-background" aria-label="Ocasiões especiais">
+    <section ref={sectionRef} className="pb-8 md:pb-10 bg-background" aria-label="Ocasiões especiais">
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-3 md:mb-4">
           <h2 className="font-display text-base md:text-xl text-foreground">
@@ -158,27 +162,19 @@ const OccasionsThumbs = () => {
                       <LazyImage
                         src={o.image_url}
                         alt={o.name}
-                        className="transition-transform duration-500 group-hover:scale-110"
+                        className="transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <LucideIcon
                           name={iconName}
-                          className="w-6 h-6 md:w-7 md:h-7 text-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+                          className="w-6 h-6 md:w-7 md:h-7 text-primary transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
                     )}
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{
-                        background:
-                          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
-                        backgroundSize: "200% 100%",
-                        animation: "shimmer 1.6s linear infinite",
-                      }}
-                      aria-hidden
-                    />
-                    <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-primary/20 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500 -z-10 animate-pulse-slow" aria-hidden />
+                    {/* Removed: continuous shimmer overlay + pulse-slow halo blur.
+                        Keep one discrete hover affordance only. */}
+                    <div className="pointer-events-none absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors duration-300" aria-hidden />
                   </div>
                   <span
                     className={cn(

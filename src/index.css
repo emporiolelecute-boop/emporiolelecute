@@ -267,3 +267,42 @@
     will-change: transform;
   }
 }
+
+/* ---------------------------------------------------------------
+   Reduced-motion opt-out — applies when <html class="motion-reduced">
+   is set by useReducedMotion() OR system prefers-reduced-motion.
+   Kills continuous animations site-wide while keeping discrete
+   transitions (hover, focus) intact for affordance.
+--------------------------------------------------------------- */
+.motion-reduced *,
+.motion-reduced *::before,
+.motion-reduced *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+.motion-reduced .animate-pingpong,
+.motion-reduced .animate-float,
+.motion-reduced .animate-pulse-slow,
+.motion-reduced .animate-spin-slow,
+.motion-reduced .animate-bounce-soft,
+.motion-reduced [class*="animate-"] {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.motion-reduced) [class*="animate-"] {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Mobile skeleton: drop shimmer animation under 640px to save GPU. */
+@media (max-width: 640px) {
+  .skeleton-light [style*="shimmer"],
+  .skeleton-light [class*="shimmer"] {
+    animation: none !important;
+    background: hsl(var(--muted) / 0.7) !important;
+  }
+}
+

@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "
 import { lazy, Suspense, useEffect } from "react";
 import { CartProvider } from "./contexts/CartContext";
 import { usePageTracking } from "./lib/analytics";
+import { useReducedMotion } from "./hooks/useReducedMotion";
 import { PageSkeleton, AdminSkeleton } from "./components/ui/skeleton-loading";
 
 // Lazy load pages for better performance
@@ -154,6 +155,15 @@ const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Mount the reduced-motion controller once. Toggles the `motion-reduced` class
+// on <html> based on user preference (localStorage) or system setting.
+const ReducedMotionMount = () => {
+  useReducedMotion();
+  return null;
+};
+
+
+
 /**
  * Fase A — Redirect canônico 1-hop: /produto/:slug → /produtos/:slug
  * Preserva query string e hash. Usa `replace` para não poluir o histórico
@@ -175,6 +185,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <TooltipProvider>
+          <ReducedMotionMount />
           <Toaster />
           <Sonner />
           <StaleBundleOverlay />
