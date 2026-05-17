@@ -217,6 +217,30 @@ export interface TelemetrySnapshot {
   strategic_longevity_score: number;
   entropy_resistance_score: number;
   existential_exposure_score: number;
+  // Fase 14.6 — Meta Governance
+  governance_score: number;
+  systemic_consistency_score: number;
+  strategic_governability_score: number;
+  operational_predictability_score: number;
+  semantic_cohesion_score: number;
+  authority_balance_score: number;
+  resilience_continuity_score: number;
+  contradiction_pressure_score: number;
+  strategic_fragmentation_score: number;
+  operational_noise_score: number;
+  semantic_instability_score: number;
+  authority_distortion_score: number;
+  sustainability_continuity_score: number;
+  adaptability_continuity_score: number;
+  recovery_continuity_score: number;
+  execution_continuity_score: number;
+  long_horizon_survivability_score: number;
+  systemic_trustworthiness_score: number;
+  existential_stability_score: number;
+  governance_entropy_score: number;
+  governance_drift_score: number;
+  continuity_break_risk_score: number;
+  strategic_hallucination_score: number;
 }
 
 export interface AutonomyTelemetryInput {
