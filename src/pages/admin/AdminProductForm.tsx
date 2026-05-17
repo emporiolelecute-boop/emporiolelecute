@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, X, Save, Loader2, Tag } from 'lucide-react';
+import { ArrowLeft, Plus, X, Save, Loader2, Tag, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import {
   DbProduct,
 } from '@/hooks/useProducts';
 import { useTags, useUpdateProductTags } from '@/hooks/useTags';
+import { useSlugAvailability } from '@/hooks/useSlugAvailability';
 import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateProductSeo } from '@/lib/productSeo';
@@ -84,6 +85,8 @@ const AdminProductForm = () => {
   const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [keywordsInput, setKeywordsInput] = useState('');
+
+  const slugCheck = useSlugAvailability('products', formData.slug, id ?? null);
 
   useEffect(() => {
     if (existingProduct && isEditing) {
@@ -365,9 +368,30 @@ const AdminProductForm = () => {
                     onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                     placeholder="slug-do-produto"
                     required
+                    aria-describedby="slug-status"
+                    aria-invalid={slugCheck.status === 'taken' || slugCheck.status === 'invalid'}
                   />
+                  <p
+                    id="slug-status"
+                    aria-live="polite"
+                    className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                      slugCheck.status === 'available'
+                        ? 'text-emerald-600'
+                        : slugCheck.status === 'taken' || slugCheck.status === 'invalid'
+                        ? 'text-destructive'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {slugCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                    {slugCheck.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                    {(slugCheck.status === 'taken' || slugCheck.status === 'invalid') && (
+                      <AlertCircle className="h-3 w-3" aria-hidden />
+                    )}
+                    <span>{slugCheck.message}</span>
+                  </p>
                 </div>
               </div>
+
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição curta</Label>
