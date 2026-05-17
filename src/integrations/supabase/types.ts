@@ -2016,6 +2016,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_meta_governance_snapshots: {
+        Row: {
+          adaptability_continuity: number
+          authority_balance: number
+          authority_distortion: number
+          contradiction_pressure: number
+          created_at: string
+          created_by: string | null
+          ecosystem_integrity: number
+          execution_continuity: number
+          existential_stability: number
+          governance_score: number
+          id: string
+          long_horizon_survivability: number
+          notes: string | null
+          operational_noise: number
+          operational_predictability: number
+          recovery_continuity: number
+          resilience_continuity: number
+          semantic_cohesion: number
+          semantic_instability: number
+          snapshot: Json
+          strategic_fragmentation: number
+          strategic_governability: number
+          sustainability_continuity: number
+          systemic_consistency: number
+          systemic_trustworthiness: number
+        }
+        Insert: {
+          adaptability_continuity?: number
+          authority_balance?: number
+          authority_distortion?: number
+          contradiction_pressure?: number
+          created_at?: string
+          created_by?: string | null
+          ecosystem_integrity?: number
+          execution_continuity?: number
+          existential_stability?: number
+          governance_score?: number
+          id?: string
+          long_horizon_survivability?: number
+          notes?: string | null
+          operational_noise?: number
+          operational_predictability?: number
+          recovery_continuity?: number
+          resilience_continuity?: number
+          semantic_cohesion?: number
+          semantic_instability?: number
+          snapshot?: Json
+          strategic_fragmentation?: number
+          strategic_governability?: number
+          sustainability_continuity?: number
+          systemic_consistency?: number
+          systemic_trustworthiness?: number
+        }
+        Update: {
+          adaptability_continuity?: number
+          authority_balance?: number
+          authority_distortion?: number
+          contradiction_pressure?: number
+          created_at?: string
+          created_by?: string | null
+          ecosystem_integrity?: number
+          execution_continuity?: number
+          existential_stability?: number
+          governance_score?: number
+          id?: string
+          long_horizon_survivability?: number
+          notes?: string | null
+          operational_noise?: number
+          operational_predictability?: number
+          recovery_continuity?: number
+          resilience_continuity?: number
+          semantic_cohesion?: number
+          semantic_instability?: number
+          snapshot?: Json
+          strategic_fragmentation?: number
+          strategic_governability?: number
+          sustainability_continuity?: number
+          systemic_consistency?: number
+          systemic_trustworthiness?: number
+        }
+        Relationships: []
+      }
       seo_nervous_system_snapshots: {
         Row: {
           adaptive_capacity: number
