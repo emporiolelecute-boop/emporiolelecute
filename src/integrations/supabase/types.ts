@@ -4113,6 +4113,78 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_unified_nexus_snapshots: {
+        Row: {
+          continuity_alignment_score: number | null
+          created_at: string
+          dominant_systemic_risk: string | null
+          dominant_systemic_signal: string | null
+          executive_clarity_score: number | null
+          executive_entropy_score: number | null
+          governance_stability_score: number | null
+          id: string
+          nexus_verdict: string | null
+          notes: string | null
+          operational_disruption_score: number | null
+          operational_harmony_score: number | null
+          resilience_unification_score: number | null
+          semantic_alignment_score: number | null
+          semantic_divergence_score: number | null
+          strategic_instability_score: number | null
+          strategic_truth_score: number | null
+          strategic_unification_score: number | null
+          systemic_coherence_score: number | null
+          systemic_fragmentation_score: number | null
+          unified_nexus_score: number | null
+        }
+        Insert: {
+          continuity_alignment_score?: number | null
+          created_at?: string
+          dominant_systemic_risk?: string | null
+          dominant_systemic_signal?: string | null
+          executive_clarity_score?: number | null
+          executive_entropy_score?: number | null
+          governance_stability_score?: number | null
+          id?: string
+          nexus_verdict?: string | null
+          notes?: string | null
+          operational_disruption_score?: number | null
+          operational_harmony_score?: number | null
+          resilience_unification_score?: number | null
+          semantic_alignment_score?: number | null
+          semantic_divergence_score?: number | null
+          strategic_instability_score?: number | null
+          strategic_truth_score?: number | null
+          strategic_unification_score?: number | null
+          systemic_coherence_score?: number | null
+          systemic_fragmentation_score?: number | null
+          unified_nexus_score?: number | null
+        }
+        Update: {
+          continuity_alignment_score?: number | null
+          created_at?: string
+          dominant_systemic_risk?: string | null
+          dominant_systemic_signal?: string | null
+          executive_clarity_score?: number | null
+          executive_entropy_score?: number | null
+          governance_stability_score?: number | null
+          id?: string
+          nexus_verdict?: string | null
+          notes?: string | null
+          operational_disruption_score?: number | null
+          operational_harmony_score?: number | null
+          resilience_unification_score?: number | null
+          semantic_alignment_score?: number | null
+          semantic_divergence_score?: number | null
+          strategic_instability_score?: number | null
+          strategic_truth_score?: number | null
+          strategic_unification_score?: number | null
+          systemic_coherence_score?: number | null
+          systemic_fragmentation_score?: number | null
+          unified_nexus_score?: number | null
+        }
+        Relationships: []
+      }
       seo_url_status: {
         Row: {
           alerted: boolean

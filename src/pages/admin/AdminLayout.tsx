@@ -44,7 +44,8 @@ import {
   Eye,
   Compass,
   Crown,
-  Infinity as InfinityIcon
+  Infinity as InfinityIcon,
+  Hexagon
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -94,6 +95,7 @@ const menuItems = [
   { icon: Eye, label: 'Consciousness Fabric', path: '/admin/seo-consciousness-fabric' },
   { icon: Compass, label: 'Strategic Reality', path: '/admin/seo-strategic-reality' },
   { icon: InfinityIcon, label: 'Strategic Continuum', path: '/admin/seo-strategic-continuum' },
+  { icon: Hexagon, label: 'Unified Nexus', path: '/admin/seo-unified-nexus' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

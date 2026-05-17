@@ -464,6 +464,23 @@ export interface TelemetrySnapshot {
   topical_persistence_score?: number;
   structural_persistence_score?: number;
   continuum_elasticity_score?: number;
+  // Fase 16.0 — SEO Unified Strategic Nexus (only fields not previously declared)
+  unified_nexus_score?: number;
+  strategic_unification_score?: number;
+  semantic_alignment_score?: number;
+  resilience_unification_score?: number;
+  continuity_alignment_score?: number;
+  executive_clarity_score?: number;
+  strategic_truth_score?: number;
+  systemic_fragmentation_score?: number;
+  strategic_instability_score?: number;
+  semantic_divergence_score?: number;
+  operational_disruption_score?: number;
+  executive_entropy_score?: number;
+  execution_synchronization_score?: number;
+  narrative_integrity_score?: number;
+  recovery_unification_score?: number;
+  continuity_resilience_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
