@@ -94,6 +94,24 @@ const AdminLayout = () => {
   const location = useLocation();
   const { user, isAdmin, loading, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navRef = useState<HTMLElement | null>(null);
+  const [advanced, setAdvanced] = useState<boolean>(() => {
+    try { return localStorage.getItem('admin_advanced_mode') === '1'; } catch { return false; }
+  });
+  // Preserve scroll position across the toggle so the operator does not lose context.
+  const toggleAdvanced = () => {
+    const el = document.getElementById('admin-nav-scroller');
+    const prevTop = el?.scrollTop ?? 0;
+    setAdvanced((v) => {
+      const next = !v;
+      try { localStorage.setItem('admin_advanced_mode', next ? '1' : '0'); } catch { /* noop */ }
+      requestAnimationFrame(() => {
+        const el2 = document.getElementById('admin-nav-scroller');
+        if (el2) el2.scrollTop = prevTop;
+      });
+      return next;
+    });
+  };
   useAdminPageTracking();
 
   useEffect(() => {
