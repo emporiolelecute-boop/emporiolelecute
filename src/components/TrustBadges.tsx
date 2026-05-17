@@ -1,4 +1,4 @@
-import { Truck, Percent, Headset, CreditCard, MessageCircle, Shield, Heart, Sparkles, Package, Clock, Star, type LucideIcon } from "lucide-react";
+import { Truck, Percent, Headset, CreditCard, Shield, Heart, Sparkles, Package, Clock, Star, type LucideIcon } from "lucide-react";
 import { useTrustBadgesConfig, type TrustBadgeItem } from "@/hooks/useStoreSettings";
 
 const ICON_MAP: Record<TrustBadgeItem['icon'], LucideIcon> = {
@@ -6,17 +6,13 @@ const ICON_MAP: Record<TrustBadgeItem['icon'], LucideIcon> = {
 };
 
 interface TrustBadgesProps {
-  showWhatsApp?: boolean;
   className?: string;
 }
 
-const TrustBadges = ({ showWhatsApp = true, className = "" }: TrustBadgesProps) => {
+const TrustBadges = ({ className = "" }: TrustBadgesProps) => {
   const { data: config } = useTrustBadgesConfig();
 
   if (!config) return null;
-
-  const renderWhatsApp = showWhatsApp && config.show_whatsapp;
-  const waHref = `https://wa.me/5541992214299?text=${encodeURIComponent(config.whatsapp_message)}`;
 
   return (
     <aside
@@ -47,24 +43,10 @@ const TrustBadges = ({ showWhatsApp = true, className = "" }: TrustBadgesProps) 
             );
           })}
         </ul>
-
-        {renderWhatsApp && (
-          <div className="mt-6 flex justify-center">
-            <a
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={config.whatsapp_label}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#25D366] text-white text-sm font-semibold shadow-md hover:scale-105 transition-transform"
-            >
-              <MessageCircle className="h-5 w-5" aria-hidden="true" />
-              {config.whatsapp_label}
-            </a>
-          </div>
-        )}
       </div>
     </aside>
   );
 };
 
 export default TrustBadges;
+
