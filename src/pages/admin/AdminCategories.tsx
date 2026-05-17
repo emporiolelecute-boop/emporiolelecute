@@ -1,5 +1,24 @@
-import { useState } from 'react';
-import { Plus, Trash2, Edit, Check, X, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Trash2, Edit, Check, X, Search, GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,15 +41,185 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useDbCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/useProducts';
+import {
+  useDbCategories,
+  useCreateCategory,
+  useDeleteCategory,
+  useUpdateCategory,
+  type DbCategory,
+} from '@/hooks/useProducts';
 import { LucideIcon } from '@/components/LucideIcon';
 import LucideIconPicker from '@/components/admin/LucideIconPicker';
+
+interface SortableRowProps {
+  category: DbCategory;
+  editingId: string | null;
+  editName: string;
+  editSlug: string;
+  editIcon: string | null;
+  editImageUrl: string;
+  isSaving: boolean;
+  onStartEdit: (c: DbCategory) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onDelete: (id: string) => void;
+  setEditName: (v: string) => void;
+  setEditSlug: (v: string) => void;
+  setEditIcon: (v: string | null) => void;
+  setEditImageUrl: (v: string) => void;
+  generateSlug: (n: string) => string;
+}
+
+const SortableRow = ({
+  category,
+  editingId,
+  editName,
+  editSlug,
+  editIcon,
+  editImageUrl,
+  isSaving,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onDelete,
+  setEditName,
+  setEditSlug,
+  setEditIcon,
+  setEditImageUrl,
+  generateSlug,
+}: SortableRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: category.id,
+    disabled: editingId === category.id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  const isEditing = editingId === category.id;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+    >
+      {isEditing ? (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Nome</Label>
+              <Input
+                value={editName}
+                onChange={(e) => {
+                  setEditName(e.target.value);
+                  setEditSlug(generateSlug(e.target.value));
+                }}
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Slug</Label>
+              <Input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Ícone (Lucide)</Label>
+              <LucideIconPicker value={editIcon} onChange={setEditIcon} />
+            </div>
+            <div>
+              <Label className="text-xs">Imagem (URL)</Label>
+              <Input
+                value={editImageUrl}
+                onChange={(e) => setEditImageUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={onCancelEdit}>
+              <X className="w-4 h-4 mr-1" /> Cancelar
+            </Button>
+            <Button onClick={onSaveEdit} disabled={isSaving}>
+              <Check className="w-4 h-4 mr-1" /> Salvar
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <button
+              type="button"
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 -ml-1 touch-none"
+              aria-label="Arrastar para reordenar"
+            >
+              <GripVertical className="w-4 h-4" />
+            </button>
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-background ring-2 ring-border flex items-center justify-center shrink-0">
+              {category.image_url ? (
+                <img
+                  src={category.image_url}
+                  alt={category.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <LucideIcon name={category.icon} className="w-5 h-5 text-primary" />
+              )}
+            </div>
+            <div className="cursor-pointer min-w-0" onClick={() => onStartEdit(category)}>
+              <p className="font-medium text-foreground truncate flex items-center gap-2">
+                {category.name}
+                {category.icon && (
+                  <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                    <LucideIcon name={category.icon} className="w-3 h-3" />
+                    {category.icon}
+                  </span>
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground truncate">
+                {category.slug}
+                {typeof category.position === 'number' && (
+                  <span className="ml-2 text-xs">#{category.position}</span>
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onStartEdit(category)}
+              className="text-muted-foreground hover:text-primary"
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive"
+              onClick={() => onDelete(category.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const AdminCategories = () => {
   const { data: categories, isLoading } = useDbCategories();
   const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
   const updateCategory = useUpdateCategory();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -38,12 +227,24 @@ const AdminCategories = () => {
   const [formData, setFormData] = useState({ name: '', slug: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
   const [editIcon, setEditIcon] = useState<string | null>(null);
   const [editImageUrl, setEditImageUrl] = useState('');
+
+  // Local sortable order
+  const [orderedIds, setOrderedIds] = useState<string[]>([]);
+  const [savingOrder, setSavingOrder] = useState(false);
+
+  useEffect(() => {
+    if (categories) setOrderedIds(categories.map((c) => c.id));
+  }, [categories]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const generateSlug = (name: string) =>
     name
@@ -53,9 +254,7 @@ const AdminCategories = () => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-  const handleNameChange = (name: string) => {
-    setFormData({ name, slug: generateSlug(name) });
-  };
+  const handleNameChange = (name: string) => setFormData({ name, slug: generateSlug(name) });
 
   const handleCreate = async () => {
     if (!formData.name || !formData.slug) {
@@ -83,13 +282,7 @@ const AdminCategories = () => {
     setDeleteId(null);
   };
 
-  const handleStartEdit = (category: {
-    id: string;
-    name: string;
-    slug: string;
-    icon?: string | null;
-    image_url?: string | null;
-  }) => {
+  const handleStartEdit = (category: DbCategory) => {
     setEditingId(category.id);
     setEditName(category.name);
     setEditSlug(category.slug);
@@ -122,11 +315,51 @@ const AdminCategories = () => {
     }
   };
 
-  const filteredCategories = categories?.filter(
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = orderedIds.indexOf(active.id as string);
+    const newIndex = orderedIds.indexOf(over.id as string);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const newOrder = arrayMove(orderedIds, oldIndex, newIndex);
+    setOrderedIds(newOrder);
+    setSavingOrder(true);
+
+    try {
+      // Persist position = (index+1) * 10 for each category
+      const updates = newOrder.map((id, idx) =>
+        supabase
+          .from('categories')
+          .update({ position: (idx + 1) * 10 })
+          .eq('id', id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast({ title: 'Ordem atualizada' });
+    } catch {
+      toast({ title: 'Erro ao salvar ordem', variant: 'destructive' });
+      if (categories) setOrderedIds(categories.map((c) => c.id));
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
+  const byId = new Map((categories ?? []).map((c) => [c.id, c]));
+  const sortedCategories: DbCategory[] = orderedIds
+    .map((id) => byId.get(id))
+    .filter((c): c is DbCategory => !!c);
+
+  const filteredCategories = sortedCategories.filter(
     (cat) =>
       cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const showDnd = !searchQuery; // Drag only makes sense over the full list
 
   return (
     <div className="p-6 lg:p-8">
@@ -134,7 +367,8 @@ const AdminCategories = () => {
         <div>
           <h1 className="text-3xl font-display font-semibold text-foreground">Categorias</h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie nome, slug, ícone (Lucide) e imagem das categorias exibidas no scroll da home.
+            Arraste para reordenar. Edite nome, slug, ícone (Lucide) e imagem. A ordem aqui define o
+            carrossel da home.
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -189,122 +423,78 @@ const AdminCategories = () => {
       </div>
 
       <Card className="shadow-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg font-display">
-            Todas as Categorias ({filteredCategories?.length || 0})
+            Todas as Categorias ({filteredCategories.length})
           </CardTitle>
+          {savingOrder && (
+            <span className="text-xs text-muted-foreground">Salvando ordem...</span>
+          )}
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
-          ) : filteredCategories && filteredCategories.length > 0 ? (
-            <div className="space-y-3">
-              {filteredCategories.map((category) => (
-                <div
-                  key={category.id}
-                  className="p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  {editingId === category.id ? (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">Nome</Label>
-                          <Input
-                            value={editName}
-                            onChange={(e) => {
-                              setEditName(e.target.value);
-                              setEditSlug(generateSlug(e.target.value));
-                            }}
-                            placeholder="Nome"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Slug</Label>
-                          <Input
-                            value={editSlug}
-                            onChange={(e) => setEditSlug(e.target.value)}
-                            placeholder="slug"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">Ícone (Lucide)</Label>
-                          <LucideIconPicker value={editIcon} onChange={setEditIcon} />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Imagem (URL)</Label>
-                          <Input
-                            value={editImageUrl}
-                            onChange={(e) => setEditImageUrl(e.target.value)}
-                            placeholder="https://..."
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" onClick={handleCancelEdit}>
-                          <X className="w-4 h-4 mr-1" /> Cancelar
-                        </Button>
-                        <Button onClick={handleSaveEdit} disabled={updateCategory.isPending}>
-                          <Check className="w-4 h-4 mr-1" /> Salvar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-background ring-2 ring-border flex items-center justify-center shrink-0">
-                          {category.image_url ? (
-                            <img
-                              src={category.image_url}
-                              alt={category.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <LucideIcon name={category.icon} className="w-5 h-5 text-primary" />
-                          )}
-                        </div>
-                        <div
-                          className="cursor-pointer min-w-0"
-                          onClick={() => handleStartEdit(category)}
-                        >
-                          <p className="font-medium text-foreground truncate flex items-center gap-2">
-                            {category.name}
-                            {category.icon && (
-                              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                                <LucideIcon name={category.icon} className="w-3 h-3" />
-                                {category.icon}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">{category.slug}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleStartEdit(category)}
-                          className="text-muted-foreground hover:text-primary"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteId(category.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+          ) : filteredCategories.length > 0 ? (
+            showDnd ? (
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={filteredCategories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-3">
+                    {filteredCategories.map((category) => (
+                      <SortableRow
+                        key={category.id}
+                        category={category}
+                        editingId={editingId}
+                        editName={editName}
+                        editSlug={editSlug}
+                        editIcon={editIcon}
+                        editImageUrl={editImageUrl}
+                        isSaving={updateCategory.isPending}
+                        onStartEdit={handleStartEdit}
+                        onCancelEdit={handleCancelEdit}
+                        onSaveEdit={handleSaveEdit}
+                        onDelete={setDeleteId}
+                        setEditName={setEditName}
+                        setEditSlug={setEditSlug}
+                        setEditIcon={setEditIcon}
+                        setEditImageUrl={setEditImageUrl}
+                        generateSlug={generateSlug}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Reordenação desativada durante a busca. Limpe o filtro para arrastar.
+                </p>
+                <div className="space-y-3">
+                  {filteredCategories.map((category) => (
+                    <SortableRow
+                      key={category.id}
+                      category={category}
+                      editingId={editingId}
+                      editName={editName}
+                      editSlug={editSlug}
+                      editIcon={editIcon}
+                      editImageUrl={editImageUrl}
+                      isSaving={updateCategory.isPending}
+                      onStartEdit={handleStartEdit}
+                      onCancelEdit={handleCancelEdit}
+                      onSaveEdit={handleSaveEdit}
+                      onDelete={setDeleteId}
+                      setEditName={setEditName}
+                      setEditSlug={setEditSlug}
+                      setEditIcon={setEditIcon}
+                      setEditImageUrl={setEditImageUrl}
+                      generateSlug={generateSlug}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">
