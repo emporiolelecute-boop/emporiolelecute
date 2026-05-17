@@ -514,6 +514,24 @@ export interface TelemetrySnapshot {
   resilience_fatigue_score?: number;
   consensus_stability_score?: number;
   stability_persistence_score?: number;
+  // Phase 16.3 — Strategic Integrity Grid (additive, optional; collision-safe)
+  integrity_grid_score?: number;
+  executive_integrity_score?: number;
+  strategic_coherence_score?: number;
+  systemic_trust_score?: number;
+  continuity_integrity_score?: number;
+  operational_integrity_score?: number;
+  resilience_integrity_score?: number;
+  convergence_integrity_score?: number;
+  hidden_fragmentation_risk?: number;
+  strategic_erosion_risk?: number;
+  semantic_confusion_risk?: number;
+  operational_conflict_risk?: number;
+  continuity_break_risk?: number;
+  trust_continuity_score?: number;
+  adaptive_integrity_score?: number;
+  strategic_harmony_score?: number;
+  integrity_persistence_score?: number;
 }
 
 export interface AutonomyTelemetryInput {

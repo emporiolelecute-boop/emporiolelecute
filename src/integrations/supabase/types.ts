@@ -2739,6 +2739,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_integrity_grid_snapshots: {
+        Row: {
+          continuity_break_risk: number | null
+          continuity_graph: Json | null
+          continuity_integrity_score: number | null
+          convergence_integrity_score: number | null
+          created_at: string
+          executive_integrity_score: number | null
+          governance_conflicts: Json | null
+          governance_integrity_score: number | null
+          hidden_fragmentation_risk: number | null
+          id: string
+          integrity_grid_score: number | null
+          integrity_matrix: Json | null
+          notes: string | null
+          operational_conflict_risk: number | null
+          operational_integrity_score: number | null
+          resilience_distribution: Json | null
+          resilience_integrity_score: number | null
+          semantic_confusion_risk: number | null
+          semantic_integrity_map: Json | null
+          semantic_integrity_score: number | null
+          snapshot_type: string
+          strategic_alignment_map: Json | null
+          strategic_coherence_score: number | null
+          strategic_erosion_risk: number | null
+          systemic_trust_score: number | null
+        }
+        Insert: {
+          continuity_break_risk?: number | null
+          continuity_graph?: Json | null
+          continuity_integrity_score?: number | null
+          convergence_integrity_score?: number | null
+          created_at?: string
+          executive_integrity_score?: number | null
+          governance_conflicts?: Json | null
+          governance_integrity_score?: number | null
+          hidden_fragmentation_risk?: number | null
+          id?: string
+          integrity_grid_score?: number | null
+          integrity_matrix?: Json | null
+          notes?: string | null
+          operational_conflict_risk?: number | null
+          operational_integrity_score?: number | null
+          resilience_distribution?: Json | null
+          resilience_integrity_score?: number | null
+          semantic_confusion_risk?: number | null
+          semantic_integrity_map?: Json | null
+          semantic_integrity_score?: number | null
+          snapshot_type?: string
+          strategic_alignment_map?: Json | null
+          strategic_coherence_score?: number | null
+          strategic_erosion_risk?: number | null
+          systemic_trust_score?: number | null
+        }
+        Update: {
+          continuity_break_risk?: number | null
+          continuity_graph?: Json | null
+          continuity_integrity_score?: number | null
+          convergence_integrity_score?: number | null
+          created_at?: string
+          executive_integrity_score?: number | null
+          governance_conflicts?: Json | null
+          governance_integrity_score?: number | null
+          hidden_fragmentation_risk?: number | null
+          id?: string
+          integrity_grid_score?: number | null
+          integrity_matrix?: Json | null
+          notes?: string | null
+          operational_conflict_risk?: number | null
+          operational_integrity_score?: number | null
+          resilience_distribution?: Json | null
+          resilience_integrity_score?: number | null
+          semantic_confusion_risk?: number | null
+          semantic_integrity_map?: Json | null
+          semantic_integrity_score?: number | null
+          snapshot_type?: string
+          strategic_alignment_map?: Json | null
+          strategic_coherence_score?: number | null
+          strategic_erosion_risk?: number | null
+          systemic_trust_score?: number | null
+        }
+        Relationships: []
+      }
       seo_kernel_snapshots: {
         Row: {
           architectural_entropy: number
