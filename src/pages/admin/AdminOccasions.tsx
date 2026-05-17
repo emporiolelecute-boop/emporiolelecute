@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle } from 'lucide-react';
 import { trackAdminEvent } from '@/lib/adminUsage';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,24 @@ const AdminOccasions = () => {
 
   const createSlugCheck = useSlugAvailability('occasions', formData.slug, null);
   const editSlugCheck = useSlugAvailability('occasions', editSlug, editingId);
+
+  // Usage telemetry: open/submit/abandon for create dialog.
+  const createState = useRef({ opened: false, submitted: false });
+  useEffect(() => {
+    if (isDialogOpen) {
+      trackAdminEvent('form_open', 'occasion_create');
+      createState.current = { opened: true, submitted: false };
+    } else if (createState.current.opened && !createState.current.submitted) {
+      trackAdminEvent('form_abandon', 'occasion_create');
+      createState.current.opened = false;
+    }
+  }, [isDialogOpen]);
+
+  useEffect(() => {
+    if (!searchQuery) return;
+    const t = setTimeout(() => trackAdminEvent('list_search', 'occasions'), 700);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   const generateSlug = (name: string) => {
     return name
