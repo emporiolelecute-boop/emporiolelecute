@@ -46,3 +46,49 @@ export function buildOperationalGlossary(items: Array<{ term: string; definition
   for (const i of items) out[i.term] = i.definition;
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// Final Phase — system map helpers (additive, read-only)
+// ---------------------------------------------------------------------------
+
+export function buildSystemMap(engines: EngineEntry[], deps: DependencyEntry[]): Record<string, { layer: string; outgoing: string[]; incoming: string[] }> {
+  const out: Record<string, { layer: string; outgoing: string[]; incoming: string[] }> = {};
+  for (const e of engines) out[e.name] = { layer: e.layer, outgoing: [], incoming: [] };
+  for (const d of deps) {
+    if (out[d.from]) out[d.from].outgoing.push(d.to);
+    if (out[d.to]) out[d.to].incoming.push(d.from);
+  }
+  return out;
+}
+
+export function buildDependencyTree(deps: DependencyEntry[], root: string): Record<string, string[]> {
+  const adj: Record<string, string[]> = {};
+  for (const d of deps) (adj[d.from] ??= []).push(d.to);
+  const out: Record<string, string[]> = {};
+  const stack = [root];
+  const seen = new Set<string>();
+  while (stack.length) {
+    const n = stack.pop()!;
+    if (seen.has(n)) continue;
+    seen.add(n);
+    out[n] = adj[n] ?? [];
+    for (const c of out[n]) stack.push(c);
+  }
+  return out;
+}
+
+export function buildLayerRelationships(engines: EngineEntry[], deps: DependencyEntry[]): Array<{ from: string; to: string; count: number }> {
+  const layerOf: Record<string, string> = {};
+  for (const e of engines) layerOf[e.name] = e.layer;
+  const counts: Record<string, number> = {};
+  for (const d of deps) {
+    const a = layerOf[d.from]; const b = layerOf[d.to];
+    if (!a || !b || a === b) continue;
+    const key = `${a}→${b}`;
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return Object.entries(counts).map(([k, count]) => {
+    const [from, to] = k.split("→");
+    return { from, to, count };
+  });
+}

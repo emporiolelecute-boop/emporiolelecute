@@ -50,3 +50,49 @@ export function compressOperationalNarrative(overview: ExecutiveOverview, priori
     risks.length ? `Riscos críticos: ${risks.slice(0, 3).join(", ")}.` : "",
   ].filter(Boolean).join(" ");
 }
+
+// ---------------------------------------------------------------------------
+// Final Phase — UX compression helpers (additive, read-only)
+// ---------------------------------------------------------------------------
+
+export interface WidgetCandidate { id: string; importance: number; lastInteractionDaysAgo: number }
+
+export function prioritizeExecutiveWidgets(widgets: WidgetCandidate[], topN = 12): string[] {
+  return [...widgets]
+    .sort((a, b) => b.importance - a.importance || a.lastInteractionDaysAgo - b.lastInteractionDaysAgo)
+    .slice(0, topN)
+    .map((w) => w.id);
+}
+
+export function detectDashboardNoise(dashboards: number, activeDashboards: number): number {
+  if (dashboards === 0) return 0;
+  const idle = Math.max(0, dashboards - activeDashboards);
+  return clamp((idle / dashboards) * 100);
+}
+
+export function buildExecutiveSummaryCards(scores: Record<string, number>): Array<{ label: string; value: number }> {
+  return Object.entries(scores).slice(0, 6).map(([label, value]) => ({ label, value }));
+}
+
+export function compressNavigationDepth(maxDepth: number, baseline = 3): number {
+  if (maxDepth <= baseline) return 0;
+  return clamp(((maxDepth - baseline) / baseline) * 100);
+}
+
+export function calculateCognitiveLoad(input: {
+  widgets: number; metrics: number; dashboards: number;
+}): number {
+  const score = input.widgets * 1.1 + input.metrics * 0.2 + input.dashboards * 1.5;
+  return clamp(score);
+}
+
+export function suggestUiSimplification(input: {
+  noise: number; cognitiveLoad: number; navDepth: number;
+}): string[] {
+  const out: string[] = [];
+  if (input.noise > 50) out.push("Esconder dashboards inativos.");
+  if (input.cognitiveLoad > 60) out.push("Reduzir widgets por tela para ≤ 12.");
+  if (input.navDepth > 40) out.push("Achatar a navegação admin para ≤ 3 níveis.");
+  if (!out.length) out.push("UX executiva dentro do envelope confortável.");
+  return out;
+}

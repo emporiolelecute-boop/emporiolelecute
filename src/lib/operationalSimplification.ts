@@ -43,3 +43,32 @@ export function buildSimplificationRoadmap(input: {
   if (!out.length) out.push("Sistema dentro de envelopes saudáveis.");
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// Final Phase — operational simplification extensions (additive, read-only)
+// ---------------------------------------------------------------------------
+
+export function detectOperationalRedundancy(items: Array<{ name: string; cluster: string }>): string[] {
+  const clusters: Record<string, string[]> = {};
+  for (const i of items) (clusters[i.cluster] ??= []).push(i.name);
+  const out: string[] = [];
+  for (const names of Object.values(clusters)) if (names.length > 1) out.push(...names);
+  return out;
+}
+
+export function detectExcessiveGovernance(governanceLayers: number, baseline = 5): number {
+  if (governanceLayers <= baseline) return 0;
+  return clamp(((governanceLayers - baseline) / baseline) * 100);
+}
+
+export function calculateOperationalDrag(input: {
+  overload: number; redundancy: number; governanceExcess: number;
+}): number {
+  return clamp((input.overload + input.redundancy + input.governanceExcess) / 3);
+}
+
+export function calculateStrategicFriction(input: {
+  fragmentation: number; abstraction: number; drag: number;
+}): number {
+  return clamp((input.fragmentation + input.abstraction + input.drag) / 3);
+}
