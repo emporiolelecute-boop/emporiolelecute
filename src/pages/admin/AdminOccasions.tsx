@@ -168,6 +168,36 @@ const AdminOccasions = () => {
     occ.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const openContentEditor = (occ: any) => {
+    setContentEditId(occ.id);
+    setContentForm({
+      image_url: occ.image_url || '',
+      description: occ.description || '',
+      meta_title: occ.meta_title || '',
+      meta_description: occ.meta_description || '',
+    });
+  };
+
+  const saveContent = async () => {
+    if (!contentEditId) return;
+    setSavingContent(true);
+    try {
+      await updateOccasion.mutateAsync({
+        id: contentEditId,
+        image_url: contentForm.image_url.trim() || null,
+        description: contentForm.description.trim() || null,
+        meta_title: contentForm.meta_title.trim() || null,
+        meta_description: contentForm.meta_description.trim() || null,
+      });
+      toast({ title: 'Conteúdo atualizado!' });
+      setContentEditId(null);
+    } catch {
+      toast({ title: 'Erro ao salvar', variant: 'destructive' });
+    } finally {
+      setSavingContent(false);
+    }
+  };
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
