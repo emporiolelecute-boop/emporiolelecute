@@ -798,6 +798,16 @@ const App = () => {
                       <AdminSeoSystemAudit />
                     </Suspense>
                   } />
+                  <Route path="executive-mode" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminExecutiveMode />
+                    </Suspense>
+                  } />
+                  <Route path="seo-operational-consolidation" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoOperationalConsolidation />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
