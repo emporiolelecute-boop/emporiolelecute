@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Check, X, Search, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X, Search, GripVertical, Loader2, AlertCircle } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -48,6 +48,7 @@ import {
   useUpdateCategory,
   type DbCategory,
 } from '@/hooks/useProducts';
+import { useSlugAvailability, type SlugCheckState } from '@/hooks/useSlugAvailability';
 import { LucideIcon } from '@/components/LucideIcon';
 import LucideIconPicker from '@/components/admin/LucideIconPicker';
 
@@ -68,6 +69,7 @@ interface SortableRowProps {
   setEditIcon: (v: string | null) => void;
   setEditImageUrl: (v: string) => void;
   generateSlug: (n: string) => string;
+  slugCheck?: SlugCheckState;
 }
 
 const SortableRow = ({
@@ -87,6 +89,7 @@ const SortableRow = ({
   setEditIcon,
   setEditImageUrl,
   generateSlug,
+  slugCheck,
 }: SortableRowProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
@@ -123,7 +126,30 @@ const SortableRow = ({
             </div>
             <div>
               <Label className="text-xs">Slug</Label>
-              <Input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} />
+              <Input
+                value={editSlug}
+                onChange={(e) => setEditSlug(e.target.value)}
+                aria-describedby="edit-slug-status"
+                aria-invalid={slugCheck?.status === 'taken' || slugCheck?.status === 'invalid'}
+              />
+              <p
+                id="edit-slug-status"
+                aria-live="polite"
+                className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                  slugCheck?.status === 'available'
+                    ? 'text-emerald-600'
+                    : slugCheck?.status === 'taken' || slugCheck?.status === 'invalid'
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {slugCheck?.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                {slugCheck?.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                {(slugCheck?.status === 'taken' || slugCheck?.status === 'invalid') && (
+                  <AlertCircle className="h-3 w-3" aria-hidden />
+                )}
+                <span>{slugCheck?.message}</span>
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -232,6 +258,9 @@ const AdminCategories = () => {
   const [editSlug, setEditSlug] = useState('');
   const [editIcon, setEditIcon] = useState<string | null>(null);
   const [editImageUrl, setEditImageUrl] = useState('');
+
+  const createSlugCheck = useSlugAvailability('categories', formData.slug, null);
+  const editSlugCheck = useSlugAvailability('categories', editSlug, editingId);
 
   // Local sortable order
   const [orderedIds, setOrderedIds] = useState<string[]>([]);
@@ -399,7 +428,27 @@ const AdminCategories = () => {
                   value={formData.slug}
                   onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                   placeholder="slug-da-categoria"
+                  aria-describedby="create-slug-status"
+                  aria-invalid={createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid'}
                 />
+                <p
+                  id="create-slug-status"
+                  aria-live="polite"
+                  className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                    createSlugCheck.status === 'available'
+                      ? 'text-emerald-600'
+                      : createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid'
+                      ? 'text-destructive'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {createSlugCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                  {createSlugCheck.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                  {(createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid') && (
+                    <AlertCircle className="h-3 w-3" aria-hidden />
+                  )}
+                  <span>{createSlugCheck.message}</span>
+                </p>
               </div>
               <p className="text-xs text-muted-foreground">
                 Após criar, edite a categoria para definir o ícone Lucide e a imagem.
@@ -460,6 +509,7 @@ const AdminCategories = () => {
                         setEditIcon={setEditIcon}
                         setEditImageUrl={setEditImageUrl}
                         generateSlug={generateSlug}
+                        slugCheck={editSlugCheck}
                       />
                     ))}
                   </div>
@@ -488,9 +538,10 @@ const AdminCategories = () => {
                       setEditName={setEditName}
                       setEditSlug={setEditSlug}
                       setEditIcon={setEditIcon}
-                      setEditImageUrl={setEditImageUrl}
-                      generateSlug={generateSlug}
-                    />
+                        setEditImageUrl={setEditImageUrl}
+                        generateSlug={generateSlug}
+                        slugCheck={editSlugCheck}
+                      />
                   ))}
                 </div>
               </>
