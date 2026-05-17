@@ -38,7 +38,8 @@ import {
   Rocket,
   BrainCircuit,
   Landmark,
-  Cpu
+  Cpu,
+  Orbit
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -79,6 +80,7 @@ const menuItems = [
   { icon: ShieldCheck, label: 'Meta Governance', path: '/admin/seo-meta-governance' },
   { icon: Landmark, label: 'Civilization Layer', path: '/admin/seo-civilization' },
   { icon: Cpu, label: 'SEO Kernel', path: '/admin/seo-kernel' },
+  { icon: Orbit, label: 'Unified Intelligence', path: '/admin/seo-unified-intelligence' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
