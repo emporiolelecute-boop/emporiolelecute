@@ -37,6 +37,7 @@ import {
   Network,
   Rocket,
   BrainCircuit,
+  Brain,
   Landmark,
   Cpu,
   Orbit
