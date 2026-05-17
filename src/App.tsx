@@ -737,6 +737,11 @@ const App = () => {
                       <AdminSeoUnifiedNexus />
                     </Suspense>
                   } />
+                  <Route path="seo-nexus-convergence" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoNexusConvergence />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
