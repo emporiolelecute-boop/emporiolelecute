@@ -1,144 +1,84 @@
 import logoImg from "@/assets/logo.webp";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Tags, 
-  Calendar, 
-  LogOut, 
-  Menu,
-  X,
-  Home,
-  Upload,
-  Sparkles,
-  ShoppingCart,
-  Users,
-  Settings,
-  Search,
-  HelpCircle,
-  Rss,
-  Instagram,
-  MapPin,
-  Image,
-  MessageSquare,
-  Tag,
-  ArrowRightLeft,
-  BarChart3,
-  ShieldCheck,
-  Bot,
-  Activity,
-  Clock,
-  Star,
-  BookOpen,
-  TrendingUp,
-  Network,
-  Rocket,
-  BrainCircuit,
-  Brain,
-  Landmark,
-  Cpu,
-  Orbit,
-  Eye,
-  Compass,
-  Crown,
-  Infinity as InfinityIcon,
-  Hexagon,
-  Layers3,
-  ShieldAlert,
-  Boxes
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  LayoutDashboard, Package, Tags, Calendar, LogOut, Menu, X, Home, Sparkles,
+  ShoppingCart, Users, Settings, Search, HelpCircle, Rss, Instagram, MapPin,
+  Image, MessageSquare, Tag, ArrowRightLeft, BarChart3, ShieldCheck, Bot,
+  Activity, Clock, Star, BookOpen, TrendingUp, Network, Rocket, BrainCircuit,
+  Brain, Landmark, Cpu, Orbit, Eye, Compass, Crown, Infinity as InfinityIcon,
+  Hexagon, Layers3, ShieldAlert, Boxes, ChevronDown,
 } from 'lucide-react';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { EXECUTIVE_NAV, type NavGroup, type NavLeaf } from '@/lib/executiveNavigation';
 
-const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-  { icon: ShoppingCart, label: 'Pedidos', path: '/admin/pedidos' },
-  { icon: Users, label: 'Clientes', path: '/admin/clientes' },
-  { icon: Package, label: 'Produtos', path: '/admin/produtos' },
-  { icon: ShieldCheck, label: 'Saúde SEO Produtos', path: '/admin/produtos/health' },
-  { icon: Activity, label: 'Saúde do Conteúdo', path: '/admin/content-health' },
-  { icon: Sparkles, label: 'Oportunidades', path: '/admin/opportunities' },
-  { icon: Star, label: 'Avaliações', path: '/admin/reviews' },
-  { icon: BookOpen, label: 'Blog', path: '/admin/blog' },
-  { icon: Activity, label: 'Saúde do Blog', path: '/admin/blog/health' },
-  { icon: Image, label: 'Saúde de Imagens', path: '/admin/image-health' },
-  { icon: ArrowRightLeft, label: 'Páginas Combinatórias', path: '/admin/combination-pages' },
-  { icon: Sparkles, label: 'Discovery Engine', path: '/admin/discovery' },
-  { icon: Sparkles, label: 'Hubs Temáticos', path: '/admin/themes' },
-  { icon: TrendingUp, label: 'Authority Center', path: '/admin/authority' },
-  { icon: Sparkles, label: 'Editorial Execution', path: '/admin/editorial-execution' },
-  { icon: BarChart3, label: 'SEO Operations', path: '/admin/seo-operations' },
-  { icon: Activity, label: 'Saúde de Links', path: '/admin/link-health' },
-  { icon: Sparkles, label: 'Content Gaps', path: '/admin/content-gaps' },
-  { icon: BarChart3, label: 'SEO Command Center', path: '/admin/seo-command' },
-  { icon: Network, label: 'Knowledge Graph', path: '/admin/knowledge-graph' },
-  { icon: TrendingUp, label: 'SEO Evolution', path: '/admin/seo-evolution' },
-  { icon: Rocket, label: 'SEO War Room', path: '/admin/seo-war-room' },
-  { icon: Rocket, label: 'SEO Autonomy', path: '/admin/seo-autonomy' },
-  { icon: Rocket, label: 'SEO Operating System', path: '/admin/seo-os' },
-  { icon: Rocket, label: 'SEO Control Tower', path: '/admin/seo-control-tower' },
-  { icon: Rocket, label: 'SEO Simulation Lab', path: '/admin/seo-simulation-lab' },
-  { icon: Rocket, label: 'Strategic Simulation', path: '/admin/seo-strategic-simulation' },
-  { icon: Rocket, label: 'SEO Singularity', path: '/admin/seo-singularity' },
-  { icon: Rocket, label: 'SEO Consciousness', path: '/admin/seo-consciousness' },
-  { icon: BrainCircuit, label: 'Executive Grid', path: '/admin/seo-executive-grid' },
-  { icon: Activity, label: 'Nervous System', path: '/admin/seo-nervous-system' },
-  { icon: ShieldCheck, label: 'Meta Governance', path: '/admin/seo-meta-governance' },
-  { icon: Landmark, label: 'Civilization Layer', path: '/admin/seo-civilization' },
-  { icon: Cpu, label: 'SEO Kernel', path: '/admin/seo-kernel' },
-  { icon: Orbit, label: 'Unified Intelligence', path: '/admin/seo-unified-intelligence' },
-  { icon: Network, label: 'Operating Fabric', path: '/admin/seo-operating-fabric' },
-  { icon: Brain, label: 'Cognitive Orchestration', path: '/admin/seo-cognitive-orchestration' },
-  { icon: Brain, label: 'Meta Reasoning', path: '/admin/seo-meta-reasoning' },
-  { icon: Crown, label: 'Executive Core', path: '/admin/seo-executive-core' },
-  { icon: ShieldCheck, label: 'Governance Matrix', path: '/admin/seo-governance-matrix' },
-  { icon: Eye, label: 'Consciousness Fabric', path: '/admin/seo-consciousness-fabric' },
-  { icon: Compass, label: 'Strategic Reality', path: '/admin/seo-strategic-reality' },
-  { icon: InfinityIcon, label: 'Strategic Continuum', path: '/admin/seo-strategic-continuum' },
-  { icon: Hexagon, label: 'Unified Nexus', path: '/admin/seo-unified-nexus' },
-  { icon: Orbit, label: 'Strategic Nexus', path: '/admin/seo-nexus-convergence' },
-  { icon: Layers3, label: 'Stability Fabric', path: '/admin/seo-stability-fabric' },
-  { icon: ShieldAlert, label: 'Integrity Grid', path: '/admin/seo-integrity-grid' },
-  { icon: Boxes, label: 'Coherence Matrix', path: '/admin/seo-coherence-matrix' },
-  { icon: Boxes, label: 'Consolidation', path: '/admin/seo-consolidation' },
-  { icon: Rocket, label: 'Execution Orchestrator', path: '/admin/seo-execution-orchestrator' },
-  { icon: Crown, label: 'SEO Executive Home', path: '/admin/seo-executive-home' },
-  { icon: Activity, label: 'Operational Reality', path: '/admin/seo-operational-reality' },
-  { icon: ShieldCheck, label: 'Final Governance', path: '/admin/seo-final-governance' },
-  { icon: Search, label: 'System Audit', path: '/admin/seo-system-audit' },
-  { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
-  { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
-  { icon: Tags, label: 'Tags', path: '/admin/tags' },
-  { icon: Sparkles, label: 'Taxonomias (novo)', path: '/admin/taxonomias' },
-  { icon: Tag, label: 'Cupons', path: '/admin/cupons' },
-  
-  { icon: Image, label: 'Slides do Hero', path: '/admin/hero-slides' },
-  { icon: MessageSquare, label: 'Depoimentos', path: '/admin/depoimentos' },
-  { icon: Home, label: 'Blocos Homepage', path: '/admin/blocos' },
-  { icon: Instagram, label: 'Instagram', path: '/admin/instagram' },
-  { icon: Instagram, label: 'Feed Instagram', path: '/admin/feed-instagram' },
-  { icon: MapPin, label: 'Landings SEO', path: '/admin/landings' },
-  { icon: Home, label: 'Páginas', path: '/admin/paginas' },
-  { icon: Menu, label: 'Menus', path: '/admin/menus' },
-  { icon: HelpCircle, label: 'FAQs', path: '/admin/faqs' },
-  { icon: ArrowRightLeft, label: 'Redirects 301', path: '/admin/redirects' },
-  { icon: Bot, label: 'Robots.txt', path: '/admin/robots' },
-  { icon: BarChart3, label: 'Analytics & Ads', path: '/admin/tracking' },
-  { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
-  { icon: Rss, label: 'Feed Merchant', path: '/admin/merchant-feed' },
-  { icon: Search, label: 'SEO & Sitemap', path: '/admin/seo' },
-  { icon: BarChart3, label: 'SEO Dashboard', path: '/admin/seo-dashboard' },
-  { icon: Bot, label: 'Cloudflare Worker', path: '/admin/cloudflare-worker' },
-  { icon: BarChart3, label: 'Diagnóstico', path: '/admin/diagnostico' },
-  { icon: Activity, label: 'Telemetria', path: '/admin/telemetria' },
-  { icon: Clock, label: 'Tarefas Agendadas', path: '/admin/cron' },
-  { icon: ShieldCheck, label: 'Usuários', path: '/admin/usuarios' },
-  { icon: ShieldCheck, label: 'Solicitações de acesso', path: '/admin/usuarios/solicitacoes' },
-  { icon: BarChart3, label: 'Auditoria', path: '/admin/auditoria' },
-];
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  LayoutDashboard, Package, Tags, Calendar, Home, Sparkles, ShoppingCart, Users,
+  Settings, Search, HelpCircle, Rss, Instagram, MapPin, Image, MessageSquare,
+  Tag, ArrowRightLeft, BarChart3, ShieldCheck, Bot, Activity, Clock, Star,
+  BookOpen, TrendingUp, Network, Rocket, BrainCircuit, Brain, Landmark, Cpu,
+  Orbit, Eye, Compass, Crown, Infinity: InfinityIcon, Hexagon, Layers3,
+  ShieldAlert, Boxes, Menu,
+};
+
+function NavItem({ leaf, active, onClick }: { leaf: NavLeaf; active: boolean; onClick: () => void }) {
+  const Icon = ICONS[leaf.icon] ?? Sparkles;
+  return (
+    <Link
+      to={leaf.path}
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors text-sm",
+        active
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      )}
+    >
+      <Icon className="w-4 h-4 shrink-0" />
+      <span className="truncate">{leaf.label}</span>
+    </Link>
+  );
+}
+
+function NavGroupSection({ group, pathname, onItemClick }: { group: NavGroup; pathname: string; onItemClick: () => void }) {
+  const containsActive = group.items.some((i) => pathname === i.path);
+  const [open, setOpen] = useState<boolean>(group.defaultOpen || containsActive);
+
+  if (!group.collapsible) {
+    return (
+      <div className="space-y-0.5">
+        <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground/70">
+          {group.label}
+        </div>
+        {group.items.map((leaf) => (
+          <NavItem key={leaf.path} leaf={leaf} active={pathname === leaf.path} onClick={onItemClick} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground/70 hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          {group.label}
+          {group.hiddenByDefault && (
+            <span className="text-[9px] normal-case font-normal text-muted-foreground/50">(advanced)</span>
+          )}
+        </span>
+        <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-0.5 mt-0.5">
+        {group.items.map((leaf) => (
+          <NavItem key={leaf.path} leaf={leaf} active={pathname === leaf.path} onClick={onItemClick} />
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -171,18 +111,15 @@ const AdminLayout = () => {
     );
   }
 
-  if (!user || !isAdmin) {
-    return null;
-  }
+  if (!user || !isAdmin) return null;
+
+  const closeMobile = () => setSidebarOpen(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted/30 via-background to-accent/5">
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-xl border-b border-border/50 z-50 flex items-center justify-between px-4 shadow-sm">
-        <button 
-          onClick={() => setSidebarOpen(true)} 
-          className="p-2.5 hover:bg-primary/10 rounded-xl transition-colors"
-        >
+        <button onClick={() => setSidebarOpen(true)} className="p-2.5 hover:bg-primary/10 rounded-xl transition-colors">
           <Menu className="w-5 h-5 text-foreground" />
         </button>
         <Link to="/admin" className="flex items-center gap-2">
@@ -194,90 +131,58 @@ const AdminLayout = () => {
         <div className="w-10" />
       </header>
 
-      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-foreground/40 backdrop-blur-sm z-50 transition-opacity"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-foreground/40 backdrop-blur-sm z-50" onClick={closeMobile} />
       )}
 
-      {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 h-full w-72 bg-card/95 backdrop-blur-xl border-r border-border/50 z-50 transition-all duration-300 shadow-xl lg:shadow-none flex flex-col",
+        "fixed top-0 left-0 h-full w-64 bg-card/95 backdrop-blur-xl border-r border-border/50 z-50 transition-transform duration-300 shadow-xl lg:shadow-none flex flex-col",
         "lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border/50 shrink-0">
-          <Link to="/admin" className="flex items-center gap-3 group">
-            <div className="w-14 h-14 rounded-full bg-white shadow-md ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all flex items-center justify-center overflow-hidden shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 shrink-0">
+          <Link to="/admin" className="flex items-center gap-2.5 group">
+            <div className="w-11 h-11 rounded-full bg-white shadow ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all flex items-center justify-center overflow-hidden shrink-0">
               <img src={logoImg} alt="LeleCute" className="w-full h-full object-contain p-1" />
             </div>
             <div>
-              <span className="font-display text-xl text-foreground block leading-tight">LeleCute</span>
-              <span className="text-xs text-muted-foreground">Painel Admin</span>
+              <span className="font-display text-base text-foreground block leading-tight">LeleCute</span>
+              <span className="text-[10px] text-muted-foreground">Painel Admin</span>
             </div>
           </Link>
-          <button 
-            onClick={() => setSidebarOpen(false)} 
-            className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
-          >
+          <button onClick={closeMobile} className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1.5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
-                  isActive
-                    ? "bg-gradient-to-r from-primary to-primary-dark text-primary-foreground shadow-lg shadow-primary/25"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                )}
-                <item.icon className={cn(
-                  "w-5 h-5 transition-transform group-hover:scale-110",
-                  isActive && "drop-shadow-lg"
-                )} />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
+        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5 space-y-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent [scrollbar-gutter:stable]">
+          {EXECUTIVE_NAV.map((group) => (
+            <NavGroupSection
+              key={group.id}
+              group={group}
+              pathname={location.pathname}
+              onItemClick={closeMobile}
+            />
+          ))}
         </nav>
 
-        {/* Footer */}
-        <div className="shrink-0 p-4 border-t border-border/50 space-y-2 bg-card/80 backdrop-blur-sm">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-all group"
-          >
-            <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            <span className="font-medium">Ver site</span>
+        <div className="shrink-0 p-3 border-t border-border/50 space-y-1.5 bg-card/80 backdrop-blur-sm">
+          <Link to="/" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-all text-sm">
+            <Home className="w-4 h-4" />
+            <span>Ver site</span>
           </Link>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl py-3 h-auto"
+            className="w-full justify-start gap-2.5 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg py-2 h-auto text-sm"
             onClick={handleSignOut}
           >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Sair</span>
+            <LogOut className="w-4 h-4" />
+            <span>Sair</span>
           </Button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="lg:ml-72 pt-16 lg:pt-0 min-h-screen">
+      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         <Outlet />
       </main>
     </div>
