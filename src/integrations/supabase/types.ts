@@ -4374,53 +4374,80 @@ export type Database = {
       seo_system_finalization_snapshots: {
         Row: {
           created_at: string
+          dashboard_noise_score: number | null
+          dependency_complexity_score: number | null
           documentation_completeness_score: number | null
           executive_clarity_score: number | null
           finalization_confidence_score: number | null
           governance_integrity_score: number | null
+          governance_overhead_score: number | null
           id: string
           maintainability_score: number | null
           notes: string | null
           observability_efficiency_score: number | null
+          operational_drag_score: number | null
           operational_overload_score: number | null
           operational_simplicity_score: number | null
           performance_pressure_score: number | null
           runtime_stability_score: number | null
           scalability_risk_score: number | null
+          scalability_score: number | null
+          signal_efficiency_score: number | null
+          simplification_readiness_score: number | null
+          strategic_friction_score: number | null
+          telemetry_density_score: number | null
           telemetry_efficiency_score: number | null
         }
         Insert: {
           created_at?: string
+          dashboard_noise_score?: number | null
+          dependency_complexity_score?: number | null
           documentation_completeness_score?: number | null
           executive_clarity_score?: number | null
           finalization_confidence_score?: number | null
           governance_integrity_score?: number | null
+          governance_overhead_score?: number | null
           id?: string
           maintainability_score?: number | null
           notes?: string | null
           observability_efficiency_score?: number | null
+          operational_drag_score?: number | null
           operational_overload_score?: number | null
           operational_simplicity_score?: number | null
           performance_pressure_score?: number | null
           runtime_stability_score?: number | null
           scalability_risk_score?: number | null
+          scalability_score?: number | null
+          signal_efficiency_score?: number | null
+          simplification_readiness_score?: number | null
+          strategic_friction_score?: number | null
+          telemetry_density_score?: number | null
           telemetry_efficiency_score?: number | null
         }
         Update: {
           created_at?: string
+          dashboard_noise_score?: number | null
+          dependency_complexity_score?: number | null
           documentation_completeness_score?: number | null
           executive_clarity_score?: number | null
           finalization_confidence_score?: number | null
           governance_integrity_score?: number | null
+          governance_overhead_score?: number | null
           id?: string
           maintainability_score?: number | null
           notes?: string | null
           observability_efficiency_score?: number | null
+          operational_drag_score?: number | null
           operational_overload_score?: number | null
           operational_simplicity_score?: number | null
           performance_pressure_score?: number | null
           runtime_stability_score?: number | null
           scalability_risk_score?: number | null
+          scalability_score?: number | null
+          signal_efficiency_score?: number | null
+          simplification_readiness_score?: number | null
+          strategic_friction_score?: number | null
+          telemetry_density_score?: number | null
           telemetry_efficiency_score?: number | null
         }
         Relationships: []
