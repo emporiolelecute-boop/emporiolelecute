@@ -52,6 +52,8 @@ export function useAdminPageTracking() {
         }
         enteredAtRef.current = Date.now();
       }
+      // Try a last sync on hide. Throttle still applies; fire-and-forget.
+      sendUsageBatch();
     };
     window.addEventListener('pagehide', onHide);
     document.addEventListener('visibilitychange', () => {
