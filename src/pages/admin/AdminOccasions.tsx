@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle } from 'lucide-react';
+import { trackAdminEvent } from '@/lib/adminUsage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +46,24 @@ const AdminOccasions = () => {
   const createSlugCheck = useSlugAvailability('occasions', formData.slug, null);
   const editSlugCheck = useSlugAvailability('occasions', editSlug, editingId);
 
+  // Usage telemetry: open/submit/abandon for create dialog.
+  const createState = useRef({ opened: false, submitted: false });
+  useEffect(() => {
+    if (isDialogOpen) {
+      trackAdminEvent('form_open', 'occasion_create');
+      createState.current = { opened: true, submitted: false };
+    } else if (createState.current.opened && !createState.current.submitted) {
+      trackAdminEvent('form_abandon', 'occasion_create');
+      createState.current.opened = false;
+    }
+  }, [isDialogOpen]);
+
+  useEffect(() => {
+    if (!searchQuery) return;
+    const t = setTimeout(() => trackAdminEvent('list_search', 'occasions'), 700);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -63,9 +82,16 @@ const AdminOccasions = () => {
       toast({ title: 'Preencha todos os campos', variant: 'destructive' });
       return;
     }
+    if (createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid') {
+      trackAdminEvent('slug_invalid_attempt', 'occasions');
+      toast({ title: 'Corrija o slug antes de criar', variant: 'destructive' });
+      return;
+    }
 
     try {
       await createOccasion.mutateAsync(formData);
+      createState.current.submitted = true;
+      trackAdminEvent('form_submit', 'occasion_create');
       toast({ title: 'Ocasião criada com sucesso!' });
       setFormData({ name: '', slug: '' });
       setIsDialogOpen(false);
@@ -86,12 +112,15 @@ const AdminOccasions = () => {
   };
 
   const handleStartEdit = (occasion: { id: string; name: string; slug: string }) => {
+    trackAdminEvent('list_item_click', 'occasions');
+    trackAdminEvent('form_open', 'occasion_edit');
     setEditingId(occasion.id);
     setEditName(occasion.name);
     setEditSlug(occasion.slug);
   };
 
   const handleCancelEdit = () => {
+    if (editingId) trackAdminEvent('form_abandon', 'occasion_edit');
     setEditingId(null);
     setEditName('');
     setEditSlug('');
@@ -99,15 +128,23 @@ const AdminOccasions = () => {
 
   const handleSaveEdit = async () => {
     if (!editingId || !editName.trim() || !editSlug.trim()) return;
-    
+    if (editSlugCheck.status === 'taken' || editSlugCheck.status === 'invalid') {
+      trackAdminEvent('slug_invalid_attempt', 'occasions');
+      toast({ title: 'Corrija o slug antes de salvar', variant: 'destructive' });
+      return;
+    }
+
     try {
       await updateOccasion.mutateAsync({
         id: editingId,
         name: editName.trim(),
         slug: editSlug.trim(),
       });
+      trackAdminEvent('form_submit', 'occasion_edit');
       toast({ title: 'Ocasião atualizada com sucesso!' });
-      handleCancelEdit();
+      setEditingId(null);
+      setEditName('');
+      setEditSlug('');
     } catch {
       toast({ title: 'Erro ao atualizar ocasião', variant: 'destructive' });
     }

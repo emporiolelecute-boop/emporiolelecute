@@ -70,6 +70,7 @@ const AdminRobots = lazyWithRetry(() => import("./pages/admin/AdminRobots"), "Ad
 const AdminTracking = lazyWithRetry(() => import("./pages/admin/AdminTracking"), "AdminTracking");
 const AdminSEODashboard = lazyWithRetry(() => import("./pages/admin/AdminSEODashboard"), "AdminSEODashboard");
 const AdminTelemetry = lazyWithRetry(() => import("./pages/admin/AdminTelemetry"), "AdminTelemetry");
+const AdminUsage = lazyWithRetry(() => import("./pages/admin/AdminUsage"), "AdminUsage");
 const AdminCronStatus = lazyWithRetry(() => import("./pages/admin/AdminCronStatus"), "AdminCronStatus");
 const AdminCloudflareGuide = lazyWithRetry(() => import("./pages/admin/AdminCloudflareGuide"), "AdminCloudflareGuide");
 const AdminDiagnostics = lazyWithRetry(() => import("./pages/admin/AdminDiagnostics"), "AdminDiagnostics");
@@ -488,6 +489,11 @@ const App = () => {
                   <Route path="telemetria" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminTelemetry />
+                    </Suspense>
+                  } />
+                  <Route path="uso" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminUsage />
                     </Suspense>
                   } />
                   <Route path="cron" element={

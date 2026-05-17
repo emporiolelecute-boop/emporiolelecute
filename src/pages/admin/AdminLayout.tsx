@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EXECUTIVE_NAV, type NavGroup, type NavLeaf } from '@/lib/executiveNavigation';
+import { useAdminPageTracking } from '@/hooks/useAdminPageTracking';
+import { trackAdminEvent } from '@/lib/adminUsage';
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Package, Tags, Calendar, Home, Sparkles, ShoppingCart, Users,
@@ -29,7 +31,10 @@ function NavItem({ leaf, active, onClick }: { leaf: NavLeaf; active: boolean; on
   return (
     <Link
       to={leaf.path}
-      onClick={onClick}
+      onClick={() => {
+        trackAdminEvent('nav_click', leaf.label || leaf.path);
+        onClick();
+      }}
       className={cn(
         "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors text-sm",
         active
@@ -85,6 +90,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const { user, isAdmin, loading, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useAdminPageTracking();
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {

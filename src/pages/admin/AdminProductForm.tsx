@@ -38,6 +38,8 @@ import EditorialTemplatesPicker from '@/components/admin/EditorialTemplatesPicke
 import TaxonomySuggestionsHints from '@/components/admin/TaxonomySuggestionsHints';
 import { Link } from 'react-router-dom';
 import { FileText, ExternalLink } from 'lucide-react';
+import { useFormUsageTracking } from '@/hooks/useFormUsageTracking';
+import { trackAdminEvent } from '@/lib/adminUsage';
 
 const AdminProductForm = () => {
   const { id } = useParams();
@@ -87,6 +89,7 @@ const AdminProductForm = () => {
   const [keywordsInput, setKeywordsInput] = useState('');
 
   const slugCheck = useSlugAvailability('products', formData.slug, id ?? null);
+  const usage = useFormUsageTracking(isEditing ? 'product_form_edit' : 'product_form_create');
 
   useEffect(() => {
     if (existingProduct && isEditing) {
@@ -215,6 +218,12 @@ const AdminProductForm = () => {
       return;
     }
 
+    if (slugCheck.status === 'taken' || slugCheck.status === 'invalid') {
+      trackAdminEvent('slug_invalid_attempt', 'products');
+      toast({ title: 'Corrija o slug antes de salvar', variant: 'destructive' });
+      return;
+    }
+
     // Peso obrigatório para novos produtos (evita erros no cálculo de frete)
     const weightNum = formData.weight ? parseFloat(formData.weight) : 0;
     if (!isEditing && (!weightNum || weightNum <= 0)) {
@@ -284,6 +293,12 @@ const AdminProductForm = () => {
       await updateProductSegments.mutateAsync({ productId, segmentIds: selectedSegments });
 
       toast({ title: isEditing ? 'Produto atualizado!' : 'Produto criado!' });
+      // Stay on page after save when editing
+      if (!isEditing) {
+        navigate('/admin/produtos');
+      }
+      toast({ title: isEditing ? 'Produto atualizado!' : 'Produto criado!' });
+      usage.markSubmitted();
       // Stay on page after save when editing
       if (!isEditing) {
         navigate('/admin/produtos');
