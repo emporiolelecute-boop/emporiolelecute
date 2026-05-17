@@ -13,6 +13,7 @@ export type NavGroupId =
   | "system"
   | "site"
   | "settings"
+  | "seo-advanced"
   | "labs";
 
 export interface NavLeaf {
