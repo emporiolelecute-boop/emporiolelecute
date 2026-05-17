@@ -129,6 +129,19 @@ const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * Fase A — Redirect canônico 1-hop: /produto/:slug → /produtos/:slug
+ * Preserva query string e hash. Usa `replace` para não poluir o histórico
+ * (equivalente client-side de um 301; o hosting Lovable serve sempre
+ * index.html, então não há camada de servidor onde aplicar 301 real).
+ */
+const LegacyProductRedirect = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  if (!slug) return <Navigate to="/produtos" replace />;
+  return <Navigate to={`/produtos/${slug}${location.search}${location.hash}`} replace />;
+};
+
 const App = () => {
   // Analytics carregadas dinamicamente em <TrackingScripts /> via tracking_config.
   useEffect(() => {}, []);
