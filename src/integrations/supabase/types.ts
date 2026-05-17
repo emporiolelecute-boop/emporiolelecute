@@ -1857,6 +1857,114 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_cognitive_snapshots: {
+        Row: {
+          authority_confusion_score: number
+          authority_signal_clarity: number
+          blockers: Json
+          cognitive_decay_risk: number
+          cognitive_load_score: number
+          cognitive_resilience_score: number
+          cognitive_stability_score: number
+          created_at: string
+          decision_confidence_score: number
+          decision_conflict_score: number
+          decision_consistency_score: number
+          decision_latency_score: number
+          decision_synthesis_score: number
+          decision_traceability_score: number
+          governance_confusion_score: number
+          id: string
+          notes: string | null
+          operational_signal_clarity: number
+          orchestration_alignment: number
+          orchestration_efficiency: number
+          orchestration_entropy: number
+          orchestration_fragmentation: number
+          orchestration_noise: number
+          orchestration_scalability_score: number
+          recommendations: Json
+          semantic_confusion_score: number
+          semantic_signal_clarity: number
+          strategic_confusion_score: number
+          strategic_signal_clarity: number
+          strategic_survival_projection: number
+          summary: Json
+          systemic_reasoning_score: number
+          warnings: Json
+        }
+        Insert: {
+          authority_confusion_score?: number
+          authority_signal_clarity?: number
+          blockers?: Json
+          cognitive_decay_risk?: number
+          cognitive_load_score?: number
+          cognitive_resilience_score?: number
+          cognitive_stability_score?: number
+          created_at?: string
+          decision_confidence_score?: number
+          decision_conflict_score?: number
+          decision_consistency_score?: number
+          decision_latency_score?: number
+          decision_synthesis_score?: number
+          decision_traceability_score?: number
+          governance_confusion_score?: number
+          id?: string
+          notes?: string | null
+          operational_signal_clarity?: number
+          orchestration_alignment?: number
+          orchestration_efficiency?: number
+          orchestration_entropy?: number
+          orchestration_fragmentation?: number
+          orchestration_noise?: number
+          orchestration_scalability_score?: number
+          recommendations?: Json
+          semantic_confusion_score?: number
+          semantic_signal_clarity?: number
+          strategic_confusion_score?: number
+          strategic_signal_clarity?: number
+          strategic_survival_projection?: number
+          summary?: Json
+          systemic_reasoning_score?: number
+          warnings?: Json
+        }
+        Update: {
+          authority_confusion_score?: number
+          authority_signal_clarity?: number
+          blockers?: Json
+          cognitive_decay_risk?: number
+          cognitive_load_score?: number
+          cognitive_resilience_score?: number
+          cognitive_stability_score?: number
+          created_at?: string
+          decision_confidence_score?: number
+          decision_conflict_score?: number
+          decision_consistency_score?: number
+          decision_latency_score?: number
+          decision_synthesis_score?: number
+          decision_traceability_score?: number
+          governance_confusion_score?: number
+          id?: string
+          notes?: string | null
+          operational_signal_clarity?: number
+          orchestration_alignment?: number
+          orchestration_efficiency?: number
+          orchestration_entropy?: number
+          orchestration_fragmentation?: number
+          orchestration_noise?: number
+          orchestration_scalability_score?: number
+          recommendations?: Json
+          semantic_confusion_score?: number
+          semantic_signal_clarity?: number
+          strategic_confusion_score?: number
+          strategic_signal_clarity?: number
+          strategic_survival_projection?: number
+          summary?: Json
+          systemic_reasoning_score?: number
+          warnings?: Json
+        }
+        Relationships: []
+      }
       seo_consciousness_memory: {
         Row: {
           adaptive_consciousness: number
@@ -1941,6 +2049,45 @@ export type Database = {
           strategic_clarity?: number
           systemic_coherence?: number
           systemic_instability?: number
+        }
+        Relationships: []
+      }
+      seo_decision_lineage: {
+        Row: {
+          affected_engines: Json
+          confidence_score: number
+          conflict_probability: number
+          created_at: string
+          decision_summary: string | null
+          decision_type: string | null
+          id: string
+          lineage_depth: number
+          originating_engine: string | null
+          reasoning_chain: Json
+        }
+        Insert: {
+          affected_engines?: Json
+          confidence_score?: number
+          conflict_probability?: number
+          created_at?: string
+          decision_summary?: string | null
+          decision_type?: string | null
+          id?: string
+          lineage_depth?: number
+          originating_engine?: string | null
+          reasoning_chain?: Json
+        }
+        Update: {
+          affected_engines?: Json
+          confidence_score?: number
+          conflict_probability?: number
+          created_at?: string
+          decision_summary?: string | null
+          decision_type?: string | null
+          id?: string
+          lineage_depth?: number
+          originating_engine?: string | null
+          reasoning_chain?: Json
         }
         Relationships: []
       }
@@ -2757,6 +2904,48 @@ export type Database = {
           strong_clusters?: number
           thin_content_entities?: number
           weak_clusters?: number
+        }
+        Relationships: []
+      }
+      seo_reasoning_conflicts: {
+        Row: {
+          conflict_type: string | null
+          created_at: string
+          description: string | null
+          id: string
+          layer_a: string | null
+          layer_b: string | null
+          mitigation: string | null
+          reasoning_divergence: number
+          resolved: boolean
+          severity: string | null
+          strategic_impact: number
+        }
+        Insert: {
+          conflict_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          layer_a?: string | null
+          layer_b?: string | null
+          mitigation?: string | null
+          reasoning_divergence?: number
+          resolved?: boolean
+          severity?: string | null
+          strategic_impact?: number
+        }
+        Update: {
+          conflict_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          layer_a?: string | null
+          layer_b?: string | null
+          mitigation?: string | null
+          reasoning_divergence?: number
+          resolved?: boolean
+          severity?: string | null
+          strategic_impact?: number
         }
         Relationships: []
       }

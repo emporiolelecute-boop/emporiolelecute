@@ -37,6 +37,7 @@ import {
   Network,
   Rocket,
   BrainCircuit,
+  Brain,
   Landmark,
   Cpu,
   Orbit
@@ -82,6 +83,7 @@ const menuItems = [
   { icon: Cpu, label: 'SEO Kernel', path: '/admin/seo-kernel' },
   { icon: Orbit, label: 'Unified Intelligence', path: '/admin/seo-unified-intelligence' },
   { icon: Network, label: 'Operating Fabric', path: '/admin/seo-operating-fabric' },
+  { icon: Brain, label: 'Cognitive Orchestration', path: '/admin/seo-cognitive-orchestration' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
