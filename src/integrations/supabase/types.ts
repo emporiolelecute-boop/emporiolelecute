@@ -95,6 +95,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_usage_aggregates: {
+        Row: {
+          client_ts: string
+          id: string
+          payload: Json
+          received_at: string
+          session_id: string
+          total_events: number
+          version: string
+        }
+        Insert: {
+          client_ts: string
+          id?: string
+          payload: Json
+          received_at?: string
+          session_id: string
+          total_events?: number
+          version?: string
+        }
+        Update: {
+          client_ts?: string
+          id?: string
+          payload?: Json
+          received_at?: string
+          session_id?: string
+          total_events?: number
+          version?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author: string | null
