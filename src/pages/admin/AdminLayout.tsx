@@ -45,7 +45,8 @@ import {
   Compass,
   Crown,
   Infinity as InfinityIcon,
-  Hexagon
+  Hexagon,
+  Layers3
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
