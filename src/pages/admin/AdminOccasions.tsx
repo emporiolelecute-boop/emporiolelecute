@@ -40,11 +40,21 @@ const AdminOccasions = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', slug: '' });
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Inline editing state
+
+  // Inline editing state (name/slug)
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
+
+  // Advanced content editor (image + descrição + meta tags)
+  const [contentEditId, setContentEditId] = useState<string | null>(null);
+  const [contentForm, setContentForm] = useState({
+    image_url: '',
+    description: '',
+    meta_title: '',
+    meta_description: '',
+  });
+  const [savingContent, setSavingContent] = useState(false);
 
   const createSlugCheck = useSlugAvailability('occasions', formData.slug, null);
   const editSlugCheck = useSlugAvailability('occasions', editSlug, editingId);
