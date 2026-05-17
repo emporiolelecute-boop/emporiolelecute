@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Edit, Check, X, Search, GripVertical, Loader2, AlertCircle } from 'lucide-react';
 import { trackAdminEvent } from '@/lib/adminUsage';
 import {
@@ -271,6 +271,25 @@ const AdminCategories = () => {
     if (categories) setOrderedIds(categories.map((c) => c.id));
   }, [categories]);
 
+  // Usage telemetry: open/submit/abandon for the create dialog.
+  const createState = useRef({ opened: false, submitted: false });
+  useEffect(() => {
+    if (isDialogOpen) {
+      trackAdminEvent('form_open', 'category_create');
+      createState.current = { opened: true, submitted: false };
+    } else if (createState.current.opened && !createState.current.submitted) {
+      trackAdminEvent('form_abandon', 'category_create');
+      createState.current.opened = false;
+    }
+  }, [isDialogOpen]);
+
+  // Debounced search usage tracking.
+  useEffect(() => {
+    if (!searchQuery) return;
+    const t = setTimeout(() => trackAdminEvent('list_search', 'categories'), 700);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -291,8 +310,15 @@ const AdminCategories = () => {
       toast({ title: 'Preencha todos os campos', variant: 'destructive' });
       return;
     }
+    if (createSlugCheck.status === 'taken' || createSlugCheck.status === 'invalid') {
+      trackAdminEvent('slug_invalid_attempt', 'categories');
+      toast({ title: 'Corrija o slug antes de criar', variant: 'destructive' });
+      return;
+    }
     try {
       await createCategory.mutateAsync(formData);
+      createState.current.submitted = true;
+      trackAdminEvent('form_submit', 'category_create');
       toast({ title: 'Categoria criada com sucesso!' });
       setFormData({ name: '', slug: '' });
       setIsDialogOpen(false);
