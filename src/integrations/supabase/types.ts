@@ -2523,6 +2523,78 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_governance_matrix_snapshots: {
+        Row: {
+          autonomous_stability_score: number | null
+          collapse_exposure_score: number | null
+          created_at: string
+          dominant_risk: string | null
+          dominant_strength: string | null
+          evolutionary_consistency_score: number | null
+          execution_integrity_score: number | null
+          executive_noise_score: number | null
+          governance_entropy_score: number | null
+          governance_matrix_score: number | null
+          governance_verdict: string | null
+          id: string
+          notes: string | null
+          operational_conflict_score: number | null
+          operational_predictability_score: number | null
+          resilience_projection_score: number | null
+          semantic_drift_score: number | null
+          strategic_cohesion_score: number | null
+          strategic_fragmentation_score: number | null
+          strategic_integrity_score: number | null
+          systemic_alignment_score: number | null
+        }
+        Insert: {
+          autonomous_stability_score?: number | null
+          collapse_exposure_score?: number | null
+          created_at?: string
+          dominant_risk?: string | null
+          dominant_strength?: string | null
+          evolutionary_consistency_score?: number | null
+          execution_integrity_score?: number | null
+          executive_noise_score?: number | null
+          governance_entropy_score?: number | null
+          governance_matrix_score?: number | null
+          governance_verdict?: string | null
+          id?: string
+          notes?: string | null
+          operational_conflict_score?: number | null
+          operational_predictability_score?: number | null
+          resilience_projection_score?: number | null
+          semantic_drift_score?: number | null
+          strategic_cohesion_score?: number | null
+          strategic_fragmentation_score?: number | null
+          strategic_integrity_score?: number | null
+          systemic_alignment_score?: number | null
+        }
+        Update: {
+          autonomous_stability_score?: number | null
+          collapse_exposure_score?: number | null
+          created_at?: string
+          dominant_risk?: string | null
+          dominant_strength?: string | null
+          evolutionary_consistency_score?: number | null
+          execution_integrity_score?: number | null
+          executive_noise_score?: number | null
+          governance_entropy_score?: number | null
+          governance_matrix_score?: number | null
+          governance_verdict?: string | null
+          id?: string
+          notes?: string | null
+          operational_conflict_score?: number | null
+          operational_predictability_score?: number | null
+          resilience_projection_score?: number | null
+          semantic_drift_score?: number | null
+          strategic_cohesion_score?: number | null
+          strategic_fragmentation_score?: number | null
+          strategic_integrity_score?: number | null
+          systemic_alignment_score?: number | null
+        }
+        Relationships: []
+      }
       seo_kernel_snapshots: {
         Row: {
           architectural_entropy: number
