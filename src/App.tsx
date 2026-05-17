@@ -665,6 +665,11 @@ const App = () => {
                       <AdminSeoMetaGovernance />
                     </Suspense>
                   } />
+                  <Route path="seo-civilization" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoCivilization />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
