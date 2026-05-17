@@ -339,6 +339,8 @@ const AdminCategories = () => {
   };
 
   const handleStartEdit = (category: DbCategory) => {
+    trackAdminEvent('list_item_click', 'categories');
+    trackAdminEvent('form_open', 'category_edit');
     setEditingId(category.id);
     setEditName(category.name);
     setEditSlug(category.slug);
