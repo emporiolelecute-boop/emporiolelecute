@@ -287,6 +287,20 @@ export interface TelemetrySnapshot {
   metric_inflation_score: number;
   opacity_risk_score: number;
   telemetry_corruption_score: number;
+  // Phase 17 — Consolidation & Compression (all optional)
+  compression_score?: number;
+  systemic_signal_quality?: number;
+  observability_noise_score?: number;
+  executive_focus_score?: number;
+  metric_overlap_score?: number;
+  redundancy_pressure_score?: number;
+  telemetry_entropy_score?: number;
+  operational_clutter_score?: number;
+  consolidation_readiness_score?: number;
+  executive_decision_confidence?: number;
+  systemic_deduplication_score?: number;
+  observability_bloat_score?: number;
+  artificial_complexity_score?: number;
   // Fase 15.1 — Unified Intelligence Bus
   unified_bus_score?: number;
   engine_consensus_score?: number;

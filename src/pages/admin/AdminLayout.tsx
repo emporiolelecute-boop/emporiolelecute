@@ -103,6 +103,7 @@ const menuItems = [
   { icon: Layers3, label: 'Stability Fabric', path: '/admin/seo-stability-fabric' },
   { icon: ShieldAlert, label: 'Integrity Grid', path: '/admin/seo-integrity-grid' },
   { icon: Boxes, label: 'Coherence Matrix', path: '/admin/seo-coherence-matrix' },
+  { icon: Boxes, label: 'Consolidation', path: '/admin/seo-consolidation' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
