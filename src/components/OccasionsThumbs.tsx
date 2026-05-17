@@ -162,27 +162,19 @@ const OccasionsThumbs = () => {
                       <LazyImage
                         src={o.image_url}
                         alt={o.name}
-                        className="transition-transform duration-500 group-hover:scale-110"
+                        className="transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <LucideIcon
                           name={iconName}
-                          className="w-6 h-6 md:w-7 md:h-7 text-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+                          className="w-6 h-6 md:w-7 md:h-7 text-primary transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
                     )}
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{
-                        background:
-                          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
-                        backgroundSize: "200% 100%",
-                        animation: "shimmer 1.6s linear infinite",
-                      }}
-                      aria-hidden
-                    />
-                    <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-primary/20 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500 -z-10 animate-pulse-slow" aria-hidden />
+                    {/* Removed: continuous shimmer overlay + pulse-slow halo blur.
+                        Keep one discrete hover affordance only. */}
+                    <div className="pointer-events-none absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors duration-300" aria-hidden />
                   </div>
                   <span
                     className={cn(
