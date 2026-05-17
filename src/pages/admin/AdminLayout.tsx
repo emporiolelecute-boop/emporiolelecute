@@ -86,6 +86,7 @@ const menuItems = [
   { icon: Network, label: 'Operating Fabric', path: '/admin/seo-operating-fabric' },
   { icon: Brain, label: 'Cognitive Orchestration', path: '/admin/seo-cognitive-orchestration' },
   { icon: Brain, label: 'Meta Reasoning', path: '/admin/seo-meta-reasoning' },
+  { icon: Crown, label: 'Executive Core', path: '/admin/seo-executive-core' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
