@@ -431,6 +431,27 @@ export interface TelemetrySnapshot {
   strategic_legibility_score?: number;
   continuity_strength_score?: number;
   survivability_score?: number;
+  // Fase 15.8 — Strategic Reality Engine
+  strategic_reality_score?: number;
+  operational_truth_score?: number;
+  semantic_grounding_score?: number;
+  execution_credibility_score?: number;
+  sustainability_realism_score?: number;
+  resilience_realism_score?: number;
+  systemic_truth_score?: number;
+  long_term_viability_score?: number;
+  strategic_authenticity_score?: number;
+  signal_clarity_score?: number;
+  illusion_risk_score?: number;
+  strategic_self_deception_score?: number;
+  semantic_distortion_score?: number;
+  operational_fiction_score?: number;
+  survivability_gap_score?: number;
+  reality_consistency_score?: number;
+  signal_trustworthiness_score?: number;
+  execution_reliability_score?: number;
+  semantic_truth_density?: number;
+  strategic_grounding_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
