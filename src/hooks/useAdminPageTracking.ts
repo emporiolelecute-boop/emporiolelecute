@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { trackAdminEvent } from '@/lib/adminUsage';
+import { sendUsageBatch } from '@/lib/adminUsageSync';
 
 /**
  * Auto-tracks admin page views and dwell time per route.
