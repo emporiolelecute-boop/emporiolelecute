@@ -743,6 +743,11 @@ const App = () => {
                       <AdminSeoNexusConvergence />
                     </Suspense>
                   } />
+                  <Route path="seo-stability-fabric" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoStabilityFabric />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
