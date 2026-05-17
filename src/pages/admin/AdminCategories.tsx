@@ -48,6 +48,7 @@ import {
   useUpdateCategory,
   type DbCategory,
 } from '@/hooks/useProducts';
+import { useSlugAvailability, type SlugCheckState } from '@/hooks/useSlugAvailability';
 import { LucideIcon } from '@/components/LucideIcon';
 import LucideIconPicker from '@/components/admin/LucideIconPicker';
 
