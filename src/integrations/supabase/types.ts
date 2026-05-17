@@ -1686,6 +1686,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_civilization_snapshots: {
+        Row: {
+          adaptive_evolution: number
+          authority_distribution: number
+          authority_legacy: number
+          civilization_integrity: number
+          civilization_score: number
+          collapse_resistance: number
+          continuity_depth: number
+          created_at: string
+          ecosystem_survivability: number
+          entropy_absorption: number
+          execution_sustainability: number
+          existential_durability: number
+          governance_stability: number
+          id: string
+          long_term_compounding: number
+          notes: string | null
+          operational_durability: number
+          recovery_persistence: number
+          semantic_coherence: number
+          semantic_continuity: number
+          semantic_stability: number
+          strategic_longevity: number
+          strategic_memory_strength: number
+          systemic_harmony: number
+          systemic_resilience: number
+        }
+        Insert: {
+          adaptive_evolution?: number
+          authority_distribution?: number
+          authority_legacy?: number
+          civilization_integrity?: number
+          civilization_score?: number
+          collapse_resistance?: number
+          continuity_depth?: number
+          created_at?: string
+          ecosystem_survivability?: number
+          entropy_absorption?: number
+          execution_sustainability?: number
+          existential_durability?: number
+          governance_stability?: number
+          id?: string
+          long_term_compounding?: number
+          notes?: string | null
+          operational_durability?: number
+          recovery_persistence?: number
+          semantic_coherence?: number
+          semantic_continuity?: number
+          semantic_stability?: number
+          strategic_longevity?: number
+          strategic_memory_strength?: number
+          systemic_harmony?: number
+          systemic_resilience?: number
+        }
+        Update: {
+          adaptive_evolution?: number
+          authority_distribution?: number
+          authority_legacy?: number
+          civilization_integrity?: number
+          civilization_score?: number
+          collapse_resistance?: number
+          continuity_depth?: number
+          created_at?: string
+          ecosystem_survivability?: number
+          entropy_absorption?: number
+          execution_sustainability?: number
+          existential_durability?: number
+          governance_stability?: number
+          id?: string
+          long_term_compounding?: number
+          notes?: string | null
+          operational_durability?: number
+          recovery_persistence?: number
+          semantic_coherence?: number
+          semantic_continuity?: number
+          semantic_stability?: number
+          strategic_longevity?: number
+          strategic_memory_strength?: number
+          systemic_harmony?: number
+          systemic_resilience?: number
+        }
+        Relationships: []
+      }
       seo_cluster_memory: {
         Row: {
           avg_authority: number

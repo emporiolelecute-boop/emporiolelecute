@@ -36,7 +36,8 @@ import {
   TrendingUp,
   Network,
   Rocket,
-  BrainCircuit
+  BrainCircuit,
+  Landmark
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -75,6 +76,7 @@ const menuItems = [
   { icon: BrainCircuit, label: 'Executive Grid', path: '/admin/seo-executive-grid' },
   { icon: Activity, label: 'Nervous System', path: '/admin/seo-nervous-system' },
   { icon: ShieldCheck, label: 'Meta Governance', path: '/admin/seo-meta-governance' },
+  { icon: Landmark, label: 'Civilization Layer', path: '/admin/seo-civilization' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

@@ -241,6 +241,31 @@ export interface TelemetrySnapshot {
   governance_drift_score: number;
   continuity_break_risk_score: number;
   strategic_hallucination_score: number;
+  // Fase 14.7 — Civilization Layer
+  civilization_score: number;
+  ecosystem_survivability_score: number;
+  semantic_continuity_score: number;
+  authority_legacy_score: number;
+  strategic_longevity_civ_score: number;
+  operational_durability_civ_score: number;
+  systemic_resilience_score: number;
+  semantic_stability_civ_score: number;
+  execution_sustainability_score: number;
+  governance_stability_score: number;
+  adaptive_evolution_score: number;
+  entropy_absorption_score: number;
+  collapse_resistance_civ_score: number;
+  recovery_persistence_score: number;
+  strategic_memory_strength_score: number;
+  continuity_depth_score: number;
+  semantic_coherence_score: number;
+  authority_distribution_civ_score: number;
+  systemic_harmony_score: number;
+  long_term_compounding_score: number;
+  existential_durability_score: number;
+  civilization_integrity_score: number;
+  legacy_erosion_risk_score: number;
+  civilization_decay_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -574,5 +599,29 @@ export function computeTelemetry(
     governance_drift_score: 0,
     continuity_break_risk_score: 0,
     strategic_hallucination_score: 0,
+    civilization_score: 0,
+    ecosystem_survivability_score: 0,
+    semantic_continuity_score: 0,
+    authority_legacy_score: 0,
+    strategic_longevity_civ_score: 0,
+    operational_durability_civ_score: 0,
+    systemic_resilience_score: 0,
+    semantic_stability_civ_score: 0,
+    execution_sustainability_score: 0,
+    governance_stability_score: 0,
+    adaptive_evolution_score: 0,
+    entropy_absorption_score: 0,
+    collapse_resistance_civ_score: 0,
+    recovery_persistence_score: 0,
+    strategic_memory_strength_score: 0,
+    continuity_depth_score: 0,
+    semantic_coherence_score: 0,
+    authority_distribution_civ_score: 0,
+    systemic_harmony_score: 0,
+    long_term_compounding_score: 0,
+    existential_durability_score: 0,
+    civilization_integrity_score: 0,
+    legacy_erosion_risk_score: 0,
+    civilization_decay_score: 0,
   };
 }
