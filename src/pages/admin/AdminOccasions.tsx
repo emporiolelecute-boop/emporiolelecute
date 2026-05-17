@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useDbOccasions, useCreateOccasion, useDeleteOccasion, useUpdateOccasion } from '@/hooks/useProducts';
+import { useSlugAvailability } from '@/hooks/useSlugAvailability';
 
 const AdminOccasions = () => {
   const { data: occasions, isLoading } = useDbOccasions();
