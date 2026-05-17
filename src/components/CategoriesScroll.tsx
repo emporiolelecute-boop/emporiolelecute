@@ -142,63 +142,55 @@ const CategoriesScroll = () => {
                         )}
                         style={{ animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }}
                       >
+                        {/* Static gradient ring — no spin (removed animate-spin-slow). */}
                         <div
                           className={cn(
-                            "absolute -inset-[2px] rounded-full transition-opacity duration-500 animate-spin-slow",
-                            isActive ? "opacity-100" : "opacity-70 group-hover/item:opacity-100"
+                            "absolute -inset-[2px] rounded-full transition-opacity duration-500",
+                            isActive ? "opacity-100" : "opacity-60 group-hover/item:opacity-100"
                           )}
                           style={{
                             background:
                               "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary-light, var(--primary))), hsl(var(--primary)))",
-                            animationDuration: `${10 + (i % 4) * 2}s`,
                           }}
                           aria-hidden
                         />
 
-                        <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-primary via-primary-light to-accent p-[2px] md:p-[3px] transition-transform duration-500 group-hover/item:scale-105 group-hover/item:-rotate-3">
+                        <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-primary via-primary-light to-accent p-[2px] md:p-[3px] transition-transform duration-300 group-hover/item:scale-105">
                           <div className="w-full h-full rounded-full bg-background p-0.5 md:p-1">
                             <div className="relative w-full h-full rounded-full overflow-hidden bg-muted">
                               {category.image_url ? (
                                 <LazyImage
                                   src={category.image_url}
                                   alt={category.name}
-                                  className="transition-transform duration-700 group-hover/item:scale-110"
+                                  className="transition-transform duration-500 group-hover/item:scale-105"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/20">
                                   <LucideIcon
                                     name={category.icon}
-                                    className="w-6 h-6 md:w-10 md:h-10 text-primary transition-transform duration-500 group-hover/item:scale-110 group-hover/item:rotate-6"
+                                    className="w-6 h-6 md:w-10 md:h-10 text-primary transition-transform duration-300 group-hover/item:scale-105"
                                   />
                                 </div>
                               )}
-                              <div
-                                className="pointer-events-none absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500"
-                                style={{
-                                  background:
-                                    "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
-                                  backgroundSize: "200% 100%",
-                                  animation: "shimmer 1.6s linear infinite",
-                                }}
-                                aria-hidden
-                              />
+                              {/* Subtle hover overlay (removed continuous shimmer). */}
                               <div className="absolute inset-0 bg-foreground/0 group-hover/item:bg-foreground/10 transition-colors duration-300" />
                             </div>
                           </div>
                         </div>
 
                         {category.icon && category.image_url && (
-                          <div className="hidden md:flex absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-background shadow-medium items-center justify-center ring-2 ring-primary/20 transition-transform duration-300 group-hover/item:scale-110 group-hover/item:-rotate-12">
+                          <div className="hidden md:flex absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-background shadow-medium items-center justify-center ring-2 ring-primary/20 transition-transform duration-300 group-hover/item:scale-105">
                             <LucideIcon name={category.icon} className="w-4 h-4 text-primary" />
                           </div>
                         )}
 
-                        <div
-                          className={cn(
-                            "absolute inset-0 rounded-full bg-primary/30 blur-2xl transition-opacity duration-500 -z-10 animate-pulse-slow",
-                            isActive ? "opacity-60" : "opacity-20 group-hover/item:opacity-70"
-                          )}
-                        />
+                        {/* Soft static halo — only on active item, no pulse. */}
+                        {isActive && (
+                          <div
+                            className="absolute inset-0 rounded-full bg-primary/25 blur-2xl -z-10 opacity-50"
+                            aria-hidden
+                          />
+                        )}
                       </div>
 
                       <span
