@@ -41,7 +41,9 @@ if (import.meta.env.DEV) {
 
 createRoot(document.getElementById("root")!).render(
   <RootErrorBoundary>
-    <App />
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
   </RootErrorBoundary>
 );
 
