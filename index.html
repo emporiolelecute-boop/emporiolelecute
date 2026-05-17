@@ -60,83 +60,12 @@
     <!-- LCP image is preloaded via fetchpriority="high" on the hero <img> in HeroSlider/Loja
          (Vite hashes local asset URLs at build, so we can't statically reference them here). -->
 
-    <!-- Structured Data / JSON-LD -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "Empório LeleCute",
-        "description": "Ateliê criativo de lembrancinhas artesanais personalizadas. Sabonetes, velas perfumadas e presentes únicos para maternidade, chá de bebê, batizado, casamento e aniversário.",
-        "url": "https://emporiolelecute.com.br",
-        "telephone": "+55-41-99221-4299",
-        "email": "contato@emporiolelecute.com.br",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "São José dos Pinhais",
-          "addressRegion": "PR",
-          "addressCountry": "BR"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": "-25.5314",
-          "longitude": "-49.2063"
-        },
-        "areaServed": {
-          "@type": "Country",
-          "name": "Brasil"
-        },
-        "sameAs": [
-          "https://www.instagram.com/emporiolelecute",
-          "https://www.facebook.com/emporiolelecute",
-          "https://wa.me/5541992214299"
-        ],
-        "priceRange": "$$",
-        "image": "https://emporiolelecute.com.br/og-image.webp",
-        "openingHoursSpecification": {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "10:00",
-          "closes": "18:00"
-        }
-      }
-    </script>
-
-    <!-- Product JSON-LD removido — agora é injetado dinamicamente em cada página de produto
-         via <ProductStructuredData/>, evitando dados desatualizados ou imagens de terceiros. -->
-
-    <!-- FAQ Structured Data -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Vocês enviam para todo o Brasil?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sim! Enviamos para todo o Brasil através dos Correios (PAC ou Sedex). Você escolhe a modalidade de frete no momento da compra."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Qual o prazo de produção?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "O prazo de produção varia de 10 a 25 dias úteis, dependendo da demanda de pedidos, contado a partir da confirmação do pagamento."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Posso personalizar as lembrancinhas?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sim! Todas as nossas lembrancinhas podem ser personalizadas com cores, aromas, tags e embalagens conforme o tema da sua festa."
-            }
-          }
-        ]
-      }
-    </script>
+    <!-- JSON-LD: fonte única dinâmica para evitar duplicação.
+         LocalBusiness/Organization/WebSite -> src/pages/Index.tsx via componentes em src/components/*StructuredData.tsx
+         FAQPage -> src/components/FAQStructuredData.tsx (paginas com FAQ real)
+         Product -> src/components/ProductStructuredData.tsx (rotas /produto/:slug)
+         Nao inserir JSON-LD estatico aqui — quebra o determinismo do <head>. -->
+    <!-- (bloco LocalBusiness + FAQPage estatico removido em favor da injecao dinamica) -->
 
     <!-- Tracking via TrackingScripts.tsx (admin-controlled) -->
     <!-- GTM only noscript for non-JS fallback - GTM script injected dynamically -->
