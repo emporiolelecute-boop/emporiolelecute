@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit, Check, X, Search, GripVertical, Loader2, AlertCircle } from 'lucide-react';
+import { trackAdminEvent } from '@/lib/adminUsage';
 import {
   DndContext,
   closestCenter,

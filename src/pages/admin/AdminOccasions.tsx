@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Trash2, Edit, Check, X, Search, Calendar, Loader2, AlertCircle } from 'lucide-react';
+import { trackAdminEvent } from '@/lib/adminUsage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
