@@ -1,18 +1,26 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { BlindspotSignal } from "@/lib/metaIntelligenceEngine";
 
-export default function StrategicBlindspotsPanel({ blindspots }: { blindspots: BlindspotSignal[] }) {
+interface Props { blindspots: BlindspotSignal[]; }
+export default function StrategicBlindspotsPanel({ blindspots }: Props) {
   return (
-    <Card className="p-4 space-y-2">
-      <h4 className="font-medium">Pontos Cegos Estratégicos</h4>
-      {blindspots.length === 0 && <p className="text-xs text-muted-foreground">Nenhum ponto cego relevante.</p>}
-      {blindspots.map((b) => (
-        <div key={b.key} className="flex justify-between text-sm">
-          <span>{b.note}</span>
-          <Badge variant={b.severity === "high" ? "destructive" : b.severity === "medium" ? "secondary" : "outline"}>{b.severity}</Badge>
-        </div>
-      ))}
+    <Card>
+      <CardHeader><CardTitle className="text-base">Strategic Blindspots</CardTitle></CardHeader>
+      <CardContent className="space-y-2 text-sm">
+        {blindspots.length === 0 && (
+          <p className="text-muted-foreground">Nenhum blindspot detectado.</p>
+        )}
+        {blindspots.map((b, i) => (
+          <div key={i} className="flex items-start gap-2">
+            <Badge variant={b.severity === "high" ? "destructive" : "outline"}>{b.severity}</Badge>
+            <div>
+              <p className="font-medium">{b.key}</p>
+              <p className="text-muted-foreground">{b.note}</p>
+            </div>
+          </div>
+        ))}
+      </CardContent>
     </Card>
   );
 }

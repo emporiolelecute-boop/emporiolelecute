@@ -2004,6 +2004,78 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_consciousness_fabric_snapshots: {
+        Row: {
+          adaptive_maturity_score: number | null
+          adaptive_regression_score: number | null
+          cognitive_fragmentation_score: number | null
+          cognitive_stability_score: number | null
+          consciousness_verdict: string | null
+          created_at: string
+          dominant_instability: string | null
+          dominant_pattern: string | null
+          evolutionary_awareness_score: number | null
+          executive_awareness_score: number | null
+          executive_dissonance_score: number | null
+          existential_stability_score: number | null
+          id: string
+          longitudinal_consistency_score: number | null
+          notes: string | null
+          operational_coherence_score: number | null
+          strategic_confusion_score: number | null
+          strategic_consciousness_score: number | null
+          strategic_identity_score: number | null
+          systemic_clarity_score: number | null
+          systemic_instability_score: number | null
+        }
+        Insert: {
+          adaptive_maturity_score?: number | null
+          adaptive_regression_score?: number | null
+          cognitive_fragmentation_score?: number | null
+          cognitive_stability_score?: number | null
+          consciousness_verdict?: string | null
+          created_at?: string
+          dominant_instability?: string | null
+          dominant_pattern?: string | null
+          evolutionary_awareness_score?: number | null
+          executive_awareness_score?: number | null
+          executive_dissonance_score?: number | null
+          existential_stability_score?: number | null
+          id?: string
+          longitudinal_consistency_score?: number | null
+          notes?: string | null
+          operational_coherence_score?: number | null
+          strategic_confusion_score?: number | null
+          strategic_consciousness_score?: number | null
+          strategic_identity_score?: number | null
+          systemic_clarity_score?: number | null
+          systemic_instability_score?: number | null
+        }
+        Update: {
+          adaptive_maturity_score?: number | null
+          adaptive_regression_score?: number | null
+          cognitive_fragmentation_score?: number | null
+          cognitive_stability_score?: number | null
+          consciousness_verdict?: string | null
+          created_at?: string
+          dominant_instability?: string | null
+          dominant_pattern?: string | null
+          evolutionary_awareness_score?: number | null
+          executive_awareness_score?: number | null
+          executive_dissonance_score?: number | null
+          existential_stability_score?: number | null
+          id?: string
+          longitudinal_consistency_score?: number | null
+          notes?: string | null
+          operational_coherence_score?: number | null
+          strategic_confusion_score?: number | null
+          strategic_consciousness_score?: number | null
+          strategic_identity_score?: number | null
+          systemic_clarity_score?: number | null
+          systemic_instability_score?: number | null
+        }
+        Relationships: []
+      }
       seo_consciousness_memory: {
         Row: {
           adaptive_consciousness: number

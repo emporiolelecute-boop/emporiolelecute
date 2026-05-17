@@ -416,6 +416,21 @@ export interface TelemetrySnapshot {
   governance_recovery_elasticity?: number;
   narrative_consistency_score?: number;
   leadership_clarity_score?: number;
+  // Fase 15.7 — Strategic Consciousness Fabric
+  strategic_consciousness_score?: number;
+  executive_awareness_score?: number;
+  adaptive_maturity_score?: number;
+  systemic_clarity_score?: number;
+  longitudinal_consistency_score?: number;
+  strategic_identity_score?: number;
+  evolutionary_awareness_score?: number;
+  cognitive_fragmentation_score?: number;
+  executive_dissonance_score?: number;
+  adaptive_regression_score?: number;
+  strategic_focus_score?: number;
+  strategic_legibility_score?: number;
+  continuity_strength_score?: number;
+  survivability_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
