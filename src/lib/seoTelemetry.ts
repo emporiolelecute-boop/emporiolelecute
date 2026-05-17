@@ -295,9 +295,7 @@ export interface TelemetrySnapshot {
   metric_overlap_score?: number;
   redundancy_pressure_score?: number;
   telemetry_entropy_score?: number;
-  strategic_clarity_score?: number;
   operational_clutter_score?: number;
-  signal_compression_efficiency?: number;
   consolidation_readiness_score?: number;
   executive_decision_confidence?: number;
   systemic_deduplication_score?: number;
