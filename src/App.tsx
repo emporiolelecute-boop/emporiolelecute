@@ -119,6 +119,7 @@ const AdminSeoUnifiedNexus = lazyWithRetry(() => import("./pages/admin/AdminSeoU
 const AdminSeoNexusConvergence = lazyWithRetry(() => import("./pages/admin/AdminSeoNexusConvergence"), "AdminSeoNexusConvergence");
 const AdminSeoStabilityFabric = lazyWithRetry(() => import("./pages/admin/AdminSeoStabilityFabric"), "AdminSeoStabilityFabric");
 const AdminSeoIntegrityGrid = lazyWithRetry(() => import("./pages/admin/AdminSeoIntegrityGrid"), "AdminSeoIntegrityGrid");
+const AdminSeoCoherenceMatrix = lazyWithRetry(() => import("./pages/admin/AdminSeoCoherenceMatrix"), "AdminSeoCoherenceMatrix");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -752,6 +753,11 @@ const App = () => {
                   <Route path="seo-integrity-grid" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSeoIntegrityGrid />
+                    </Suspense>
+                  } />
+                  <Route path="seo-coherence-matrix" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoCoherenceMatrix />
                     </Suspense>
                   } />
                 </Route>

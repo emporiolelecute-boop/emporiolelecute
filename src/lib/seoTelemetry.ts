@@ -532,6 +532,22 @@ export interface TelemetrySnapshot {
   adaptive_integrity_score?: number;
   strategic_harmony_score?: number;
   integrity_persistence_score?: number;
+  // Phase 16.4 — Strategic Coherence Matrix (additive, optional; collision-safe)
+  coherence_matrix_score?: number;
+  cognitive_consistency_score?: number;
+  operational_alignment_score?: number;
+  governance_alignment_score?: number;
+  continuity_coherence_score?: number;
+  resilience_coherence_score?: number;
+  strategic_misalignment_risk?: number;
+  semantic_divergence_risk?: number;
+  operational_dispersion_risk?: number;
+  governance_dissonance_risk?: number;
+  cognitive_fragmentation_risk?: number;
+  semantic_flow_score?: number;
+  governance_harmony_score?: number;
+  strategic_persistence_score?: number;
+  coherence_persistence_score?: number;
 }
 
 export interface AutonomyTelemetryInput {

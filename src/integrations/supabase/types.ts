@@ -2004,6 +2004,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_coherence_matrix_snapshots: {
+        Row: {
+          alignment_matrix: Json | null
+          cognitive_consistency_score: number | null
+          cognitive_fragmentation_risk: number | null
+          coherence_map: Json | null
+          coherence_matrix_score: number | null
+          continuity_coherence_graph: Json | null
+          continuity_coherence_score: number | null
+          created_at: string
+          execution_coherence_score: number | null
+          governance_alignment_score: number | null
+          governance_dissonance_risk: number | null
+          id: string
+          notes: string | null
+          operational_alignment_score: number | null
+          operational_dispersion_risk: number | null
+          operational_dissonance_map: Json | null
+          resilience_alignment_map: Json | null
+          resilience_coherence_score: number | null
+          semantic_coherence_score: number | null
+          semantic_divergence_risk: number | null
+          semantic_flow_map: Json | null
+          snapshot_type: string
+          strategic_alignment_score: number | null
+          strategic_misalignment_risk: number | null
+          systemic_coherence_score: number | null
+        }
+        Insert: {
+          alignment_matrix?: Json | null
+          cognitive_consistency_score?: number | null
+          cognitive_fragmentation_risk?: number | null
+          coherence_map?: Json | null
+          coherence_matrix_score?: number | null
+          continuity_coherence_graph?: Json | null
+          continuity_coherence_score?: number | null
+          created_at?: string
+          execution_coherence_score?: number | null
+          governance_alignment_score?: number | null
+          governance_dissonance_risk?: number | null
+          id?: string
+          notes?: string | null
+          operational_alignment_score?: number | null
+          operational_dispersion_risk?: number | null
+          operational_dissonance_map?: Json | null
+          resilience_alignment_map?: Json | null
+          resilience_coherence_score?: number | null
+          semantic_coherence_score?: number | null
+          semantic_divergence_risk?: number | null
+          semantic_flow_map?: Json | null
+          snapshot_type?: string
+          strategic_alignment_score?: number | null
+          strategic_misalignment_risk?: number | null
+          systemic_coherence_score?: number | null
+        }
+        Update: {
+          alignment_matrix?: Json | null
+          cognitive_consistency_score?: number | null
+          cognitive_fragmentation_risk?: number | null
+          coherence_map?: Json | null
+          coherence_matrix_score?: number | null
+          continuity_coherence_graph?: Json | null
+          continuity_coherence_score?: number | null
+          created_at?: string
+          execution_coherence_score?: number | null
+          governance_alignment_score?: number | null
+          governance_dissonance_risk?: number | null
+          id?: string
+          notes?: string | null
+          operational_alignment_score?: number | null
+          operational_dispersion_risk?: number | null
+          operational_dissonance_map?: Json | null
+          resilience_alignment_map?: Json | null
+          resilience_coherence_score?: number | null
+          semantic_coherence_score?: number | null
+          semantic_divergence_risk?: number | null
+          semantic_flow_map?: Json | null
+          snapshot_type?: string
+          strategic_alignment_score?: number | null
+          strategic_misalignment_risk?: number | null
+          systemic_coherence_score?: number | null
+        }
+        Relationships: []
+      }
       seo_consciousness_fabric_snapshots: {
         Row: {
           adaptive_maturity_score: number | null
