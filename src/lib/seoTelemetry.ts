@@ -324,6 +324,33 @@ export interface TelemetrySnapshot {
   causality_depth_score?: number;
   observability_depth_score?: number;
   tracing_reliability_score?: number;
+  // Fase 15.3 — Cognitive Orchestration Layer
+  cognitive_stability_score?: number;
+  decision_synthesis_score?: number;
+  reasoning_integrity_score?: number;
+  orchestration_efficiency_score?: number;
+  orchestration_entropy_score?: number;
+  orchestration_noise_score?: number;
+  strategic_signal_clarity?: number;
+  operational_signal_clarity?: number;
+  semantic_signal_clarity?: number;
+  authority_signal_clarity?: number;
+  governance_signal_clarity?: number;
+  decision_confidence_score?: number;
+  decision_consistency_score?: number;
+  reasoning_depth_score?: number;
+  reasoning_complexity_score?: number;
+  reasoning_fragmentation_score?: number;
+  signal_compression_efficiency?: number;
+  signal_redundancy_score?: number;
+  signal_overload_score?: number;
+  strategic_confusion_score?: number;
+  semantic_confusion_score?: number;
+  authority_confusion_score?: number;
+  governance_confusion_score?: number;
+  cognitive_resilience_score?: number;
+  cognitive_decay_risk?: number;
+  reasoning_exhaustion_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
