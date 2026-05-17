@@ -102,6 +102,7 @@ const OccasionsThumbs = () => {
             onKeyDown={onKeyDown}
             role="listbox"
             tabIndex={0}
+            data-testid="occasions-carousel"
             aria-label="Lista de ocasiões especiais — use as setas do teclado para navegar"
             aria-activedescendant={list[activeIdx]?.id ? `occ-item-${list[activeIdx].id}` : undefined}
             className={cn(
@@ -132,6 +133,8 @@ const OccasionsThumbs = () => {
                   ref={(el) => { itemsRef.current[i] = el; }}
                   to={`/produtos?ocasiao=${o.slug}`}
                   role="option"
+                  data-testid="occasion-item"
+                  data-active={isActive ? "true" : "false"}
                   aria-selected={isActive}
                   aria-current={isActive ? "true" : undefined}
                   aria-setsize={total}

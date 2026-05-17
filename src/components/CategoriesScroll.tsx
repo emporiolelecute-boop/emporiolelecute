@@ -87,6 +87,7 @@ const CategoriesScroll = () => {
             onKeyDown={onKeyDown}
             role="listbox"
             tabIndex={0}
+            data-testid="categories-carousel"
             aria-label="Lista de categorias — use as setas do teclado para navegar"
             aria-activedescendant={visible[activeIdx]?.id ? `cat-item-${visible[activeIdx].id}` : undefined}
             className={cn(
@@ -114,6 +115,8 @@ const CategoriesScroll = () => {
                       ref={(el) => { itemsRef.current[i] = el; }}
                       to={`/categoria/${category.slug}`}
                       role="option"
+                      data-testid="category-item"
+                      data-active={isActive ? "true" : "false"}
                       aria-selected={isActive}
                       aria-label={`${category.name} — categoria ${i + 1} de ${total}${isActive ? ", em foco" : ""}`}
                       aria-current={isActive ? "true" : undefined}

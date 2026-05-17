@@ -13,8 +13,9 @@ import { test, expect, Page } from "@playwright/test";
  *   BASE_URL=https://emporiolelecute.com.br PW_NO_SERVER=1 npx playwright test
  */
 
-const CATEGORIES = '[aria-label="Lista de categorias — use as setas do teclado para navegar"]';
-const OCCASIONS  = '[aria-label="Lista de ocasiões especiais — use as setas do teclado para navegar"]';
+// Stable data-testid selectors — survive ARIA copy changes.
+const CATEGORIES = '[data-testid="categories-carousel"]';
+const OCCASIONS  = '[data-testid="occasions-carousel"]';
 
 async function waitForCarousels(page: Page) {
   await page.goto("/");
@@ -150,7 +151,6 @@ test.describe("Carousels — anti-flicker on micro scrolls", () => {
     await page.waitForTimeout(150);
     const initial = await carousel.locator('[aria-selected="true"]').first().getAttribute("id");
 
-    // Apply 10 small jitter scrolls (±5px) — should never change active.
     for (let i = 0; i < 10; i++) {
       const delta = (i % 2 === 0 ? 1 : -1) * 5;
       await carousel.evaluate((el, d) => { (el as HTMLElement).scrollLeft += d; }, delta);
@@ -158,6 +158,49 @@ test.describe("Carousels — anti-flicker on micro scrolls", () => {
     }
     const after = await carousel.locator('[aria-selected="true"]').first().getAttribute("id");
     expect(after).toBe(initial);
+  });
+
+  test("active item toggles AT MOST ONCE across many <18px micro-scrolls", async ({ page }) => {
+    await waitForCarousels(page);
+    const carousel = page.locator(CATEGORIES);
+    await carousel.evaluate((el) => { (el as HTMLElement).scrollLeft = 0; });
+    await page.waitForTimeout(200);
+
+    // Instrument: observe aria-selected changes via MutationObserver.
+    await page.evaluate((sel) => {
+      const root = document.querySelector(sel) as HTMLElement | null;
+      if (!root) return;
+      (window as any).__activeChanges = 0;
+      (window as any).__lastActiveId = root.querySelector('[aria-selected="true"]')?.id ?? null;
+      const obs = new MutationObserver((muts) => {
+        for (const m of muts) {
+          if (m.type === "attributes" && m.attributeName === "aria-selected") {
+            const t = m.target as HTMLElement;
+            if (t.getAttribute("aria-selected") === "true") {
+              const id = t.id;
+              if (id && id !== (window as any).__lastActiveId) {
+                (window as any).__activeChanges += 1;
+                (window as any).__lastActiveId = id;
+              }
+            }
+          }
+        }
+      });
+      obs.observe(root, { subtree: true, attributes: true, attributeFilter: ["aria-selected"] });
+      (window as any).__activeObs = obs;
+    }, CATEGORIES);
+
+    // 30 jitter scrolls below the 18px threshold (±8px each).
+    for (let i = 0; i < 30; i++) {
+      const delta = (i % 2 === 0 ? 1 : -1) * 8;
+      await carousel.evaluate((el, d) => { (el as HTMLElement).scrollLeft += d; }, delta);
+      await page.waitForTimeout(25);
+    }
+    await page.waitForTimeout(250);
+
+    const changes = await page.evaluate(() => (window as any).__activeChanges ?? 0);
+    // STRICT: micro-scrolls below threshold must NOT toggle the active item.
+    expect(changes, `aria-selected toggled ${changes}× during sub-threshold jitter`).toBeLessThanOrEqual(1);
   });
 });
 
