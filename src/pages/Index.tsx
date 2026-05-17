@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoriesScroll from "@/components/CategoriesScroll";
+import { useHomepageBlock } from "@/hooks/useHomepageBlocks";
 import OccasionsThumbs from "@/components/OccasionsThumbs";
 
 import BestSellers from "@/components/BestSellers";
