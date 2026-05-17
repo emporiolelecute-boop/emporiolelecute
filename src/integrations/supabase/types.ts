@@ -2247,6 +2247,63 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_consolidation_snapshots: {
+        Row: {
+          compression_score: number | null
+          consolidation_confidence: number | null
+          created_at: string
+          created_by: string | null
+          executive_clarity_score: number | null
+          executive_signal_quality: number | null
+          id: string
+          notes: string | null
+          observability_efficiency: number | null
+          operational_noise_score: number | null
+          payload: Json | null
+          redundancy_score: number | null
+          signal_noise_ratio: number | null
+          strategic_focus_score: number | null
+          systemic_complexity_score: number | null
+          telemetry_entropy_score: number | null
+        }
+        Insert: {
+          compression_score?: number | null
+          consolidation_confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          executive_clarity_score?: number | null
+          executive_signal_quality?: number | null
+          id?: string
+          notes?: string | null
+          observability_efficiency?: number | null
+          operational_noise_score?: number | null
+          payload?: Json | null
+          redundancy_score?: number | null
+          signal_noise_ratio?: number | null
+          strategic_focus_score?: number | null
+          systemic_complexity_score?: number | null
+          telemetry_entropy_score?: number | null
+        }
+        Update: {
+          compression_score?: number | null
+          consolidation_confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          executive_clarity_score?: number | null
+          executive_signal_quality?: number | null
+          id?: string
+          notes?: string | null
+          observability_efficiency?: number | null
+          operational_noise_score?: number | null
+          payload?: Json | null
+          redundancy_score?: number | null
+          signal_noise_ratio?: number | null
+          strategic_focus_score?: number | null
+          systemic_complexity_score?: number | null
+          telemetry_entropy_score?: number | null
+        }
+        Relationships: []
+      }
       seo_continuum_snapshots: {
         Row: {
           authority_continuity_score: number | null
