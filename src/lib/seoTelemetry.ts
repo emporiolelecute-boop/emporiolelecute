@@ -574,6 +574,21 @@ export interface TelemetrySnapshot {
   governance_harmony_score?: number;
   strategic_persistence_score?: number;
   coherence_persistence_score?: number;
+  // Final Phase — Hardening, Productization & Operational Simplification (additive, optional)
+  maintainability_score?: number;
+  operational_simplicity_score?: number;
+  telemetry_efficiency_score?: number;
+  executive_clarity_score?: number;
+  runtime_stability_score?: number;
+  governance_topology_score?: number;
+  documentation_completeness_score?: number;
+  scalability_risk_score?: number;
+  observability_efficiency_score_final?: number;
+  dashboard_fatigue_score?: number;
+  abstraction_pressure_score?: number;
+  decision_fragmentation_score?: number;
+  performance_pressure_score?: number;
+  system_finalization_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
