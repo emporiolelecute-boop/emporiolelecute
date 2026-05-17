@@ -631,7 +631,7 @@ export interface TelemetrySnapshot {
   navigation_compression_score?: number;
   dashboard_redundancy_score?: number;
   operational_clarity_score?: number;
-  executive_focus_score?: number;
+  executive_focus_score_consolidation?: number;
   menu_entropy_score?: number;
   governance_pressure_score?: number;
   admin_cognitive_load_score?: number;
