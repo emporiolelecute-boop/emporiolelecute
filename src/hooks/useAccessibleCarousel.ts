@@ -37,13 +37,14 @@ export function useAccessibleCarousel({
   const drag = useRef({ active: false, startX: 0, startLeft: 0, moved: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
+  const DRAG_THRESHOLD = 6;
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return; // let native touch handle mobile
     const el = scrollerRef.current;
     if (!el) return;
+    // Do NOT setPointerCapture here — it hijacks click events from child <Link>s.
+    // We only mark drag active; capture is engaged lazily once movement exceeds threshold.
     drag.current = { active: true, startX: e.clientX, startLeft: el.scrollLeft, moved: 0 };
-    setIsDragging(true);
-    el.setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!drag.current.active) return;
@@ -51,12 +52,18 @@ export function useAccessibleCarousel({
     if (!el) return;
     const dx = e.clientX - drag.current.startX;
     drag.current.moved = Math.abs(dx);
-    el.scrollLeft = drag.current.startLeft - dx;
+    // Engage drag state (and capture) only after real movement, so simple clicks
+    // on child links keep working untouched.
+    if (drag.current.moved > DRAG_THRESHOLD) {
+      if (!isDragging) setIsDragging(true);
+      try { el.setPointerCapture(e.pointerId); } catch { /* noop */ }
+      el.scrollLeft = drag.current.startLeft - dx;
+    }
   };
   const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!drag.current.active) return;
     drag.current.active = false;
-    setIsDragging(false);
+    if (isDragging) setIsDragging(false);
     const el = scrollerRef.current;
     if (el) {
       try { el.releasePointerCapture(e.pointerId); } catch { /* noop */ }
