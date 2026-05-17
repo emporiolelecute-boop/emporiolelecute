@@ -731,6 +731,11 @@ const App = () => {
                       <AdminSeoStrategicContinuum />
                     </Suspense>
                   } />
+                  <Route path="seo-unified-nexus" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoUnifiedNexus />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
