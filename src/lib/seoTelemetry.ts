@@ -266,6 +266,27 @@ export interface TelemetrySnapshot {
   civilization_integrity_score: number;
   legacy_erosion_risk_score: number;
   civilization_decay_score: number;
+  // Fase 15 — Kernel & Observability
+  kernel_coherence_score: number;
+  metric_redundancy_score: number;
+  engine_overlap_score: number;
+  explainability_score: number;
+  observability_score: number;
+  telemetry_quality_score: number;
+  diagnostic_consistency_score: number;
+  kernel_systemic_noise_score: number;
+  operator_load_score: number;
+  maintainability_score: number;
+  tracing_coverage_score: number;
+  lineage_integrity_score: number;
+  confidence_integrity_score: number;
+  normalization_health_score: number;
+  orchestration_stability_score: number;
+  architectural_entropy_score: number;
+  operational_compression_score: number;
+  metric_inflation_score: number;
+  opacity_risk_score: number;
+  telemetry_corruption_score: number;
 }
 
 export interface AutonomyTelemetryInput {
@@ -623,5 +644,25 @@ export function computeTelemetry(
     civilization_integrity_score: 0,
     legacy_erosion_risk_score: 0,
     civilization_decay_score: 0,
+    kernel_coherence_score: 0,
+    metric_redundancy_score: 0,
+    engine_overlap_score: 0,
+    explainability_score: 0,
+    observability_score: 0,
+    telemetry_quality_score: 0,
+    diagnostic_consistency_score: 0,
+    kernel_systemic_noise_score: 0,
+    operator_load_score: 0,
+    maintainability_score: 0,
+    tracing_coverage_score: 0,
+    lineage_integrity_score: 0,
+    confidence_integrity_score: 0,
+    normalization_health_score: 0,
+    orchestration_stability_score: 0,
+    architectural_entropy_score: 0,
+    operational_compression_score: 0,
+    metric_inflation_score: 0,
+    opacity_risk_score: 0,
+    telemetry_corruption_score: 0,
   };
 }

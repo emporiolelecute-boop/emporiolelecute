@@ -1908,6 +1908,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_engine_registry: {
+        Row: {
+          complexity_score: number
+          confidence_score: number
+          created_at: string
+          deprecated: boolean
+          description: string | null
+          domain: string | null
+          engine_key: string
+          engine_name: string
+          id: string
+          input_count: number
+          maintenance_cost: number
+          output_count: number
+          overlap_risk: number
+        }
+        Insert: {
+          complexity_score?: number
+          confidence_score?: number
+          created_at?: string
+          deprecated?: boolean
+          description?: string | null
+          domain?: string | null
+          engine_key: string
+          engine_name: string
+          id?: string
+          input_count?: number
+          maintenance_cost?: number
+          output_count?: number
+          overlap_risk?: number
+        }
+        Update: {
+          complexity_score?: number
+          confidence_score?: number
+          created_at?: string
+          deprecated?: boolean
+          description?: string | null
+          domain?: string | null
+          engine_key?: string
+          engine_name?: string
+          id?: string
+          input_count?: number
+          maintenance_cost?: number
+          output_count?: number
+          overlap_risk?: number
+        }
+        Relationships: []
+      }
       seo_entity_snapshots: {
         Row: {
           authority_score: number
@@ -2100,6 +2148,75 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_kernel_snapshots: {
+        Row: {
+          architectural_entropy: number
+          confidence_integrity: number
+          created_at: string
+          diagnostic_consistency: number
+          engine_overlap: number
+          explainability_score: number
+          id: string
+          kernel_coherence: number
+          lineage_integrity: number
+          maintainability_score: number
+          metric_redundancy: number
+          normalization_health: number
+          notes: string | null
+          observability_score: number
+          operational_compression: number
+          operator_load: number
+          orchestration_stability: number
+          systemic_noise: number
+          telemetry_quality: number
+          tracing_coverage: number
+        }
+        Insert: {
+          architectural_entropy?: number
+          confidence_integrity?: number
+          created_at?: string
+          diagnostic_consistency?: number
+          engine_overlap?: number
+          explainability_score?: number
+          id?: string
+          kernel_coherence?: number
+          lineage_integrity?: number
+          maintainability_score?: number
+          metric_redundancy?: number
+          normalization_health?: number
+          notes?: string | null
+          observability_score?: number
+          operational_compression?: number
+          operator_load?: number
+          orchestration_stability?: number
+          systemic_noise?: number
+          telemetry_quality?: number
+          tracing_coverage?: number
+        }
+        Update: {
+          architectural_entropy?: number
+          confidence_integrity?: number
+          created_at?: string
+          diagnostic_consistency?: number
+          engine_overlap?: number
+          explainability_score?: number
+          id?: string
+          kernel_coherence?: number
+          lineage_integrity?: number
+          maintainability_score?: number
+          metric_redundancy?: number
+          normalization_health?: number
+          notes?: string | null
+          observability_score?: number
+          operational_compression?: number
+          operator_load?: number
+          orchestration_stability?: number
+          systemic_noise?: number
+          telemetry_quality?: number
+          tracing_coverage?: number
+        }
+        Relationships: []
+      }
       seo_meta_governance_snapshots: {
         Row: {
           adaptability_continuity: number
@@ -2181,6 +2298,96 @@ export type Database = {
           sustainability_continuity?: number
           systemic_consistency?: number
           systemic_trustworthiness?: number
+        }
+        Relationships: []
+      }
+      seo_metric_lineage: {
+        Row: {
+          confidence: number
+          created_at: string
+          depends_on: string[]
+          derived_from_engines: string[]
+          id: string
+          lineage_depth: number
+          metric_key: string
+          volatility: number
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          depends_on?: string[]
+          derived_from_engines?: string[]
+          id?: string
+          lineage_depth?: number
+          metric_key: string
+          volatility?: number
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          depends_on?: string[]
+          derived_from_engines?: string[]
+          id?: string
+          lineage_depth?: number
+          metric_key?: string
+          volatility?: number
+        }
+        Relationships: []
+      }
+      seo_metric_registry: {
+        Row: {
+          calculation_type: string | null
+          canonical_metric: boolean
+          category: string | null
+          confidence_weight: number
+          created_at: string
+          deprecated: boolean
+          description: string | null
+          domain: string | null
+          id: string
+          is_normalized: boolean
+          metric_key: string
+          metric_name: string
+          redundancy_group: string | null
+          scale_max: number
+          scale_min: number
+          source_engine: string | null
+        }
+        Insert: {
+          calculation_type?: string | null
+          canonical_metric?: boolean
+          category?: string | null
+          confidence_weight?: number
+          created_at?: string
+          deprecated?: boolean
+          description?: string | null
+          domain?: string | null
+          id?: string
+          is_normalized?: boolean
+          metric_key: string
+          metric_name: string
+          redundancy_group?: string | null
+          scale_max?: number
+          scale_min?: number
+          source_engine?: string | null
+        }
+        Update: {
+          calculation_type?: string | null
+          canonical_metric?: boolean
+          category?: string | null
+          confidence_weight?: number
+          created_at?: string
+          deprecated?: boolean
+          description?: string | null
+          domain?: string | null
+          id?: string
+          is_normalized?: boolean
+          metric_key?: string
+          metric_name?: string
+          redundancy_group?: string | null
+          scale_max?: number
+          scale_min?: number
+          source_engine?: string | null
         }
         Relationships: []
       }
