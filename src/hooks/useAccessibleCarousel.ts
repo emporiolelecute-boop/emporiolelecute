@@ -80,17 +80,23 @@ export function useAccessibleCarousel({
     const center = el.scrollLeft + el.clientWidth / 2;
     let bestIdx = lastActiveRef.current;
     let bestDist = Infinity;
+    let activeDist = Infinity;
     itemsRef.current.forEach((node, i) => {
       if (!node) return;
       const c = node.offsetLeft + node.offsetWidth / 2;
       const d = Math.abs(c - center);
       if (d < bestDist) { bestDist = d; bestIdx = i; }
+      if (i === lastActiveRef.current) activeDist = d;
     });
 
-    if (
+    // Anti-flicker: only switch when the new candidate is at least
+    // `activeSwitchThreshold` pixels closer to center than the
+    // currently-active item. Micro-movements never cross this gap.
+    const shouldSwitch =
       bestIdx !== lastActiveRef.current &&
-      Math.abs(bestDist - lastBestDistRef.current) > activeSwitchThreshold
-    ) {
+      activeDist - bestDist > activeSwitchThreshold;
+
+    if (shouldSwitch) {
       if (haptic && typeof navigator !== "undefined" && "vibrate" in navigator) {
         try { navigator.vibrate?.(8); } catch { /* noop */ }
       }
