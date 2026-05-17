@@ -80,3 +80,99 @@ export function calculateGovernanceMaturity(input: {
   const cadenceScore = Math.min(40, input.snapshotsLast90d * 5);
   return clamp(20 + playbookScore + cadenceScore - gapPenalty);
 }
+
+// ============================================================
+// Executive Consolidation extensions (additive, read-only)
+// ============================================================
+
+export interface ComplexityPressure {
+  area: string;
+  level: "low" | "medium" | "high";
+  detail: string;
+}
+
+export function detectExcessiveComplexity(input: {
+  dashboardCount: number;
+  routeCount: number;
+  kpiCount: number;
+}): ComplexityPressure[] {
+  const out: ComplexityPressure[] = [];
+  if (input.dashboardCount > 30)
+    out.push({ area: "dashboards", level: "high", detail: `${input.dashboardCount} dashboards` });
+  if (input.routeCount > 70)
+    out.push({ area: "routes", level: "high", detail: `${input.routeCount} routes` });
+  if (input.kpiCount > 250)
+    out.push({ area: "kpis", level: "medium", detail: `${input.kpiCount} KPIs in surface` });
+  return out;
+}
+
+export function calculateAdminCognitiveLoadScore(input: {
+  dashboardCount: number;
+  routeCount: number;
+  kpiCount: number;
+}): number {
+  return clamp(
+    input.dashboardCount * 1.2 +
+      input.routeCount * 0.6 +
+      input.kpiCount * 0.1,
+  );
+}
+
+export function calculateGovernancePressureScore(input: {
+  pressures: ComplexityPressure[];
+  maturity: number;
+}): number {
+  const severity = input.pressures.reduce(
+    (s, p) => s + (p.level === "high" ? 25 : p.level === "medium" ? 12 : 4),
+    0,
+  );
+  return clamp(severity + (100 - input.maturity) * 0.4);
+}
+
+export function calculateOperationalClarityScore(input: {
+  redundancyScore: number;
+  cognitiveLoad: number;
+  pressure: number;
+}): number {
+  return clamp(
+    100 - (input.redundancyScore * 0.3 + input.cognitiveLoad * 0.4 + input.pressure * 0.3),
+  );
+}
+
+export function detectAdminSprawl(routeCount: number, dashboardCount: number): string[] {
+  const out: string[] = [];
+  if (routeCount > 80) out.push("Excessive admin routes");
+  if (dashboardCount > 35) out.push("Dashboard inflation");
+  return out;
+}
+
+export function detectEntropyDrift(input: {
+  newDashboardsLast30d: number;
+  newRoutesLast30d: number;
+}): "low" | "medium" | "high" {
+  const delta = input.newDashboardsLast30d * 2 + input.newRoutesLast30d;
+  if (delta >= 15) return "high";
+  if (delta >= 6) return "medium";
+  return "low";
+}
+
+export function buildSimplificationRoadmap(input: {
+  mergeCandidates: number;
+  thinDashboards: number;
+  lowUsageDashboards: number;
+  inflatedKPIs: number;
+}): Array<{ step: number; action: string; impact: "low" | "medium" | "high" }> {
+  const steps: Array<{ step: number; action: string; impact: "low" | "medium" | "high" }> = [];
+  let i = 1;
+  if (input.mergeCandidates > 0)
+    steps.push({ step: i++, action: `Review ${input.mergeCandidates} merge candidates`, impact: "high" });
+  if (input.thinDashboards > 0)
+    steps.push({ step: i++, action: `Convert ${input.thinDashboards} thin dashboards into widgets`, impact: "medium" });
+  if (input.lowUsageDashboards > 0)
+    steps.push({ step: i++, action: `Move ${input.lowUsageDashboards} low-usage dashboards into Labs`, impact: "medium" });
+  if (input.inflatedKPIs > 0)
+    steps.push({ step: i++, action: `Split ${input.inflatedKPIs} KPI-inflated dashboards into tabs`, impact: "low" });
+  steps.push({ step: i++, action: "Validate executive navigation with operator", impact: "high" });
+  steps.push({ step: i++, action: "Document Labs/Advanced boundary", impact: "low" });
+  return steps;
+}
