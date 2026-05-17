@@ -38,6 +38,8 @@ import EditorialTemplatesPicker from '@/components/admin/EditorialTemplatesPicke
 import TaxonomySuggestionsHints from '@/components/admin/TaxonomySuggestionsHints';
 import { Link } from 'react-router-dom';
 import { FileText, ExternalLink } from 'lucide-react';
+import { useFormUsageTracking } from '@/hooks/useFormUsageTracking';
+import { trackAdminEvent } from '@/lib/adminUsage';
 
 const AdminProductForm = () => {
   const { id } = useParams();
