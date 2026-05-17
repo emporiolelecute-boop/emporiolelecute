@@ -165,7 +165,8 @@ export function useDbCategories() {
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .order('name');
+        .order('position', { ascending: true, nullsFirst: false })
+        .order('name', { ascending: true });
 
       if (error) throw error;
       return data as DbCategory[];
