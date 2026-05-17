@@ -6,16 +6,12 @@ import { LucideIcon } from "@/components/LucideIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-/**
- * Elegant, lively horizontal scroll of categories (Instagram-stories style).
- * - Native touch swipe on mobile (overflow-x with snap + momentum)
- * - Pointer drag-to-scroll on desktop (mouse / trackpad)
- * - Continuous "alive" micro-animations: floating, rotating gradient ring, glow pulse, shimmer
- * Data 100% managed via admin (categories table).
- */
+const SCROLL_KEY = "categoriesScroll:left";
+
 const CategoriesScroll = () => {
   const { data: categories, isLoading } = useDbCategories();
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<Array<HTMLAnchorElement | null>>([]);
 
   const visible = (categories ?? []).filter((c) => c.is_indexed !== false);
 
@@ -24,7 +20,6 @@ const CategoriesScroll = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Only enable drag for mouse / pen — let touch use native momentum scroll.
     if (e.pointerType === "touch") return;
     const el = scrollerRef.current;
     if (!el) return;
@@ -52,7 +47,6 @@ const CategoriesScroll = () => {
     }
   };
 
-  // Block click after a real drag (avoid accidental navigation)
   const onClickCapture = (e: React.MouseEvent) => {
     if (drag.current.moved > 6) {
       e.preventDefault();
@@ -61,28 +55,73 @@ const CategoriesScroll = () => {
     }
   };
 
-  // ---------- Arrow controls + scroll progress ----------
+  // ---------- Arrow controls, active index, scroll persistence ----------
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const lastActiveRef = useRef(0);
 
-  const updateEdges = useCallback(() => {
+  const updateState = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
     setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+
+    // Determine most-visible item (closest center to viewport center)
+    const center = el.scrollLeft + el.clientWidth / 2;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    itemsRef.current.forEach((node, i) => {
+      if (!node) return;
+      const c = node.offsetLeft + node.offsetWidth / 2;
+      const d = Math.abs(c - center);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    });
+    if (bestIdx !== lastActiveRef.current) {
+      // Haptic feedback on mobile when active card changes
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        try { navigator.vibrate?.(8); } catch { /* noop */ }
+      }
+      lastActiveRef.current = bestIdx;
+      setActiveIdx(bestIdx);
+    }
+
+    // Persist scroll position (session)
+    try {
+      sessionStorage.setItem(SCROLL_KEY, String(el.scrollLeft));
+    } catch { /* noop */ }
   }, []);
 
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    updateEdges();
-    el.addEventListener("scroll", updateEdges, { passive: true });
-    window.addEventListener("resize", updateEdges);
+    updateState();
+    el.addEventListener("scroll", updateState, { passive: true });
+    window.addEventListener("resize", updateState);
     return () => {
-      el.removeEventListener("scroll", updateEdges);
-      window.removeEventListener("resize", updateEdges);
+      el.removeEventListener("scroll", updateState);
+      window.removeEventListener("resize", updateState);
     };
-  }, [updateEdges, visible.length]);
+  }, [updateState, visible.length]);
+
+  // Restore scroll position after items render
+  useEffect(() => {
+    if (isLoading || visible.length === 0) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+    try {
+      const saved = sessionStorage.getItem(SCROLL_KEY);
+      if (saved) {
+        const n = parseInt(saved, 10);
+        if (!Number.isNaN(n)) {
+          el.scrollLeft = n;
+        }
+      }
+    } catch { /* noop */ }
+  }, [isLoading, visible.length]);
 
   const scrollBy = (dir: 1 | -1) => {
     const el = scrollerRef.current;
@@ -91,16 +130,14 @@ const CategoriesScroll = () => {
   };
 
   return (
-    <section className="py-12 bg-background" aria-label="Categorias">
+    <section className="py-6 md:py-12 bg-background" aria-label="Categorias">
       <div className="container mx-auto px-4">
         <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
 
         <div className="relative group">
-          {/* Edge fades */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-8 md:w-12 bg-gradient-to-r from-background to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 md:w-12 bg-gradient-to-l from-background to-transparent z-10" />
 
-          {/* Arrows (desktop) */}
           <button
             type="button"
             onClick={() => scrollBy(-1)}
@@ -138,7 +175,7 @@ const CategoriesScroll = () => {
             onPointerCancel={endDrag}
             onClickCapture={onClickCapture}
             className={cn(
-              "flex gap-5 md:gap-7 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2",
+              "flex gap-3 md:gap-7 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-3 md:pb-4 px-1 md:px-2",
               "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
               "[-webkit-overflow-scrolling:touch] [touch-action:pan-x] [overscroll-behavior-x:contain]",
               isDragging ? "cursor-grabbing select-none" : "md:cursor-grab"
@@ -147,91 +184,114 @@ const CategoriesScroll = () => {
             {isLoading
               ? Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="flex flex-col items-center gap-2 shrink-0 snap-start">
-                    <Skeleton className="w-24 h-24 md:w-32 md:h-32 rounded-full" />
-                    <Skeleton className="w-16 h-3" />
+                    <Skeleton className="w-16 h-16 md:w-32 md:h-32 rounded-full" />
+                    <Skeleton className="w-12 h-3" />
                   </div>
                 ))
-              : visible.map((category, i) => (
-                  <Link
-                    key={category.id}
-                    to={`/categoria/${category.slug}`}
-                    aria-label={category.name}
-                    draggable={false}
-                    className={cn(
-                      "group/item flex flex-col items-center gap-3 shrink-0 snap-start",
-                      "animate-fade-in"
-                    )}
-                    style={{ animationDelay: `${Math.min(i * 60, 480)}ms` }}
-                  >
-                    <div
-                      className="relative w-24 h-24 md:w-32 md:h-32 animate-bounce-soft"
-                      style={{ animationDelay: `${(i % 5) * 0.35}s`, animationDuration: `${3 + (i % 3) * 0.4}s` }}
+              : visible.map((category, i) => {
+                  const isActive = i === activeIdx;
+                  return (
+                    <Link
+                      key={category.id}
+                      ref={(el) => { itemsRef.current[i] = el; }}
+                      to={`/categoria/${category.slug}`}
+                      aria-label={category.name}
+                      aria-current={isActive ? "true" : undefined}
+                      draggable={false}
+                      className={cn(
+                        "group/item flex flex-col items-center gap-1.5 md:gap-3 shrink-0 snap-start",
+                        "animate-fade-in"
+                      )}
+                      style={{ animationDelay: `${Math.min(i * 60, 480)}ms` }}
                     >
-                      {/* Rotating conic gradient ring */}
                       <div
-                        className="absolute -inset-[2px] rounded-full opacity-80 group-hover/item:opacity-100 transition-opacity duration-500 animate-spin-slow"
-                        style={{
-                          background:
-                            "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary-light, var(--primary))), hsl(var(--primary)))",
-                          animationDuration: `${10 + (i % 4) * 2}s`,
-                        }}
-                        aria-hidden
-                      />
+                        className={cn(
+                          "relative w-16 h-16 md:w-32 md:h-32 transition-transform duration-500",
+                          "md:animate-pingpong",
+                          isActive && "scale-105 md:scale-110"
+                        )}
+                        style={{ animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }}
+                      >
+                        <div
+                          className={cn(
+                            "absolute -inset-[2px] rounded-full transition-opacity duration-500 animate-spin-slow",
+                            isActive ? "opacity-100" : "opacity-70 group-hover/item:opacity-100"
+                          )}
+                          style={{
+                            background:
+                              "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary-light, var(--primary))), hsl(var(--primary)))",
+                            animationDuration: `${10 + (i % 4) * 2}s`,
+                          }}
+                          aria-hidden
+                        />
 
-                      {/* Static gradient ring + inner content */}
-                      <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-primary via-primary-light to-accent p-[3px] transition-transform duration-500 group-hover/item:scale-105 group-hover/item:-rotate-3">
-                        <div className="w-full h-full rounded-full bg-background p-1">
-                          <div className="relative w-full h-full rounded-full overflow-hidden bg-muted">
-                            {category.image_url ? (
-                              <img
-                                src={category.image_url}
-                                alt={category.name}
-                                loading="lazy"
-                                decoding="async"
-                                draggable={false}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/20">
-                                <LucideIcon
-                                  name={category.icon}
-                                  className="w-10 h-10 text-primary transition-transform duration-500 group-hover/item:scale-110 group-hover/item:rotate-6"
+                        <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-primary via-primary-light to-accent p-[2px] md:p-[3px] transition-transform duration-500 group-hover/item:scale-105 group-hover/item:-rotate-3">
+                          <div className="w-full h-full rounded-full bg-background p-0.5 md:p-1">
+                            <div className="relative w-full h-full rounded-full overflow-hidden bg-muted">
+                              {category.image_url ? (
+                                <img
+                                  src={category.image_url}
+                                  alt={category.name}
+                                  loading="lazy"
+                                  decoding="async"
+                                  draggable={false}
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110"
                                 />
-                              </div>
-                            )}
-                            {/* Shimmer sweep on hover */}
-                            <div
-                              className="pointer-events-none absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500"
-                              style={{
-                                background:
-                                  "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
-                                backgroundSize: "200% 100%",
-                                animation: "shimmer 1.6s linear infinite",
-                              }}
-                              aria-hidden
-                            />
-                            {/* Soft darken on hover */}
-                            <div className="absolute inset-0 bg-foreground/0 group-hover/item:bg-foreground/10 transition-colors duration-300" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/20">
+                                  <LucideIcon
+                                    name={category.icon}
+                                    className="w-6 h-6 md:w-10 md:h-10 text-primary transition-transform duration-500 group-hover/item:scale-110 group-hover/item:rotate-6"
+                                  />
+                                </div>
+                              )}
+                              <div
+                                className="pointer-events-none absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500"
+                                style={{
+                                  background:
+                                    "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
+                                  backgroundSize: "200% 100%",
+                                  animation: "shimmer 1.6s linear infinite",
+                                }}
+                                aria-hidden
+                              />
+                              <div className="absolute inset-0 bg-foreground/0 group-hover/item:bg-foreground/10 transition-colors duration-300" />
+                            </div>
                           </div>
                         </div>
+
+                        {category.icon && category.image_url && (
+                          <div className="hidden md:flex absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-background shadow-medium items-center justify-center ring-2 ring-primary/20 transition-transform duration-300 group-hover/item:scale-110 group-hover/item:-rotate-12">
+                            <LucideIcon name={category.icon} className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
+
+                        <div
+                          className={cn(
+                            "absolute inset-0 rounded-full bg-primary/30 blur-2xl transition-opacity duration-500 -z-10 animate-pulse-slow",
+                            isActive ? "opacity-60" : "opacity-20 group-hover/item:opacity-70"
+                          )}
+                        />
                       </div>
 
-                      {/* Floating icon badge */}
-                      {category.icon && category.image_url && (
-                        <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-background shadow-medium flex items-center justify-center ring-2 ring-primary/20 transition-transform duration-300 group-hover/item:scale-110 group-hover/item:-rotate-12">
-                          <LucideIcon name={category.icon} className="w-4 h-4 text-primary" />
-                        </div>
-                      )}
-
-                      {/* Glow pulse */}
-                      <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl opacity-20 group-hover/item:opacity-70 transition-opacity duration-500 -z-10 animate-pulse-slow" />
-                    </div>
-
-                    <span className="text-xs md:text-sm font-medium text-foreground text-center max-w-[7rem] truncate transition-colors group-hover/item:text-primary">
-                      {category.name}
-                    </span>
-                  </Link>
-                ))}
+                      <span
+                        className={cn(
+                          "text-[10px] md:text-sm font-medium text-center max-w-[5rem] md:max-w-[7rem] truncate transition-colors",
+                          isActive ? "text-primary" : "text-foreground group-hover/item:text-primary"
+                        )}
+                      >
+                        {category.name}
+                      </span>
+                      <span
+                        className={cn(
+                          "block h-0.5 rounded-full bg-primary transition-all duration-300",
+                          isActive ? "w-6 opacity-100" : "w-0 opacity-0"
+                        )}
+                        aria-hidden
+                      />
+                    </Link>
+                  );
+                })}
           </div>
         </div>
       </div>

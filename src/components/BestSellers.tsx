@@ -8,7 +8,7 @@ import { ProductGridSkeleton } from "@/components/ProductSkeleton";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
 
-const STORAGE_KEY = "bestsellers:selection:v1";
+const STORAGE_KEY = "bestsellers:selection:v2";
 const TTL_MS = 1000 * 60 * 60 * 24; // 24h — same selection across reloads / sessions
 
 type Cached = { ids: string[]; ts: number };
@@ -47,7 +47,7 @@ const BestSellers = () => {
 
   const { products, totalActive } = useMemo(() => {
     const active = (dbProducts || []).filter(p => p.is_active);
-    const desiredMax = 8; // up to 2 rows of 4 on desktop, parity-aligned
+    const desiredMax = 16; // up to 4 rows of 4 on desktop, parity-aligned
     const targetCount = Math.min(
       active.length >= 4 ? Math.floor(active.length / 4) * 4 : active.length,
       desiredMax

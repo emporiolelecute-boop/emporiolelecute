@@ -127,6 +127,12 @@ export default {
           "0%, 100%": { transform: "translateY(0) scale(1)" },
           "50%": { transform: "translateY(-4px) scale(1.02)" },
         },
+        "pingpong": {
+          "0%, 100%": { transform: "translateX(0) translateY(0)" },
+          "25%": { transform: "translateX(4px) translateY(-3px)" },
+          "50%": { transform: "translateX(0) translateY(-5px)" },
+          "75%": { transform: "translateX(-4px) translateY(-3px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -140,6 +146,7 @@ export default {
         "spin-slow": "spin-slow 8s linear infinite",
         shimmer: "shimmer 2.5s linear infinite",
         "bounce-soft": "bounce-soft 2.8s ease-in-out infinite",
+        "pingpong": "pingpong 7s ease-in-out infinite",
       },
     },
   },
