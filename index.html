@@ -20,7 +20,9 @@
     />
     <meta name="author" content="Empório LeleCute" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://emporiolelecute.com.br/" />
+    <!-- canonical é injetado por DynamicSEO/react-helmet em cada rota.
+         Não duplicar aqui — <link> não deduplica por rel, causaria dois canonicals na mesma página. -->
+
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
