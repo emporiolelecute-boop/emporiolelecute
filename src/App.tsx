@@ -13,6 +13,7 @@ import { PageSkeleton, AdminSkeleton } from "./components/ui/skeleton-loading";
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
 const Produtos = lazy(() => import("./pages/Produtos"));
+const Buscar = lazy(() => import("./pages/Buscar"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
 const Carrinho = lazy(() => import("./pages/Carrinho"));
 const Envio = lazy(() => import("./pages/Envio"));
@@ -218,6 +219,11 @@ const App = () => {
                 <Route path="/produtos" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <Produtos />
+                  </Suspense>
+                } />
+                <Route path="/buscar" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Buscar />
                   </Suspense>
                 } />
                 <Route path="/produtos/:slug" element={
