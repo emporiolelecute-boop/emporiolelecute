@@ -266,6 +266,27 @@ export interface TelemetrySnapshot {
   civilization_integrity_score: number;
   legacy_erosion_risk_score: number;
   civilization_decay_score: number;
+  // Fase 15 — Kernel & Observability
+  kernel_coherence_score: number;
+  metric_redundancy_score: number;
+  engine_overlap_score: number;
+  explainability_score: number;
+  observability_score: number;
+  telemetry_quality_score: number;
+  diagnostic_consistency_score: number;
+  kernel_systemic_noise_score: number;
+  operator_load_score: number;
+  maintainability_score: number;
+  tracing_coverage_score: number;
+  lineage_integrity_score: number;
+  confidence_integrity_score: number;
+  normalization_health_score: number;
+  orchestration_stability_score: number;
+  architectural_entropy_score: number;
+  operational_compression_score: number;
+  metric_inflation_score: number;
+  opacity_risk_score: number;
+  telemetry_corruption_score: number;
 }
 
 export interface AutonomyTelemetryInput {
