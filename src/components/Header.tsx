@@ -194,6 +194,7 @@ const Header = () => {
 
           <div className="lg:hidden flex items-center gap-1">
             <button
+              data-mobile-search-toggle
               className="p-2 text-foreground hover:text-primary transition-colors"
               onClick={() => {
                 setIsMobileSearchOpen((v) => !v);
