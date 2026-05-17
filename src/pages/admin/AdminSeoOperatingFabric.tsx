@@ -149,7 +149,7 @@ export default function AdminSeoOperatingFabric() {
         sustainability_projection: FABRIC_INPUTS.sustainability,
         continuity_projection: FABRIC_INPUTS.continuity,
         collapse_probability: FABRIC_INPUTS.collapseProbability,
-        executive_summary: executive as unknown as Record<string, unknown>,
+        executive_summary: JSON.parse(JSON.stringify(executive)),
         strengths: fabric.bottleneckChains.length === 0 ? ["Sem gargalos detectados"] : [],
         blockers: fabric.weaknesses,
         recommendations: [
