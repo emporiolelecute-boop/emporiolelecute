@@ -94,7 +94,6 @@ const AdminLayout = () => {
   const location = useLocation();
   const { user, isAdmin, loading, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navRef = useState<HTMLElement | null>(null);
   const [advanced, setAdvanced] = useState<boolean>(() => {
     try { return localStorage.getItem('admin_advanced_mode') === '1'; } catch { return false; }
   });
