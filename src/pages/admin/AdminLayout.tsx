@@ -47,7 +47,8 @@ import {
   Infinity as InfinityIcon,
   Hexagon,
   Layers3,
-  ShieldAlert
+  ShieldAlert,
+  Boxes
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
