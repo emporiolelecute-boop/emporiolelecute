@@ -106,6 +106,7 @@ const menuItems = [
   { icon: Boxes, label: 'Consolidation', path: '/admin/seo-consolidation' },
   { icon: Rocket, label: 'Execution Orchestrator', path: '/admin/seo-execution-orchestrator' },
   { icon: Crown, label: 'SEO Executive Home', path: '/admin/seo-executive-home' },
+  { icon: Activity, label: 'Operational Reality', path: '/admin/seo-operational-reality' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
