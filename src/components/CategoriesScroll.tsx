@@ -3,32 +3,33 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbCategories } from "@/hooks/useProducts";
 import { LucideIcon } from "@/components/LucideIcon";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const SCROLL_KEY = "categoriesScroll:left";
 // Threshold (px) for the most-visible card to change before we update
-// activeIdx. Avoids flicker on tiny scroll deltas.
-const ACTIVE_SWITCH_THRESHOLD = 24;
+// activeIdx. Avoids flicker on tiny scroll deltas, but stays responsive.
+const ACTIVE_SWITCH_THRESHOLD = 18;
 
-const usePrefersReducedMotion = () => {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(mq.matches);
-    update();
-    mq.addEventListener?.("change", update);
-    return () => mq.removeEventListener?.("change", update);
-  }, []);
-  return reduced;
-};
+/** Shimmer skeleton block used while categories load. */
+const ShimmerBlock = ({ className }: { className?: string }) => (
+  <div className={cn("relative overflow-hidden bg-muted/70", className)}>
+    <div
+      className="absolute inset-0"
+      style={{
+        background:
+          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.75) 50%, transparent 70%)",
+        backgroundSize: "200% 100%",
+        animation: "shimmer 1.4s linear infinite",
+      }}
+      aria-hidden
+    />
+  </div>
+);
 
 const CategoriesScroll = () => {
   const { data: categories, isLoading } = useDbCategories();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<Array<HTMLAnchorElement | null>>([]);
-  const reducedMotion = usePrefersReducedMotion();
 
   const visible = (categories ?? []).filter((c) => c.is_indexed !== false);
 
@@ -86,7 +87,6 @@ const CategoriesScroll = () => {
     setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
 
-    // Determine most-visible item (closest center to viewport center)
     const center = el.scrollLeft + el.clientWidth / 2;
     let bestIdx = lastActiveRef.current;
     let bestDist = Infinity;
@@ -100,8 +100,6 @@ const CategoriesScroll = () => {
       }
     });
 
-    // Debounce: only switch active when the new candidate is meaningfully
-    // closer than the current one (avoids flicker on tiny scroll deltas).
     if (
       bestIdx !== lastActiveRef.current &&
       Math.abs(bestDist - lastBestDistRef.current) > ACTIVE_SWITCH_THRESHOLD
@@ -116,7 +114,6 @@ const CategoriesScroll = () => {
       lastBestDistRef.current = bestDist;
     }
 
-    // Persist scroll position (session + local), throttled via rAF.
     if (persistRaf.current == null) {
       persistRaf.current = requestAnimationFrame(() => {
         persistRaf.current = null;
@@ -139,7 +136,6 @@ const CategoriesScroll = () => {
     };
   }, [updateState, visible.length]);
 
-  // Restore scroll position after items render (session wins; falls back to local).
   useEffect(() => {
     if (isLoading || visible.length === 0) return;
     const el = scrollerRef.current;
@@ -154,10 +150,38 @@ const CategoriesScroll = () => {
     } catch { /* noop */ }
   }, [isLoading, visible.length]);
 
+  const scrollToIndex = (i: number, focus = false) => {
+    const node = itemsRef.current[i];
+    const el = scrollerRef.current;
+    if (!node || !el) return;
+    const target = node.offsetLeft - el.clientWidth / 2 + node.offsetWidth / 2;
+    el.scrollTo({ left: target, behavior: "smooth" });
+    if (focus) {
+      requestAnimationFrame(() => node.focus({ preventScroll: true }));
+    }
+  };
+
   const scrollBy = (dir: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
     el.scrollBy({ left: dir * Math.min(el.clientWidth * 0.8, 600), behavior: "smooth" });
+  };
+
+  // ---------- Keyboard navigation ----------
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!visible.length) return;
+    let next = activeIdx;
+    switch (e.key) {
+      case "ArrowRight": next = Math.min(activeIdx + 1, visible.length - 1); break;
+      case "ArrowLeft":  next = Math.max(activeIdx - 1, 0); break;
+      case "Home":       next = 0; break;
+      case "End":        next = visible.length - 1; break;
+      default: return;
+    }
+    e.preventDefault();
+    setActiveIdx(next);
+    lastActiveRef.current = next;
+    scrollToIndex(next, true);
   };
 
   const activeName = visible[activeIdx]?.name ?? "";
@@ -168,7 +192,6 @@ const CategoriesScroll = () => {
       <div className="container mx-auto px-4">
         <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
 
-        {/* Live region — announces active category to screen readers */}
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {activeName
             ? `Categoria em foco: ${activeName}. Item ${activeIdx + 1} de ${total}.`
@@ -187,7 +210,7 @@ const CategoriesScroll = () => {
             className={cn(
               "hidden md:flex absolute -left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
               "hover:bg-primary hover:text-primary-foreground hover:scale-110",
-              "opacity-0 group-hover:opacity-100",
+              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
               !canLeft && "!opacity-0 pointer-events-none"
             )}
           >
@@ -201,7 +224,7 @@ const CategoriesScroll = () => {
             className={cn(
               "hidden md:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
               "hover:bg-primary hover:text-primary-foreground hover:scale-110",
-              "opacity-0 group-hover:opacity-100",
+              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
               !canRight && "!opacity-0 pointer-events-none"
             )}
           >
@@ -215,23 +238,25 @@ const CategoriesScroll = () => {
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
             onClickCapture={onClickCapture}
+            onKeyDown={onKeyDown}
             role="listbox"
-            aria-label="Lista de categorias"
+            tabIndex={0}
+            aria-label="Lista de categorias — use as setas do teclado para navegar"
             aria-activedescendant={visible[activeIdx]?.id ? `cat-item-${visible[activeIdx].id}` : undefined}
             className={cn(
               "flex gap-3 md:gap-7 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-3 md:pb-4 px-1 md:px-2",
-              // Center the items horizontally when there are few; still scrolls when overflowing.
               "justify-start md:justify-center",
               "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
               "[-webkit-overflow-scrolling:touch] [touch-action:pan-x] [overscroll-behavior-x:contain]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-xl",
               isDragging ? "cursor-grabbing select-none" : "md:cursor-grab"
             )}
           >
             {isLoading
               ? Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="flex flex-col items-center gap-2 shrink-0 snap-start">
-                    <Skeleton className="w-16 h-16 md:w-32 md:h-32 rounded-full" />
-                    <Skeleton className="w-12 h-3" />
+                    <ShimmerBlock className="w-16 h-16 md:w-32 md:h-32 rounded-full" />
+                    <ShimmerBlock className="w-12 h-3 rounded-full" />
                   </div>
                 ))
               : visible.map((category, i) => {
@@ -248,29 +273,25 @@ const CategoriesScroll = () => {
                       aria-current={isActive ? "true" : undefined}
                       aria-setsize={total}
                       aria-posinset={i + 1}
+                      tabIndex={isActive ? 0 : -1}
                       draggable={false}
                       className={cn(
-                        "group/item flex flex-col items-center gap-1.5 md:gap-3 shrink-0 snap-start",
+                        "group/item flex flex-col items-center gap-1.5 md:gap-3 shrink-0 snap-start outline-none",
+                        "focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:rounded-2xl",
                         "animate-fade-in"
                       )}
                       style={{ animationDelay: `${Math.min(i * 60, 480)}ms` }}
                     >
                       <div
                         className={cn(
-                          "relative w-16 h-16 md:w-32 md:h-32 transition-transform duration-500",
-                          !reducedMotion && "md:animate-pingpong",
+                          "relative w-16 h-16 md:w-32 md:h-32 transition-transform duration-500 md:animate-pingpong",
                           isActive && "scale-105 md:scale-110"
                         )}
-                        style={
-                          reducedMotion
-                            ? undefined
-                            : { animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }
-                        }
+                        style={{ animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }}
                       >
                         <div
                           className={cn(
-                            "absolute -inset-[2px] rounded-full transition-opacity duration-500",
-                            !reducedMotion && "animate-spin-slow",
+                            "absolute -inset-[2px] rounded-full transition-opacity duration-500 animate-spin-slow",
                             isActive ? "opacity-100" : "opacity-70 group-hover/item:opacity-100"
                           )}
                           style={{
@@ -307,7 +328,7 @@ const CategoriesScroll = () => {
                                   background:
                                     "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
                                   backgroundSize: "200% 100%",
-                                  animation: reducedMotion ? undefined : "shimmer 1.6s linear infinite",
+                                  animation: "shimmer 1.6s linear infinite",
                                 }}
                                 aria-hidden
                               />
@@ -324,8 +345,7 @@ const CategoriesScroll = () => {
 
                         <div
                           className={cn(
-                            "absolute inset-0 rounded-full bg-primary/30 blur-2xl transition-opacity duration-500 -z-10",
-                            !reducedMotion && "animate-pulse-slow",
+                            "absolute inset-0 rounded-full bg-primary/30 blur-2xl transition-opacity duration-500 -z-10 animate-pulse-slow",
                             isActive ? "opacity-60" : "opacity-20 group-hover/item:opacity-70"
                           )}
                         />
