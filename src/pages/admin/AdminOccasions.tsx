@@ -433,6 +433,73 @@ const AdminOccasions = () => {
         </CardContent>
       </Card>
 
+      {/* Editor avançado de conteúdo: imagem + descrição + meta SEO */}
+      <Dialog open={!!contentEditId} onOpenChange={(o) => !o && setContentEditId(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Imagem & SEO da ocasião</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            <div className="space-y-2">
+              <Label>Imagem da ocasião</Label>
+              <p className="text-xs text-muted-foreground">
+                Aparece no carrossel da home e na vitrine. Recomendado: quadrada, 600×600px.
+              </p>
+              <ImagePickerWithLibrary
+                value={contentForm.image_url}
+                onChange={(url) => setContentForm((f) => ({ ...f, image_url: url }))}
+                folder="occasions"
+                hint="600x600 recomendado"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="occ-desc">Descrição</Label>
+              <Textarea
+                id="occ-desc"
+                rows={5}
+                value={contentForm.description}
+                onChange={(e) => setContentForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Texto institucional exibido nas páginas da ocasião."
+              />
+              <p className="text-xs text-muted-foreground">{contentForm.description.length} caracteres</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="occ-mt">Meta title (SEO)</Label>
+              <Input
+                id="occ-mt"
+                maxLength={70}
+                value={contentForm.meta_title}
+                onChange={(e) => setContentForm((f) => ({ ...f, meta_title: e.target.value }))}
+                placeholder="Ex.: Lembrancinhas para Casamento Artesanais | Empório Lelê"
+              />
+              <p className="text-xs text-muted-foreground">{contentForm.meta_title.length}/60 ideal</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="occ-md">Meta description (SEO)</Label>
+              <Textarea
+                id="occ-md"
+                rows={3}
+                maxLength={200}
+                value={contentForm.meta_description}
+                onChange={(e) => setContentForm((f) => ({ ...f, meta_description: e.target.value }))}
+                placeholder="Resumo de até 155 caracteres para resultados do Google."
+              />
+              <p className="text-xs text-muted-foreground">{contentForm.meta_description.length}/155 ideal</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setContentEditId(null)} disabled={savingContent}>Cancelar</Button>
+            <Button onClick={saveContent} disabled={savingContent}>
+              {savingContent ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
