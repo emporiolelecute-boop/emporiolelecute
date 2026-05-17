@@ -2,20 +2,21 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbCategories } from "@/hooks/useProducts";
 import { useAccessibleCarousel } from "@/hooks/useAccessibleCarousel";
+import { usePauseAnimationsOffscreen } from "@/hooks/usePauseAnimationsOffscreen";
 import { LucideIcon } from "@/components/LucideIcon";
 import { LazyImage } from "@/components/LazyImage";
 import { cn } from "@/lib/utils";
 
-/** Shimmer skeleton block used while categories load. */
+/** Lightweight static skeleton — shimmer is disabled on mobile via CSS. */
 const ShimmerBlock = ({ className }: { className?: string }) => (
-  <div className={cn("relative overflow-hidden bg-muted/70", className)}>
+  <div className={cn("relative overflow-hidden bg-muted/70 skeleton-light", className)}>
     <div
-      className="absolute inset-0"
+      className="absolute inset-0 shimmer"
       style={{
         background:
-          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.85) 50%, transparent 70%)",
+          "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.7) 50%, transparent 70%)",
         backgroundSize: "200% 100%",
-        animation: "shimmer 1.4s linear infinite",
+        animation: "shimmer 1.6s linear infinite",
       }}
       aria-hidden
     />
@@ -36,11 +37,14 @@ const CategoriesScroll = () => {
     haptic: true,
   });
 
+  // Pause continuous animations when the carousel leaves the viewport.
+  const sectionRef = usePauseAnimationsOffscreen<HTMLElement>();
+
   const activeName = visible[activeIdx]?.name ?? "";
   const total = visible.length;
 
   return (
-    <section className="py-8 md:py-14 bg-background" aria-label="Categorias">
+    <section ref={sectionRef} className="py-8 md:py-14 bg-background" aria-label="Categorias">
       <div className="container mx-auto px-4">
         <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
 
