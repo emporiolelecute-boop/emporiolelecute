@@ -92,14 +92,24 @@ const SearchBar = ({
         navigate(`/produtos/${suggestions[selectedIndex].slug}`);
         setQuery("");
         setIsOpen(false);
+        onResultSelect?.();
       } else if (query.length >= 2) {
-        navigate(`/produtos?busca=${encodeURIComponent(query)}`);
+        navigate(`${searchPath}?${paramKey}=${encodeURIComponent(query)}`);
         setIsOpen(false);
+        onResultSelect?.();
       }
     } else if (e.key === "Escape") {
       setIsOpen(false);
     }
   };
+
+  // Autofocus (mobile open)
+  useEffect(() => {
+    if (autoFocus) {
+      const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 60);
+      return () => clearTimeout(t);
+    }
+  }, [autoFocus]);
 
   const clearSearch = () => {
     setQuery("");
