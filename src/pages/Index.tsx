@@ -27,9 +27,10 @@ const Index = () => {
       <main>
         <HeroSlider />
         <CategoriesScroll />
-        
+        <OccasionsThumbs />
+
         <BestSellers />
-        <OccasionsSection />
+
         <QuoteCTABanner />
         <Testimonials />
         <FAQSection />
