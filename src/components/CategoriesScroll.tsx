@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbCategories } from "@/hooks/useProducts";
 import { useAccessibleCarousel } from "@/hooks/useAccessibleCarousel";
 import { LucideIcon } from "@/components/LucideIcon";
+import { LazyImage } from "@/components/LazyImage";
 import { cn } from "@/lib/utils";
 
 /** Shimmer skeleton block used while categories load. */
@@ -151,13 +152,10 @@ const CategoriesScroll = () => {
                           <div className="w-full h-full rounded-full bg-background p-0.5 md:p-1">
                             <div className="relative w-full h-full rounded-full overflow-hidden bg-muted">
                               {category.image_url ? (
-                                <img
+                                <LazyImage
                                   src={category.image_url}
                                   alt={category.name}
-                                  loading="lazy"
-                                  decoding="async"
-                                  draggable={false}
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110"
+                                  className="transition-transform duration-700 group-hover/item:scale-110"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/20">

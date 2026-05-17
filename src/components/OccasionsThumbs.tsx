@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbOccasions } from "@/hooks/useProducts";
 import { useAccessibleCarousel } from "@/hooks/useAccessibleCarousel";
 import { LucideIcon } from "@/components/LucideIcon";
+import { LazyImage } from "@/components/LazyImage";
 import { cn } from "@/lib/utils";
 
 // Pool of fallback Lucide icons assigned by index when an occasion has
@@ -151,13 +152,10 @@ const OccasionsThumbs = () => {
                     style={{ animationDelay: `${(i % 5) * 0.5}s`, animationDuration: `${6 + (i % 4) * 1.5}s` }}
                   >
                     {o.image_url ? (
-                      <img
+                      <LazyImage
                         src={o.image_url}
                         alt={o.name}
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
