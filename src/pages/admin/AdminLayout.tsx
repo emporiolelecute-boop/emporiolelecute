@@ -96,6 +96,7 @@ const menuItems = [
   { icon: Compass, label: 'Strategic Reality', path: '/admin/seo-strategic-reality' },
   { icon: InfinityIcon, label: 'Strategic Continuum', path: '/admin/seo-strategic-continuum' },
   { icon: Hexagon, label: 'Unified Nexus', path: '/admin/seo-unified-nexus' },
+  { icon: Orbit, label: 'Strategic Nexus', path: '/admin/seo-nexus-convergence' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

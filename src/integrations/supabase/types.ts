@@ -3228,6 +3228,87 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_nexus_convergence_snapshots: {
+        Row: {
+          causal_alignment_score: number | null
+          causal_graph: Json | null
+          continuity_projection: Json | null
+          convergence_map: Json | null
+          convergence_score: number | null
+          created_at: string
+          dominant_cluster: string | null
+          entropy_resistance_score: number | null
+          executive_clarity_score: number | null
+          governance_confidence_score: number | null
+          highest_risk_domain: string | null
+          id: string
+          notes: string | null
+          operational_stability_score: number | null
+          resilience_projection: Json | null
+          semantic_trust_score: number | null
+          signal_integrity_score: number | null
+          snapshot_type: string
+          strategic_conflicts: Json | null
+          strategic_consistency_score: number | null
+          strongest_domain: string | null
+          temporal_coherence_score: number | null
+          trust_matrix: Json | null
+          weakest_cluster: string | null
+        }
+        Insert: {
+          causal_alignment_score?: number | null
+          causal_graph?: Json | null
+          continuity_projection?: Json | null
+          convergence_map?: Json | null
+          convergence_score?: number | null
+          created_at?: string
+          dominant_cluster?: string | null
+          entropy_resistance_score?: number | null
+          executive_clarity_score?: number | null
+          governance_confidence_score?: number | null
+          highest_risk_domain?: string | null
+          id?: string
+          notes?: string | null
+          operational_stability_score?: number | null
+          resilience_projection?: Json | null
+          semantic_trust_score?: number | null
+          signal_integrity_score?: number | null
+          snapshot_type?: string
+          strategic_conflicts?: Json | null
+          strategic_consistency_score?: number | null
+          strongest_domain?: string | null
+          temporal_coherence_score?: number | null
+          trust_matrix?: Json | null
+          weakest_cluster?: string | null
+        }
+        Update: {
+          causal_alignment_score?: number | null
+          causal_graph?: Json | null
+          continuity_projection?: Json | null
+          convergence_map?: Json | null
+          convergence_score?: number | null
+          created_at?: string
+          dominant_cluster?: string | null
+          entropy_resistance_score?: number | null
+          executive_clarity_score?: number | null
+          governance_confidence_score?: number | null
+          highest_risk_domain?: string | null
+          id?: string
+          notes?: string | null
+          operational_stability_score?: number | null
+          resilience_projection?: Json | null
+          semantic_trust_score?: number | null
+          signal_integrity_score?: number | null
+          snapshot_type?: string
+          strategic_conflicts?: Json | null
+          strategic_consistency_score?: number | null
+          strongest_domain?: string | null
+          temporal_coherence_score?: number | null
+          trust_matrix?: Json | null
+          weakest_cluster?: string | null
+        }
+        Relationships: []
+      }
       seo_operating_fabric_snapshots: {
         Row: {
           anomaly_pressure: number | null

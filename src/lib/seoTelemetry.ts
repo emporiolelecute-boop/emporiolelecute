@@ -481,6 +481,19 @@ export interface TelemetrySnapshot {
   narrative_integrity_score?: number;
   recovery_unification_score?: number;
   continuity_resilience_score?: number;
+  // Phase 16.1 — Nexus Convergence (only fields not previously declared)
+  nexus_convergence_score?: number;
+  temporal_coherence_score?: number;
+  signal_integrity_score?: number;
+  semantic_trust_score?: number;
+  governance_confidence_score?: number;
+  operational_stability_score?: number;
+  causal_alignment_score?: number;
+  signal_noise_score?: number;
+  dependency_integrity_score?: number;
+  trust_leak_score?: number;
+  convergence_velocity_score?: number;
+  circular_reasoning_risk?: number;
 }
 
 export interface AutonomyTelemetryInput {
