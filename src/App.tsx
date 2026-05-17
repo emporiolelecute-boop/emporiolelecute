@@ -671,6 +671,11 @@ const App = () => {
                       <AdminSeoCivilization />
                     </Suspense>
                   } />
+                  <Route path="seo-kernel" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoKernel />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
