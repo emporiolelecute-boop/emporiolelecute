@@ -115,6 +115,18 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.7" },
         },
+        "spin-slow": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "bounce-soft": {
+          "0%, 100%": { transform: "translateY(0) scale(1)" },
+          "50%": { transform: "translateY(-4px) scale(1.02)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -125,6 +137,9 @@ export default {
         "slide-in-right": "slide-in-right 0.5s ease-out forwards",
         float: "float 3s ease-in-out infinite",
         "pulse-slow": "pulse 3s ease-in-out infinite",
+        "spin-slow": "spin-slow 8s linear infinite",
+        shimmer: "shimmer 2.5s linear infinite",
+        "bounce-soft": "bounce-soft 2.8s ease-in-out infinite",
       },
     },
   },
