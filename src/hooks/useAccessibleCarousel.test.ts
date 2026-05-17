@@ -30,9 +30,8 @@ function setupDom(total: number, itemW = 100, viewport = 300) {
 }
 
 function attach(result: ReturnType<typeof renderHook<ReturnType<typeof useAccessibleCarousel>, unknown>>["result"], scroller: HTMLDivElement, items: HTMLElement[]) {
-  // @ts-expect-error refs are mutable
-  result.current.scrollerRef.current = scroller;
-  result.current.itemsRef.current = items;
+  (result.current.scrollerRef as React.MutableRefObject<HTMLDivElement | null>).current = scroller;
+  (result.current.itemsRef as React.MutableRefObject<Array<HTMLElement | null>>).current = items;
 }
 
 function fireScroll(scroller: HTMLDivElement, left: number) {
