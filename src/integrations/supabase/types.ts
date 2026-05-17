@@ -3699,6 +3699,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_stability_fabric_snapshots: {
+        Row: {
+          consensus_fragmentation_risk: number | null
+          consensus_integrity_score: number | null
+          created_at: string
+          degradation_map: Json | null
+          degradation_resistance_score: number | null
+          equilibrium_matrix: Json | null
+          executive_instability_risk: number | null
+          executive_stability_score: number | null
+          fragmentation_zones: Json | null
+          id: string
+          notes: string | null
+          operational_resilience_score: number | null
+          recovery_cohesion_score: number | null
+          recovery_paths: Json | null
+          resilience_projection: Json | null
+          semantic_erosion_risk: number | null
+          semantic_resilience_score: number | null
+          signal_stability_score: number | null
+          silent_degradation_risk: number | null
+          snapshot_type: string
+          stability_clusters: Json | null
+          stability_fabric_score: number | null
+          strategic_equilibrium_score: number | null
+          systemic_dispersion_risk: number | null
+          systemic_integrity_score: number | null
+        }
+        Insert: {
+          consensus_fragmentation_risk?: number | null
+          consensus_integrity_score?: number | null
+          created_at?: string
+          degradation_map?: Json | null
+          degradation_resistance_score?: number | null
+          equilibrium_matrix?: Json | null
+          executive_instability_risk?: number | null
+          executive_stability_score?: number | null
+          fragmentation_zones?: Json | null
+          id?: string
+          notes?: string | null
+          operational_resilience_score?: number | null
+          recovery_cohesion_score?: number | null
+          recovery_paths?: Json | null
+          resilience_projection?: Json | null
+          semantic_erosion_risk?: number | null
+          semantic_resilience_score?: number | null
+          signal_stability_score?: number | null
+          silent_degradation_risk?: number | null
+          snapshot_type?: string
+          stability_clusters?: Json | null
+          stability_fabric_score?: number | null
+          strategic_equilibrium_score?: number | null
+          systemic_dispersion_risk?: number | null
+          systemic_integrity_score?: number | null
+        }
+        Update: {
+          consensus_fragmentation_risk?: number | null
+          consensus_integrity_score?: number | null
+          created_at?: string
+          degradation_map?: Json | null
+          degradation_resistance_score?: number | null
+          equilibrium_matrix?: Json | null
+          executive_instability_risk?: number | null
+          executive_stability_score?: number | null
+          fragmentation_zones?: Json | null
+          id?: string
+          notes?: string | null
+          operational_resilience_score?: number | null
+          recovery_cohesion_score?: number | null
+          recovery_paths?: Json | null
+          resilience_projection?: Json | null
+          semantic_erosion_risk?: number | null
+          semantic_resilience_score?: number | null
+          signal_stability_score?: number | null
+          silent_degradation_risk?: number | null
+          snapshot_type?: string
+          stability_clusters?: Json | null
+          stability_fabric_score?: number | null
+          strategic_equilibrium_score?: number | null
+          systemic_dispersion_risk?: number | null
+          systemic_integrity_score?: number | null
+        }
+        Relationships: []
+      }
       seo_strategic_reality_snapshots: {
         Row: {
           created_at: string
