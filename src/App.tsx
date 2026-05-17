@@ -126,6 +126,8 @@ const AdminSeoExecutiveHome = lazyWithRetry(() => import("./pages/admin/AdminSeo
 const AdminSeoOperationalReality = lazyWithRetry(() => import("./pages/admin/AdminSeoOperationalReality"), "AdminSeoOperationalReality");
 const AdminSeoFinalGovernance = lazyWithRetry(() => import("./pages/admin/AdminSeoFinalGovernance"), "AdminSeoFinalGovernance");
 const AdminSeoSystemAudit = lazyWithRetry(() => import("./pages/admin/AdminSeoSystemAudit"), "AdminSeoSystemAudit");
+const AdminExecutiveMode = lazyWithRetry(() => import("./pages/admin/AdminExecutiveMode"), "AdminExecutiveMode");
+const AdminSeoOperationalConsolidation = lazyWithRetry(() => import("./pages/admin/AdminSeoOperationalConsolidation"), "AdminSeoOperationalConsolidation");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
