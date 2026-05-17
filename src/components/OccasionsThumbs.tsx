@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDbOccasions } from "@/hooks/useProducts";
 import { useAccessibleCarousel } from "@/hooks/useAccessibleCarousel";
 import { LucideIcon } from "@/components/LucideIcon";
+import { LazyImage } from "@/components/LazyImage";
 import { cn } from "@/lib/utils";
 
 // Pool of fallback Lucide icons assigned by index when an occasion has
