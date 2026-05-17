@@ -195,6 +195,28 @@ export interface TelemetrySnapshot {
   authority_persistence_score: number;
   ecosystem_integrity_score: number;
   systemic_noise_score: number;
+  // Fase 14.5 — strategic nervous system
+  nervous_system_score: number;
+  systemic_synchronization_score: number;
+  operational_pulse_score: number;
+  strategic_pulse_score: number;
+  semantic_pulse_score: number;
+  recovery_intelligence_score: number;
+  structural_integrity_score: number;
+  long_term_viability_score: number;
+  authority_dependence_score: number;
+  cluster_fragility_score: number;
+  single_point_failure_score: number;
+  cascade_impact_score: number;
+  recovery_complexity_score: number;
+  execution_fatigue_score: number;
+  semantic_pressure_score: number;
+  burnout_risk_score: number;
+  maintenance_stress_score: number;
+  survival_confidence_score: number;
+  strategic_longevity_score: number;
+  entropy_resistance_score: number;
+  existential_exposure_score: number;
 }
 
 export interface AutonomyTelemetryInput {
