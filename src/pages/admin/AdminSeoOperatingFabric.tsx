@@ -158,7 +158,7 @@ export default function AdminSeoOperatingFabric() {
           ...bottlenecks,
         ],
         notes: `verdict=${fabric.verdict}`,
-      });
+      }]);
       if (error) throw error;
       toast.success("Snapshot do Operating Fabric capturado.");
     } catch (e) {
