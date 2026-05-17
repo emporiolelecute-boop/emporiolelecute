@@ -107,6 +107,7 @@ const AdminSeoMetaGovernance = lazyWithRetry(() => import("./pages/admin/AdminSe
 const AdminSeoCivilization = lazyWithRetry(() => import("./pages/admin/AdminSeoCivilization"), "AdminSeoCivilization");
 const AdminSeoKernel = lazyWithRetry(() => import("./pages/admin/AdminSeoKernel"), "AdminSeoKernel");
 const AdminSeoUnifiedIntelligence = lazyWithRetry(() => import("./pages/admin/AdminSeoUnifiedIntelligence"), "AdminSeoUnifiedIntelligence");
+const AdminSeoOperatingFabric = lazyWithRetry(() => import("./pages/admin/AdminSeoOperatingFabric"), "AdminSeoOperatingFabric");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
