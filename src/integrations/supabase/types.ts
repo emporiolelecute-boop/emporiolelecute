@@ -2328,6 +2328,120 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_executive_core_snapshots: {
+        Row: {
+          authority_integrity_score: number | null
+          coherence_depth_score: number | null
+          collapse_exposure_score: number | null
+          created_at: string
+          decision_reliability_score: number | null
+          execution_alignment_score: number | null
+          execution_fragility_score: number | null
+          executive_core_score: number | null
+          executive_priorities: Json | null
+          executive_recommendations: Json | null
+          executive_risks: Json | null
+          executive_summary: Json | null
+          explainability_depth_score: number | null
+          future_collapse_probability: number | null
+          governance_fragility_score: number | null
+          governance_integrity_score: number | null
+          hidden_risk_score: number | null
+          id: string
+          intelligence_integrity_score: number | null
+          long_term_viability_score: number | null
+          notes: string | null
+          operational_sustainability_score: number | null
+          orchestration_integrity_score: number | null
+          scalability_viability_score: number | null
+          semantic_fragility_score: number | null
+          semantic_integrity_score: number | null
+          strategic_alignment_score: number | null
+          strategic_continuity_score: number | null
+          strategic_fragility_score: number | null
+          strategic_resilience_score: number | null
+          strategic_signal_quality: number | null
+          sustainability_projection_score: number | null
+          systemic_confidence_score: number | null
+          systemic_stability_score: number | null
+          systemic_strategy_score: number | null
+        }
+        Insert: {
+          authority_integrity_score?: number | null
+          coherence_depth_score?: number | null
+          collapse_exposure_score?: number | null
+          created_at?: string
+          decision_reliability_score?: number | null
+          execution_alignment_score?: number | null
+          execution_fragility_score?: number | null
+          executive_core_score?: number | null
+          executive_priorities?: Json | null
+          executive_recommendations?: Json | null
+          executive_risks?: Json | null
+          executive_summary?: Json | null
+          explainability_depth_score?: number | null
+          future_collapse_probability?: number | null
+          governance_fragility_score?: number | null
+          governance_integrity_score?: number | null
+          hidden_risk_score?: number | null
+          id?: string
+          intelligence_integrity_score?: number | null
+          long_term_viability_score?: number | null
+          notes?: string | null
+          operational_sustainability_score?: number | null
+          orchestration_integrity_score?: number | null
+          scalability_viability_score?: number | null
+          semantic_fragility_score?: number | null
+          semantic_integrity_score?: number | null
+          strategic_alignment_score?: number | null
+          strategic_continuity_score?: number | null
+          strategic_fragility_score?: number | null
+          strategic_resilience_score?: number | null
+          strategic_signal_quality?: number | null
+          sustainability_projection_score?: number | null
+          systemic_confidence_score?: number | null
+          systemic_stability_score?: number | null
+          systemic_strategy_score?: number | null
+        }
+        Update: {
+          authority_integrity_score?: number | null
+          coherence_depth_score?: number | null
+          collapse_exposure_score?: number | null
+          created_at?: string
+          decision_reliability_score?: number | null
+          execution_alignment_score?: number | null
+          execution_fragility_score?: number | null
+          executive_core_score?: number | null
+          executive_priorities?: Json | null
+          executive_recommendations?: Json | null
+          executive_risks?: Json | null
+          executive_summary?: Json | null
+          explainability_depth_score?: number | null
+          future_collapse_probability?: number | null
+          governance_fragility_score?: number | null
+          governance_integrity_score?: number | null
+          hidden_risk_score?: number | null
+          id?: string
+          intelligence_integrity_score?: number | null
+          long_term_viability_score?: number | null
+          notes?: string | null
+          operational_sustainability_score?: number | null
+          orchestration_integrity_score?: number | null
+          scalability_viability_score?: number | null
+          semantic_fragility_score?: number | null
+          semantic_integrity_score?: number | null
+          strategic_alignment_score?: number | null
+          strategic_continuity_score?: number | null
+          strategic_fragility_score?: number | null
+          strategic_resilience_score?: number | null
+          strategic_signal_quality?: number | null
+          sustainability_projection_score?: number | null
+          systemic_confidence_score?: number | null
+          systemic_stability_score?: number | null
+          systemic_strategy_score?: number | null
+        }
+        Relationships: []
+      }
       seo_executive_snapshots: {
         Row: {
           adaptability_score: number
@@ -3288,6 +3402,42 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_strategy_alignment_registry: {
+        Row: {
+          alignment_score: number | null
+          confidence_score: number | null
+          created_at: string
+          divergence_score: number | null
+          execution_gap_score: number | null
+          execution_layer: string | null
+          explanation: string | null
+          id: string
+          strategy_layer: string | null
+        }
+        Insert: {
+          alignment_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          divergence_score?: number | null
+          execution_gap_score?: number | null
+          execution_layer?: string | null
+          explanation?: string | null
+          id?: string
+          strategy_layer?: string | null
+        }
+        Update: {
+          alignment_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          divergence_score?: number | null
+          execution_gap_score?: number | null
+          execution_layer?: string | null
+          explanation?: string | null
+          id?: string
+          strategy_layer?: string | null
+        }
+        Relationships: []
+      }
       seo_strategy_memory: {
         Row: {
           authority_score: number
@@ -3555,6 +3705,51 @@ export type Database = {
           system_health_score?: number
           system_resilience?: number
           volatility_pressure?: number
+        }
+        Relationships: []
+      }
+      seo_systemic_risk_registry: {
+        Row: {
+          affected_systems: Json | null
+          collapse_probability: number | null
+          created_at: string
+          description: string | null
+          id: string
+          mitigation_complexity: number | null
+          propagation_probability: number | null
+          resilience_impact: number | null
+          resolved: boolean
+          risk_severity: string | null
+          risk_type: string | null
+          suggested_action: string | null
+        }
+        Insert: {
+          affected_systems?: Json | null
+          collapse_probability?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          mitigation_complexity?: number | null
+          propagation_probability?: number | null
+          resilience_impact?: number | null
+          resolved?: boolean
+          risk_severity?: string | null
+          risk_type?: string | null
+          suggested_action?: string | null
+        }
+        Update: {
+          affected_systems?: Json | null
+          collapse_probability?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          mitigation_complexity?: number | null
+          propagation_probability?: number | null
+          resilience_impact?: number | null
+          resolved?: boolean
+          risk_severity?: string | null
+          risk_type?: string | null
+          suggested_action?: string | null
         }
         Relationships: []
       }
