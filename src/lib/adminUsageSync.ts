@@ -13,8 +13,29 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getUsageAggregates, type UsageAggregates } from '@/lib/adminUsage';
 
-/** Flag global. Manter `false` por padrão — comportamento atual 100% preservado. */
-export const ENABLE_GLOBAL_USAGE = false;
+/**
+ * Flag global de telemetria.
+ * P2.6: ativada para validação em produção contínua.
+ * Comportamento local (localStorage + /admin/uso) permanece a fonte primária — falha de sync nunca afeta UX.
+ */
+export const ENABLE_GLOBAL_USAGE = true;
+
+/** Ativa logs verbosos somente em DEV (Vite). */
+const DEV =
+  typeof import.meta !== 'undefined' &&
+  (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
+
+interface SyncStats {
+  attempts: number;
+  successes: number;
+  failures: number;
+  lastPayloadBytes: number;
+  lastLatencyMs: number;
+}
+const stats: SyncStats = { attempts: 0, successes: 0, failures: 0, lastPayloadBytes: 0, lastLatencyMs: 0 };
+export function getSyncStats(): SyncStats {
+  return { ...stats };
+}
 
 const SESSION_KEY = 'admin_usage_session_v1';
 const LAST_SYNC_KEY = 'admin_usage_last_sync_v1';
@@ -66,16 +87,28 @@ export function exportAggregates(): UsageAggregatePayload {
 }
 
 async function postWithRetry(payload: UsageAggregatePayload, attempt = 0): Promise<boolean> {
+  const started = Date.now();
   try {
-    const { error } = await supabase.functions.invoke('admin-usage-ingest', {
-      body: payload,
-    });
-    if (!error) return true;
-    if (attempt >= 1) return false;
+    const { error } = await supabase.functions.invoke('admin-usage-ingest', { body: payload });
+    stats.lastLatencyMs = Date.now() - started;
+    if (!error) {
+      stats.successes += 1;
+      if (DEV) console.debug('[adminUsageSync] ingest ok', { bytes: stats.lastPayloadBytes, ms: stats.lastLatencyMs });
+      return true;
+    }
+    if (attempt >= 1) {
+      stats.failures += 1;
+      if (DEV) console.debug('[adminUsageSync] ingest failed', error);
+      return false;
+    }
     await new Promise((r) => setTimeout(r, 1500));
     return postWithRetry(payload, attempt + 1);
-  } catch {
-    if (attempt >= 1) return false;
+  } catch (err) {
+    if (attempt >= 1) {
+      stats.failures += 1;
+      if (DEV) console.debug('[adminUsageSync] ingest threw', err);
+      return false;
+    }
     await new Promise((r) => setTimeout(r, 1500));
     return postWithRetry(payload, attempt + 1);
   }
@@ -98,6 +131,13 @@ export function sendUsageBatch(force = false): boolean {
     /* ignore */
   }
   const payload = exportAggregates();
+  try {
+    stats.lastPayloadBytes = JSON.stringify(payload).length;
+  } catch {
+    stats.lastPayloadBytes = 0;
+  }
+  stats.attempts += 1;
+  if (DEV) console.debug('[adminUsageSync] batch dispatched', { bytes: stats.lastPayloadBytes, totalEvents: payload.totalEvents });
   // fire-and-forget; never blocks UX
   void postWithRetry(payload).catch(() => {});
   return true;

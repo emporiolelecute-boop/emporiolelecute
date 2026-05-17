@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { trackAdminEvent } from '@/lib/adminUsage';
+import { sendUsageBatch } from '@/lib/adminUsageSync';
 
 /**
  * Auto-tracks admin page views and dwell time per route.
@@ -26,6 +27,8 @@ export function useAdminPageTracking() {
     trackAdminEvent('page_view', route);
     lastRouteRef.current = route;
     enteredAtRef.current = now;
+    // Opportunistic global sync — throttled (≥5min) + fire-and-forget. Local UX is unaffected.
+    sendUsageBatch();
 
     return () => {
       // On unmount (e.g., leaving admin entirely), flush dwell.
@@ -49,6 +52,8 @@ export function useAdminPageTracking() {
         }
         enteredAtRef.current = Date.now();
       }
+      // Try a last sync on hide. Throttle still applies; fire-and-forget.
+      sendUsageBatch();
     };
     window.addEventListener('pagehide', onHide);
     document.addEventListener('visibilitychange', () => {

@@ -1,0 +1,1 @@
+DELETE FROM public.admin_usage_aggregates WHERE session_id = 'p26-validation';
