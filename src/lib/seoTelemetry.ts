@@ -575,10 +575,10 @@ export interface TelemetrySnapshot {
   strategic_persistence_score?: number;
   coherence_persistence_score?: number;
   // Final Phase — Hardening, Productization & Operational Simplification (additive, optional)
-  maintainability_score?: number;
+  maintainability_score_final?: number;
   operational_simplicity_score?: number;
   telemetry_efficiency_score?: number;
-  executive_clarity_score?: number;
+  executive_clarity_score_final?: number;
   runtime_stability_score?: number;
   governance_topology_score?: number;
   documentation_completeness_score?: number;
