@@ -749,6 +749,11 @@ const App = () => {
                       <AdminSeoStabilityFabric />
                     </Suspense>
                   } />
+                  <Route path="seo-integrity-grid" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoIntegrityGrid />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
