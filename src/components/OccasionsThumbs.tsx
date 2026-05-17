@@ -31,6 +31,7 @@ const OccasionsThumbs = () => {
         <div
           className={cn(
             "flex gap-3 md:gap-4 overflow-x-auto pb-2 -mx-2 px-2",
+            "justify-start md:justify-center",
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             "[-webkit-overflow-scrolling:touch] [touch-action:pan-x] [overscroll-behavior-x:contain]",
             "snap-x snap-mandatory"
@@ -52,7 +53,7 @@ const OccasionsThumbs = () => {
                 aria-label={o.name}
                 className="group shrink-0 flex flex-col items-center gap-1.5 snap-start"
               >
-                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/20 ring-1 ring-border/60 transition-all duration-300 group-hover:ring-primary group-hover:-translate-y-0.5 group-hover:shadow-medium">
+                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/20 ring-1 ring-border/60 transition-all duration-300 group-hover:ring-primary group-hover:-translate-y-0.5 group-hover:shadow-medium motion-safe:hover:animate-bounce-soft">
                   {o.image_url ? (
                     <img
                       src={o.image_url}
@@ -70,6 +71,19 @@ const OccasionsThumbs = () => {
                       />
                     </div>
                   )}
+                  {/* Shimmer sweep on hover */}
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 motion-reduce:hidden"
+                    style={{
+                      background:
+                        "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
+                      backgroundSize: "200% 100%",
+                      animation: "shimmer 1.6s linear infinite",
+                    }}
+                    aria-hidden
+                  />
+                  {/* Soft glow ring on hover */}
+                  <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-primary/20 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500 -z-10 motion-safe:animate-pulse-slow" aria-hidden />
                 </div>
                 <span className="text-[10px] md:text-xs font-medium text-foreground/80 text-center max-w-[5.5rem] truncate group-hover:text-primary transition-colors">
                   {o.name}
