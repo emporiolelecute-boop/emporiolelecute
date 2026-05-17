@@ -1,92 +1,90 @@
-# Plano: Integração completa Google Search Console + SEO técnico
+## 1. Ajustes visuais no carrossel `OccasionsThumbs`
 
-Antes de implementar, alinhamento do que será feito (em ordem de execução). Nada será alterado no que já funciona — apenas adições.
+- Setas **sempre visíveis** também no mobile (hoje só desktop ganhou setas).
+- Setas reagem ao estado real de rolagem (`canLeft`/`canRight`) — quando não há mais conteúdo, somem suavemente.
+- Setas posicionadas **sobre** o scroller (não fora do container), com offset que não corta em telas estreitas (≤ 360px).
+- Padding vertical (`py-4`) e horizontal (`px-8 md:px-12`) para acomodar o lift do hover, a animação `pingpong` e o anel ativo sem cortar topo/laterais.
+- Fades laterais ligados ao estado de rolagem (somem quando `!canLeft` / `!canRight`).
+- Dica visual de rolagem: na primeira renderização (apenas se `canRight`), um chevron sutil pulsando à direita por ~3s.
 
-## Status atual (já existente no projeto)
-- ✅ Conexão Google Search Console: **já conectada** (secret `GOOGLE_SEARCH_CONSOLE_API_KEY` ativo)
-- ✅ Sitemap dinâmico submetido ao GSC (91 URLs, 54 imagens, 0 erros)
-- ✅ `robots.txt` dinâmico via Edge Function `robots-txt` + painel admin (`AdminRobots`) com sitemap correto
-- ✅ Schema.org já implementado: `Organization`, `WebSite`, `LocalBusiness`, `Product`, `FAQPage`, `BreadcrumbList`, `ItemList`
-- ✅ Edge Function `seo-gsc-analytics` e `seo-checks` existentes
-- ✅ Geração de sitemap por `generate-sitemap` + `submit-sitemap`
+## 2. CMS completo das seções da home
 
-Ou seja, **vários itens do pedido já estão prontos**. O plano foca no que falta ou pode ser melhorado.
+Nova tabela `home_sections` (separada de `homepage_blocks` para não misturar semântica de conteúdo com semântica de layout):
 
----
+```text
+home_sections
+├── id (uuid)
+├── section_key (text, unique)        ── identificador estável usado no Index.tsx
+├── component_name (text)              ── nome do componente React
+├── label (text)                       ── nome amigável no admin
+├── description (text)                 ── descrição curta
+├── is_visible (boolean, default true)
+├── position (int)                     ── ordem na home
+├── editable_props (jsonb)             ── overrides opcionais (título, etc.)
+├── created_at / updated_at
+```
 
-## 1. Conexão GSC ✅ (nada a fazer)
-Já conectada e o sitemap `https://emporiolelecute.com.br/sitemap.xml` foi submetido com sucesso. Apenas **revalidar** via painel.
+Seed inicial com todas as seções atuais da home:
+`HeroSlider`, `CategoriesScroll`, `OccasionsThumbs`, `BestSellers`, `QuoteCTABanner`, `Testimonials`, `FAQSection`, `InstagramFeed`.
 
-## 2. robots.txt completo ✅ (revisão leve)
-Já existe via Edge Function + `public/robots.txt` de fallback. Vou:
-- Garantir que o `public/robots.txt` espelhe a config do banco (mesmas regras)
-- Adicionar `Disallow: /checkout`, `/api/` e bots agressivos opcionais (se quiser)
-- Sem mudanças se já estiver ok — apenas validar diff visual no painel
+`src/pages/Index.tsx` deixa de hard-codear a ordem e passa a iterar sobre `home_sections` ordenadas por `position`, renderizando dinamicamente cada componente via um **registry tipado** `src/lib/homeSectionsRegistry.ts` (mapa `component_name → React.ComponentType`).
 
-## 3. Painel de métricas SEO (NOVO)
-Criar página `AdminSEODashboard` (ou expandir a existente) consumindo a Edge Function `seo-gsc-analytics` para mostrar:
-- **Status de indexação**: total submetido vs indexado vs excluído (últimos 30 dias)
-- **Cobertura do sitemap**: contagem de URLs no sitemap × URLs descobertas pelo Google
-- **Top queries** (cliques, impressões, CTR, posição média)
-- **Top páginas** com performance
-- **Erros de cobertura** (404, server errors, redirects, noindex)
-- Gráficos com Recharts já presente
-- Refresh manual + cache de 1h
+A linha `section_categories_scroll` criada anteriormente em `homepage_blocks` é migrada para `home_sections` e a antiga é removida.
 
-## 4. Monitoramento periódico + alertas (NOVO)
-Edge Function `seo-indexation-monitor` agendada via `pg_cron` (diário 06:00):
-- Lê todas URLs do sitemap
-- Chama GSC URL Inspection API em lote (limite ~2000/dia)
-- Salva snapshot em nova tabela `seo_url_status` (url, coverage_state, last_crawl, indexing_state, checked_at)
-- Se aparecer **nova** URL com erro/excluída → envia e-mail via Resend para `emporiolelecute@gmail.com`
-- Painel mostra histórico + diff do dia
+## 3. Painel administrativo `AdminHomeSections`
 
-## 5. Reenvio automático do sitemap em mudanças no catálogo (NOVO)
-Trigger Postgres `AFTER INSERT/UPDATE/DELETE` em `products`, `categories`, `pages`, `blog_posts`:
-- Marca flag em `store_settings.key = 'sitemap_dirty'` com timestamp
-- Job `pg_cron` a cada 15min: se dirty, chama `submit-sitemap` (que regenera + faz `ping` ao GSC) e limpa flag
-- Debounce evita reenvio a cada save individual; respeita quota GSC
+Nova rota: `/admin/secoes-home` (entrada no menu lateral do admin).
 
-## 6. Schema.org + Rich Results (revisão)
-Auditar componentes existentes e:
-- Confirmar `Product` com `offers`, `aggregateRating` (condicional), `shippingDetails`, `MerchantReturnPolicy` ✅ já tem
-- Confirmar `BreadcrumbList` em todas as páginas profundas ✅ já tem
-- Adicionar `BreadcrumbList` onde faltar (páginas dinâmicas, blog)
-- `Organization` + `LocalBusiness` ✅ já tem
-- Validar URLs principais via API do Rich Results Test (ou link direto no painel)
-- Adicionar botão no painel SEO: "Validar no Rich Results Test" (abre `https://search.google.com/test/rich-results?url=...` em nova aba para cada URL chave)
+Funcionalidades:
+- Lista de seções em **cards arrastáveis** (`@dnd-kit/sortable` — já instalado).
+- Cada card mostra: nome, descrição, badge de visibilidade, switch oculto/visível, botão editar, botão "Ver prévia".
+- Drag & drop reordena e persiste `position` em batch (uma transação por drop).
+- Botão "Editar" abre dialog com campos editáveis (label/description e qualquer prop registrada como editável em `editable_props`).
 
----
+## 4. Prévia ao vivo
 
-## Detalhes técnicos
+Página adicional `/admin/secoes-home/preview/:section_key`:
+- Renderiza o componente real isolado dentro de um iframe-like container com `Header`/`Footer` opcionais.
+- Botão "Salvar visibilidade" disponível direto na prévia.
+- Toggle "preview com dados reais" (default) vs "preview com placeholder" (quando o componente depende de dados que possam não existir em produção).
 
-### Novos arquivos
-- `supabase/functions/seo-indexation-monitor/index.ts` — cron diário GSC URL Inspection
-- `supabase/functions/seo-sitemap-auto-resubmit/index.ts` — reenvio debounced
-- `src/pages/admin/AdminSEODashboard.tsx` — painel de métricas (ou expandir o existente)
-- `src/components/admin/SEOIndexationPanel.tsx` — tabela de URLs com status
-- Migration: tabela `seo_url_status` + trigger `mark_sitemap_dirty()` + cron jobs
+Implementação: cliente-side simples (sem iframe real) — usamos o mesmo registry e montamos o componente dentro de um wrapper com `aria-label="Prévia"`.
 
-### Novos secrets necessários
-Nenhum — `GOOGLE_SEARCH_CONSOLE_API_KEY`, `LOVABLE_API_KEY`, `RESEND_API_KEY` já configurados.
+## 5. Log de auditoria
 
-### Sem mudanças em
-- `HeroSlider.tsx` (funcionando, não tocar)
-- `index.css`, design tokens, componentes públicos
-- Schemas existentes (apenas auditoria)
+Nova tabela `home_section_audit`:
 
-### Riscos / Cuidados
-- GSC URL Inspection API tem quota de 2000 chamadas/dia — ok para ~91 URLs/dia
-- Cron deve respeitar `pg_cron` + `pg_net` (já habilitados no projeto)
-- Reenvio do sitemap não pode ficar em loop — uso de flag + debounce
+```text
+home_section_audit
+├── id (uuid)
+├── section_key (text)
+├── action (text)                      ── 'visibility_changed' | 'reordered' | 'edited'
+├── old_value (jsonb)
+├── new_value (jsonb)
+├── changed_by (uuid → auth.users)
+├── changed_by_email (text)
+├── created_at
+```
 
----
+Trigger `home_sections_audit_trigger` em `AFTER UPDATE` em `home_sections` registra automaticamente mudanças de `is_visible`, `position` e `editable_props`.
 
-## Ordem de execução proposta
-1. Auditoria + ajustes mínimos no `robots.txt` e Schema (rápido, baixo risco)
-2. Painel SEO Dashboard com dados do GSC já existente
-3. Tabela + Edge Function de monitoramento de indexação
-4. Cron + alertas por e-mail
-5. Trigger + reenvio automático do sitemap
+Aba "Histórico" no painel mostra timeline (data, usuário, ação, antes → depois).
 
-Posso seguir? Se aprovar, começo pelos itens 1+2 (mais visíveis e seguros) e depois 3-5 em sequência.
+## 6. RLS e segurança
+
+- `home_sections`: leitura pública, escrita só para `admin`/`editor`.
+- `home_section_audit`: leitura só para `admin`, escrita só via trigger (`SECURITY DEFINER`).
+
+## 7. Detalhes técnicos
+
+- Migration única criando `home_sections` + `home_section_audit` + RLS + trigger + seed.
+- Hook `useHomeSections.ts` (query + mutations + reorder em batch).
+- `Index.tsx` consome `useHomeSections()` com fallback para a ordem hard-coded enquanto carrega (evita FOUC).
+- Loading skeleton para preservar altura aproximada das seções enquanto a query roda.
+- Componentes do registry usam `React.lazy` para não inflar o bundle do admin.
+
+## 8. Fora de escopo
+
+- Não substitui `homepage_blocks` (continua gerenciando blocos de conteúdo internos como categorias em destaque).
+- Não move `Header`/`Footer` para o CMS (continuam fixos).
+- Não toca em SEO ou structured data (continuam renderizados sempre).
