@@ -14,7 +14,7 @@ import SystemicClarityMap from "@/components/admin/SystemicClarityMap";
 import LongitudinalConsistencyTimeline from "@/components/admin/LongitudinalConsistencyTimeline";
 import StrategicIdentityPanel from "@/components/admin/StrategicIdentityPanel";
 import ExistentialStabilityCard from "@/components/admin/ExistentialStabilityCard";
-import StrategicBlindspotsPanel from "@/components/admin/StrategicBlindspotsPanel";
+import ConsciousnessBlindspotsPanel from "@/components/admin/ConsciousnessBlindspotsPanel";
 import EvolutionarySurvivabilityGauge from "@/components/admin/EvolutionarySurvivabilityGauge";
 
 import { buildConsciousnessVerdict, type ConsciousnessInputs } from "@/lib/strategicConsciousness";
@@ -285,7 +285,7 @@ export default function AdminSeoConsciousnessFabric() {
         </TabsContent>
 
         <TabsContent value="blindspots">
-          <StrategicBlindspotsPanel
+          <ConsciousnessBlindspotsPanel
             blindspots={consciousness.blindspots}
             warnings={consciousness.executiveWarnings}
           />
