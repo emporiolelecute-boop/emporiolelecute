@@ -57,3 +57,44 @@ export function estimateTelemetryMaintenanceCost(metrics: MetricUsage[]): number
     map.EXPERIMENTAL.length * 4 + map.LEGACY.length * 5 + map.PRUNABLE.length * 6 + map.ARCHIVED.length * 2;
   return clamp(cost);
 }
+
+// ---------------------------------------------------------------------------
+// Final Phase — executive signal compression (additive, read-only)
+// ---------------------------------------------------------------------------
+
+export interface ExecutiveSignal { metric: string; weight: number; value: number }
+
+export function buildCoreSignalSubset(signals: ExecutiveSignal[], topN = 12): ExecutiveSignal[] {
+  return [...signals].sort((a, b) => b.weight - a.weight).slice(0, topN);
+}
+
+export function compressExecutiveSignals(signals: ExecutiveSignal[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const s of buildCoreSignalSubset(signals)) out[s.metric] = s.value;
+  return out;
+}
+
+export function detectRedundantMetrics(metrics: MetricUsage[]): string[] {
+  return detectOverlappingTelemetry(metrics);
+}
+
+export function buildMinimalExecutiveTelemetry(scores: Record<string, number>): Record<string, number> {
+  const priority = [
+    "maintainability_score", "operational_simplicity_score", "executive_clarity_score",
+    "scalability_score", "signal_efficiency_score", "operational_drag_score",
+  ];
+  const out: Record<string, number> = {};
+  for (const k of priority) if (k in scores) out[k] = scores[k];
+  return out;
+}
+
+export function calculateSignalDensity(activeSignals: number, totalSignals: number): number {
+  if (totalSignals === 0) return 0;
+  return clamp((activeSignals / totalSignals) * 100);
+}
+
+export function calculateSignalEfficiency(input: {
+  obesity: number; noise: number; density: number;
+}): number {
+  return clamp(input.density - (input.obesity + input.noise) / 4);
+}

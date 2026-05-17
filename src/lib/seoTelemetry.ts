@@ -589,6 +589,19 @@ export interface TelemetrySnapshot {
   decision_fragmentation_score?: number;
   performance_pressure_score?: number;
   system_finalization_score?: number;
+  // Final Phase — Executive Consolidation & Stabilization (additive, optional, collision-safe)
+  operational_simplicity_score_final?: number;
+  telemetry_density_score_final?: number;
+  scalability_score_final?: number;
+  signal_efficiency_score_final?: number;
+  governance_overhead_score_final?: number;
+  dependency_complexity_score_final?: number;
+  operational_drag_score_final?: number;
+  dashboard_noise_score_final?: number;
+  strategic_friction_score_final?: number;
+  simplification_readiness_score_final?: number;
+  system_weight_score_final?: number;
+  executive_focus_score_final?: number;
 }
 
 export interface AutonomyTelemetryInput {

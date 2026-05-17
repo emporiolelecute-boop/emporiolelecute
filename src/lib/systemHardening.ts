@@ -62,3 +62,63 @@ export function calculateMaintainabilityScore(input: {
     input.bloat * 0.2 + input.unused * 3 + input.dead * 1.5;
   return clamp(100 - penalty);
 }
+
+// ---------------------------------------------------------------------------
+// Final Phase — extended diagnostic helpers (additive, read-only)
+// ---------------------------------------------------------------------------
+
+export function detectDeadLayers(layers: Array<{ name: string; consumers: number; lastUsedDaysAgo: number }>): string[] {
+  return layers.filter((l) => l.consumers === 0 || l.lastUsedDaysAgo > 120).map((l) => l.name);
+}
+
+export function detectUnusedSignals(signals: Array<{ name: string; consumers: number }>): string[] {
+  return signals.filter((s) => s.consumers === 0).map((s) => s.name);
+}
+
+export function detectMetricInflation(total: number, baseline = 90): number {
+  if (total <= baseline) return 0;
+  return clamp(((total - baseline) / baseline) * 100);
+}
+
+export function detectObservabilityBloat(dashboards: number, baseline = 14): number {
+  if (dashboards <= baseline) return 0;
+  return clamp(((dashboards - baseline) / baseline) * 100);
+}
+
+export function detectTelemetryNoise(metrics: Array<{ variance: number }>): number {
+  if (!metrics.length) return 0;
+  const lowVar = metrics.filter((m) => m.variance < 1).length;
+  return clamp((lowVar / metrics.length) * 100);
+}
+
+export function calculateSystemMaintainability(input: {
+  deadLayers: number; unusedSignals: number; inflation: number; bloat: number; noise: number;
+}): number {
+  const penalty = input.deadLayers * 5 + input.unusedSignals * 2 + input.inflation * 0.3 +
+    input.bloat * 0.3 + input.noise * 0.4;
+  return clamp(100 - penalty);
+}
+
+export function calculateOperationalSimplicity(input: {
+  bloat: number; inflation: number; noise: number;
+}): number {
+  return clamp(100 - (input.bloat + input.inflation + input.noise) / 3);
+}
+
+export function calculateExecutiveClarity(input: {
+  maintainability: number; simplicity: number; signalEfficiency: number;
+}): number {
+  return clamp((input.maintainability + input.simplicity + input.signalEfficiency) / 3);
+}
+
+export function buildHardeningRecommendations(input: {
+  deadLayers: string[]; unusedSignals: string[]; bloat: number; noise: number;
+}): string[] {
+  const out: string[] = [];
+  if (input.deadLayers.length) out.push(`Revisar ${input.deadLayers.length} camada(s) sem consumidores.`);
+  if (input.unusedSignals.length) out.push(`Marcar ${input.unusedSignals.length} sinal(is) como PRUNABLE.`);
+  if (input.bloat > 50) out.push("Consolidar dashboards executivos sobrepostos.");
+  if (input.noise > 50) out.push("Filtrar métricas de baixa variância da camada executiva.");
+  if (!out.length) out.push("Sistema dentro de envelopes saudáveis.");
+  return out;
+}
