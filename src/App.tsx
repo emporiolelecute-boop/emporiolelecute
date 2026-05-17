@@ -683,6 +683,11 @@ const App = () => {
                       <AdminSeoUnifiedIntelligence />
                     </Suspense>
                   } />
+                  <Route path="seo-operating-fabric" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoOperatingFabric />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
