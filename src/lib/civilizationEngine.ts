@@ -58,8 +58,8 @@ export function calculateOperationalDurability(t: TelemetrySnapshot): number {
 
 export function calculateLongTermCompounding(t: TelemetrySnapshot): number {
   return clamp(
-    (t.compounding_score ?? 0) * 0.4 +
-    (t.authority_growth_velocity ?? 0) * 0.3 +
+    (t.compounding_health_score ?? 0) * 0.4 +
+    (t.authority_compounding_score ?? 0) * 0.3 +
     (t.sustainability_continuity_score ?? 0) * 0.3,
   );
 }
