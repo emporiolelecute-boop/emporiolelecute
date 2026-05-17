@@ -701,6 +701,11 @@ const App = () => {
                       <AdminSeoMetaReasoning />
                     </Suspense>
                   } />
+                  <Route path="seo-executive-core" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoExecutiveCore />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
