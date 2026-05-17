@@ -452,6 +452,18 @@ export interface TelemetrySnapshot {
   execution_reliability_score?: number;
   semantic_truth_density?: number;
   strategic_grounding_score?: number;
+  // Fase 15.9 — Strategic Continuum Core (only fields not previously declared)
+  strategic_continuum_score?: number;
+  operational_persistence_score?: number;
+  authority_continuity_score?: number;
+  systemic_persistence_score?: number;
+  entropy_accumulation_score?: number;
+  execution_decay_score?: number;
+  authority_fragmentation_score?: number;
+  persistence_capacity_score?: number;
+  topical_persistence_score?: number;
+  structural_persistence_score?: number;
+  continuum_elasticity_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
