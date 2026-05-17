@@ -287,6 +287,24 @@ export interface TelemetrySnapshot {
   metric_inflation_score: number;
   opacity_risk_score: number;
   telemetry_corruption_score: number;
+  // Fase 15.1 — Unified Intelligence Bus
+  unified_bus_score?: number;
+  engine_consensus_score?: number;
+  observability_completeness?: number;
+  anomaly_risk_score?: number;
+  governance_convergence_score?: number;
+  telemetry_fragmentation_score?: number;
+  metric_variance_score?: number;
+  semantic_signal_integrity?: number;
+  authority_signal_integrity?: number;
+  resilience_signal_integrity?: number;
+  future_viability_projection?: number;
+  conflict_density_score?: number;
+  cross_engine_coherence?: number;
+  monitoring_reliability?: number;
+  blindspot_risk_score?: number;
+  opaque_logic_score?: number;
+  kernel_consistency_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
