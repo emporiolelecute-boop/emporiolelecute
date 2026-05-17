@@ -224,12 +224,34 @@ const AdminOccasions = () => {
                         className="max-w-xs"
                         placeholder="Nome"
                       />
-                      <Input
-                        value={editSlug}
-                        onChange={(e) => setEditSlug(e.target.value)}
-                        className="max-w-xs"
-                        placeholder="Slug"
-                      />
+                      <div className="flex-1 min-w-0">
+                        <Input
+                          value={editSlug}
+                          onChange={(e) => setEditSlug(e.target.value)}
+                          className="max-w-xs"
+                          placeholder="Slug"
+                          aria-describedby="edit-slug-status"
+                          aria-invalid={editSlugCheck.status === 'taken' || editSlugCheck.status === 'invalid'}
+                        />
+                        <p
+                          id="edit-slug-status"
+                          aria-live="polite"
+                          className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                            editSlugCheck.status === 'available'
+                              ? 'text-emerald-600'
+                              : editSlugCheck.status === 'taken' || editSlugCheck.status === 'invalid'
+                              ? 'text-destructive'
+                              : 'text-muted-foreground'
+                          }`}
+                        >
+                          {editSlugCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                          {editSlugCheck.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                          {(editSlugCheck.status === 'taken' || editSlugCheck.status === 'invalid') && (
+                            <AlertCircle className="h-3 w-3" aria-hidden />
+                          )}
+                          <span>{editSlugCheck.message}</span>
+                        </p>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
