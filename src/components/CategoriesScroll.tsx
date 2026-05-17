@@ -7,11 +7,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const SCROLL_KEY = "categoriesScroll:left";
+// Threshold (px) for the most-visible card to change before we update
+// activeIdx. Avoids flicker on tiny scroll deltas.
+const ACTIVE_SWITCH_THRESHOLD = 24;
+
+const usePrefersReducedMotion = () => {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => mq.removeEventListener?.("change", update);
+  }, []);
+  return reduced;
+};
 
 const CategoriesScroll = () => {
   const { data: categories, isLoading } = useDbCategories();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<Array<HTMLAnchorElement | null>>([]);
+  const reducedMotion = usePrefersReducedMotion();
 
   const visible = (categories ?? []).filter((c) => c.is_indexed !== false);
 
@@ -60,6 +77,8 @@ const CategoriesScroll = () => {
   const [canRight, setCanRight] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
   const lastActiveRef = useRef(0);
+  const lastBestDistRef = useRef(Infinity);
+  const persistRaf = useRef<number | null>(null);
 
   const updateState = useCallback(() => {
     const el = scrollerRef.current;
@@ -69,7 +88,7 @@ const CategoriesScroll = () => {
 
     // Determine most-visible item (closest center to viewport center)
     const center = el.scrollLeft + el.clientWidth / 2;
-    let bestIdx = 0;
+    let bestIdx = lastActiveRef.current;
     let bestDist = Infinity;
     itemsRef.current.forEach((node, i) => {
       if (!node) return;
@@ -80,19 +99,32 @@ const CategoriesScroll = () => {
         bestIdx = i;
       }
     });
-    if (bestIdx !== lastActiveRef.current) {
-      // Haptic feedback on mobile when active card changes
+
+    // Debounce: only switch active when the new candidate is meaningfully
+    // closer than the current one (avoids flicker on tiny scroll deltas).
+    if (
+      bestIdx !== lastActiveRef.current &&
+      Math.abs(bestDist - lastBestDistRef.current) > ACTIVE_SWITCH_THRESHOLD
+    ) {
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         try { navigator.vibrate?.(8); } catch { /* noop */ }
       }
       lastActiveRef.current = bestIdx;
+      lastBestDistRef.current = bestDist;
       setActiveIdx(bestIdx);
+    } else if (bestIdx === lastActiveRef.current) {
+      lastBestDistRef.current = bestDist;
     }
 
-    // Persist scroll position (session)
-    try {
-      sessionStorage.setItem(SCROLL_KEY, String(el.scrollLeft));
-    } catch { /* noop */ }
+    // Persist scroll position (session + local), throttled via rAF.
+    if (persistRaf.current == null) {
+      persistRaf.current = requestAnimationFrame(() => {
+        persistRaf.current = null;
+        const left = String(el.scrollLeft);
+        try { sessionStorage.setItem(SCROLL_KEY, left); } catch { /* noop */ }
+        try { localStorage.setItem(SCROLL_KEY, left); } catch { /* noop */ }
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -107,18 +139,17 @@ const CategoriesScroll = () => {
     };
   }, [updateState, visible.length]);
 
-  // Restore scroll position after items render
+  // Restore scroll position after items render (session wins; falls back to local).
   useEffect(() => {
     if (isLoading || visible.length === 0) return;
     const el = scrollerRef.current;
     if (!el) return;
     try {
-      const saved = sessionStorage.getItem(SCROLL_KEY);
+      const saved =
+        sessionStorage.getItem(SCROLL_KEY) ?? localStorage.getItem(SCROLL_KEY);
       if (saved) {
         const n = parseInt(saved, 10);
-        if (!Number.isNaN(n)) {
-          el.scrollLeft = n;
-        }
+        if (!Number.isNaN(n)) el.scrollLeft = n;
       }
     } catch { /* noop */ }
   }, [isLoading, visible.length]);
@@ -129,10 +160,20 @@ const CategoriesScroll = () => {
     el.scrollBy({ left: dir * Math.min(el.clientWidth * 0.8, 600), behavior: "smooth" });
   };
 
+  const activeName = visible[activeIdx]?.name ?? "";
+  const total = visible.length;
+
   return (
     <section className="py-6 md:py-12 bg-background" aria-label="Categorias">
       <div className="container mx-auto px-4">
         <h1 className="sr-only">Empório LeleCute - Lembrancinhas Artesanais Personalizadas</h1>
+
+        {/* Live region — announces active category to screen readers */}
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {activeName
+            ? `Categoria em foco: ${activeName}. Item ${activeIdx + 1} de ${total}.`
+            : ""}
+        </div>
 
         <div className="relative group">
           <div className="pointer-events-none absolute inset-y-0 left-0 w-8 md:w-12 bg-gradient-to-r from-background to-transparent z-10" />
@@ -141,7 +182,7 @@ const CategoriesScroll = () => {
           <button
             type="button"
             onClick={() => scrollBy(-1)}
-            aria-label="Anterior"
+            aria-label="Categoria anterior"
             disabled={!canLeft}
             className={cn(
               "hidden md:flex absolute -left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
@@ -155,7 +196,7 @@ const CategoriesScroll = () => {
           <button
             type="button"
             onClick={() => scrollBy(1)}
-            aria-label="Próximo"
+            aria-label="Próxima categoria"
             disabled={!canRight}
             className={cn(
               "hidden md:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
@@ -174,8 +215,13 @@ const CategoriesScroll = () => {
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
             onClickCapture={onClickCapture}
+            role="listbox"
+            aria-label="Lista de categorias"
+            aria-activedescendant={visible[activeIdx]?.id ? `cat-item-${visible[activeIdx].id}` : undefined}
             className={cn(
               "flex gap-3 md:gap-7 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-3 md:pb-4 px-1 md:px-2",
+              // Center the items horizontally when there are few; still scrolls when overflowing.
+              "justify-start md:justify-center",
               "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
               "[-webkit-overflow-scrolling:touch] [touch-action:pan-x] [overscroll-behavior-x:contain]",
               isDragging ? "cursor-grabbing select-none" : "md:cursor-grab"
@@ -193,10 +239,15 @@ const CategoriesScroll = () => {
                   return (
                     <Link
                       key={category.id}
+                      id={`cat-item-${category.id}`}
                       ref={(el) => { itemsRef.current[i] = el; }}
                       to={`/categoria/${category.slug}`}
-                      aria-label={category.name}
+                      role="option"
+                      aria-selected={isActive}
+                      aria-label={`${category.name} — categoria ${i + 1} de ${total}${isActive ? ", em foco" : ""}`}
                       aria-current={isActive ? "true" : undefined}
+                      aria-setsize={total}
+                      aria-posinset={i + 1}
                       draggable={false}
                       className={cn(
                         "group/item flex flex-col items-center gap-1.5 md:gap-3 shrink-0 snap-start",
@@ -207,14 +258,19 @@ const CategoriesScroll = () => {
                       <div
                         className={cn(
                           "relative w-16 h-16 md:w-32 md:h-32 transition-transform duration-500",
-                          "md:animate-pingpong",
+                          !reducedMotion && "md:animate-pingpong",
                           isActive && "scale-105 md:scale-110"
                         )}
-                        style={{ animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }}
+                        style={
+                          reducedMotion
+                            ? undefined
+                            : { animationDelay: `${(i % 5) * 0.6}s`, animationDuration: `${7 + (i % 4) * 1.5}s` }
+                        }
                       >
                         <div
                           className={cn(
-                            "absolute -inset-[2px] rounded-full transition-opacity duration-500 animate-spin-slow",
+                            "absolute -inset-[2px] rounded-full transition-opacity duration-500",
+                            !reducedMotion && "animate-spin-slow",
                             isActive ? "opacity-100" : "opacity-70 group-hover/item:opacity-100"
                           )}
                           style={{
@@ -251,7 +307,7 @@ const CategoriesScroll = () => {
                                   background:
                                     "linear-gradient(115deg, transparent 30%, hsl(var(--background) / 0.55) 50%, transparent 70%)",
                                   backgroundSize: "200% 100%",
-                                  animation: "shimmer 1.6s linear infinite",
+                                  animation: reducedMotion ? undefined : "shimmer 1.6s linear infinite",
                                 }}
                                 aria-hidden
                               />
@@ -268,7 +324,8 @@ const CategoriesScroll = () => {
 
                         <div
                           className={cn(
-                            "absolute inset-0 rounded-full bg-primary/30 blur-2xl transition-opacity duration-500 -z-10 animate-pulse-slow",
+                            "absolute inset-0 rounded-full bg-primary/30 blur-2xl transition-opacity duration-500 -z-10",
+                            !reducedMotion && "animate-pulse-slow",
                             isActive ? "opacity-60" : "opacity-20 group-hover/item:opacity-70"
                           )}
                         />
