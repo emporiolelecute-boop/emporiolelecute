@@ -349,6 +349,7 @@ const AdminCategories = () => {
   };
 
   const handleCancelEdit = () => {
+    if (editingId) trackAdminEvent('form_abandon', 'category_edit');
     setEditingId(null);
     setEditName('');
     setEditSlug('');
@@ -358,6 +359,11 @@ const AdminCategories = () => {
 
   const handleSaveEdit = async () => {
     if (!editingId || !editName.trim() || !editSlug.trim()) return;
+    if (editSlugCheck.status === 'taken' || editSlugCheck.status === 'invalid') {
+      trackAdminEvent('slug_invalid_attempt', 'categories');
+      toast({ title: 'Corrija o slug antes de salvar', variant: 'destructive' });
+      return;
+    }
     try {
       await updateCategory.mutateAsync({
         id: editingId,
@@ -366,8 +372,13 @@ const AdminCategories = () => {
         icon: editIcon,
         image_url: editImageUrl.trim() || null,
       });
+      trackAdminEvent('form_submit', 'category_edit');
       toast({ title: 'Categoria atualizada com sucesso!' });
-      handleCancelEdit();
+      setEditingId(null);
+      setEditName('');
+      setEditSlug('');
+      setEditIcon(null);
+      setEditImageUrl('');
     } catch {
       toast({ title: 'Erro ao atualizar categoria', variant: 'destructive' });
     }
