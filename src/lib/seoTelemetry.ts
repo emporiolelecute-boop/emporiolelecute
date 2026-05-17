@@ -439,7 +439,7 @@ export interface TelemetrySnapshot {
   sustainability_realism_score?: number;
   resilience_realism_score?: number;
   systemic_truth_score?: number;
-  long_term_viability_score?: number;
+  // long_term_viability_score reused from Fase 14.5
   strategic_authenticity_score?: number;
   signal_clarity_score?: number;
   illusion_risk_score?: number;
