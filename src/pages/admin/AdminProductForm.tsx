@@ -298,8 +298,13 @@ const AdminProductForm = () => {
 
   if (isEditing && loadingProduct) {
     return (
-      <div className="p-6 lg:p-8 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div
+        className="p-6 lg:p-8 flex flex-col items-center justify-center gap-3 min-h-[40vh]"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden />
+        <p className="text-sm text-muted-foreground">Carregando produto…</p>
       </div>
     );
   }
@@ -518,7 +523,10 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                   {!occasions?.length && (
-                    <p className="text-sm text-muted-foreground">Nenhuma ocasião cadastrada</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma ocasião cadastrada.{' '}
+                      <a href="/admin/ocasioes" className="underline text-primary">Criar agora</a>
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -549,7 +557,10 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                   {!tags?.length && (
-                    <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma tag cadastrada.{' '}
+                      <a href="/admin/tags" className="underline text-primary">Criar agora</a>
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -577,7 +588,10 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                   {!segments?.length && (
-                    <p className="text-sm text-muted-foreground">Nenhum segmento cadastrado</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum segmento cadastrado.{' '}
+                      <a href="/admin/segmentos" className="underline text-primary">Criar agora</a>
+                    </p>
                   )}
                 </div>
               </CardContent>

@@ -482,8 +482,11 @@ const AdminCategories = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            <div className="space-y-3" aria-busy="true" aria-live="polite">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-16 rounded-lg bg-muted/50 animate-pulse" />
+              ))}
+              <span className="sr-only">Carregando categorias…</span>
             </div>
           ) : filteredCategories.length > 0 ? (
             showDnd ? (
@@ -547,10 +550,26 @@ const AdminCategories = () => {
               </>
             )
           ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                {searchQuery ? 'Nenhuma categoria encontrada' : 'Nenhuma categoria cadastrada'}
-              </p>
+            <div className="text-center py-12 flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center" aria-hidden>
+                <Plus className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">
+                  {searchQuery ? 'Nenhuma categoria encontrada' : 'Nenhuma categoria cadastrada'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {searchQuery
+                    ? 'Tente outro termo de busca ou limpe o filtro.'
+                    : 'Crie a primeira categoria para começar a organizar seus produtos.'}
+                </p>
+              </div>
+              {!searchQuery && (
+                <Button onClick={() => setIsDialogOpen(true)} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar primeira categoria
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
@@ -559,10 +578,9 @@ const AdminCategories = () => {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>Excluir categoria?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir esta categoria? Produtos vinculados ficarão sem
-              categoria.
+              Os produtos vinculados ficarão sem esta categoria. Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
