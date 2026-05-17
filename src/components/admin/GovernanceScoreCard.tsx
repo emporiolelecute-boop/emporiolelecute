@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { GovernanceReport } from "@/lib/metaGovernance";
 
-const colorFor = (v: string) => {
+const colorFor = (v: string): "default" | "secondary" | "destructive" => {
   switch (v) {
     case "SOVEREIGN": return "default";
     case "ASCENDANT": return "default";
@@ -12,7 +12,7 @@ const colorFor = (v: string) => {
     case "COLLAPSING": return "destructive";
     default: return "secondary";
   }
-} as const;
+};
 
 export default function GovernanceScoreCard({ report }: { report: GovernanceReport }) {
   return (
