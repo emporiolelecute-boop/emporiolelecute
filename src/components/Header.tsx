@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Instagram, Facebook, ShoppingCart, LogIn } from "lucide-react";
+import { Menu, X, Instagram, Facebook, ShoppingCart, LogIn, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
 import { useCart } from "@/contexts/CartContext";
@@ -9,6 +9,7 @@ import logo from "@/assets/logo.webp";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { itemCount } = useCart();
   const navigate = useNavigate();
@@ -168,15 +169,53 @@ const Header = () => {
             </Link>
           </div>
 
-          <button
-            className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="lg:hidden flex items-center gap-1">
+            <button
+              className="p-2 text-foreground hover:text-primary transition-colors"
+              onClick={() => {
+                setIsMobileSearchOpen((v) => !v);
+                setIsMenuOpen(false);
+              }}
+              aria-label={isMobileSearchOpen ? "Fechar busca" : "Abrir busca"}
+              aria-expanded={isMobileSearchOpen}
+            >
+              {isMobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+            </button>
+
+            <Link
+              to="/carrinho"
+              className="relative p-2 text-foreground/80 hover:text-primary transition-colors"
+              aria-label="Carrinho de compras"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              )}
+            </Link>
+
+            <button
+              className="p-2 text-foreground hover:text-primary transition-colors"
+              onClick={() => {
+                setIsMenuOpen(!isMenuOpen);
+                setIsMobileSearchOpen(false);
+              }}
+              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={isMenuOpen}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
+
+        {isMobileSearchOpen && (
+          <div className="lg:hidden mt-3 pb-2 animate-fade-in">
+            <div className="[&_.max-w-xs]:max-w-full" onClick={(e) => e.stopPropagation()}>
+              <SearchBar />
+            </div>
+          </div>
+        )}
 
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-medium animate-fade-in">
