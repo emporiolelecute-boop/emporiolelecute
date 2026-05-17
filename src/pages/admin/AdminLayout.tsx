@@ -78,6 +78,7 @@ const menuItems = [
   { icon: Activity, label: 'Nervous System', path: '/admin/seo-nervous-system' },
   { icon: ShieldCheck, label: 'Meta Governance', path: '/admin/seo-meta-governance' },
   { icon: Landmark, label: 'Civilization Layer', path: '/admin/seo-civilization' },
+  { icon: Cpu, label: 'SEO Kernel', path: '/admin/seo-kernel' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
