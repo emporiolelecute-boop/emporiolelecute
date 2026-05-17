@@ -128,12 +128,12 @@ export default function AdminSeoNexusConvergence() {
         weakest_cluster: verdict.unstable_domains[0] ?? null,
         highest_risk_domain: verdict.blockers[0] ?? null,
         strongest_domain: verdict.strengths[0] ?? null,
-        convergence_map: { engines: NEX, verdict: verdict.verdict },
-        trust_matrix: trust as unknown as Record<string, unknown>,
-        causal_graph: { nodes: causal.nodes, edges: causal.edges },
-        strategic_conflicts: verdict.conflict_zones,
-        resilience_projection: { recovery, persistence, decay },
-        continuity_projection: forecast,
+        convergence_map: JSON.parse(JSON.stringify({ engines: NEX, verdict: verdict.verdict })),
+        trust_matrix: JSON.parse(JSON.stringify(trust)),
+        causal_graph: JSON.parse(JSON.stringify({ nodes: causal.nodes, edges: causal.edges })),
+        strategic_conflicts: JSON.parse(JSON.stringify(verdict.conflict_zones)),
+        resilience_projection: JSON.parse(JSON.stringify({ recovery, persistence, decay })),
+        continuity_projection: JSON.parse(JSON.stringify(forecast)),
         snapshot_type: "manual",
       });
       if (error) throw error;
