@@ -70,20 +70,20 @@ const OccasionsThumbs = () => {
           {activeName ? `Ocasião em foco: ${activeName}. Item ${activeIdx + 1} de ${total}.` : ""}
         </div>
 
-        <div className="relative group">
+        <div className="relative">
           <button
             type="button"
             onClick={() => scrollBy(-1)}
             aria-label="Ocasião anterior"
             disabled={!canLeft}
             className={cn(
-              "hidden md:flex absolute -left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
+              "flex absolute -left-1 md:-left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground border border-border/60 transition-all",
               "hover:bg-primary hover:text-primary-foreground hover:scale-110",
-              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary",
-              !canLeft && "!opacity-0 pointer-events-none"
+              "focus-visible:ring-2 focus-visible:ring-primary",
+              !canLeft && "opacity-0 pointer-events-none"
             )}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           <button
             type="button"
@@ -91,14 +91,18 @@ const OccasionsThumbs = () => {
             aria-label="Próxima ocasião"
             disabled={!canRight}
             className={cn(
-              "hidden md:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground transition-all",
+              "flex absolute -right-1 md:-right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full bg-background/95 backdrop-blur shadow-medium items-center justify-center text-foreground border border-border/60 transition-all",
               "hover:bg-primary hover:text-primary-foreground hover:scale-110",
-              "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary",
-              !canRight && "!opacity-0 pointer-events-none"
+              "focus-visible:ring-2 focus-visible:ring-primary",
+              !canRight && "opacity-0 pointer-events-none"
             )}
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </button>
+
+          {/* Fades laterais para indicar conteúdo rolável */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-6 md:w-10 bg-gradient-to-r from-background to-transparent z-10" aria-hidden />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-6 md:w-10 bg-gradient-to-l from-background to-transparent z-10" aria-hidden />
 
           <div
             ref={scrollerRef}
@@ -110,7 +114,7 @@ const OccasionsThumbs = () => {
             aria-label="Lista de ocasiões especiais — use as setas do teclado para navegar"
             aria-activedescendant={list[activeIdx]?.id ? `occ-item-${list[activeIdx].id}` : undefined}
             className={cn(
-              "flex gap-3 md:gap-4 overflow-x-auto pb-2 -mx-2 px-2",
+              "flex gap-3 md:gap-4 overflow-x-auto py-3 px-6 md:px-10",
               "justify-start md:justify-center",
               "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
               "[-webkit-overflow-scrolling:touch] [touch-action:pan-x] [overscroll-behavior-x:contain]",
