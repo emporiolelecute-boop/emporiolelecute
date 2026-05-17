@@ -15,6 +15,6 @@ export default function GovernanceMatrixEntropyPanel({ entropy, signals, risks }
             <ul>{risks.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
         )}
       </CardContent>
-    </Class>
+    </Card>
   );
 }
