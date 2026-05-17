@@ -259,7 +259,7 @@ export interface TelemetrySnapshot {
   strategic_memory_strength_score: number;
   continuity_depth_score: number;
   semantic_coherence_score: number;
-  authority_distribution_score: number;
+  authority_distribution_civ_score: number;
   systemic_harmony_score: number;
   long_term_compounding_score: number;
   existential_durability_score: number;
