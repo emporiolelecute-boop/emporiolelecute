@@ -241,6 +241,31 @@ export interface TelemetrySnapshot {
   governance_drift_score: number;
   continuity_break_risk_score: number;
   strategic_hallucination_score: number;
+  // Fase 14.7 — Civilization Layer
+  civilization_score: number;
+  ecosystem_survivability_score: number;
+  semantic_continuity_score: number;
+  authority_legacy_score: number;
+  strategic_longevity_civ_score: number;
+  operational_durability_civ_score: number;
+  systemic_resilience_score: number;
+  semantic_stability_civ_score: number;
+  execution_sustainability_score: number;
+  governance_stability_score: number;
+  adaptive_evolution_score: number;
+  entropy_absorption_score: number;
+  collapse_resistance_civ_score: number;
+  recovery_persistence_score: number;
+  strategic_memory_strength_score: number;
+  continuity_depth_score: number;
+  semantic_coherence_score: number;
+  authority_distribution_score: number;
+  systemic_harmony_score: number;
+  long_term_compounding_score: number;
+  existential_durability_score: number;
+  civilization_integrity_score: number;
+  legacy_erosion_risk_score: number;
+  civilization_decay_score: number;
 }
 
 export interface AutonomyTelemetryInput {
