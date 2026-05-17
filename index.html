@@ -60,8 +60,13 @@
     <!-- LCP image is preloaded via fetchpriority="high" on the hero <img> in HeroSlider/Loja
          (Vite hashes local asset URLs at build, so we can't statically reference them here). -->
 
-    <!-- Structured Data / JSON-LD -->
-    <script type="application/ld+json">
+    <!-- JSON-LD: fonte única dinâmica para evitar duplicação.
+         LocalBusiness/Organization/WebSite -> src/pages/Index.tsx via componentes em src/components/*StructuredData.tsx
+         FAQPage -> src/components/FAQStructuredData.tsx (paginas com FAQ real)
+         Product -> src/components/ProductStructuredData.tsx (rotas /produto/:slug)
+         Nao inserir JSON-LD estatico aqui — quebra o determinismo do <head>. -->
+    <!-- (bloco LocalBusiness + FAQPage estatico removido em favor da injecao dinamica) -->
+    <!--
       {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
