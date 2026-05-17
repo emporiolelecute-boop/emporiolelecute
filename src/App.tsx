@@ -755,6 +755,11 @@ const App = () => {
                       <AdminSeoIntegrityGrid />
                     </Suspense>
                   } />
+                  <Route path="seo-coherence-matrix" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoCoherenceMatrix />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Landing Page for Google Ads */}
