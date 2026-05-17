@@ -1908,6 +1908,45 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_engine_conflicts: {
+        Row: {
+          affected_entities: Json
+          conflict_type: string
+          created_at: string
+          description: string | null
+          engine_a: string
+          engine_b: string
+          id: string
+          resolution_suggestion: string | null
+          resolved: boolean
+          severity: string
+        }
+        Insert: {
+          affected_entities?: Json
+          conflict_type: string
+          created_at?: string
+          description?: string | null
+          engine_a: string
+          engine_b: string
+          id?: string
+          resolution_suggestion?: string | null
+          resolved?: boolean
+          severity?: string
+        }
+        Update: {
+          affected_entities?: Json
+          conflict_type?: string
+          created_at?: string
+          description?: string | null
+          engine_a?: string
+          engine_b?: string
+          id?: string
+          resolution_suggestion?: string | null
+          resolved?: boolean
+          severity?: string
+        }
+        Relationships: []
+      }
       seo_engine_registry: {
         Row: {
           complexity_score: number
@@ -2298,6 +2337,39 @@ export type Database = {
           sustainability_continuity?: number
           systemic_consistency?: number
           systemic_trustworthiness?: number
+        }
+        Relationships: []
+      }
+      seo_metric_consistency: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          id: string
+          metric_name: string
+          normalized_value: number
+          raw_value: number
+          source_engine: string
+          variance_score: number
+        }
+        Insert: {
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          metric_name: string
+          normalized_value?: number
+          raw_value?: number
+          source_engine: string
+          variance_score?: number
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          metric_name?: string
+          normalized_value?: number
+          raw_value?: number
+          source_engine?: string
+          variance_score?: number
         }
         Relationships: []
       }
@@ -2910,6 +2982,78 @@ export type Database = {
           system_health_score?: number
           system_resilience?: number
           volatility_pressure?: number
+        }
+        Relationships: []
+      }
+      seo_unified_bus_snapshots: {
+        Row: {
+          anomaly_score: number
+          anomaly_signature: Json
+          authority_signature: Json
+          coherence_score: number
+          continuity_signature: Json
+          created_at: string
+          entropy_score: number
+          explainability_signature: Json
+          future_viability_score: number
+          governance_score: number
+          governance_signature: Json
+          id: string
+          intelligence_signature: Json
+          kernel_score: number
+          notes: string | null
+          observability_score: number
+          operational_signature: Json
+          resilience_score: number
+          resilience_signature: Json
+          semantic_signature: Json
+          system_consistency_score: number
+        }
+        Insert: {
+          anomaly_score?: number
+          anomaly_signature?: Json
+          authority_signature?: Json
+          coherence_score?: number
+          continuity_signature?: Json
+          created_at?: string
+          entropy_score?: number
+          explainability_signature?: Json
+          future_viability_score?: number
+          governance_score?: number
+          governance_signature?: Json
+          id?: string
+          intelligence_signature?: Json
+          kernel_score?: number
+          notes?: string | null
+          observability_score?: number
+          operational_signature?: Json
+          resilience_score?: number
+          resilience_signature?: Json
+          semantic_signature?: Json
+          system_consistency_score?: number
+        }
+        Update: {
+          anomaly_score?: number
+          anomaly_signature?: Json
+          authority_signature?: Json
+          coherence_score?: number
+          continuity_signature?: Json
+          created_at?: string
+          entropy_score?: number
+          explainability_signature?: Json
+          future_viability_score?: number
+          governance_score?: number
+          governance_signature?: Json
+          id?: string
+          intelligence_signature?: Json
+          kernel_score?: number
+          notes?: string | null
+          observability_score?: number
+          operational_signature?: Json
+          resilience_score?: number
+          resilience_signature?: Json
+          semantic_signature?: Json
+          system_consistency_score?: number
         }
         Relationships: []
       }
