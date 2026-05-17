@@ -108,6 +108,7 @@ const menuItems = [
   { icon: Crown, label: 'SEO Executive Home', path: '/admin/seo-executive-home' },
   { icon: Activity, label: 'Operational Reality', path: '/admin/seo-operational-reality' },
   { icon: ShieldCheck, label: 'Final Governance', path: '/admin/seo-final-governance' },
+  { icon: Search, label: 'System Audit', path: '/admin/seo-system-audit' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },
