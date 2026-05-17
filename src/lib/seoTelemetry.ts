@@ -494,6 +494,26 @@ export interface TelemetrySnapshot {
   trust_leak_score?: number;
   convergence_velocity_score?: number;
   circular_reasoning_risk?: number;
+  // Phase 16.2 — Stability Fabric (only fields not previously declared)
+  stability_fabric_score?: number;
+  systemic_integrity_score?: number;
+  executive_stability_score?: number;
+  operational_resilience_score?: number;
+  consensus_integrity_score?: number;
+  strategic_equilibrium_score?: number;
+  degradation_resistance_score?: number;
+  recovery_cohesion_score?: number;
+  signal_stability_score?: number;
+  silent_degradation_risk?: number;
+  semantic_erosion_risk?: number;
+  consensus_fragmentation_risk?: number;
+  executive_instability_risk?: number;
+  systemic_dispersion_risk?: number;
+  degradation_velocity_score?: number;
+  operational_volatility_score?: number;
+  resilience_fatigue_score?: number;
+  consensus_stability_score?: number;
+  stability_persistence_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
