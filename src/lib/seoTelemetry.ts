@@ -305,6 +305,27 @@ export interface TelemetrySnapshot {
   blindspot_risk_score?: number;
   opaque_logic_score?: number;
   kernel_consistency_score?: number;
+  // Fase 15.2 — Strategic Operating Fabric
+  operating_fabric_score?: number;
+  structural_integrity_score?: number;
+  strategic_cohesion_score?: number;
+  scalability_score?: number;
+  maintenance_explosion_risk?: number;
+  architectural_debt_score?: number;
+  telemetry_inflation_score?: number;
+  semantic_compression_score?: number;
+  authority_compression_score?: number;
+  execution_compression_score?: number;
+  propagation_risk_score?: number;
+  cascade_origin_score?: number;
+  hidden_dependency_score?: number;
+  scaling_fragility_score?: number;
+  operational_overengineering_score?: number;
+  governance_complexity_score?: number;
+  systemic_shock_risk?: number;
+  causality_depth_score?: number;
+  observability_depth_score?: number;
+  tracing_reliability_score?: number;
 }
 
 export interface AutonomyTelemetryInput {
