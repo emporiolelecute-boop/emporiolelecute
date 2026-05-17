@@ -89,6 +89,7 @@ const SortableRow = ({
   setEditIcon,
   setEditImageUrl,
   generateSlug,
+  slugCheck,
 }: SortableRowProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
