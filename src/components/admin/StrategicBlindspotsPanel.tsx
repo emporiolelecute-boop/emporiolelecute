@@ -1,18 +1,27 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import type { BlindspotSignal } from "@/lib/metaIntelligenceEngine";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function StrategicBlindspotsPanel({ blindspots }: { blindspots: BlindspotSignal[] }) {
+interface Props { blindspots: string[]; warnings: string[]; }
+export default function StrategicBlindspotsPanel({ blindspots, warnings }: Props) {
   return (
-    <Card className="p-4 space-y-2">
-      <h4 className="font-medium">Pontos Cegos Estratégicos</h4>
-      {blindspots.length === 0 && <p className="text-xs text-muted-foreground">Nenhum ponto cego relevante.</p>}
-      {blindspots.map((b) => (
-        <div key={b.key} className="flex justify-between text-sm">
-          <span>{b.note}</span>
-          <Badge variant={b.severity === "high" ? "destructive" : b.severity === "medium" ? "secondary" : "outline"}>{b.severity}</Badge>
-        </div>
-      ))}
+    <Card>
+      <CardHeader><CardTitle className="text-base">Strategic Blindspots</CardTitle></CardHeader>
+      <CardContent className="text-sm space-y-2">
+        {blindspots.length === 0 && warnings.length === 0 && (
+          <p className="text-muted-foreground">Nenhum blindspot relevante detectado.</p>
+        )}
+        {blindspots.length > 0 && (
+          <div>
+            <p className="font-medium">Blindspots</p>
+            <ul>{blindspots.map((b, i) => <li key={i}>• {b}</li>)}</ul>
+          </div>
+        )}
+        {warnings.length > 0 && (
+          <div>
+            <p className="font-medium">Executive Warnings</p>
+            <ul>{warnings.map((w, i) => <li key={i}>• {w}</li>)}</ul>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
