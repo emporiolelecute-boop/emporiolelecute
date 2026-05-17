@@ -37,7 +37,8 @@ import {
   Network,
   Rocket,
   BrainCircuit,
-  Landmark
+  Landmark,
+  Cpu
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
