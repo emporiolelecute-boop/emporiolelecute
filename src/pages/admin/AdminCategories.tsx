@@ -259,6 +259,9 @@ const AdminCategories = () => {
   const [editIcon, setEditIcon] = useState<string | null>(null);
   const [editImageUrl, setEditImageUrl] = useState('');
 
+  const createSlugCheck = useSlugAvailability('categories', formData.slug, null);
+  const editSlugCheck = useSlugAvailability('categories', editSlug, editingId);
+
   // Local sortable order
   const [orderedIds, setOrderedIds] = useState<string[]>([]);
   const [savingOrder, setSavingOrder] = useState(false);
