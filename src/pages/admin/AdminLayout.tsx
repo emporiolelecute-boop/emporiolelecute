@@ -36,7 +36,8 @@ import {
   TrendingUp,
   Network,
   Rocket,
-  BrainCircuit
+  BrainCircuit,
+  Landmark
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
