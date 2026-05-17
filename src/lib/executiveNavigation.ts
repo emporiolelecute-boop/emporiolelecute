@@ -13,6 +13,7 @@ export type NavGroupId =
   | "system"
   | "site"
   | "settings"
+  | "seo-advanced"
   | "labs";
 
 export interface NavLeaf {
@@ -75,9 +76,10 @@ export const EXECUTIVE_NAV: NavGroup[] = [
   },
   {
     id: "executive",
-    label: "SEO Executive",
-    defaultOpen: true,
+    label: "SEO Executive (avançado)",
+    defaultOpen: false,
     collapsible: true,
+    hiddenByDefault: true,
     items: [
       { label: "Executive Mode", path: "/admin/executive-mode", icon: "Crown" },
       { label: "Executive Home", path: "/admin/seo-executive-home", icon: "Crown" },
@@ -91,9 +93,10 @@ export const EXECUTIVE_NAV: NavGroup[] = [
   },
   {
     id: "intelligence",
-    label: "Intelligence",
+    label: "Intelligence (avançado)",
     defaultOpen: false,
     collapsible: true,
+    hiddenByDefault: true,
     items: [
       { label: "Knowledge Graph", path: "/admin/knowledge-graph", icon: "Network" },
       { label: "Unified Nexus", path: "/admin/seo-unified-nexus", icon: "Hexagon" },
@@ -107,9 +110,10 @@ export const EXECUTIVE_NAV: NavGroup[] = [
   },
   {
     id: "system",
-    label: "System",
+    label: "System (avançado)",
     defaultOpen: false,
     collapsible: true,
+    hiddenByDefault: true,
     items: [
       { label: "Final Governance", path: "/admin/seo-final-governance", icon: "ShieldCheck" },
       { label: "System Audit", path: "/admin/seo-system-audit", icon: "Search" },
@@ -130,7 +134,6 @@ export const EXECUTIVE_NAV: NavGroup[] = [
       { label: "Hero Slides", path: "/admin/hero-slides", icon: "Image" },
       { label: "Depoimentos", path: "/admin/depoimentos", icon: "MessageSquare" },
       { label: "Blocos Homepage", path: "/admin/blocos", icon: "Home" },
-      { label: "Instagram", path: "/admin/instagram", icon: "Instagram" },
       { label: "Feed Instagram", path: "/admin/feed-instagram", icon: "Instagram" },
       { label: "Landings SEO", path: "/admin/landings", icon: "MapPin" },
       { label: "Páginas", path: "/admin/paginas", icon: "Home" },
@@ -156,17 +159,28 @@ export const EXECUTIVE_NAV: NavGroup[] = [
       { label: "Merchant Feed", path: "/admin/merchant-feed", icon: "Rss" },
       { label: "SEO & Sitemap", path: "/admin/seo", icon: "Search" },
       { label: "SEO Dashboard", path: "/admin/seo-dashboard", icon: "BarChart3" },
-      { label: "Cloudflare Worker", path: "/admin/cloudflare-worker", icon: "Bot" },
-      { label: "Diagnóstico", path: "/admin/diagnostico", icon: "BarChart3" },
       { label: "Telemetria", path: "/admin/telemetria", icon: "Activity" },
       { label: "Cron", path: "/admin/cron", icon: "Clock" },
       { label: "Usuários", path: "/admin/usuarios", icon: "ShieldCheck" },
       { label: "Solicitações", path: "/admin/usuarios/solicitacoes", icon: "ShieldCheck" },
       { label: "Auditoria", path: "/admin/auditoria", icon: "BarChart3" },
-      { label: "SEO Operations", path: "/admin/seo-operations", icon: "BarChart3" },
-      { label: "Link Health", path: "/admin/link-health", icon: "Activity" },
+    ],
+  },
+  {
+    id: "seo-advanced",
+    label: "SEO Avançado",
+    defaultOpen: false,
+    collapsible: true,
+    hiddenByDefault: true,
+    items: [
       { label: "SEO Command", path: "/admin/seo-command", icon: "BarChart3" },
       { label: "SEO Evolution", path: "/admin/seo-evolution", icon: "TrendingUp" },
+      { label: "SEO Operations", path: "/admin/seo-operations", icon: "BarChart3" },
+      { label: "Link Health", path: "/admin/link-health", icon: "Activity" },
+      { label: "Cloudflare Worker", path: "/admin/cloudflare-worker", icon: "Bot" },
+      { label: "SEO System Audit", path: "/admin/seo-system-audit", icon: "Search" },
+      { label: "SEO Diagnóstico", path: "/admin/diagnostico", icon: "BarChart3" },
+      { label: "SEO Consolidation", path: "/admin/seo-consolidation", icon: "Boxes" },
     ],
   },
   {
