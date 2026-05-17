@@ -523,7 +523,10 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                   {!occasions?.length && (
-                    <p className="text-sm text-muted-foreground">Nenhuma ocasião cadastrada</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma ocasião cadastrada.{' '}
+                      <a href="/admin/ocasioes" className="underline text-primary">Criar agora</a>
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -554,7 +557,10 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                   {!tags?.length && (
-                    <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma tag cadastrada.{' '}
+                      <a href="/admin/tags" className="underline text-primary">Criar agora</a>
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -582,7 +588,10 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                   {!segments?.length && (
-                    <p className="text-sm text-muted-foreground">Nenhum segmento cadastrado</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum segmento cadastrado.{' '}
+                      <a href="/admin/segmentos" className="underline text-primary">Criar agora</a>
+                    </p>
                   )}
                 </div>
               </CardContent>
