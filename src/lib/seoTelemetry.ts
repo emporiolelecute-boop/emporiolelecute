@@ -351,6 +351,31 @@ export interface TelemetrySnapshot {
   cognitive_resilience_score?: number;
   cognitive_decay_risk?: number;
   reasoning_exhaustion_score?: number;
+  // Fase 15.4 — Meta-Reasoning Grid
+  meta_reasoning_score?: number;
+  strategic_self_awareness_score?: number;
+  systemic_reflection_score?: number;
+  cognitive_integrity_score?: number;
+  reasoning_reliability_score?: number;
+  decision_reliability_score?: number;
+  forecast_reliability_score?: number;
+  traceability_integrity_score?: number;
+  cross_layer_coherence?: number;
+  strategic_coherence?: number;
+  operational_coherence?: number;
+  semantic_coherence_meta?: number;
+  authority_coherence?: number;
+  governance_coherence?: number;
+  reasoning_drift_score?: number;
+  strategic_drift_score?: number;
+  operational_drift_score?: number;
+  contradiction_risk_score?: number;
+  self_conflict_score?: number;
+  strategic_hallucination_risk?: number;
+  coherence_collapse_risk?: number;
+  long_term_reasoning_viability?: number;
+  systemic_longevity_score?: number;
+  strategic_survival_confidence?: number;
 }
 
 export interface AutonomyTelemetryInput {

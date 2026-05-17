@@ -109,6 +109,7 @@ const AdminSeoKernel = lazyWithRetry(() => import("./pages/admin/AdminSeoKernel"
 const AdminSeoUnifiedIntelligence = lazyWithRetry(() => import("./pages/admin/AdminSeoUnifiedIntelligence"), "AdminSeoUnifiedIntelligence");
 const AdminSeoOperatingFabric = lazyWithRetry(() => import("./pages/admin/AdminSeoOperatingFabric"), "AdminSeoOperatingFabric");
 const AdminSeoCognitiveOrchestration = lazyWithRetry(() => import("./pages/admin/AdminSeoCognitiveOrchestration"), "AdminSeoCognitiveOrchestration");
+const AdminSeoMetaReasoning = lazyWithRetry(() => import("./pages/admin/AdminSeoMetaReasoning"), "AdminSeoMetaReasoning");
 const AcessoRestrito = lazy(() => import("./pages/AcessoRestrito"));
 
 import RequireAdmin from "./components/RequireAdmin";
@@ -692,6 +693,11 @@ const App = () => {
                   <Route path="seo-cognitive-orchestration" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminSeoCognitiveOrchestration />
+                    </Suspense>
+                  } />
+                  <Route path="seo-meta-reasoning" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoMetaReasoning />
                     </Suspense>
                   } />
                 </Route>
