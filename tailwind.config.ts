@@ -146,6 +146,7 @@ export default {
         "spin-slow": "spin-slow 8s linear infinite",
         shimmer: "shimmer 2.5s linear infinite",
         "bounce-soft": "bounce-soft 2.8s ease-in-out infinite",
+        "pingpong": "pingpong 7s ease-in-out infinite",
       },
     },
   },
