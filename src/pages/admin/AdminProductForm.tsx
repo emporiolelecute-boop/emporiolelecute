@@ -368,9 +368,30 @@ const AdminProductForm = () => {
                     onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                     placeholder="slug-do-produto"
                     required
+                    aria-describedby="slug-status"
+                    aria-invalid={slugCheck.status === 'taken' || slugCheck.status === 'invalid'}
                   />
+                  <p
+                    id="slug-status"
+                    aria-live="polite"
+                    className={`text-xs flex items-center gap-1 min-h-[1rem] ${
+                      slugCheck.status === 'available'
+                        ? 'text-emerald-600'
+                        : slugCheck.status === 'taken' || slugCheck.status === 'invalid'
+                        ? 'text-destructive'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {slugCheck.status === 'checking' && <Loader2 className="h-3 w-3 animate-spin" aria-hidden />}
+                    {slugCheck.status === 'available' && <Check className="h-3 w-3" aria-hidden />}
+                    {(slugCheck.status === 'taken' || slugCheck.status === 'invalid') && (
+                      <AlertCircle className="h-3 w-3" aria-hidden />
+                    )}
+                    <span>{slugCheck.message}</span>
+                  </p>
                 </div>
               </div>
+
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição curta</Label>
