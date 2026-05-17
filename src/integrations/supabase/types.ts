@@ -1647,6 +1647,42 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_causality_registry: {
+        Row: {
+          affected_layers: Json | null
+          causality_strength: number | null
+          created_at: string
+          description: string | null
+          event_type: string | null
+          id: string
+          propagation_depth: number | null
+          propagation_risk: number | null
+          source_layer: string | null
+        }
+        Insert: {
+          affected_layers?: Json | null
+          causality_strength?: number | null
+          created_at?: string
+          description?: string | null
+          event_type?: string | null
+          id?: string
+          propagation_depth?: number | null
+          propagation_risk?: number | null
+          source_layer?: string | null
+        }
+        Update: {
+          affected_layers?: Json | null
+          causality_strength?: number | null
+          created_at?: string
+          description?: string | null
+          event_type?: string | null
+          id?: string
+          propagation_depth?: number | null
+          propagation_risk?: number | null
+          source_layer?: string | null
+        }
+        Relationships: []
+      }
       seo_check_runs: {
         Row: {
           alert_error: string | null
@@ -2550,6 +2586,105 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_operating_fabric_snapshots: {
+        Row: {
+          anomaly_pressure: number | null
+          authority_integrity_score: number | null
+          blockers: Json | null
+          collapse_probability: number | null
+          consensus_score: number | null
+          continuity_projection: number | null
+          created_at: string
+          dependency_risk: number | null
+          entropy_score: number | null
+          execution_pressure: number | null
+          executive_summary: Json | null
+          explainability_score: number | null
+          fragmentation_risk: number | null
+          future_stability_score: number | null
+          governance_integrity_score: number | null
+          id: string
+          notes: string | null
+          observability_score: number | null
+          operating_fabric_score: number | null
+          operational_debt: number | null
+          recommendations: Json | null
+          resilience_integrity_score: number | null
+          scalability_projection: number | null
+          scaling_risk: number | null
+          semantic_integrity_score: number | null
+          strategic_cohesion_score: number | null
+          strategic_noise: number | null
+          strengths: Json | null
+          sustainability_projection: number | null
+          systemic_complexity: number | null
+        }
+        Insert: {
+          anomaly_pressure?: number | null
+          authority_integrity_score?: number | null
+          blockers?: Json | null
+          collapse_probability?: number | null
+          consensus_score?: number | null
+          continuity_projection?: number | null
+          created_at?: string
+          dependency_risk?: number | null
+          entropy_score?: number | null
+          execution_pressure?: number | null
+          executive_summary?: Json | null
+          explainability_score?: number | null
+          fragmentation_risk?: number | null
+          future_stability_score?: number | null
+          governance_integrity_score?: number | null
+          id?: string
+          notes?: string | null
+          observability_score?: number | null
+          operating_fabric_score?: number | null
+          operational_debt?: number | null
+          recommendations?: Json | null
+          resilience_integrity_score?: number | null
+          scalability_projection?: number | null
+          scaling_risk?: number | null
+          semantic_integrity_score?: number | null
+          strategic_cohesion_score?: number | null
+          strategic_noise?: number | null
+          strengths?: Json | null
+          sustainability_projection?: number | null
+          systemic_complexity?: number | null
+        }
+        Update: {
+          anomaly_pressure?: number | null
+          authority_integrity_score?: number | null
+          blockers?: Json | null
+          collapse_probability?: number | null
+          consensus_score?: number | null
+          continuity_projection?: number | null
+          created_at?: string
+          dependency_risk?: number | null
+          entropy_score?: number | null
+          execution_pressure?: number | null
+          executive_summary?: Json | null
+          explainability_score?: number | null
+          fragmentation_risk?: number | null
+          future_stability_score?: number | null
+          governance_integrity_score?: number | null
+          id?: string
+          notes?: string | null
+          observability_score?: number | null
+          operating_fabric_score?: number | null
+          operational_debt?: number | null
+          recommendations?: Json | null
+          resilience_integrity_score?: number | null
+          scalability_projection?: number | null
+          scaling_risk?: number | null
+          semantic_integrity_score?: number | null
+          strategic_cohesion_score?: number | null
+          strategic_noise?: number | null
+          strengths?: Json | null
+          sustainability_projection?: number | null
+          systemic_complexity?: number | null
+        }
+        Relationships: []
+      }
       seo_operational_snapshots: {
         Row: {
           authority_velocity: number
@@ -2907,6 +3042,48 @@ export type Database = {
           simulation_result?: Json
           simulation_type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_structural_dependencies: {
+        Row: {
+          cascading_risk: number | null
+          created_at: string
+          dependency_strength: number | null
+          dependency_type: string | null
+          failure_impact: number | null
+          fragility_score: number | null
+          id: string
+          is_critical: boolean
+          mitigation_strategy: string | null
+          source_engine: string | null
+          target_engine: string | null
+        }
+        Insert: {
+          cascading_risk?: number | null
+          created_at?: string
+          dependency_strength?: number | null
+          dependency_type?: string | null
+          failure_impact?: number | null
+          fragility_score?: number | null
+          id?: string
+          is_critical?: boolean
+          mitigation_strategy?: string | null
+          source_engine?: string | null
+          target_engine?: string | null
+        }
+        Update: {
+          cascading_risk?: number | null
+          created_at?: string
+          dependency_strength?: number | null
+          dependency_type?: string | null
+          failure_impact?: number | null
+          fragility_score?: number | null
+          id?: string
+          is_critical?: boolean
+          mitigation_strategy?: string | null
+          source_engine?: string | null
+          target_engine?: string | null
         }
         Relationships: []
       }
