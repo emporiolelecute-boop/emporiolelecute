@@ -42,6 +42,9 @@ const AdminOccasions = () => {
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
 
+  const createSlugCheck = useSlugAvailability('occasions', formData.slug, null);
+  const editSlugCheck = useSlugAvailability('occasions', editSlug, editingId);
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
