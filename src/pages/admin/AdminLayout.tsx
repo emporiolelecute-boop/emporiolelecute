@@ -107,6 +107,7 @@ const menuItems = [
   { icon: Rocket, label: 'Execution Orchestrator', path: '/admin/seo-execution-orchestrator' },
   { icon: Crown, label: 'SEO Executive Home', path: '/admin/seo-executive-home' },
   { icon: Activity, label: 'Operational Reality', path: '/admin/seo-operational-reality' },
+  { icon: ShieldCheck, label: 'Final Governance', path: '/admin/seo-final-governance' },
   { icon: Tags, label: 'Categorias', path: '/admin/categorias' },
   { icon: Calendar, label: 'Ocasiões', path: '/admin/ocasioes' },
   { icon: Tags, label: 'Tags', path: '/admin/tags' },

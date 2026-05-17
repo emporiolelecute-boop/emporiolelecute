@@ -615,6 +615,17 @@ export interface TelemetrySnapshot {
   governance_maturity_score_real?: number;
   operational_sustainability_score_real?: number;
   executive_signal_to_noise_score_real?: number;
+  // Phase: Final Hardening, Governance & Commercial Reality (read-only, optional)
+  governance_maturity_score_final?: number;
+  sustainable_complexity_score_final?: number;
+  maintenance_liability_score_final?: number;
+  documentation_reliability_score_final?: number;
+  commercial_leverage_score_final?: number;
+  performance_pressure_score_final?: number;
+  cache_pressure_score_final?: number;
+  operational_bloat_score_final?: number;
+  simplification_backlog_score_final?: number;
+  operational_sustainability_score_final?: number;
 }
 
 export interface AutonomyTelemetryInput {
