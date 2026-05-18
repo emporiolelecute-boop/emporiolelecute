@@ -238,28 +238,45 @@ const Produtos = () => {
   const [sideFilters, setSideFilters] = useCatalogFiltersFromUrl();
   const priceBounds = useMemo(() => priceBoundsFrom(products.map(p => ({ price: p.priceNum }))), [products]);
 
-  // Filter products — search now also covers long description + segments
+  // Filter products — text search + structural badges + sidebar filters (price/prazo/personalizável/tags-multi)
   const filteredProducts = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
-    return products.filter((product) => {
-      const matchesSearch = !q ||
-        product.name.toLowerCase().includes(q) ||
-        product.description.toLowerCase().includes(q) ||
-        (product.longDescriptionRaw?.toLowerCase().includes(q) ?? false) ||
-        product.keywords.some(k => k.toLowerCase().includes(q)) ||
-        (product.categoryName?.toLowerCase().includes(q) ?? false) ||
-        product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
-        product.tagNames.some(n => n.toLowerCase().includes(q)) ||
-        product.segmentNames.some(n => n.toLowerCase().includes(q));
+    const matchesText = (product: typeof products[number]) => !q ||
+      product.name.toLowerCase().includes(q) ||
+      product.description.toLowerCase().includes(q) ||
+      (product.longDescriptionRaw?.toLowerCase().includes(q) ?? false) ||
+      product.keywords.some(k => k.toLowerCase().includes(q)) ||
+      (product.categoryName?.toLowerCase().includes(q) ?? false) ||
+      product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
+      product.tagNames.some(n => n.toLowerCase().includes(q)) ||
+      product.segmentNames.some(n => n.toLowerCase().includes(q));
 
+    const base = products.filter((product) => {
       const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
       const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
       const matchesSegment = !resolvedSegment || product.segmentIds.includes(resolvedSegment.id);
       const matchesTag = !resolvedTag || product.tagIds.includes(resolvedTag.id);
-
-      return matchesSearch && matchesCategory && matchesOccasion && matchesSegment && matchesTag;
+      return matchesText(product) && matchesCategory && matchesOccasion && matchesSegment && matchesTag;
     });
-  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag]);
+
+    const sideAdapted = base.map((p) => ({
+      id: p.id,
+      price: p.priceNum,
+      is_active: true,
+      personalization_enabled: p.personalization_enabled,
+      production_days: p.production_days,
+      production_speed: p.production_speed,
+      featured_weight: p.featured_weight,
+      rating: p.rating,
+      category: p.categorySlug ? { slug: p.categorySlug } : null,
+      occasions: p.occasionSlugs.map((slug) => ({ slug })),
+      tags: p.tagSlugs.map((slug) => ({ slug })),
+      segments: p.segmentSlugs.map((slug) => ({ slug })),
+      _orig: p,
+    }));
+    const filtered = applyCatalogFilters(sideAdapted, sideFilters);
+    return sortByFeatured(filtered).map((x) => x._orig);
+  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag, sideFilters]);
 
   // Counts per taxonomy (over all active products, not the filtered list — keeps UI predictable)
   const counts = useMemo(() => {
