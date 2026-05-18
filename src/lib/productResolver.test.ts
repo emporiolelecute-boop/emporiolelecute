@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
-    rpc: vi.fn(),
-    from: vi.fn(),
-  },
+  supabase: { rpc: vi.fn(), from: vi.fn() },
 }));
 
 import { supabase } from "@/integrations/supabase/client";
@@ -12,13 +9,12 @@ import { resolveProductSlug } from "./productResolver";
 
 const rpc = supabase.rpc as unknown as ReturnType<typeof vi.fn>;
 
-beforeEach(() => {
-  rpc.mockReset();
-});
+beforeEach(() => rpc.mockReset());
 
 describe("resolveProductSlug", () => {
-  it("returns null for empty slug", async () => {
-    expect(await resolveProductSlug("")).toBeNull();
+  it("returns unknown for empty slug", async () => {
+    const r = await resolveProductSlug("");
+    expect(r.status).toBe("unknown");
     expect(rpc).not.toHaveBeenCalled();
   });
 
@@ -28,18 +24,24 @@ describe("resolveProductSlug", () => {
       error: null,
     });
     const r = await resolveProductSlug("abc");
-    expect(r?.resolvedVia).toBe("primary");
-    expect(r?.shouldRedirect).toBe(false);
+    expect(r.status).toBe("ok");
+    if (r.status === "ok") {
+      expect(r.resolvedVia).toBe("primary");
+      expect(r.shouldRedirect).toBe(false);
+    }
   });
 
-  it("classifies historical (legacy/rename) as historical", async () => {
+  it("classifies historical (rename) as historical", async () => {
     rpc.mockResolvedValue({
       data: [{ product_id: "p1", matched_slug: "old", primary_slug: "new", is_primary: false, is_active: true, source: "rename" }],
       error: null,
     });
     const r = await resolveProductSlug("old");
-    expect(r?.resolvedVia).toBe("historical");
-    expect(r?.shouldRedirect).toBe(true);
+    expect(r.status).toBe("ok");
+    if (r.status === "ok") {
+      expect(r.resolvedVia).toBe("historical");
+      expect(r.shouldRedirect).toBe(true);
+    }
   });
 
   it("classifies manual alias as alias", async () => {
@@ -48,19 +50,28 @@ describe("resolveProductSlug", () => {
       error: null,
     });
     const r = await resolveProductSlug("promo");
-    expect(r?.resolvedVia).toBe("alias");
+    expect(r.status).toBe("ok");
+    if (r.status === "ok") expect(r.resolvedVia).toBe("alias");
   });
 
-  it("returns null when inactive (404 contract)", async () => {
+  it("returns inactive (distinct from unknown) when alias disabled", async () => {
     rpc.mockResolvedValue({
       data: [{ product_id: "p1", matched_slug: "old", primary_slug: "new", is_primary: false, is_active: false, source: "rename" }],
       error: null,
     });
-    expect(await resolveProductSlug("old")).toBeNull();
+    const r = await resolveProductSlug("old");
+    expect(r.status).toBe("inactive");
   });
 
-  it("returns null when unknown", async () => {
+  it("returns unknown when not found", async () => {
     rpc.mockResolvedValue({ data: [], error: null });
-    expect(await resolveProductSlug("ghost")).toBeNull();
+    const r = await resolveProductSlug("ghost");
+    expect(r.status).toBe("unknown");
+  });
+
+  it("returns unknown on rpc error", async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
+    const r = await resolveProductSlug("x");
+    expect(r.status).toBe("unknown");
   });
 });
