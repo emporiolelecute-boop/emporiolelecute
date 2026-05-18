@@ -363,7 +363,8 @@ const ProductPage = () => {
   // Sem fallback silencioso: ausência é inconsistência estrutural.
   const slugMeta = dbProduct?.__slugMeta;
   if (!slugMeta?.primarySlug) {
-    logSlugEvent("structural_inconsistency", {
+    logSlugEvent({
+      event: "structural_inconsistency",
       reason: "missing_primary_slug_meta",
       productId: dbProduct?.id,
       matchedSlug: slug,
