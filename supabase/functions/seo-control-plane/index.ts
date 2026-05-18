@@ -6,6 +6,7 @@
 // Triggered by: POST /seo-control-plane  (admin-only, JWT enforced in-code)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { productPath } from "../_shared/urls.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -192,7 +193,7 @@ Deno.serve(async (req) => {
   ]);
 
   const dbPaths = new Set<string>();
-  productsRes.data?.forEach((r: any) => r.slug && dbPaths.add(`/produto/${r.slug}`));
+  productsRes.data?.forEach((r: any) => r.slug && dbPaths.add(productPath(r.slug)));
   catsRes.data?.forEach((r: any) => r.is_indexed !== false && r.slug && dbPaths.add(`/categoria/${r.slug}`));
   occRes.data?.forEach((r: any) => r.is_indexed !== false && r.slug && dbPaths.add(`/ocasiao/${r.slug}`));
   tagsRes.data?.forEach((r: any) => r.is_indexed !== false && r.slug && dbPaths.add(`/tag/${r.slug}`));
@@ -266,7 +267,7 @@ Deno.serve(async (req) => {
     return out;
   };
 
-  const productSamples = pickRandom(productsRes.data || [], 5).map((r: any) => `/produto/${r.slug}`);
+  const productSamples = pickRandom(productsRes.data || [], 5).map((r: any) => productPath(r.slug));
   const catSamples = pickRandom(catsRes.data?.filter((r: any) => r.is_indexed !== false) || [], 3).map((r: any) => `/categoria/${r.slug}`);
   const landingSamples = pickRandom(landingsRes.data || [], 2).map((r: any) => `/lembrancinhas-${r.slug}`);
 

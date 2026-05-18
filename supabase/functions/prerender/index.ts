@@ -9,6 +9,7 @@
 // (avoids soft-404 because the SPA also returns 200 for unknown paths).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { productPath } from "../_shared/urls.ts";
 
 const ORIGIN = "https://emporiolelecute.com.br";
 const SITE_NAME = "Empório LeleCute";
@@ -204,7 +205,7 @@ ${img ? `<img src="${esc(img)}" alt="${esc(p.name)}" loading="eager">` : ""}
         brand: { "@type": "Brand", name: SITE_NAME },
         offers: {
           "@type": "Offer",
-          url: canonical(`/produto/${p.slug}`),
+          url: canonical(productPath(p.slug)),
           priceCurrency: "BRL",
           price: p.price,
           availability: "https://schema.org/InStock",
@@ -216,7 +217,7 @@ ${img ? `<img src="${esc(img)}" alt="${esc(p.name)}" loading="eager">` : ""}
       breadcrumbLd([
         { name: "Início", url: ORIGIN },
         { name: "Produtos", url: `${ORIGIN}/produtos` },
-        { name: p.name, url: canonical(`/produto/${p.slug}`) },
+        { name: p.name, url: canonical(productPath(p.slug)) },
       ]),
     ],
   };
@@ -292,7 +293,7 @@ async function renderTaxonomy(
         itemListElement: products.map((p, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: canonical(`/produto/${p.slug}`),
+          url: canonical(productPath(p.slug)),
           name: p.name,
         })),
       },
@@ -329,7 +330,7 @@ async function renderProductList(): Promise<SeoPayload> {
         itemListElement: (products || []).map((p, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: canonical(`/produto/${p.slug}`),
+          url: canonical(productPath(p.slug)),
           name: p.name,
         })),
       },
