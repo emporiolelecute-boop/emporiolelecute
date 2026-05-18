@@ -119,6 +119,8 @@ const AdminProductForm = () => {
         personalization_placeholder: existingProduct.personalization_placeholder || 'Digite o nome, data ou mensagem para personalização...',
         google_product_category: (existingProduct as any).google_product_category || '',
         editorial_content: (existingProduct as any).editorial_content || '',
+        featured_weight: String((existingProduct as any).featured_weight ?? 0),
+        production_speed: ((existingProduct as any).production_speed || '') as '' | 'rapido' | 'normal' | 'longo',
       });
       setKeywordsInput(keywords.join(', '));
 
