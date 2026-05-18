@@ -373,6 +373,24 @@ const ProductPage = () => {
   const canonicalSlug = slugMeta?.primarySlug ?? product.slug;
   const canonicalUrl = `https://emporiolelecute.com.br/produtos/${canonicalSlug}`;
 
+  // Fase 1.5 — observabilidade de canonical_mismatch: se já houve replace
+  // (ou nem deveria ter), o pathname final precisa bater com o canonical.
+  // Só roda quando a meta está estabilizada e o replace já não é mais devido.
+  useEffect(() => {
+    if (!slugMeta || slugMeta.shouldRedirect) return;
+    const expected = `/produtos/${canonicalSlug}`;
+    const actual = window.location.pathname;
+    if (actual !== expected) {
+      logSlugEvent({
+        event: "canonical_mismatch",
+        expected,
+        actual,
+        primarySlug: canonicalSlug,
+        productId: dbProduct?.id,
+      });
+    }
+  }, [slugMeta, canonicalSlug, dbProduct?.id]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* SEO and Structured Data — Fase 7 */}
