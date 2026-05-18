@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { AlertCircle, Pencil, RefreshCw } from 'lucide-react';
 import { evaluateProductSeo } from '@/lib/productSeo';
 import ProductSeoScoreBadge from '@/components/admin/ProductSeoScoreBadge';
+import { PRODUCT_PATH_PREFIX } from '@/lib/urls';
 
 interface Row {
   id: string;
@@ -129,7 +130,7 @@ const AdminProductsHealth = () => {
                     <div className="flex items-center gap-3 mb-1 flex-wrap">
                       <Link to={`/admin/produtos/${product.id}`} className="font-medium hover:underline">{product.name}</Link>
                       <ProductSeoScoreBadge evaluation={seo} />
-                      <span className="text-xs text-muted-foreground">/produtos/{product.slug}</span>
+                      <span className="text-xs text-muted-foreground">{PRODUCT_PATH_PREFIX}/{product.slug}</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {criticals.map((i, idx) => (

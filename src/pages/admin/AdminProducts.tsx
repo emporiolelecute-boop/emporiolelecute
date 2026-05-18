@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useDbProducts, useDeleteProduct, useUpdateProduct } from '@/hooks/useProducts';
+import { urls } from '@/lib/urls';
 
 const AdminProducts = () => {
   const { data: products, isLoading } = useDbProducts();
@@ -155,7 +156,7 @@ const AdminProducts = () => {
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{product.name}</span>
                           <a
-                            href={`/produtos/${product.slug}`}
+                            href={urls.product(product.slug)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-muted-foreground hover:text-primary transition-colors"

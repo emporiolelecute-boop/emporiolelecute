@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import ProductReviewForm from '@/components/admin/ProductReviewForm';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { urls } from '@/lib/urls';
 
 const SOURCES = ['manual', 'elo7', 'whatsapp', 'instagram', 'google', 'site', 'outros'];
 
@@ -153,7 +154,7 @@ const AdminProductReviews = () => {
                     {r.is_verified && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700">Verificada</span>}
                     <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{r.source}</span>
                     {r.products?.name && (
-                      <a href={`/produtos/${r.products.slug}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline truncate max-w-[260px]">
+                      <a href={urls.product(r.products.slug)} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline truncate max-w-[260px]">
                         {r.products.name}
                       </a>
                     )}
