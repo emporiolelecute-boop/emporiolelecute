@@ -78,6 +78,9 @@ export const LazyImage = ({
           decoding="async"
           draggable={false}
           onLoad={() => setLoaded(true)}
+          onError={() =>
+            logTelemetryEvent("image_load_fail", `LazyImage ${src}`, { src, alt })
+          }
           className={cn(
             "w-full h-full object-cover transition-opacity duration-500",
             loaded ? "opacity-100" : "opacity-0",
