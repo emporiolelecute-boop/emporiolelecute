@@ -45,12 +45,23 @@ const Produtos = () => {
   const [selectedSegment, setSelectedSegment] = useState<string | null>(searchParams.get('segmento') || null);
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // Filters start collapsed; auto-open if user arrived with an active filter
-  const initialFiltersOpen = Boolean(
-    searchParams.get('categoria') || searchParams.get('ocasiao') ||
-    searchParams.get('segmento')  || searchParams.get('tag')
-  );
+  // Filters: persist user preference in localStorage; auto-open if URL has active filter
+  const initialFiltersOpen = (() => {
+    const hasUrlFilter = Boolean(
+      searchParams.get('categoria') || searchParams.get('ocasiao') ||
+      searchParams.get('segmento')  || searchParams.get('tag')
+    );
+    if (hasUrlFilter) return true;
+    try {
+      const stored = localStorage.getItem('produtos:filtersOpen');
+      if (stored !== null) return stored === '1';
+    } catch { /* ignore */ }
+    return false;
+  })();
   const [filtersOpen, setFiltersOpen] = useState(initialFiltersOpen);
+  useEffect(() => {
+    try { localStorage.setItem('produtos:filtersOpen', filtersOpen ? '1' : '0'); } catch { /* ignore */ }
+  }, [filtersOpen]);
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('pagina')) || 1);
 
   // Debounce search for better performance
@@ -493,298 +504,297 @@ const Produtos = () => {
           </nav>
         </div>
 
-        {/* Filters */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Search and View Toggle */}
-            <div className="flex-1 flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar lembrancinhas..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 rounded-full"
-                />
-              </div>
-              <div className="flex gap-2">
+        {/* Search + view toggle */}
+        <div className="container mx-auto px-4 pt-8">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar lembrancinhas..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 rounded-full"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+                className="rounded-full"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+                className="rounded-full"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              {activeFiltersCount > 0 && (
                 <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("grid")}
-                  className="rounded-full"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="text-muted-foreground"
                 >
-                  <Grid className="h-4 w-4" />
+                  Limpar ({activeFiltersCount})
                 </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                  className="rounded-full"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                {activeFiltersCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleClearFilters}
-                    className="text-muted-foreground"
-                  >
-                    Limpar filtros ({activeFiltersCount})
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Toggle: filtros encolhidos por padrão */}
-          <div className="mt-6 flex items-center justify-between gap-3 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setFiltersOpen((v) => !v)}
-              aria-expanded={filtersOpen}
-              aria-controls="produtos-filtros-taxonomia"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border
-                         bg-card hover:bg-muted/60 text-sm font-medium text-foreground transition-colors"
+        {/* Ocasiões — sempre visíveis (mobile + desktop), scroll horizontal no mobile */}
+        <div className="container mx-auto px-4 mt-6">
+          <h3 className="text-sm font-medium text-foreground mb-2">Ocasiões</h3>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 snap-x scrollbar-thin">
+            <Badge
+              variant={!resolvedOccasion ? "default" : "outline"}
+              className="cursor-pointer px-4 py-2 text-sm whitespace-nowrap snap-start flex-shrink-0"
+              onClick={() => handleOccasionChange(null)}
             >
-              <SlidersHorizontal className="h-4 w-4 text-primary" />
-              Filtros
-              {activeFiltersCount > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5
-                                 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold">
-                  {activeFiltersCount}
-                </span>
-              )}
-              {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-            {!filtersOpen && activeFiltersCount > 0 && (
+              Todas
+            </Badge>
+            {(dbOccasions || []).map((occasion) => (
+              <Badge
+                key={occasion.id}
+                variant={resolvedOccasion?.id === occasion.id ? "default" : "outline"}
+                className="cursor-pointer px-4 py-2 text-sm whitespace-nowrap snap-start flex-shrink-0"
+                onClick={() => handleOccasionChange(occasion.slug)}
+              >
+                {occasion.slug === 'maternidade' ? '👶' :
+                 occasion.slug === 'cha-bebe' ? '🍼' :
+                 occasion.slug === 'batizado' ? '⛪' :
+                 occasion.slug === 'casamento' ? '💒' :
+                 occasion.slug === 'aniversario' ? '🎂' : '🏢'} {occasion.name}
+                {counts.occ[occasion.id] ? <span className="ml-1 opacity-70">({counts.occ[occasion.id]})</span> : null}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Layout 2 colunas: aside (sidebar de filtros) + grid de produtos */}
+        <div className="container mx-auto px-4 mt-6">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* ASIDE — filtros (sidebar no desktop, encolhido no mobile/tablet) */}
+            <aside className="lg:w-64 lg:flex-shrink-0">
               <button
                 type="button"
-                onClick={handleClearFilters}
-                className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2"
+                onClick={() => setFiltersOpen((v) => !v)}
+                aria-expanded={filtersOpen}
+                aria-controls="produtos-filtros-taxonomia"
+                className="w-full inline-flex items-center justify-between gap-2 px-4 py-2 rounded-full
+                           border border-border bg-card hover:bg-muted/60 text-sm font-medium
+                           text-foreground transition-colors"
               >
-                Limpar filtros
+                <span className="inline-flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4 text-primary" />
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5
+                                     rounded-full bg-primary text-primary-foreground text-[11px] font-semibold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </span>
+                {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
-            )}
-          </div>
 
-          {filtersOpen && (
-          <div id="produtos-filtros-taxonomia" className="animate-in fade-in slide-in-from-top-2 duration-200">
-          {/* Category Filters */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-foreground mb-3">Categorias</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={!resolvedCategory ? "default" : "outline"}
-                className="cursor-pointer px-4 py-2 text-sm"
-                onClick={() => handleCategoryChange(null)}
-              >
-                Todas
-              </Badge>
-              {(dbCategories || []).map((category) => (
-                <Badge
-                  key={category.id}
-                  variant={resolvedCategory?.id === category.id ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => handleCategoryChange(category.slug)}
+              {filtersOpen && (
+                <div
+                  id="produtos-filtros-taxonomia"
+                  className="mt-4 space-y-6 lg:sticky lg:top-24
+                             animate-in fade-in slide-in-from-top-2 duration-200"
                 >
-                  {category.slug === 'sabonetes' ? '🧼' : category.slug === 'velas' ? '🕯️' : category.slug === 'kits' ? '🎁' : '✨'} {category.name}
-                  {counts.cat[category.id] ? <span className="ml-1 opacity-70">({counts.cat[category.id]})</span> : null}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Occasion Filters */}
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-foreground mb-3">Ocasiões</h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={!resolvedOccasion ? "default" : "outline"}
-                className="cursor-pointer px-4 py-2 text-sm"
-                onClick={() => handleOccasionChange(null)}
-              >
-                Todas
-              </Badge>
-              {(dbOccasions || []).map((occasion) => (
-                <Badge
-                  key={occasion.id}
-                  variant={resolvedOccasion?.id === occasion.id ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => handleOccasionChange(occasion.slug)}
-                >
-                  {occasion.slug === 'maternidade' ? '👶' : 
-                   occasion.slug === 'cha-bebe' ? '🍼' : 
-                   occasion.slug === 'batizado' ? '⛪' : 
-                   occasion.slug === 'casamento' ? '💒' : 
-                   occasion.slug === 'aniversario' ? '🎂' : '🏢'} {occasion.name}
-                  {counts.occ[occasion.id] ? <span className="ml-1 opacity-70">({counts.occ[occasion.id]})</span> : null}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Segment Filters */}
-          {dbSegments && dbSegments.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-foreground mb-3">Segmentos</h3>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={!resolvedSegment ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => handleSegmentChange(null)}
-                >
-                  Todos
-                </Badge>
-                {dbSegments.map((segment) => (
-                  <Badge
-                    key={segment.id}
-                    variant={resolvedSegment?.id === segment.id ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 text-sm"
-                    onClick={() => handleSegmentChange(segment.slug)}
-                  >
-                    {segment.name}
-                    {counts.seg[segment.id] ? <span className="ml-1 opacity-70">({counts.seg[segment.id]})</span> : null}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Tag Filters */}
-          {dbTags && dbTags.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Tags
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={!resolvedTag ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 text-sm"
-                  onClick={() => handleTagChange(null)}
-                >
-                  Todas
-                </Badge>
-                {dbTags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant={resolvedTag?.id === tag.id ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 text-sm"
-                    onClick={() => handleTagChange(tag.slug)}
-                  >
-                    #{tag.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          </div>
-          )}
-        </div>
-
-        {/* Sidebar filters trigger (price, prazo, personalizável, multi-tags) */}
-        <div className="container mx-auto px-4 mt-2 mb-4 flex justify-end">
-          <CatalogFilters
-            values={sideFilters}
-            onChange={setSideFilters}
-            occasions={dbOccasions}
-            categories={dbCategories}
-            tags={dbTags}
-            segments={dbSegments}
-            priceBounds={priceBounds}
-            totalCount={filteredProducts.length}
-          />
-        </div>
-
-        {/* Products Grid */}
-        <div className="container mx-auto px-4">
-          {loadingProducts ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : filteredProducts.length > 0 ? (
-            <>
-              <p className="text-sm text-muted-foreground mb-4">
-                {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
-                {totalPages > 1 && ` • Página ${currentPage} de ${totalPages}`}
-              </p>
-              <div className={`grid gap-3 sm:gap-4 md:gap-6 ${
-                viewMode === "grid" 
-                  ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
-                  : "grid-cols-1 max-w-3xl mx-auto"
-              }`}>
-                {paginatedProducts.map((product, idx) => (
-                  <ProductCard key={product.id} product={product} priority={idx < 2} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-12">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  {/* Categorias */}
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground mb-3">Categorias</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge
+                        variant={!resolvedCategory ? "default" : "outline"}
+                        className="cursor-pointer px-3 py-1.5 text-xs"
+                        onClick={() => handleCategoryChange(null)}
+                      >
+                        Todas
+                      </Badge>
+                      {(dbCategories || []).map((category) => (
+                        <Badge
+                          key={category.id}
+                          variant={resolvedCategory?.id === category.id ? "default" : "outline"}
+                          className="cursor-pointer px-3 py-1.5 text-xs"
+                          onClick={() => handleCategoryChange(category.slug)}
                         >
-                          <ChevronLeft className="h-4 w-4" />
-                          <span>Anterior</span>
-                        </PaginationPrevious>
-                      </PaginationItem>
-
-                      {getPageNumbers().map((page, index) => (
-                        <PaginationItem key={index}>
-                          {page === 'ellipsis' ? (
-                            <PaginationEllipsis />
-                          ) : (
-                            <PaginationLink
-                              onClick={() => handlePageChange(page)}
-                              isActive={currentPage === page}
-                              className="cursor-pointer"
-                            >
-                              {page}
-                            </PaginationLink>
-                          )}
-                        </PaginationItem>
+                          {category.slug === 'sabonetes' ? '🧼' : category.slug === 'velas' ? '🕯️' : category.slug === 'kits' ? '🎁' : '✨'} {category.name}
+                          {counts.cat[category.id] ? <span className="ml-1 opacity-70">({counts.cat[category.id]})</span> : null}
+                        </Badge>
                       ))}
+                    </div>
+                  </div>
 
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  {/* Segmentos */}
+                  {dbSegments && dbSegments.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground mb-3">Segmentos</h3>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge
+                          variant={!resolvedSegment ? "default" : "outline"}
+                          className="cursor-pointer px-3 py-1.5 text-xs"
+                          onClick={() => handleSegmentChange(null)}
                         >
-                          <span>Próxima</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </PaginationNext>
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+                          Todos
+                        </Badge>
+                        {dbSegments.map((segment) => (
+                          <Badge
+                            key={segment.id}
+                            variant={resolvedSegment?.id === segment.id ? "default" : "outline"}
+                            className="cursor-pointer px-3 py-1.5 text-xs"
+                            onClick={() => handleSegmentChange(segment.slug)}
+                          >
+                            {segment.name}
+                            {counts.seg[segment.id] ? <span className="ml-1 opacity-70">({counts.seg[segment.id]})</span> : null}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {dbTags && dbTags.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                        <Tag className="h-4 w-4" />
+                        Tags
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge
+                          variant={!resolvedTag ? "default" : "outline"}
+                          className="cursor-pointer px-3 py-1.5 text-xs"
+                          onClick={() => handleTagChange(null)}
+                        >
+                          Todas
+                        </Badge>
+                        {dbTags.map((tag) => (
+                          <Badge
+                            key={tag.id}
+                            variant={resolvedTag?.id === tag.id ? "default" : "outline"}
+                            className="cursor-pointer px-3 py-1.5 text-xs"
+                            onClick={() => handleTagChange(tag.slug)}
+                          >
+                            #{tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Filtros avançados (preço, prazo, personalizável, multi-tags) */}
+                  <div className="pt-2 border-t border-border">
+                    <CatalogFilters
+                      values={sideFilters}
+                      onChange={setSideFilters}
+                      occasions={dbOccasions}
+                      categories={dbCategories}
+                      tags={dbTags}
+                      segments={dbSegments}
+                      priceBounds={priceBounds}
+                      totalCount={filteredProducts.length}
+                    />
+                  </div>
                 </div>
               )}
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground mb-4">
-                Nenhum produto encontrado
-                {(() => {
-                  const parts = [
-                    resolvedCategory?.name,
-                    resolvedOccasion?.name,
-                    resolvedSegment?.name,
-                    resolvedTag?.name,
-                    debouncedSearch ? `"${debouncedSearch}"` : null,
-                  ].filter(Boolean);
-                  return parts.length ? ` para: ${parts.join(' + ')}` : '';
-                })()}
-              </p>
-              <Button onClick={handleClearFilters}>
-                Limpar filtros
-              </Button>
+            </aside>
+
+            {/* MAIN — grid de produtos */}
+            <div className="flex-1 min-w-0">
+              {loadingProducts ? (
+                <div className="flex justify-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : filteredProducts.length > 0 ? (
+                <>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {filteredProducts.length} {filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+                    {totalPages > 1 && ` • Página ${currentPage} de ${totalPages}`}
+                  </p>
+                  <div className={`grid gap-3 sm:gap-4 md:gap-6 ${
+                    viewMode === "grid"
+                      ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+                      : "grid-cols-1 max-w-3xl mx-auto"
+                  }`}>
+                    {paginatedProducts.map((product, idx) => (
+                      <ProductCard key={product.id} product={product} priority={idx < 2} />
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="mt-12">
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious
+                              onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                              <span>Anterior</span>
+                            </PaginationPrevious>
+                          </PaginationItem>
+
+                          {getPageNumbers().map((page, index) => (
+                            <PaginationItem key={index}>
+                              {page === 'ellipsis' ? (
+                                <PaginationEllipsis />
+                              ) : (
+                                <PaginationLink
+                                  onClick={() => handlePageChange(page)}
+                                  isActive={currentPage === page}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              )}
+                            </PaginationItem>
+                          ))}
+
+                          <PaginationItem>
+                            <PaginationNext
+                              onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            >
+                              <span>Próxima</span>
+                              <ChevronRight className="h-4 w-4" />
+                            </PaginationNext>
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground mb-4">
+                    Nenhum produto encontrado
+                    {(() => {
+                      const parts = [
+                        resolvedCategory?.name,
+                        resolvedOccasion?.name,
+                        resolvedSegment?.name,
+                        resolvedTag?.name,
+                        debouncedSearch ? `"${debouncedSearch}"` : null,
+                      ].filter(Boolean);
+                      return parts.length ? ` para: ${parts.join(' + ')}` : '';
+                    })()}
+                  </p>
+                  <Button onClick={handleClearFilters}>
+                    Limpar filtros
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* SEO Copy + FAQ — só na visão padrão (sem filtros) para evitar conteúdo duplicado */}
