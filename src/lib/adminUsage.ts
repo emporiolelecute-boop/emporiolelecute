@@ -20,7 +20,9 @@ export type AdminUsageEventType =
   | 'list_search'
   | 'list_filter'
   | 'list_item_click'
-  | 'slug_invalid_attempt';
+  | 'slug_invalid_attempt'
+  | 'slug_generation_blocked'
+  | 'slug_quality_warning';
 
 export interface AdminUsageEvent {
   /** event type */

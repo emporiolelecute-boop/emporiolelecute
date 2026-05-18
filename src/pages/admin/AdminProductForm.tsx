@@ -27,6 +27,7 @@ import {
 } from '@/hooks/useProducts';
 import { useTags, useUpdateProductTags } from '@/hooks/useTags';
 import { useSlugAvailability } from '@/hooks/useSlugAvailability';
+import { generateSafeSlug, assessSlugQuality } from '@/lib/slugHardening';
 import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateProductSeo } from '@/lib/productSeo';
@@ -159,14 +160,9 @@ const AdminProductForm = () => {
     }
   }, [existingProduct, isEditing]);
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
+  // Fase 4.1: gerador token-aware. Nunca corta no meio de palavra,
+  // remove stopwords antes de cortar tokens semânticos, jamais emite hash.
+  const generateSlug = (name: string) => generateSafeSlug(name);
 
   const handleNameChange = (name: string) => {
     setFormData((prev) => ({
@@ -225,6 +221,18 @@ const AdminProductForm = () => {
     if (slugCheck.status === 'taken' || slugCheck.status === 'invalid') {
       trackAdminEvent('slug_invalid_attempt', 'products');
       toast({ title: 'Corrija o slug antes de salvar', variant: 'destructive' });
+      return;
+    }
+
+    // Fase 4.1: bloqueia hash residual / slug gigante.
+    const quality = assessSlugQuality(formData.slug);
+    if (quality.severity === 'error') {
+      trackAdminEvent('slug_generation_blocked', 'products');
+      toast({
+        title: 'Slug com problema',
+        description: quality.issues[0] ?? 'Corrija o slug antes de salvar.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -415,6 +423,22 @@ const AdminProductForm = () => {
                     )}
                     <span>{slugCheck.message}</span>
                   </p>
+                  {(() => {
+                    const q = assessSlugQuality(formData.slug);
+                    if (q.severity === 'ok' || q.issues.length === 0) return null;
+                    const tone =
+                      q.severity === 'error' ? 'text-destructive' : 'text-amber-600';
+                    return (
+                      <ul className={`text-xs space-y-0.5 ${tone}`} aria-live="polite">
+                        {q.issues.map((issue, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" aria-hidden />
+                            <span>{issue}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  })()}
                 </div>
               </div>
 
