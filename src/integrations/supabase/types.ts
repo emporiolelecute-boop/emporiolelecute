@@ -1627,6 +1627,56 @@ export type Database = {
           },
         ]
       }
+      product_slugs: {
+        Row: {
+          created_at: string
+          hit_count: number
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          last_hit_at: string | null
+          product_id: string
+          slug: string
+          slug_normalized: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hit_count?: number
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          last_hit_at?: string | null
+          product_id: string
+          slug: string
+          slug_normalized: string
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hit_count?: number
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          last_hit_at?: string | null
+          product_id?: string
+          slug?: string
+          slug_normalized?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_slugs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_tags: {
         Row: {
           product_id: string
@@ -1815,6 +1865,18 @@ export type Database = {
           status_code?: number
           to_path?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      reserved_slugs: {
+        Row: {
+          slug: string
+        }
+        Insert: {
+          slug: string
+        }
+        Update: {
+          slug?: string
         }
         Relationships: []
       }
@@ -5623,17 +5685,30 @@ export type Database = {
           username: string
         }[]
       }
+      normalize_slug: { Args: { _s: string }; Returns: string }
       pdp_funnel_stats: {
         Args: { _from?: string; _to?: string }
         Returns: Json
       }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
+      record_product_slug_hit: { Args: { _slug: string }; Returns: undefined }
       refresh_admin_audit_timeline: { Args: never; Returns: Json }
       reject_admin_request: {
         Args: { _reason: string; _user_id: string }
         Returns: Json
       }
       request_admin_access: { Args: never; Returns: Json }
+      resolve_product_slug: {
+        Args: { _slug: string }
+        Returns: {
+          is_active: boolean
+          is_primary: boolean
+          matched_slug: string
+          primary_slug: string
+          product_id: string
+        }[]
+      }
+      unaccent: { Args: { "": string }; Returns: string }
       validate_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: Json
