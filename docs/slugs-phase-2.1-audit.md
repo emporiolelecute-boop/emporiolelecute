@@ -151,3 +151,112 @@ Criados:
 - `docs/slugs-phase-2.1-audit.md` — este documento
 
 **Nada público alterado. Nenhuma URL, canonical, sitemap, robots, ou merchant feed mudou.**
+
+---
+
+# Fase 2.1b — Materialização aplicada (Estratégia B)
+
+## Arquitetura final
+
+```
+┌────────────────────────────┐
+│  src/lib/urls.ts           │  ←─ helper canônico (fonte única)
+│  supabase/functions/       │     espelhado em
+│  _shared/urls.ts           │
+└─────────────┬──────────────┘
+              │ consome PRODUCT_PATH_PREFIX
+              ▼
+┌────────────────────────────┐      HTTP GET (anon key)
+│  edge: generate-sitemap    │ ◄─────────────────────────┐
+│  (fonte única da LÓGICA    │                            │
+│   de geração)              │                            │
+└─────────────┬──────────────┘                            │
+              │ XML + marcadores `lovable:sitemap-*`     │
+              ▼                                            │
+┌────────────────────────────┐                            │
+│  scripts/generate-sitemap  │  ←── prebuild + predev    │
+│  .ts                       │      (npm hook)            │
+│  • valida marcador         │                            │
+│  • escreve XML             │                            │
+│  • escreve audit JSON      │                            │
+└─────────────┬──────────────┘                            │
+              ▼                                            │
+┌────────────────────────────┐                            │
+│  public/sitemap.xml        │  ← servido estático CDN   │
+│  public/.sitemap-source    │  ← audit (sha256, count)  │
+│  .json                     │                            │
+└────────────────────────────┘                            │
+                                                          │
+                  testes em CI ───────────────────────────┘
+              (src/lib/seoSurfaceDrift.test.ts, 6 testes)
+```
+
+## Pipeline operacional
+
+| Quando | Como | Resultado |
+|---|---|---|
+| `bun run dev` | `predev` chama edge function | sitemap fresco em dev |
+| `bun run build` (deploy Lovable) | `prebuild` chama edge function | sitemap fresco em produção |
+| Admin "Regenerar sitemap" | já existe (`seo-autopilot → regen_sitemap`) | atualiza apenas no banco; **não** atualiza o estático |
+| Cron diário (`seo-sitemap-auto-resubmit`) | hoje só ressubmete ao GSC | inalterado |
+| Falha de rede no script | warn + exit 0 | **build não quebra**; XML anterior preservado |
+
+**Trade-off conhecido (aceito):** entre dois deploys, novos produtos não aparecem no sitemap servido. O cron de ressubmissão chega ao GSC, mas a URL fica defasada até o próximo deploy. Mitigação futura (não nesta fase): cron que faz commit no repo via GitHub API.
+
+## Anti-drift garantido
+
+`src/lib/seoSurfaceDrift.test.ts` (6 testes, todos passando):
+
+1. Helper frontend ≡ helper edge (prefixo + origem)
+2. `public/sitemap.xml` não contém namespace legado
+3. **`public/sitemap.xml` contém marcador `lovable:sitemap-source`** (prova materialização)
+4. **`.sitemap-source.json` bate com bytes/sha256 do XML**
+5. `public/robots.txt` aponta para origem canônica
+6. Edge functions não reintroduzem hardcode de namespace
+
+Se alguém editar `public/sitemap.xml` à mão, o teste 3/4 falha em CI.
+
+## Critério de sucesso — atingido
+
+> "qualquer alteração futura de namespace deve exigir alteração em UM único lugar e o sitemap público deve refletir isso automaticamente após regeneração"
+
+✅ Alterar `PRODUCT_PATH_PREFIX` em `src/lib/urls.ts` + `supabase/functions/_shared/urls.ts` (já registrados pelo teste 1 como sincronizados) + 1 deploy → `prebuild` regenera o sitemap automaticamente com o novo namespace.
+
+## Checklist exato do flip (Fase 2.2)
+
+Pré-flip:
+- [ ] Snapshot GSC: "Páginas indexadas" + impressões 28d.
+- [ ] `bun run scripts/generate-sitemap.ts` localmente e confirmar `namespace=/produtos`.
+- [ ] `bunx vitest run src/lib/seoSurfaceDrift.test.ts` verde.
+
+Flip (commit atômico):
+- [ ] Trocar `PRODUCT_PATH_PREFIX` em **2** arquivos para `/produto`.
+- [ ] Em `App.tsx`: rota canônica `/produto/:slug`; `LegacyProductRedirect` redireciona `/produtos/*` → `/produto/*`.
+- [ ] `bun run scripts/generate-sitemap.ts` (regenera XML com namespace novo).
+- [ ] Confirmar `public/.sitemap-source.json` mostra `"namespace": "/produto"`.
+- [ ] `bunx vitest run` — todos verdes.
+
+Pós-flip:
+- [ ] Submeter `/sitemap.xml` no GSC (URL não muda; conteúdo sim).
+- [ ] Re-fetch manual no Merchant Center.
+- [ ] Monitorar `legacy_namespace_hit` por 30 dias.
+
+## Rollback do flip
+
+- `git revert` do commit reverte 2 constantes + App.tsx + sitemap regenerado.
+- Próximo `prebuild` materializa namespace antigo.
+- GSC re-consolida em 2-4 semanas em ambas direções.
+
+## Arquivos finais da Fase 2.1b
+
+Editados:
+- `supabase/functions/generate-sitemap/index.ts` — +4 comentários XML de metadata; deploy automático aplicado.
+- `package.json` — `predev` + `prebuild` hooks.
+- `src/lib/seoSurfaceDrift.test.ts` — +2 testes (marcador + audit JSON).
+
+Criados:
+- `scripts/generate-sitemap.ts` — materializador (89 linhas, falha segura).
+- `public/.sitemap-source.json` — audit trail commitado (hash/timestamp/count).
+
+Materializado:
+- `public/sitemap.xml` — 32.206 bytes, 54 produtos, namespace `/produtos`, sha256 registrado em `.sitemap-source.json`.
