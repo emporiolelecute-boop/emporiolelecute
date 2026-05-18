@@ -10,6 +10,9 @@ export interface CartItem {
   image: string;
   personalization?: string;
   minQuantity: number;
+  /** Quando o item foi adicionado como parte de um kit editorial. */
+  bundleId?: string;
+  bundleName?: string;
 }
 
 interface CartContextType {
