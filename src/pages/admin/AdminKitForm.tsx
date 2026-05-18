@@ -108,7 +108,15 @@ export default function AdminKitForm() {
         .sort((a, b) => a.position - b.position)
         .map((r) => ({ product_id: r.product_id, quantity: r.quantity ?? 1 }))
     );
+    setDirty(false);
   }, [existing]);
+
+  // Marca dirty em qualquer edição após o load inicial.
+  useEffect(() => {
+    if (isLoading) return;
+    setDirty(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, items]);
 
   const productMap = useMemo(() => {
     const m = new Map<string, { id: string; name: string; slug: string; images: string[]; min_quantity: number }>();
