@@ -130,16 +130,17 @@ export function useDbProduct(slug: string) {
   return useQuery({
     queryKey: ['product', slug],
     queryFn: async () => {
-      const resolved = await resolveProductSlug(slug);
+      const result = await resolveProductSlug(slug);
 
-      if (resolved.status === 'unknown') {
-        logSlugEvent({ event: 'unknown_slug', matchedSlug: resolved.matchedSlug });
+      if (result.status === 'unknown') {
+        logSlugEvent({ event: 'unknown_slug', matchedSlug: result.matchedSlug });
         return null;
       }
-      if (resolved.status === 'inactive') {
-        logSlugEvent({ event: 'inactive_alias_attempt', matchedSlug: resolved.matchedSlug });
+      if (result.status === 'inactive') {
+        logSlugEvent({ event: 'inactive_alias_attempt', matchedSlug: result.matchedSlug });
         return null;
       }
+      const resolved = result; // narrowed to ResolvedSlug
 
       // Telemetria fire-and-forget
       recordProductSlugHit(resolved.matchedSlug);
