@@ -27,6 +27,7 @@ import {
 } from '@/hooks/useProducts';
 import { useTags, useUpdateProductTags } from '@/hooks/useTags';
 import { useSlugAvailability } from '@/hooks/useSlugAvailability';
+import { generateSafeSlug, assessSlugQuality } from '@/lib/slugHardening';
 import { useSegments, useUpdateProductSegments } from '@/hooks/useSegments';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateProductSeo } from '@/lib/productSeo';
