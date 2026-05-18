@@ -663,6 +663,14 @@ const ProductPage = () => {
                 quantity={quantity}
                 personalization={personalization}
                 onWhatsApp={() => openWhatsApp("quick_summary")}
+                productSlug={product.slug}
+                enabled={ctaConfig?.quickSummary?.enabled !== false}
+                title={ctaConfig?.quickSummary?.title}
+                minLabel={ctaConfig?.quickSummary?.minLabel}
+                prazoLabel={ctaConfig?.quickSummary?.prazoLabel}
+                shippingLabel={ctaConfig?.quickSummary?.shippingLabel}
+                shippingValue={ctaConfig?.quickSummary?.shippingValue}
+                ctaLabel={ctaConfig?.quickSummary?.ctaLabel}
               />
 
               {/* Note about shipping */}
