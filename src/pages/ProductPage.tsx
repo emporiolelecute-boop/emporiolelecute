@@ -62,6 +62,7 @@ import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 import { resolvePrimaryAction } from "@/lib/primaryAction";
 import { logSlugEvent } from "@/lib/slugObservability";
+import { urls } from "@/lib/urls";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -131,7 +132,7 @@ const ProductPage = () => {
     const meta = dbProduct?.__slugMeta;
     if (!meta || !meta.shouldRedirect) return;
     if (didReplaceRef.current) return;
-    const targetPath = `/produtos/${meta.primarySlug}`;
+    const targetPath = urls.product(meta.primarySlug);
     if (window.location.pathname === targetPath) {
       logSlugEvent({
         event: "loop_prevented",
@@ -371,14 +372,14 @@ const ProductPage = () => {
     });
   }
   const canonicalSlug = slugMeta?.primarySlug ?? product.slug;
-  const canonicalUrl = `https://emporiolelecute.com.br/produtos/${canonicalSlug}`;
+  const canonicalUrl = urls.productCanonical(canonicalSlug);
 
   // Fase 1.5 — observabilidade de canonical_mismatch: se já houve replace
   // (ou nem deveria ter), o pathname final precisa bater com o canonical.
   // Só roda quando a meta está estabilizada e o replace já não é mais devido.
   useEffect(() => {
     if (!slugMeta || slugMeta.shouldRedirect) return;
-    const expected = `/produtos/${canonicalSlug}`;
+    const expected = urls.product(canonicalSlug);
     const actual = window.location.pathname;
     if (actual !== expected) {
       logSlugEvent({
