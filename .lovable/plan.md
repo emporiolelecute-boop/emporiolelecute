@@ -1,259 +1,271 @@
-# SEO Control Plane — MVP
+# SEO Autopilot — Execution Core (MVP honesto)
 
-## Princípio (importante para evitar regressão)
+## Realidade vs ambição da spec
 
-O projeto já tem **50 tabelas `seo_***` e a tabela genérica `**seo_check_runs**` com coluna `checks jsonb` desenhada exatamente para o caso de uso de "rodar checks e persistir findings". **Não vou criar tabelas novas** — vou reusar `seo_check_runs` com `source='control_plane'`. Isso elimina drift de schema e respeita a arquitetura existente.
+A spec pede "auto-fix" para 9 categorias de finding. Antes de codar, separar o que é **realmente auto-fixável em runtime** vs o que exige **mudança de código ou conteúdo humano** (e portanto não pode ser auto-aplicado sem risco).
+
+
+| Finding                          | Auto-fixável?              | Razão                                                                               |
+| -------------------------------- | -------------------------- | ----------------------------------------------------------------------------------- |
+| Sitemap drift (DB↔sitemap)       | ✅ **Sim**                  | Já existe edge `generate-sitemap` que regenera do DB. Autopilot só precisa invocar. |
+| Sitemap não submetido            | ✅ **Sim**                  | Edge `seo-sitemap-auto-resubmit` existe.                                            |
+| Rota nova sem entrada no sitemap | ✅ **Sim**                  | Subset do caso acima.                                                               |
+| Prerender retornando erro        | ⚠️ **Diagnóstico**         | É bug de código no `prerender/index.ts`. Autopilot loga issue, não auto-corrige.    |
+| JSON-LD ausente em produto       | ⚠️ **Diagnóstico**         | Prerender já gera JSON-LD do DB. Se ausente → bug ou produto sem dados.             |
+| 404 sem noindex                  | ⚠️ **Diagnóstico**         | Já implementado no prerender atual. Se quebrar = bug de código.                     |
+| OG image ausente em produto      | ⚠️ **Diagnóstico**         | Vem de `products.images[0]`. Se faltar = produto sem imagem no DB → ação humana.    |
+| Canonical ausente                | ⚠️ **Diagnóstico**         | Bug de código.                                                                      |
+| Order/loop entre fixes           | ✅ **Prevenido por design** | Rate limit + cooldown.                                                              |
+
+
+**Decisão honesta:** Autopilot executa **2 ações reais** (regen + resubmit sitemap) e **enfileira o resto** como issues acionáveis para revisão humana ou correção de código. Isso entrega valor real sem fingir poderes que o sistema não tem.
 
 ## O que vou entregar
 
-### 1. Edge Function `seo-control-plane` (nova)
+### 1. Edge Function `seo-autopilot` (nova)
 
-Roda server-side todas as validações e grava 1 linha em `seo_check_runs`.
+Pipeline determinístico:
 
-**Etapas internas (ordem):**
-
-1. **Coletar fontes de verdade**
-  - `products` ativos (slug)
-  - `categories`, `occasions`, `tags` (slug + `is_indexed`)
-  - `pages` (slug)
-  - sitemap atual (fetch de `https://emporiolelecute.com.br/sitemap.xml`)
-  - registry de rotas do prerender (constante interna, espelha `resolve()` em `prerender/index.ts`)
-2. **Diffs**
-  - `sitemap_missing_from_db` — URLs órfãs no sitemap
-  - `db_missing_from_sitemap` — produtos/categorias indexáveis ausentes do sitemap
-  - `prerender_missing` — rotas no sitemap sem handler no prerender
-  - `sitemap_missing_for_prerender` — handler existe mas sitemap não tem (warning)
-3. **Bot simulation** (amostra de 5 rotas críticas: `/`, `/produtos`, 1 produto random, 1 categoria random, 1 rota inválida)
-  - Chama a Edge `prerender?path=...` direto (cross-function call, mesma região)
-  - Valida no HTML retornado: `<title>` presente e não vazio; `<meta name="description">`; `<link rel="canonical">`; `og:image`; pelo menos 1 `<script type="application/ld+json">` parseável; `noindex` correto para rota inválida
-  - Resultados anexados como findings
-4. **Classificação por severidade**
-  - 🔴 crítico: prerender de rota indexável quebrado, JSON-LD ausente em produto, 404 retornando index
-  - 🟠 warning: drift sitemap↔DB, OG ausente
-  - 🟢 ok: tudo presente
-5. **Persistir** 1 linha em `seo_check_runs`:
+1. **Carregar** última run de `seo_check_runs` com `source='control_plane'` (idade máx 24h).
+2. **Filtrar + ordenar** findings: indexation critical → data_integrity → social_preview.
+3. **Planejar ações** (dry-run sempre primeiro):
+  - Se há `diff:missing_in_sitemap` ou `diff:orphan_in_sitemap` → plan `regen_sitemap`
+  - Se houve mudança no sitemap → plan `resubmit_sitemap`
+  - Demais findings → plan `log_issue` (não executa correção)
+4. **Safety layer**:
+  - Máx 1 `regen_sitemap` por run
+  - Máx 1 `resubmit_sitemap` por run
+  - Máx 10 ações totais por run
+  - Cooldown global: 1 run autopilot a cada 30min (lê `seo_check_runs` source=autopilot)
+  - `mode: 'dry_run' | 'execute'` no body (default `dry_run`)
+5. **Executar** (se `mode='execute'` e plano OK):
+  - Invocar `generate-sitemap` (já existe)
+  - Invocar `seo-sitemap-auto-resubmit` (já existe)
+6. **Validação pós-fix**: invocar `seo-control-plane` para nova run e comparar `errors`/`warnings` antes vs depois.
+7. **Persistir** 1 linha em `seo_check_runs` com `source='autopilot'`:
   ```json
-   { source: "control_plane", total, passed, errors, warnings, checks: [{id, severity, category, message, url?, evidence?}, ...] }
+   {
+     mode, plan: [...], executed: [...], skipped: [{action, reason}],
+     failed: [...], validation: {before, after, regression: bool},
+     control_plane_run_id_before, control_plane_run_id_after
+   }
   ```
 
-### 2. Página `/admin/seo-control-plane` (nova)
+### 2. UI: aba "Autopilot" em `/admin/seo-control-plane`
 
-Lê últimas 10 runs de `seo_check_runs` filtradas por `source='control_plane'`. Mostra:
+Reusar página existente. Adicionar 3ª/4ª tab:
 
-- Botão **"Run now"** (chama a edge function on-demand)
-- Status pill da última run (🔴/🟠/🟢)
-- Cards: Sitemap coverage, Prerender coverage, Bot simulation, Drift alerts
-- Tabela: últimas 10 runs com expandable de findings
-- Cache headers do prerender (extraídos do bot simulation step)
+- **Plano (dry-run)** — botão "Planejar ações" mostra o que seria feito sem executar.
+- **Executar** — botão com confirmação. Mostra resultado: ações OK, validation diff, regressão.
+- **Histórico Autopilot** — últimas 10 runs source='autopilot'.
 
-### 3. Adicionar rota em `App.tsx`
+### 3. Hook `useSeoAutopilot`
 
-- `/admin/seo-control-plane` → novo componente lazy-loaded
-
-### 4. (Opcional, depois) Cron semanal
-
-Não vou criar agora — o projeto já tem muitos crons (`seo_check_runs` já é alimentado por `seo-checks`). Documento como ligar; user decide se quer.
+Análogo a `useSeoControlPlane`. `plan()` chama com `mode='dry_run'`, `execute()` com `mode='execute'`.
 
 ## Arquivos
 
-1. **CRIAR** `supabase/functions/seo-control-plane/index.ts` — orquestrador.
-2. **CRIAR** `src/pages/admin/AdminSeoControlPlane.tsx` — UI.
-3. **CRIAR** `src/hooks/useSeoControlPlane.ts` — fetch últimas runs + trigger.
-4. **EDITAR** `src/App.tsx` — adicionar route + lazy import.
+1. **CRIAR** `supabase/functions/seo-autopilot/index.ts`
+2. **CRIAR** `src/hooks/useSeoAutopilot.ts`
+3. **EDITAR** `src/pages/admin/AdminSeoControlPlane.tsx` — adicionar tabs Autopilot
 
-## Não-objetivos (cuidado contra escopo creep)
+## Não-objetivos (anti-escopo creep e anti-mentira)
 
-- ❌ Não criar nova tabela (reuso `seo_check_runs`).
-- ❌ Não escrever no DB nada além da linha de run (read-only sobre dados).
-- ❌ Não fazer scraping de Google ou serviço externo.
-- ❌ Não adicionar item ao sidebar de admin agora (rota acessível por URL direta + entry futura no AdminSeoCommandCenter — sidebar já tem 50+ entradas seo_*).
-- ❌ Não criar cron ainda.
+- ❌ Não criar tabela nova (reuso `seo_check_runs`).
+- ❌ Não escrever em `products`, `categories`, etc — nenhuma mutação de dados de domínio.
+- ❌ Não "reescrever JSON-LD em runtime" — isso seria fingir auto-fix para bug de código.
+- ❌ Não invalidar cache do Cloudflare Worker (não temos credencial e não está no escopo desta sessão).
+- ❌ Não criar cron — execução fica manual via UI por enquanto.
 
 ## Riscos e mitigação
 
 
-| Risco                                                    | Mitigação                                                                 |
-| -------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Cross-function call ao prerender pode adicionar latência | timeout 10s, fetch em paralelo, máx 5 rotas                               |
-| `seo_check_runs.checks` JSON cresce muito                | Limitar findings a 100 por run, truncar evidence                          |
-| Fetch do sitemap em prod pode falhar em preview          | Try/catch + finding 🟠 "sitemap inacessível" em vez de erro fatal         |
-| Falsos positivos de "rota indexável sem prerender"       | Lista de exclusão hardcoded (admin/, carrinho, etc.) idêntica à do Worker |
+| Risco                                   | Mitigação                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Loop autopilot ↔ control_plane          | Cooldown 30min + flag `triggered_by` no payload                                             |
+| Sitemap regen falhar em prod            | Try/catch, rollback = não-op (sitemap antigo continua válido), finding `error` no relatório |
+| Falso "regression" no validation        | Comparar só `errors` count, não `warnings` (mais ruidoso)                                   |
+| Auto-fix mascarar bug real de prerender | Issues vão para `log_issue` com severity preservada, visíveis no painel                     |
 
 
 ## Critério de sucesso
 
-- Rodar "Run now" no admin produz uma linha em `seo_check_runs` em < 15s.
-- Para cada rota crítica, 5 validações (title/desc/canonical/og/jsonld) com pass/fail visível.
-- Diff DB↔sitemap detecta um produto novo criado e ainda não publicado no sitemap.
-- Rota inválida é marcada como 🔴 se prerender devolver `index,follow`.
-- Zero schema migration; zero mudança no site público.
+- Dry-run produz um plano legível em < 5s.
+- Execute em `mode='execute'`: sitemap regenerado, validação re-roda, regressão detectada se errors aumentarem.
+- Findings não auto-fixáveis aparecem como "skipped" com razão clara (não falham silenciosamente).
+- Zero mutação de dados de produto/categoria.
+- Zero migration; zero mudança no site público.
 
 &nbsp;
 
-Aqui está o **texto de adendo técnico direto para colar junto ao plano do Lovable**, sem interpretação adicional:
+&nbsp;
+
+# ADENDO ÚNICO (para anexar no plano do Lovable)
+
+Aqui está o patch direto, copiável:
 
 ---
 
-# 🔧 ADENDO TÉCNICO OBRIGATÓRIO — SEO CONTROL PLANE (STABILITY PATCH)
+## 🔧 ADENDO — EXPANSÃO SEGURA DO AUTOPILOT (TEMPLATE REPAIR LAYER)
 
-Este adendo complementa o plano “SEO Control Plane — MVP” e deve ser aplicado **antes da implementação em produção** para garantir consistência de dados, evitar falsos positivos e estabilizar validações de prerender.
+Este adendo complementa o “SEO Autopilot — Execution Core (MVP honesto)” sem alterar seu modelo de segurança ou introduzir mutações em dados de domínio.
 
 ---
 
-## 1. Snapshot temporal consistente (OBRIGATÓRIO)
+## 1. Nova categoria: TEMPLATE-REPAIR (determinística e segura)
 
-Toda execução do control plane deve usar um **timestamp único de referência** para todas as fontes de dados.
+Além de:
 
-### Requisito:
+- sitemap regeneration
+- sitemap resubmit
+- logging de issues
 
-- Definir no início da execução:
-
-```ts
-const run_timestamp = new Date().toISOString();
+adicionar categoria intermediária:
 
 ```
 
-### Aplicação obrigatória:
-
-- Queries de DB (`products`, `categories`, `occasions`, `pages`) devem considerar apenas registros com:
-
-```sql
-updated_at <= run_timestamp
-
 ```
 
-- Sitemap fetch deve ser tratado como snapshot da execução (cache bust obrigatório por run).
-
-### Objetivo:
-
-Evitar falsos drift causados por diferenças temporais entre:
-
-- DB state
-- sitemap state
-- prerender state
+```
+template_repair
+```
 
 ---
 
-## 2. Expansão mínima da simulação de bots (OBRIGATÓRIO)
+## 2. O que entra em TEMPLATE-REPAIR
 
-Substituir amostragem fixa de 5 rotas por:
+São casos que NÃO são bug de código nem dados faltantes, mas:
 
-### Conjunto de validação:
-
-- 5 rotas fixas críticas:
-  - `/`
-  - `/produtos`
-  - `/produto/:slug` (1 exemplo)
-  - `/categoria/:slug` (1 exemplo)
-  - `/rota-invalida`
-- &nbsp;
-
-- amostragem dinâmica:
-
-- 5 produtos aleatórios
-- 3 categorias aleatórias
-- 2 landings SEO aleatórias
-
-### Objetivo:
-
-Garantir cobertura estatística mínima para detectar:
-
-- produtos sem JSON-LD
-- categorias sem OG
-- landings sem metadata
-- drift silencioso em subconjuntos
-
----
-
-## 3. Classificação de severidade com dimensão de impacto (OBRIGATÓRIO)
-
-Substituir modelo atual por estrutura expandida:
-
-Cada finding deve conter:
-
-```json
-{
-  "severity": "critical | warning | ok",
-  "impact": "indexation | social_preview | data_integrity"
-}
-
-```
+> renderização previsível baseada em fallback determinístico
 
 ### Regras:
 
-- **indexation** → Google SEO (ranking / crawl / index)
-- **social_preview** → WhatsApp / LinkedIn / Twitter unfurl
-- **data_integrity** → sitemap / DB / prerender inconsistencies
+### 2.1 OG tags ausentes
+
+Se `og:*` não estiver presente no prerender:
+
+GERAR:
+
+-   
+og:title = title existente ou [product.name](http://product.name)  
+
+-   
+og:description = description ou fallback DB  
+
+-   
+og:image = product.images[0] ou placeholder CDN seguro  
+
+-   
+og:url = canonical  
+
+
+👉 isso é SAFE (não modifica DB)
 
 ---
 
-## 4. Proteção contra timeout de prerender (OBRIGATÓRIO)
+### 2.2 JSON-LD ausente (quando dados existem)
 
-Todas as chamadas para `prerender` devem ter controle de timeout:
+Se produto/categoria existe no DB:
 
-### Regra:
+→ regenerar schema no nível do edge render (não persistir)
 
-- timeout máximo: **10 segundos**
+-   
+Product schema  
 
-### Comportamento:
+-   
+Offer schema  
 
-- se timeout exceder:
-  - NÃO falhar a execução
-  - registrar finding:
+-   
+Breadcrumb schema  
 
-```json
-{
-  "severity": "warning",
-  "message": "prerender timeout exceeded",
-  "impact": "indexation"
-}
 
+👉 sempre derivado do DB, nunca manual
+
+---
+
+### 2.3 Canonical ausente
+
+Gerar:
+
+```
+
+```
+
+```
+canonical = base_url + pathname
+```
+
+Sem depender de código React
+
+---
+
+## 3. Regra de execução expandida
+
+O Autopilot passa a ter 3 níveis:
+
+
+| Tipo            | Ação                              |
+| --------------- | --------------------------------- |
+| infrastructure  | sitemap regen / resubmit          |
+| template_repair | OG / JSON-LD / canonical fallback |
+| diagnostics     | log_issue                         |
+
+
+---
+
+## 4. Regra de segurança (IMPORTANTE)
+
+Template-repair:
+
+-   
+NÃO grava no DB  
+
+-   
+NÃO altera produtos  
+
+-   
+NÃO persiste SEO fields  
+
+-   
+apenas altera OUTPUT do prerender runtime  
+
+
+---
+
+## 5. Novo fluxo de decisão
+
+```
+
+```
+
+```
+if finding is indexation critical:
+    if fixable via template_repair:
+        apply template_repair
+    else:
+        log_issue
+
+if finding is sitemap:
+    execute infrastructure fix
+
+if finding is ambiguous:
+    log_issue
 ```
 
 ---
 
-## 5. Normalização de cache de sitemap (OBRIGATÓRIO)
+## 6. Resultado esperado
 
-Ao buscar sitemap:
+Com este adendo:
 
-- sempre aplicar cache bust por execução
-- não reutilizar cache entre runs diferentes
+-   
+elimina “falsos diagnósticos humanos”  
 
-Exemplo:
+-   
+reduz dependência de intervenção manual  
 
-```
-/sitemap.xml?run_timestamp=...
+-   
+mantém segurança total (sem mutation de DB)  
 
-```
-
-### Objetivo:
-
-Evitar comparação de snapshots diferentes entre runs consecutivos.
-
----
-
-## 6. Regra de consistência final (critério de validação)
-
-O sistema só é considerado estável quando:
-
-- DB snapshot = sitemap snapshot = prerender snapshot (mesmo run_timestamp)
-- bot simulation cobre:
-  - rotas críticas
-  - amostragem estatística de conteúdo dinâmico
-- nenhum finding crítico de:
-  - JSON-LD ausente em produto
-  - 404 sem noindex
-  - prerender timeout não tratado
-
----
-
-## 7. Garantia de não regressão
-
-Este adendo não altera:
-
-- schema de banco de dados
-- frontend React
-- worker Cloudflare existente
-- lógica de prerender atual
-
-Apenas adiciona **camada de consistência e validação temporal ao control plane**.
+-   
+aumenta cobertura real do autopilot de ~20% → ~60%

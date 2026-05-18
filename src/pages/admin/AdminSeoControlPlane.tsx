@@ -14,6 +14,7 @@ import {
   Database, FileSearch, Layers,
 } from "lucide-react";
 import { useSeoControlPlane, type ControlPlaneFinding } from "@/hooks/useSeoControlPlane";
+import AutopilotPanel from "@/components/admin/AutopilotPanel";
 
 const sevColor: Record<string, string> = {
   critical: "destructive",
@@ -184,6 +185,7 @@ export default function AdminSeoControlPlane() {
           <TabsTrigger value="latest">Findings atuais</TabsTrigger>
           <TabsTrigger value="history">Histórico (10 últimas)</TabsTrigger>
           <TabsTrigger value="cache">Cache prerender</TabsTrigger>
+          <TabsTrigger value="autopilot">Autopilot</TabsTrigger>
         </TabsList>
 
         <TabsContent value="latest" className="mt-4">
@@ -231,6 +233,10 @@ export default function AdminSeoControlPlane() {
               <div className="text-sm text-muted-foreground">Sem dados ainda.</div>
             )}
           </CardContent></Card>
+        </TabsContent>
+
+        <TabsContent value="autopilot" className="mt-4">
+          <AutopilotPanel />
         </TabsContent>
       </Tabs>
     </div>
