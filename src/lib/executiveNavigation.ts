@@ -146,6 +146,7 @@ export const EXECUTIVE_NAV: NavGroup[] = [
       { label: "Taxonomias", path: "/admin/taxonomias", icon: "Sparkles" },
       { label: "Cupons", path: "/admin/cupons", icon: "Tag" },
       { label: "Coleções", path: "/admin/colecoes", icon: "Boxes" },
+      { label: "Kits editoriais", path: "/admin/kits", icon: "Package" },
     ],
   },
   {
