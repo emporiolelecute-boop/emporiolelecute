@@ -71,7 +71,16 @@ const ProductPage = () => {
   const [quantityInput, setQuantityInput] = useState<string>("10");
   const [personalization, setPersonalization] = useState("");
   const [addedToCart, setAddedToCart] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
   const { toast } = useToast();
+
+  // Sticky CTA aparece após o usuário rolar além da dobra (~520px) no mobile.
+  useEffect(() => {
+    const onScroll = () => setShowStickyCta(window.scrollY > 520);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Convert to display format
   const product = dbProduct ? {
