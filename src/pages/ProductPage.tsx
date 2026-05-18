@@ -34,6 +34,7 @@ import ProductCard from "@/components/ProductCard";
 import RelatedProducts from "@/components/RelatedProducts";
 import RelatedByTaxonomy from "@/components/RelatedByTaxonomy";
 import ProductGallery from "@/components/ProductGallery";
+import { StickyAddToCart } from "@/components/StickyAddToCart";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import ProductStructuredData from "@/components/ProductStructuredData";
@@ -70,7 +71,16 @@ const ProductPage = () => {
   const [quantityInput, setQuantityInput] = useState<string>("10");
   const [personalization, setPersonalization] = useState("");
   const [addedToCart, setAddedToCart] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
   const { toast } = useToast();
+
+  // Sticky CTA aparece após o usuário rolar além da dobra (~520px) no mobile.
+  useEffect(() => {
+    const onScroll = () => setShowStickyCta(window.scrollY > 520);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Convert to display format
   const product = dbProduct ? {
@@ -151,18 +161,58 @@ const ProductPage = () => {
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      toast({ 
-        title: "Link copiado!", 
-        description: "O link do produto foi copiado para a área de transferência." 
+      toast({
+        title: "Link copiado!",
+        description: "O link do produto foi copiado para a área de transferência."
       });
     } catch {
-      toast({ 
-        title: "Erro ao copiar", 
-        description: "Não foi possível copiar o link.", 
-        variant: "destructive" 
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o link.",
+        variant: "destructive"
       });
     }
   };
+
+  // ---- WhatsApp builder reutilizado pelo CTA inline e sticky mobile ----
+  const buildWhatsAppMessage = () => {
+    if (!product) return { url: "", utmCampaign: "" };
+    const utmCampaign = `produto_${product.slug}`;
+    const ctxParts: string[] = [];
+    if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
+    if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
+    if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
+    const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
+    const imgLine = product.images?.[0] ? `\n🖼️ Imagem: ${product.images[0]}` : '';
+    const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
+
+📝 *Detalhes:*
+- Quantidade: ${quantity} unidades
+${personalization ? `- Personalização: ${personalization}\n` : ''}- Link: ${window.location.href}${imgLine}
+
+Poderia me ajudar com o valor do frete e prazos?`;
+    return {
+      url: buildWhatsAppUrl({
+        phone,
+        message: waMsg,
+        utm_source: "pdp",
+        utm_medium: "whatsapp_cta",
+        utm_campaign: utmCampaign,
+        utm_content: product.slug,
+      }),
+      utmCampaign,
+    };
+  };
+
+  const openWhatsApp = (source: "product_page" | "sticky_cta" = "product_page") => {
+    if (!product) return;
+    const { url, utmCampaign } = buildWhatsAppMessage();
+    if (!url) return;
+    trackInquiry(product.name, product.id);
+    trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
 
   if (isLoading) {
     return (
@@ -332,16 +382,42 @@ const ProductPage = () => {
 
             {/* Info Section - Reference Style */}
             <div className="flex flex-col">
-              {/* Product Name & Rating */}
-              <div className="flex items-start justify-between gap-4 mb-3">
+              {/* Product Name & Rating + Social Proof (Q2) */}
+              <div className="flex items-start justify-between gap-4 mb-2">
                 <h1 className="font-display text-2xl md:text-3xl text-foreground leading-tight">
                   {product.name}
                 </h1>
-                <div className="flex items-center gap-1 bg-amber-400 text-white px-2 py-1 rounded-md flex-shrink-0">
-                  <Star className="h-4 w-4 fill-white" />
-                  <span className="font-bold text-sm">{product.rating.toFixed(1)}</span>
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 bg-amber-400 text-white px-2 py-1 rounded-md">
+                    <Star className="h-4 w-4 fill-white" />
+                    <span className="font-bold text-sm">
+                      {reviewStats?.avg_rating ? Number(reviewStats.avg_rating).toFixed(1) : product.rating.toFixed(1)}
+                    </span>
+                  </div>
+                  {reviewStats?.review_count ? (
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      {reviewStats.review_count} {reviewStats.review_count === 1 ? "avaliação" : "avaliações"}
+                    </span>
+                  ) : null}
                 </div>
               </div>
+
+              {/* Quick trust row — mínimo + prazo (Q3) */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                  <Package className="h-3.5 w-3.5" />
+                  Mínimo {product.minQuantity} un.
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                  <Clock className="h-3.5 w-3.5" />
+                  Pronto em {product.productionDays} dias úteis
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                  <Truck className="h-3.5 w-3.5" />
+                  Envio Brasil
+                </span>
+              </div>
+
 
               {/* Category, Occasions & Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
@@ -634,37 +710,17 @@ const ProductPage = () => {
                 </div>
               )}
 
-              {/* WhatsApp — CTA inteligente Fase 7 */}
+              {/* WhatsApp — CTA inteligente (mensagem enriquecida via buildWhatsAppMessage) */}
               {(() => {
-                const utmCampaign = `produto_${product.slug}`;
-                const ctxParts: string[] = [];
-                if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
-                if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
-                if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
-                const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
-                const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
-
-📝 *Detalhes:*
-- Quantidade: ${quantity} unidades
-${personalization ? `- Personalização: ${personalization}` : ''}- Link: ${window.location.href}
-
-Poderia me ajudar com o valor do frete e prazos?`;
-                const waUrl = buildWhatsAppUrl({
-                  phone,
-                  message: waMsg,
-                  utm_source: "pdp",
-                  utm_medium: "whatsapp_cta",
-                  utm_campaign: utmCampaign,
-                  utm_content: product.slug,
-                });
+                const { url } = buildWhatsAppMessage();
                 return (
                   <a
-                    href={waUrl}
+                    href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => {
-                      trackInquiry(product.name, product.id);
-                      trackWhatsAppClick({ source: "product_page", context: product.slug, utm_campaign: utmCampaign });
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openWhatsApp("product_page");
                     }}
                     className="flex items-center justify-center gap-3 p-4 mt-4 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl font-bold shadow-lg hover:shadow-green-200 transition-all duration-300 transform hover:-translate-y-1"
                   >
@@ -815,6 +871,15 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       <Footer />
       <WhatsAppButton />
       <Chatbot />
+
+      {/* Sticky CTA mobile (Q1) — aparece após scroll */}
+      <StickyAddToCart
+        productName={product.name}
+        price={`R$ ${product.price.toFixed(2).replace('.', ',')}`}
+        isVisible={showStickyCta}
+        onWhatsApp={() => openWhatsApp("sticky_cta")}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };
