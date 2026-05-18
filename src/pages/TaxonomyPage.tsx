@@ -126,10 +126,6 @@ const TaxonomyPage = ({ kind }: Props) => {
   const dbProducts = productsQuery.data ?? [];
 
   // ============ FILTROS ============
-  const { data: dbCategories } = useDbCategories();
-  const { data: dbOccasions } = useDbOccasions();
-  const { data: dbTags } = useTags();
-  const { data: dbSegments } = useSegments();
   const [filters, setFilters] = useCatalogFiltersFromUrl();
 
   const normalized = useMemo(
@@ -143,6 +139,9 @@ const TaxonomyPage = ({ kind }: Props) => {
       })),
     [dbProducts]
   );
+
+  // Facets derived from the current taxonomy subset (not global lists)
+  const facets = useMemo(() => deriveFacets(normalized), [normalized]);
 
   const priceBounds = useMemo(() => priceBoundsFrom(normalized), [normalized]);
   const filtered = useMemo(() => sortByFeatured(applyCatalogFilters(normalized, filters)), [normalized, filters]);
