@@ -7,6 +7,7 @@
  */
 
 import { canBeIndexed, type IndexableEntity } from "./indexationGovernance";
+import { urls } from "./urls";
 
 export type LinkKind = "theme" | "occasion" | "segment" | "category" | "blog" | "combination";
 
@@ -97,7 +98,7 @@ export function buildContextualLinksForProduct(
   ctx: BuildContext
 ): ContextualLink[] {
   const used = new Set<string>();
-  const selfPath = `/produtos/${product.slug}`;
+  const selfPath = urls.product(product.slug);
   const links = [
     ...pickFrom(ctx.occasions, "occasion", 2, used),
     ...pickFrom(ctx.segments,  "segment",  1, used),

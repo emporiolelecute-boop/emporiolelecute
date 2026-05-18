@@ -1,11 +1,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { CANONICAL_ORIGIN, productAbsolute } from '../_shared/urls.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SITE_URL = 'https://emporiolelecute.com.br'
+const SITE_URL = CANONICAL_ORIGIN
 const BRAND = 'Empório LeleCute'
 
 // Default Google Product Category for handmade/artisan products
@@ -352,7 +353,7 @@ function formatProductForFeed(product: Product, config: MerchantFeedConfig, site
     id: product.id,
     title,
     description,
-    link: `${siteUrl}/produtos/${product.slug}`,
+    link: productAbsolute(product.slug, siteUrl),
     image_link: mainImage,
     additional_image_links: additionalImages,
     availability: 'in_stock',

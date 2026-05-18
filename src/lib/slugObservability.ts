@@ -46,6 +46,15 @@ export type SlugLogEvent =
       event: "redirect_chain_detected";
       hopFrom: string;
       hopTo: string;
+    } & BaseLog)
+  // Fase 2.0 — namespace de produto: definido agora, ativado na Fase 2.2.
+  // Será emitido quando a rota legada (`/produtos/` pós-flip) for acessada
+  // e o `LegacyProductRedirect` for disparado. Inerte enquanto o prefixo
+  // canônico ainda for `/produtos`.
+  | ({
+      event: "legacy_namespace_hit";
+      legacyPrefix: string;
+      targetPrefix: string;
     } & BaseLog);
 
 export type SlugEventName = SlugLogEvent["event"];

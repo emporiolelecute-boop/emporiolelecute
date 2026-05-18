@@ -257,3 +257,55 @@ Rotas, sitemap, redirects ativos, canonical público, `App.tsx`, comportamento d
 ### Rollback
 
 Reverter os 7 arquivos. Schema intacto.
+
+---
+
+## Fase 2.0 — Refator estrutural pré-flip (SAFE MODE concluído)
+
+### Centralização total
+- `src/lib/urls.ts` é a fonte única de URL pública de produto no frontend.
+  Exporta: `PRODUCT_PATH_PREFIX`, `LEGACY_PRODUCT_PATH_PREFIX`,
+  `CANONICAL_ORIGIN`, `urls.product/productAbsolute/productCanonical/productShare`,
+  `isProductPath`, `isLegacyProductPath`.
+- `supabase/functions/_shared/urls.ts` é o espelho Deno: `productPath`,
+  `productAbsolute`, mesmas constantes. **Drift entre os dois quebra
+  canonical/sitemap/feed.**
+
+### Call-sites migrados (zero hardcode residual)
+Frontend público: `ProductCard`, `BestSellers`, `CrossSellComplete`,
+`VisualComposition`, `SearchBar`, `Carrinho`, `KitPage`, `LembrancinhasLanding`,
+`Loja`, `ItemListStructuredData`, `ProductStructuredData`, `RelatedContent`,
+`SocialSeoPreviews`, `internalLinking`, `linkOrchestrator`, `ProductPage`
+(replace target, canonical, mismatch observer).
+Admin: `AdminProducts`, `AdminProductReviews`, `AdminProductsHealth`,
+`AdminSEOReport`, `AdminConversionCTA`.
+Edge functions: `generate-sitemap`, `merchant-feed`.
+
+### Hardening
+- `RedirectHandler` agora ignora `/produtos/*` e `/produto/*` —
+  `product_slugs` resolver tem precedência absoluta.
+- `slugObservability` adiciona evento `legacy_namespace_hit`
+  (definido, inativo até Fase 2.2).
+
+### Hardcodes residuais autorizados (não migrar nesta fase)
+- `src/App.tsx` — definição de rotas e `LegacyProductRedirect` (Fase 2.2).
+- Comentários explicativos em `RedirectHandler.tsx`,
+  `slugObservability.ts`, `SocialSeoPreviews.tsx`.
+- Placeholders de UI em `AdminRedirects.tsx`, `AdminTracking.tsx`
+  (texto de exemplo para o admin).
+- `public/sitemap.xml` — sitemap estático. **Recomendação Fase 2.1**:
+  promover a edge function `generate-sitemap` como fonte oficial única
+  e deletar o estático. Materialização prebuild é alternativa, mas dobra
+  a superfície de drift.
+
+### Readiness para Fase 2.2
+- Flip do prefixo público requer alterar **apenas** `PRODUCT_PATH_PREFIX`
+  em ambos os arquivos (`src/lib/urls.ts` e `supabase/functions/_shared/urls.ts`),
+  inverter `LegacyProductRedirect` e a ordem das rotas em `App.tsx`,
+  regenerar sitemap + merchant feed.
+- Rollback: reverter as duas constantes + `App.tsx`. Janela segura ~72h.
+
+### Risco residual
+- Dois pontos de mudança (frontend + edge) — drift só é detectável por
+  grep ou QA visual de sitemap/feed. Mitigação: comentário cruzado em
+  ambos os arquivos + checklist obrigatório no flip.

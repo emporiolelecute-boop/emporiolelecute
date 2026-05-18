@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { urls, CANONICAL_ORIGIN } from '@/lib/urls';
 
 interface ItemListProduct {
   name: string;
@@ -16,8 +17,6 @@ interface ItemListStructuredDataProps {
 const ItemListStructuredData = ({ products, listName = "Produtos em Destaque" }: ItemListStructuredDataProps) => {
   if (!products || products.length === 0) return null;
 
-  const baseUrl = "https://emporiolelecute.com.br";
-  
   // Calculate priceValidUntil - one year from now in YYYY-MM-DD format
   const priceValidUntil = new Date();
   priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
@@ -36,7 +35,7 @@ const ItemListStructuredData = ({ products, listName = "Produtos em Destaque" }:
         "name": product.name,
         "description": product.description,
         "image": product.image,
-        "url": `${baseUrl}/produtos/${product.slug}`,
+        "url": urls.productCanonical(product.slug),
         "sku": product.slug,
         "brand": {
           "@type": "Brand",
@@ -44,7 +43,7 @@ const ItemListStructuredData = ({ products, listName = "Produtos em Destaque" }:
         },
         "offers": {
           "@type": "Offer",
-          "url": `${baseUrl}/produtos/${product.slug}`,
+          "url": urls.productCanonical(product.slug),
           "priceCurrency": "BRL",
           "price": Number(product.price.toFixed(2)),
           "priceValidUntil": priceValidUntilStr,
@@ -68,4 +67,6 @@ const ItemListStructuredData = ({ products, listName = "Produtos em Destaque" }:
   );
 };
 
+// CANONICAL_ORIGIN re-exported para call-sites que precisem usar baseUrl puro.
+export { CANONICAL_ORIGIN };
 export default ItemListStructuredData;

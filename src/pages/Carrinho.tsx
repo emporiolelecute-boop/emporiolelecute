@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateCoupon, type ValidCoupon } from "@/hooks/useCoupons";
 import { optimizeImage } from "@/lib/image";
+import { urls } from "@/lib/urls";
 
 interface AddressData {
   cep: string;
@@ -368,7 +369,7 @@ const Carrinho = () => {
                       key={item.id}
                       className="flex gap-4 pb-4 border-b border-border last:border-0 last:pb-0"
                     >
-                      <Link to={`/produtos/${item.slug}`} className="shrink-0">
+                      <Link to={urls.product(item.slug)} className="shrink-0">
                         <img 
                           src={optimizeImage(item.image, { width: 160, resize: "contain" })} 
                           alt={item.name}
@@ -377,7 +378,7 @@ const Carrinho = () => {
                       </Link>
                       <div className="flex-1 min-w-0">
                         <Link 
-                          to={`/produtos/${item.slug}`}
+                          to={urls.product(item.slug)}
                           className="font-semibold text-sm text-foreground hover:text-primary transition-colors line-clamp-2"
                         >
                           {item.name}

@@ -5,6 +5,7 @@ import { useDbProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
 import { optimizeImage } from "@/lib/image";
+import { urls } from "@/lib/urls";
 
 interface SearchBarProps {
   /** Destination path for "see all" + Enter submit. Default: /produtos */
@@ -89,7 +90,7 @@ const SearchBar = ({
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (selectedIndex >= 0 && suggestions[selectedIndex]) {
-        navigate(`/produtos/${suggestions[selectedIndex].slug}`);
+        navigate(urls.product(suggestions[selectedIndex].slug));
         setQuery("");
         setIsOpen(false);
         onResultSelect?.();
@@ -161,7 +162,7 @@ const SearchBar = ({
                 {suggestions.map((product, index) => (
                   <li key={product.id}>
                     <Link
-                      to={`/produtos/${product.slug}`}
+                      to={urls.product(product.slug)}
                       onClick={() => {
                         setQuery("");
                         setIsOpen(false);

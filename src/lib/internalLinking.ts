@@ -11,6 +11,7 @@
  */
 
 import type { SemanticGraph, SemanticNode } from "./semanticGraph";
+import { urls } from "./urls";
 
 export interface LinkSuggestion {
   href: string;
@@ -31,7 +32,7 @@ function pathFor(node: SemanticNode): string | null {
     case "tag":         return `/tag/${node.slug}`;
     case "post":        return `/blog/${node.slug}`;
     case "combination": return node.slug.startsWith("/") ? node.slug : `/${node.slug}`;
-    case "product":     return `/produtos/${node.slug}`;
+    case "product":     return urls.product(node.slug);
     default:            return null;
   }
 }

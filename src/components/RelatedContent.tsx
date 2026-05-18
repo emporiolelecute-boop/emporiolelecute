@@ -4,6 +4,7 @@
  */
 import { Link } from "react-router-dom";
 import { BookOpen, Tag as TagIcon, Package } from "lucide-react";
+import { PRODUCT_PATH_PREFIX } from "@/lib/urls";
 
 export interface RelatedItem {
   type: "post" | "category" | "occasion" | "segment" | "tag" | "product" | "theme";
@@ -35,7 +36,7 @@ const ROUTE_PREFIX: Record<RelatedItem["type"], string> = {
   occasion: "/ocasiao/",
   segment: "/segmento/",
   tag: "/tag/",
-  product: "/produtos/",
+  product: `${PRODUCT_PATH_PREFIX}/`,
   theme: "/tema/",
 };
 

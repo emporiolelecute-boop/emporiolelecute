@@ -28,6 +28,7 @@ import { renderWhatsAppMessage } from "@/lib/whatsappTemplate";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDbProducts } from "@/hooks/useProducts";
+import { urls, CANONICAL_ORIGIN } from "@/lib/urls";
 
 // ============================================================================
 // Pré-visualização padrão (quando nenhum produto é selecionado)
@@ -35,7 +36,7 @@ import { useDbProducts } from "@/hooks/useProducts";
 const FALLBACK_VARS = {
   productName: "Sabonete artesanal lavanda",
   productSlug: "sabonete-lavanda",
-  link: "https://emporiolelecute.com.br/produtos/sabonete-lavanda",
+  link: urls.productAbsolute("sabonete-lavanda"),
   quantity: 30,
   personalization: "Nome: Maria · Cor da fita: rosa",
   price: "R$ 12,90",
@@ -306,7 +307,7 @@ function PreviewTab({ template }: { template: string }) {
     ? renderWhatsAppMessage(template, {
         productName: product.name,
         productSlug: product.slug,
-        link: `${window.location.origin}/produtos/${product.slug}`,
+        link: urls.productShare(product.slug),
         quantity: qty,
         personalization,
         price: `R$ ${product.price.toFixed(2).replace(".", ",")}`,
@@ -615,7 +616,7 @@ function QATab({ draft }: { draft: ConversionCtaConfig }) {
 
   const completedCount = Object.values(checked).filter(Boolean).length;
   const total = CHECKLIST_ITEMS.length;
-  const productUrl = firstProduct ? `/produtos/${firstProduct.slug}` : "/produtos";
+  const productUrl = firstProduct ? urls.product(firstProduct.slug) : "/produtos";
 
   return (
     <div className="space-y-4">

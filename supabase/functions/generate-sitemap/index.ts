@@ -1,11 +1,16 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import {
+  CANONICAL_ORIGIN,
+  PRODUCT_PATH_PREFIX,
+  productAbsolute,
+} from '../_shared/urls.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SITE_URL = 'https://emporiolelecute.com.br'
+const SITE_URL = CANONICAL_ORIGIN
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -204,7 +209,7 @@ Deno.serve(async (req) => {
   
   <!-- Products Catalog -->
   <url>
-    <loc>${siteUrl}/produtos</loc>
+    <loc>${siteUrl}${PRODUCT_PATH_PREFIX}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
@@ -221,7 +226,7 @@ Deno.serve(async (req) => {
           : today
         
         sitemap += `  <url>
-    <loc>${siteUrl}/produtos/${product.slug}</loc>
+    <loc>${productAbsolute(product.slug, siteUrl)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>`

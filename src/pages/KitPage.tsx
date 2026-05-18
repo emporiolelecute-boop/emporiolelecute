@@ -14,6 +14,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { trackInquiry, trackWhatsAppClick, buildWhatsAppUrl, event as gaEvent } from "@/lib/analytics";
 import { optimizeImage } from "@/lib/image";
+import { urls } from "@/lib/urls";
 import { toast } from "@/hooks/use-toast";
 
 const SITE_ORIGIN = "https://emporiolelecute.com.br";
@@ -203,7 +204,7 @@ export default function KitPage() {
                 {items.map((it) => (
                   <Card key={it.id}>
                     <CardContent className="p-4 flex gap-4 items-center">
-                      <Link to={`/produtos/${it.slug}`} className="shrink-0">
+                      <Link to={urls.product(it.slug)} className="shrink-0">
                         <img
                           src={optimizeImage(it.images?.[0] || "/placeholder.svg", { width: 160 })}
                           alt={it.name}
@@ -212,7 +213,7 @@ export default function KitPage() {
                         />
                       </Link>
                       <div className="flex-1 min-w-0">
-                        <Link to={`/produtos/${it.slug}`} className="block hover:text-primary transition-colors">
+                        <Link to={urls.product(it.slug)} className="block hover:text-primary transition-colors">
                           <p className="font-medium truncate">{it.name}</p>
                         </Link>
                         <p className="text-sm text-muted-foreground">

@@ -11,6 +11,7 @@ import ItemListStructuredData from "@/components/ItemListStructuredData";
 import TrustBadges from "@/components/TrustBadges";
 import FAQSection from "@/components/FAQSection";
 import { useDbProducts } from "@/hooks/useProducts";
+import { urls } from "@/lib/urls";
 import logoImg from "@/assets/logo.webp";
 
 const WHATSAPP_URL = "https://wa.me/5541992214299?text=Olá! Vim pelo site e gostaria de saber mais sobre as lembrancinhas personalizadas.";
@@ -39,7 +40,7 @@ const Loja = () => {
       originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace(".", ",")}` : undefined,
       image: p.images?.[0] || "/placeholder.svg",
       images: p.images || [],
-      link: `/produtos/${p.slug}`,
+      link: urls.product(p.slug),
       badge: p.badge || undefined,
       rating: p.rating || 5,
       category: "outros" as const,
