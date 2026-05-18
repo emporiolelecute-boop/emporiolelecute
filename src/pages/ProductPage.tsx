@@ -211,23 +211,30 @@ const ProductPage = () => {
     }
   };
 
-  // ---- WhatsApp builder reutilizado pelo CTA inline e sticky mobile ----
+  // ---- WhatsApp builder reutilizado pelo CTA inline, sticky, summary e exit popup ----
+  // Lê SEMPRE o estado atual via valuesRef → sem delays de render (qty/personalização frescas).
   const buildWhatsAppMessage = () => {
     if (!product) return { url: "", utmCampaign: "" };
     const utmCampaign = `produto_${product.slug}`;
-    const ctxParts: string[] = [];
-    if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
-    if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
-    if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
-    const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
-    const imgLine = product.images?.[0] ? `\n🖼️ Imagem: ${product.images[0]}` : '';
-    const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
+    const liveQty = normalizeQuantity(valuesRef.current.quantity);
+    const livePersonalization = normalizePersonalization(valuesRef.current.personalization);
 
-📝 *Detalhes:*
-- Quantidade: ${quantity} unidades
-${personalization ? `- Personalização: ${personalization}\n` : ''}- Link: ${window.location.href}${imgLine}
+    const template = ctaConfig?.whatsappTemplate?.template
+      || "Olá! Tenho interesse no produto *{produto}*.{contexto}\n\n📝 *Detalhes:*\n- Quantidade: {qtd} unidades\n{personalizacao_linha}- Link: {link}{imagem_linha}\n\nPoderia me ajudar com o valor do frete e prazos?";
 
-Poderia me ajudar com o valor do frete e prazos?`;
+    const waMsg = renderWhatsAppMessage(template, {
+      productName: product.name,
+      productSlug: product.slug,
+      link: window.location.href,
+      quantity: liveQty,
+      personalization: livePersonalization,
+      price: `R$ ${product.price.toFixed(2).replace('.', ',')}`,
+      imageUrl: product.images?.[0],
+      category: dbProduct?.category?.name,
+      occasion: dbProduct?.occasions?.[0]?.name,
+      segment: dbProduct?.segments?.[0]?.name,
+    });
+
     return {
       url: buildWhatsAppUrl({
         phone,
@@ -247,17 +254,34 @@ Poderia me ajudar com o valor do frete e prazos?`;
     if (!product) return;
     const { url, utmCampaign } = buildWhatsAppMessage();
     if (!url) return;
+    const liveQty = normalizeQuantity(valuesRef.current.quantity);
+    const livePersonalized = Boolean(normalizePersonalization(valuesRef.current.personalization));
+
     trackInquiry(product.name, product.id);
     trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
-    // Evento granular adicional para o funil de PDP
     trackEvent("pdp_whatsapp_click", {
       source,
       product_id: product.id,
       product_slug: product.slug,
-      quantity,
-      personalized: Boolean(personalization?.trim()),
+      quantity: liveQty,
+      personalized: livePersonalized,
     });
     window.open(url, "_blank", "noopener,noreferrer");
+
+    // Confirmação visual + tracking pós-clique (reduz dúvida de "funcionou?")
+    if (ctaConfig?.toast?.enabled !== false) {
+      sonnerToast.success(
+        ctaConfig?.toast?.message || "Abrindo o WhatsApp…",
+        { duration: ctaConfig?.toast?.durationMs ?? 4000 }
+      );
+    }
+    trackEvent("whatsapp_click_confirmed", {
+      source,
+      product_id: product.id,
+      product_slug: product.slug,
+      quantity: liveQty,
+      personalized: livePersonalized,
+    });
   };
 
 
