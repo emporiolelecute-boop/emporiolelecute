@@ -241,6 +241,16 @@ export default function AdminKitForm() {
         </div>
       </div>
 
+      {autosave.hasDraft && (
+        <div className="rounded-md border border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3 text-sm">
+          <span>Rascunho local encontrado para este kit.</span>
+          <div className="flex gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={autosave.discard}>Descartar</Button>
+            <Button type="button" variant="outline" size="sm" onClick={autosave.restore}>Restaurar</Button>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-4">
