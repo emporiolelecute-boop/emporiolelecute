@@ -47,7 +47,7 @@ import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { useProductReviews, useProductReviewStats } from "@/hooks/useProductReviews";
 import ProductReviews from "@/components/ProductReviews";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
-import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
+import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick, event as trackEvent } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useCart } from "@/contexts/CartContext";
 import { useSemanticContext } from "@/hooks/useSemanticContext";
