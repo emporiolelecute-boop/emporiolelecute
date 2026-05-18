@@ -2,6 +2,7 @@ import { Component, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { logTelemetryEvent } from "@/lib/telemetry";
 
 interface State {
   err: Error | null;
