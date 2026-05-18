@@ -423,6 +423,22 @@ const AdminProductForm = () => {
                     )}
                     <span>{slugCheck.message}</span>
                   </p>
+                  {(() => {
+                    const q = assessSlugQuality(formData.slug);
+                    if (q.severity === 'ok' || q.issues.length === 0) return null;
+                    const tone =
+                      q.severity === 'error' ? 'text-destructive' : 'text-amber-600';
+                    return (
+                      <ul className={`text-xs space-y-0.5 ${tone}`} aria-live="polite">
+                        {q.issues.map((issue, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" aria-hidden />
+                            <span>{issue}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  })()}
                 </div>
               </div>
 
