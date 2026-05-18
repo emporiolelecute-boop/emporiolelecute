@@ -934,7 +934,7 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
                 "@type": "Article",
                 headline: `Sobre ${product.name}`,
                 articleBody: dbProduct.editorial_content.slice(0, 4000),
-                mainEntityOfPage: `https://emporiolelecute.com.br/produtos/${product.slug}`,
+                mainEntityOfPage: canonicalUrl,
                 author: { "@type": "Organization", name: "Empório LeleCute" },
               }) }} />
             </section>
