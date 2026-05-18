@@ -266,6 +266,8 @@ const AdminProductForm = () => {
         personalization_placeholder: formData.personalization_placeholder || null,
         google_product_category: formData.google_product_category || null,
         editorial_content: formData.editorial_content || null,
+        featured_weight: parseInt(formData.featured_weight) || 0,
+        production_speed: formData.production_speed || null,
       } as any;
 
       let productId: string;
