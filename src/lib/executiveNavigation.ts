@@ -156,6 +156,7 @@ export const EXECUTIVE_NAV: NavGroup[] = [
       { label: "Redirects", path: "/admin/redirects", icon: "ArrowRightLeft" },
       { label: "Robots.txt", path: "/admin/robots", icon: "Bot" },
       { label: "Analytics & Ads", path: "/admin/tracking", icon: "BarChart3" },
+      { label: "CTA & Conversão", path: "/admin/conversao", icon: "MessageSquare" },
       { label: "Configurações", path: "/admin/configuracoes", icon: "Settings" },
       { label: "Merchant Feed", path: "/admin/merchant-feed", icon: "Rss" },
       { label: "SEO & Sitemap", path: "/admin/seo", icon: "Search" },
