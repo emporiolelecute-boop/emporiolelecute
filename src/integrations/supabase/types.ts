@@ -946,6 +946,102 @@ export type Database = {
         }
         Relationships: []
       }
+      kit_products: {
+        Row: {
+          created_at: string
+          id: string
+          kit_id: string
+          position: number
+          product_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kit_id: string
+          position?: number
+          product_id: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kit_id?: string
+          position?: number
+          product_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_products_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kits: {
+        Row: {
+          bundle_type: Database["public"]["Enums"]["kit_bundle_type"]
+          created_at: string
+          description: string | null
+          estimated_savings: number | null
+          home_position: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          position: number
+          show_on_home: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          bundle_type?: Database["public"]["Enums"]["kit_bundle_type"]
+          created_at?: string
+          description?: string | null
+          estimated_savings?: number | null
+          home_position?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          position?: number
+          show_on_home?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          bundle_type?: Database["public"]["Enums"]["kit_bundle_type"]
+          created_at?: string
+          description?: string | null
+          estimated_savings?: number | null
+          home_position?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          position?: number
+          show_on_home?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           created_at: string | null
@@ -5539,6 +5635,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      kit_bundle_type: "suggested" | "curated" | "premium"
       payment_status: "pending" | "approved" | "refunded" | "cancelled"
     }
     CompositeTypes: {
@@ -5668,6 +5765,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      kit_bundle_type: ["suggested", "curated", "premium"],
       payment_status: ["pending", "approved", "refunded", "cancelled"],
     },
   },

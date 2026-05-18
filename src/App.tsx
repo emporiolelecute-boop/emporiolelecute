@@ -96,6 +96,9 @@ const AdminEditorialExecution = lazyWithRetry(() => import("./pages/admin/AdminE
 const Colecao = lazyWithRetry(() => import("./pages/Colecao"), "Colecao");
 const AdminCollections = lazyWithRetry(() => import("./pages/admin/AdminCollections"), "AdminCollections");
 const AdminCollectionForm = lazyWithRetry(() => import("./pages/admin/AdminCollectionForm"), "AdminCollectionForm");
+const KitPage = lazyWithRetry(() => import("./pages/KitPage"), "KitPage");
+const AdminKits = lazyWithRetry(() => import("./pages/admin/AdminKits"), "AdminKits");
+const AdminKitForm = lazyWithRetry(() => import("./pages/admin/AdminKitForm"), "AdminKitForm");
 const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOperations"), "AdminSeoOperations");
 const AdminLinkHealth = lazyWithRetry(() => import("./pages/admin/AdminLinkHealth"), "AdminLinkHealth");
 const AdminContentGaps = lazyWithRetry(() => import("./pages/admin/AdminContentGaps"), "AdminContentGaps");
@@ -337,6 +340,11 @@ const App = () => {
                     <Colecao />
                   </Suspense>
                 } />
+                <Route path="/kit/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <KitPage />
+                  </Suspense>
+                } />
                 <Route path="/segmento/:segmentSlug/ocasiao/:occasionSlug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <CombinationPage />
@@ -573,6 +581,21 @@ const App = () => {
                   <Route path="colecoes/:id" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminCollectionForm />
+                    </Suspense>
+                  } />
+                  <Route path="kits" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminKits />
+                    </Suspense>
+                  } />
+                  <Route path="kits/novo" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminKitForm />
+                    </Suspense>
+                  } />
+                  <Route path="kits/:id" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminKitForm />
                     </Suspense>
                   } />
                   <Route path="usuarios" element={
