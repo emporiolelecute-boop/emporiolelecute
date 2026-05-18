@@ -12,6 +12,8 @@ import ProductCard from "@/components/ProductCard";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
+import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
+import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
 import { useSegments } from "@/hooks/useSegments";
