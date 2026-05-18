@@ -45,12 +45,23 @@ const Produtos = () => {
   const [selectedSegment, setSelectedSegment] = useState<string | null>(searchParams.get('segmento') || null);
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // Filters start collapsed; auto-open if user arrived with an active filter
-  const initialFiltersOpen = Boolean(
-    searchParams.get('categoria') || searchParams.get('ocasiao') ||
-    searchParams.get('segmento')  || searchParams.get('tag')
-  );
+  // Filters: persist user preference in localStorage; auto-open if URL has active filter
+  const initialFiltersOpen = (() => {
+    const hasUrlFilter = Boolean(
+      searchParams.get('categoria') || searchParams.get('ocasiao') ||
+      searchParams.get('segmento')  || searchParams.get('tag')
+    );
+    if (hasUrlFilter) return true;
+    try {
+      const stored = localStorage.getItem('produtos:filtersOpen');
+      if (stored !== null) return stored === '1';
+    } catch { /* ignore */ }
+    return false;
+  })();
   const [filtersOpen, setFiltersOpen] = useState(initialFiltersOpen);
+  useEffect(() => {
+    try { localStorage.setItem('produtos:filtersOpen', filtersOpen ? '1' : '0'); } catch { /* ignore */ }
+  }, [filtersOpen]);
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('pagina')) || 1);
 
   // Debounce search for better performance
