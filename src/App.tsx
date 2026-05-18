@@ -560,6 +560,21 @@ const App = () => {
                       <AdminConversionCTA />
                     </Suspense>
                   } />
+                  <Route path="colecoes" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCollections />
+                    </Suspense>
+                  } />
+                  <Route path="colecoes/nova" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCollectionForm />
+                    </Suspense>
+                  } />
+                  <Route path="colecoes/:id" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCollectionForm />
+                    </Suspense>
+                  } />
                   <Route path="usuarios" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminUsers />
