@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useActiveRedirects } from "@/hooks/useRedirects";
 import { supabase } from "@/integrations/supabase/client";
+import { logSlugEvent } from "@/lib/slugObservability";
 
 /**
  * Checks every navigation against the redirects table. If the current
