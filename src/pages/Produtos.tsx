@@ -45,6 +45,12 @@ const Produtos = () => {
   const [selectedSegment, setSelectedSegment] = useState<string | null>(searchParams.get('segmento') || null);
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag') || null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  // Filters start collapsed; auto-open if user arrived with an active filter
+  const initialFiltersOpen = Boolean(
+    searchParams.get('categoria') || searchParams.get('ocasiao') ||
+    searchParams.get('segmento')  || searchParams.get('tag')
+  );
+  const [filtersOpen, setFiltersOpen] = useState(initialFiltersOpen);
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('pagina')) || 1);
 
   // Debounce search for better performance
