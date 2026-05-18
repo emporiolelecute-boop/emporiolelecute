@@ -59,18 +59,6 @@ export default function AdminKitForm() {
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
-  // Sprint final — autosave de rascunho. Wraps form+items num único snapshot.
-  const autosave = useFormAutosave(
-    `kit:${id ?? "novo"}`,
-    { form, items },
-    (snap) => {
-      setForm(snap.form);
-      setItems(snap.items);
-    },
-    { enabled: !isLoading },
-  );
-  useUnsavedChangesPrompt(dirty || saving);
-
   const { data: existing, isLoading } = useQuery({
     queryKey: ["admin-kit", id],
     enabled: isEdit,
@@ -84,6 +72,19 @@ export default function AdminKitForm() {
       return data;
     },
   });
+
+  // Sprint final — autosave de rascunho. Wraps form+items num único snapshot.
+  const autosave = useFormAutosave(
+    `kit:${id ?? "novo"}`,
+    { form, items },
+    (snap) => {
+      setForm(snap.form);
+      setItems(snap.items);
+      setDirty(true);
+    },
+    { enabled: !isLoading },
+  );
+  useUnsavedChangesPrompt(dirty || saving);
 
   useEffect(() => {
     if (!existing) return;
