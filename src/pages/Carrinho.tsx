@@ -114,13 +114,34 @@ const Carrinho = () => {
   };
 
   const formatWhatsAppMessage = (code: string) => {
-    const itemsList = items
-      .map((item, index) => 
-        `${index + 1}. ${item.name}\n   Qtd: ${item.quantity}x\n   Preço unit: R$ ${item.price.toFixed(2).replace('.', ',')}\n   Subtotal: R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}${item.personalization ? `\n   Personalização: ${item.personalization}` : ''}`
-      )
-      .join('\n\n');
+    // Sprint 3 — agrupa itens por kit (bundleName) quando aplicável
+    const groups = new Map<string, typeof items>();
+    const ORDER_STANDALONE = "__standalone__";
+    for (const item of items) {
+      const key = item.bundleName ? `kit::${item.bundleName}` : ORDER_STANDALONE;
+      const list = groups.get(key) ?? [];
+      list.push(item);
+      groups.set(key, list);
+    }
 
-    return `🛒 *NOVO PEDIDO - EMPÓRIO LELECUTE*\n\n📋 *Código do Pedido:* ${code}\n\n👤 *DADOS DO CLIENTE*\nNome: ${customer.name}\nTelefone: ${customer.phone}\nEmail: ${customer.email}\n\n📍 *DADOS DE ENTREGA/ENVIO*\nCEP: ${address.cep}\nCidade: ${address.city} - ${address.state}\n\n📦 *PRODUTOS*\n${itemsList}\n\n💰 *SUBTOTAL DOS PRODUTOS: R$ ${total.toFixed(2).replace('.', ',')}*\n\n🚚 *FRETE:* A calcular\n\n_Aguardando cálculo do frete e confirmação do pedido_`;
+    const formatItem = (item: typeof items[number], idx: number) =>
+      `${idx + 1}. ${item.name}\n   Qtd: ${item.quantity}x\n   Preço unit: R$ ${item.price.toFixed(2).replace('.', ',')}\n   Subtotal: R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}${item.personalization ? `\n   Personalização: ${item.personalization}` : ''}`;
+
+    const blocks: string[] = [];
+    const standalone = groups.get(ORDER_STANDALONE);
+    if (standalone && standalone.length) {
+      blocks.push(standalone.map((it, i) => `• ${it.name} — qtd ${it.quantity}${it.personalization ? ` (${it.personalization})` : ''}`).join('\n'));
+    }
+    for (const [key, list] of groups) {
+      if (key === ORDER_STANDALONE) continue;
+      const kitName = key.replace(/^kit::/, '');
+      const kitLines = list.map((it) => `  • ${it.name} — qtd ${it.quantity}${it.personalization ? ` (${it.personalization})` : ''}`).join('\n');
+      blocks.push(`🎁 *${kitName}*\n${kitLines}`);
+    }
+
+    const detailed = items.map(formatItem).join('\n\n');
+
+    return `🛒 *NOVO PEDIDO - EMPÓRIO LELECUTE*\n\n📋 *Código do Pedido:* ${code}\n\n👤 *DADOS DO CLIENTE*\nNome: ${customer.name}\nTelefone: ${customer.phone}\nEmail: ${customer.email}\n\n📍 *DADOS DE ENTREGA/ENVIO*\nCEP: ${address.cep}\nCidade: ${address.city} - ${address.state}\n\n📦 *RESUMO*\n${blocks.join('\n\n')}\n\n📑 *DETALHES DOS PRODUTOS*\n${detailed}\n\n💰 *SUBTOTAL DOS PRODUTOS: R$ ${total.toFixed(2).replace('.', ',')}*\n\n🚚 *FRETE:* A calcular\n\n_Aguardando cálculo do frete e confirmação do pedido_`;
   };
 
   const handleSubmitOrder = async () => {
