@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Star, ArrowRight } from "lucide-react";
+import { Heart, Star, ArrowRight, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/data/products";
 import { optimizeImage, buildSrcSet } from "@/lib/image";
+import { getProductionSpeed, speedLabel } from "@/lib/productMeta";
 
 interface ProductCardProps {
   product: Product;
