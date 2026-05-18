@@ -35,10 +35,10 @@ export const EMPTY_FILTERS: CatalogFilterValues = {
 export interface CatalogFiltersProps {
   values: CatalogFilterValues;
   onChange: (v: CatalogFilterValues) => void;
-  occasions?: DbOccasion[];
-  categories?: DbCategory[];
-  tags?: DbTag[];
-  segments?: DbSegment[];
+  occasions?: FacetItem[];
+  categories?: FacetItem[];
+  tags?: FacetItem[];
+  segments?: FacetItem[];
   priceBounds: { min: number; max: number };
   /** Hide a facet because the page is already scoped to it */
   hide?: { category?: boolean; occasion?: boolean; segment?: boolean };
