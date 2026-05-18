@@ -75,6 +75,7 @@ const AdminUsage = lazyWithRetry(() => import("./pages/admin/AdminUsage"), "Admi
 const AdminCronStatus = lazyWithRetry(() => import("./pages/admin/AdminCronStatus"), "AdminCronStatus");
 const AdminCloudflareGuide = lazyWithRetry(() => import("./pages/admin/AdminCloudflareGuide"), "AdminCloudflareGuide");
 const AdminDiagnostics = lazyWithRetry(() => import("./pages/admin/AdminDiagnostics"), "AdminDiagnostics");
+const AdminSeoControlPlane = lazyWithRetry(() => import("./pages/admin/AdminSeoControlPlane"), "AdminSeoControlPlane");
 const AdminUsers = lazyWithRetry(() => import("./pages/admin/AdminUsers"), "AdminUsers");
 const AdminAccessRequests = lazyWithRetry(() => import("./pages/admin/AdminAccessRequests"), "AdminAccessRequests");
 const AdminAccessRequestDetail = lazyWithRetry(() => import("./pages/admin/AdminAccessRequestDetail"), "AdminAccessRequestDetail");
