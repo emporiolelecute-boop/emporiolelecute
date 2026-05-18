@@ -33,6 +33,9 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import RelatedProducts from "@/components/RelatedProducts";
 import RelatedSmart from "@/components/RelatedSmart";
+import ProductBundleBelongsTo from "@/components/ProductBundleBelongsTo";
+import CrossSellComplete from "@/components/CrossSellComplete";
+import VisualComposition from "@/components/VisualComposition";
 import ProductGallery from "@/components/ProductGallery";
 import { StickyAddToCart } from "@/components/StickyAddToCart";
 import { QuickQuoteSummary } from "@/components/QuickQuoteSummary";
@@ -822,6 +825,31 @@ const ProductPage = () => {
               })()}
             </div>
           </div>
+
+
+          {/* Sprint 3 — Cross-sell "Complete o kit" (logo após CTA principal) */}
+          {dbProduct?.id && (
+            <CrossSellComplete
+              currentProductId={dbProduct.id}
+              currentProductSlug={product.slug}
+              occasions={dbProduct?.occasions ?? []}
+              tags={dbProduct?.tags ?? []}
+              categoryId={dbProduct?.category?.id ?? null}
+              limit={4}
+            />
+          )}
+
+          {/* Sprint 3 — Kits aos quais este produto pertence */}
+          {dbProduct?.id && <ProductBundleBelongsTo productId={dbProduct.id} />}
+
+          {/* Sprint 3 — Composição visual ("fica lindo combinado com") */}
+          {dbProduct?.id && (
+            <VisualComposition
+              currentProductId={dbProduct.id}
+              occasions={dbProduct?.occasions ?? []}
+              limit={6}
+            />
+          )}
 
           {/* Description Section */}
           <div className="mb-12">
