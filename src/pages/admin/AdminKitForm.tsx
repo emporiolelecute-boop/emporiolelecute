@@ -415,6 +415,13 @@ export default function AdminKitForm() {
           </div>
         </CardContent>
       </Card>
+      <StickySaveBar
+        dirty={dirty}
+        saving={saving}
+        savedAt={autosave.savedAt}
+        onSave={() => { setSaving(true); save.mutate(); }}
+        hint={items.length > 0 ? `${items.length} item(s) no kit` : undefined}
+      />
     </form>
   );
 }
