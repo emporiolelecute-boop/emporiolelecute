@@ -97,28 +97,32 @@ const TaxonomyPage = ({ kind }: Props) => {
     queryKey: ["taxonomy-products", cfg.table, entity?.id],
     enabled: !!entity?.id,
     queryFn: async () => {
+      const selectExpr = `id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active, created_at, personalization_enabled, production_days, production_speed, featured_weight,
+        category:categories(id, name, slug),
+        occasions:product_occasions(occasion:occasions(id, name, slug)),
+        tags:product_tags(tag:tags(id, name, slug)),
+        segments:product_segments(segment:segments(id, name, slug))`;
       if (cfg.kind === "categoria") {
         const { data, error } = await supabase
           .from("products")
-          .select("id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active")
+          .select(selectExpr)
           .eq("is_active", true)
           .eq("category_id", entity!.id)
-          .order("created_at", { ascending: false })
-          .limit(MAX_PRODUCTS);
+          .order("created_at", { ascending: false });
         if (error) throw error;
         return data ?? [];
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase.from(cfg.joinTable) as any)
-        .select(`product:products(id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active, created_at)`)
+        .select(`product:products(${selectExpr})`)
         .eq(cfg.joinCol, entity!.id);
       if (error) throw error;
-      type Row = { product: { id: string; slug: string; name: string; description: string | null; price: number; original_price: number | null; images: string[]; badge: string | null; rating: number; min_quantity: number; keywords: string[]; is_active: boolean; created_at: string } | null };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      type Row = { product: any | null };
       return ((data as Row[] | null) ?? [])
         .map((r) => r.product)
-        .filter((p): p is NonNullable<Row["product"]> => !!p && p.is_active)
-        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-        .slice(0, MAX_PRODUCTS);
+        .filter((p) => !!p && p.is_active)
+        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
     },
   });
 
