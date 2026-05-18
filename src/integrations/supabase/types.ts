@@ -266,6 +266,90 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_products: {
+        Row: {
+          added_at: string
+          collection_id: string
+          position: number
+          product_id: string
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          position?: number
+          product_id: string
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          position?: number
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          home_position: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          position: number
+          show_on_home: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          home_position?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          position?: number
+          show_on_home?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          home_position?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          position?: number
+          show_on_home?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       combination_pages_registry: {
         Row: {
           auto_discovered: boolean
@@ -1478,6 +1562,7 @@ export type Database = {
           created_at: string
           description: string | null
           editorial_content: string | null
+          featured_weight: number
           features: string[] | null
           google_product_category: string | null
           id: string
@@ -1494,6 +1579,7 @@ export type Database = {
           pix_discount: number | null
           price: number
           production_days: number | null
+          production_speed: string | null
           rating: number | null
           seo_noindex: boolean
           slug: string
@@ -1506,6 +1592,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           editorial_content?: string | null
+          featured_weight?: number
           features?: string[] | null
           google_product_category?: string | null
           id?: string
@@ -1522,6 +1609,7 @@ export type Database = {
           pix_discount?: number | null
           price: number
           production_days?: number | null
+          production_speed?: string | null
           rating?: number | null
           seo_noindex?: boolean
           slug: string
@@ -1534,6 +1622,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           editorial_content?: string | null
+          featured_weight?: number
           features?: string[] | null
           google_product_category?: string | null
           id?: string
@@ -1550,6 +1639,7 @@ export type Database = {
           pix_discount?: number | null
           price?: number
           production_days?: number | null
+          production_speed?: string | null
           rating?: number | null
           seo_noindex?: boolean
           slug?: string
