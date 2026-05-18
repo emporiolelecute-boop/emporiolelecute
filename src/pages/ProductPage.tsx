@@ -357,6 +357,19 @@ const ProductPage = () => {
   // Generate product code from ID
   const productCode = product.id.slice(0, 8).toUpperCase();
 
+  // Fase 1 — Canonical slug deriva SEMPRE de __slugMeta.primarySlug.
+  // Sem fallback silencioso: ausência é inconsistência estrutural.
+  const slugMeta = dbProduct?.__slugMeta;
+  if (!slugMeta?.primarySlug) {
+    logSlugEvent("structural_inconsistency", {
+      reason: "missing_primary_slug_meta",
+      productId: dbProduct?.id,
+      matchedSlug: slug,
+    });
+  }
+  const canonicalSlug = slugMeta?.primarySlug ?? product.slug;
+  const canonicalUrl = `https://emporiolelecute.com.br/produtos/${canonicalSlug}`;
+
   return (
     <div className="min-h-screen bg-background">
       {/* SEO and Structured Data — Fase 7 */}
