@@ -1,271 +1,82 @@
-# SEO Autopilot — Execution Core (MVP honesto)
-
-## Realidade vs ambição da spec
-
-A spec pede "auto-fix" para 9 categorias de finding. Antes de codar, separar o que é **realmente auto-fixável em runtime** vs o que exige **mudança de código ou conteúdo humano** (e portanto não pode ser auto-aplicado sem risco).
-
-
-| Finding                          | Auto-fixável?              | Razão                                                                               |
-| -------------------------------- | -------------------------- | ----------------------------------------------------------------------------------- |
-| Sitemap drift (DB↔sitemap)       | ✅ **Sim**                  | Já existe edge `generate-sitemap` que regenera do DB. Autopilot só precisa invocar. |
-| Sitemap não submetido            | ✅ **Sim**                  | Edge `seo-sitemap-auto-resubmit` existe.                                            |
-| Rota nova sem entrada no sitemap | ✅ **Sim**                  | Subset do caso acima.                                                               |
-| Prerender retornando erro        | ⚠️ **Diagnóstico**         | É bug de código no `prerender/index.ts`. Autopilot loga issue, não auto-corrige.    |
-| JSON-LD ausente em produto       | ⚠️ **Diagnóstico**         | Prerender já gera JSON-LD do DB. Se ausente → bug ou produto sem dados.             |
-| 404 sem noindex                  | ⚠️ **Diagnóstico**         | Já implementado no prerender atual. Se quebrar = bug de código.                     |
-| OG image ausente em produto      | ⚠️ **Diagnóstico**         | Vem de `products.images[0]`. Se faltar = produto sem imagem no DB → ação humana.    |
-| Canonical ausente                | ⚠️ **Diagnóstico**         | Bug de código.                                                                      |
-| Order/loop entre fixes           | ✅ **Prevenido por design** | Rate limit + cooldown.                                                              |
-
-
-**Decisão honesta:** Autopilot executa **2 ações reais** (regen + resubmit sitemap) e **enfileira o resto** como issues acionáveis para revisão humana ou correção de código. Isso entrega valor real sem fingir poderes que o sistema não tem.
-
-## O que vou entregar
-
-### 1. Edge Function `seo-autopilot` (nova)
-
-Pipeline determinístico:
-
-1. **Carregar** última run de `seo_check_runs` com `source='control_plane'` (idade máx 24h).
-2. **Filtrar + ordenar** findings: indexation critical → data_integrity → social_preview.
-3. **Planejar ações** (dry-run sempre primeiro):
-  - Se há `diff:missing_in_sitemap` ou `diff:orphan_in_sitemap` → plan `regen_sitemap`
-  - Se houve mudança no sitemap → plan `resubmit_sitemap`
-  - Demais findings → plan `log_issue` (não executa correção)
-4. **Safety layer**:
-  - Máx 1 `regen_sitemap` por run
-  - Máx 1 `resubmit_sitemap` por run
-  - Máx 10 ações totais por run
-  - Cooldown global: 1 run autopilot a cada 30min (lê `seo_check_runs` source=autopilot)
-  - `mode: 'dry_run' | 'execute'` no body (default `dry_run`)
-5. **Executar** (se `mode='execute'` e plano OK):
-  - Invocar `generate-sitemap` (já existe)
-  - Invocar `seo-sitemap-auto-resubmit` (já existe)
-6. **Validação pós-fix**: invocar `seo-control-plane` para nova run e comparar `errors`/`warnings` antes vs depois.
-7. **Persistir** 1 linha em `seo_check_runs` com `source='autopilot'`:
-  ```json
-   {
-     mode, plan: [...], executed: [...], skipped: [{action, reason}],
-     failed: [...], validation: {before, after, regression: bool},
-     control_plane_run_id_before, control_plane_run_id_after
-   }
-  ```
-
-### 2. UI: aba "Autopilot" em `/admin/seo-control-plane`
-
-Reusar página existente. Adicionar 3ª/4ª tab:
-
-- **Plano (dry-run)** — botão "Planejar ações" mostra o que seria feito sem executar.
-- **Executar** — botão com confirmação. Mostra resultado: ações OK, validation diff, regressão.
-- **Histórico Autopilot** — últimas 10 runs source='autopilot'.
-
-### 3. Hook `useSeoAutopilot`
-
-Análogo a `useSeoControlPlane`. `plan()` chama com `mode='dry_run'`, `execute()` com `mode='execute'`.
-
-## Arquivos
-
-1. **CRIAR** `supabase/functions/seo-autopilot/index.ts`
-2. **CRIAR** `src/hooks/useSeoAutopilot.ts`
-3. **EDITAR** `src/pages/admin/AdminSeoControlPlane.tsx` — adicionar tabs Autopilot
-
-## Não-objetivos (anti-escopo creep e anti-mentira)
-
-- ❌ Não criar tabela nova (reuso `seo_check_runs`).
-- ❌ Não escrever em `products`, `categories`, etc — nenhuma mutação de dados de domínio.
-- ❌ Não "reescrever JSON-LD em runtime" — isso seria fingir auto-fix para bug de código.
-- ❌ Não invalidar cache do Cloudflare Worker (não temos credencial e não está no escopo desta sessão).
-- ❌ Não criar cron — execução fica manual via UI por enquanto.
-
-## Riscos e mitigação
-
-
-| Risco                                   | Mitigação                                                                                   |
-| --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Loop autopilot ↔ control_plane          | Cooldown 30min + flag `triggered_by` no payload                                             |
-| Sitemap regen falhar em prod            | Try/catch, rollback = não-op (sitemap antigo continua válido), finding `error` no relatório |
-| Falso "regression" no validation        | Comparar só `errors` count, não `warnings` (mais ruidoso)                                   |
-| Auto-fix mascarar bug real de prerender | Issues vão para `log_issue` com severity preservada, visíveis no painel                     |
-
-
-## Critério de sucesso
-
-- Dry-run produz um plano legível em < 5s.
-- Execute em `mode='execute'`: sitemap regenerado, validação re-roda, regressão detectada se errors aumentarem.
-- Findings não auto-fixáveis aparecem como "skipped" com razão clara (não falham silenciosamente).
-- Zero mutação de dados de produto/categoria.
-- Zero migration; zero mudança no site público.
-
-&nbsp;
-
-&nbsp;
-
-# ADENDO ÚNICO (para anexar no plano do Lovable)
-
-Aqui está o patch direto, copiável:
-
----
-
-## 🔧 ADENDO — EXPANSÃO SEGURA DO AUTOPILOT (TEMPLATE REPAIR LAYER)
-
-Este adendo complementa o “SEO Autopilot — Execution Core (MVP honesto)” sem alterar seu modelo de segurança ou introduzir mutações em dados de domínio.
-
----
-
-## 1. Nova categoria: TEMPLATE-REPAIR (determinística e segura)
-
-Além de:
-
-- sitemap regeneration
-- sitemap resubmit
-- logging de issues
-
-adicionar categoria intermediária:
-
-```
-
-```
-
-```
-template_repair
-```
-
----
-
-## 2. O que entra em TEMPLATE-REPAIR
-
-São casos que NÃO são bug de código nem dados faltantes, mas:
-
-> renderização previsível baseada em fallback determinístico
-
-### Regras:
-
-### 2.1 OG tags ausentes
-
-Se `og:*` não estiver presente no prerender:
-
-GERAR:
-
--   
-og:title = title existente ou [product.name](http://product.name)  
-
--   
-og:description = description ou fallback DB  
-
--   
-og:image = product.images[0] ou placeholder CDN seguro  
-
--   
-og:url = canonical  
-
-
-👉 isso é SAFE (não modifica DB)
-
----
-
-### 2.2 JSON-LD ausente (quando dados existem)
-
-Se produto/categoria existe no DB:
-
-→ regenerar schema no nível do edge render (não persistir)
-
--   
-Product schema  
-
--   
-Offer schema  
-
--   
-Breadcrumb schema  
-
-
-👉 sempre derivado do DB, nunca manual
-
----
-
-### 2.3 Canonical ausente
-
-Gerar:
-
-```
-
-```
-
-```
-canonical = base_url + pathname
-```
-
-Sem depender de código React
-
----
-
-## 3. Regra de execução expandida
-
-O Autopilot passa a ter 3 níveis:
-
-
-| Tipo            | Ação                              |
-| --------------- | --------------------------------- |
-| infrastructure  | sitemap regen / resubmit          |
-| template_repair | OG / JSON-LD / canonical fallback |
-| diagnostics     | log_issue                         |
-
-
----
-
-## 4. Regra de segurança (IMPORTANTE)
-
-Template-repair:
-
--   
-NÃO grava no DB  
-
--   
-NÃO altera produtos  
-
--   
-NÃO persiste SEO fields  
-
--   
-apenas altera OUTPUT do prerender runtime  
-
-
----
-
-## 5. Novo fluxo de decisão
-
-```
-
-```
-
-```
-if finding is indexation critical:
-    if fixable via template_repair:
-        apply template_repair
-    else:
-        log_issue
-
-if finding is sitemap:
-    execute infrastructure fix
-
-if finding is ambiguous:
-    log_issue
-```
-
----
-
-## 6. Resultado esperado
-
-Com este adendo:
-
--   
-elimina “falsos diagnósticos humanos”  
-
--   
-reduz dependência de intervenção manual  
-
--   
-mantém segurança total (sem mutation de DB)  
-
--   
-aumenta cobertura real do autopilot de ~20% → ~60%
+# Plano — Auditoria Real de Avaliações Elo7 antes da Importação
+
+## Princípio
+**STOP TOTAL**: nenhuma avaliação será inserida em `product_reviews` até passar por aprovação manual visual no painel. Fuzzy score deixa de ser fonte de verdade — vira apenas sugestão inicial.
+
+## 1. Schema — tabela de staging/auditoria
+
+Migration nova: `review_import_audit` (staging, separada de `product_reviews`).
+
+Campos:
+- `id` uuid PK
+- `import_batch_id` uuid
+- `feedback_id` text UNIQUE (chave Elo7, evita duplicidade de staging)
+- `elo7_product_name` text
+- `elo7_product_slug` text (se houver na planilha)
+- `elo7_image_url` text (primeira imagem da avaliação, se houver)
+- `elo7_comment` text
+- `elo7_sentiment` text
+- `elo7_review_date` timestamptz
+- `elo7_buyer_name` text
+- `elo7_raw` jsonb (linha bruta da planilha, auditável/reversível)
+- `suggested_product_id` uuid NULL (sugestão do matcher)
+- `suggested_product_name` text
+- `suggested_confidence` numeric
+- `suggested_method` text ('exact'|'normalized'|'fuzzy'|'none')
+- `manual_status` text CHECK in ('pending','confirmed','doubtful','rejected','no_match') DEFAULT 'pending'
+- `manual_product_id` uuid NULL (decisão final do humano; pode diferir do suggested)
+- `visual_notes` text
+- `reviewed_by` uuid, `reviewed_by_email` text, `reviewed_at` timestamptz
+- `imported_review_id` uuid NULL (preenchido quando virar `product_reviews`)
+- `created_at`, `updated_at`
+- RLS: somente admin.
+
+## 2. Carregar planilha → staging (sem tocar em product_reviews)
+
+Script local (`scripts/elo7-stage-import.ts`) executado uma vez:
+- lê XLSX, normaliza, calcula sugestão (matcher atual)
+- INSERT em `review_import_audit` com `manual_status='pending'`
+- imagens: baixa para `storage/elo7-review-images/{feedback_id}/{idx}.jpg` (bucket privado novo) e guarda URL assinada/path em `elo7_image_url` / `elo7_raw.images[]`
+- não toca em `product_reviews`
+
+## 3. Painel `/admin/reviews-real-audit`
+
+Página admin nova. Para cada item `pending`:
+- coluna esquerda: imagem Elo7 + nome Elo7 + slug Elo7 + comentário + data + buyer
+- coluna direita: produto sugerido com **imagem principal**, nome, slug, categoria, tags
+- score + método + warning se confidence < 93
+- ações:
+  - **Confirmar** (usa suggested_product_id)
+  - **Trocar produto** (combobox de busca em `products` por nome/slug/sku → grava `manual_product_id`)
+  - **Duvidoso** (marca, fica fora da fila de import)
+  - **Sem correspondência** (`no_match`, vai p/ produto inexistente)
+  - **Rejeitar** (descarta a avaliação)
+- filtros: status, confidence range, produto sugerido, busca por texto
+- contadores no topo: pending/confirmed/doubtful/no_match/rejected
+
+## 4. Commit (somente confirmados)
+
+Botão "Importar confirmados" no painel:
+- pega todos com `manual_status='confirmed'` e `imported_review_id IS NULL`
+- INSERT em `product_reviews` usando `manual_product_id` (ou `suggested_product_id` se manual vazio), com `external_review_id=feedback_id`, `source='elo7'`
+- atualiza `imported_review_id` no staging
+- transação por lote, idempotente
+
+## 5. Restrições
+- Sem mudanças em produtos, slugs, sitemap, SEO.
+- Sem auto-importação de fuzzy.
+- Reversível: deletar `product_reviews` onde `source='elo7' AND external_review_id=feedback_id` zera tudo; staging permanece como histórico.
+
+## 6. Entregáveis desta fase
+1. Migration: tabela `review_import_audit` + bucket `elo7-review-images` (privado) + RLS admin.
+2. Script de staging (não roda automático — você confirma).
+3. Página `/admin/reviews-real-audit` com inspeção visual lado-a-lado.
+4. Edge function `import-confirmed-reviews` que faz o commit dos `confirmed`.
+
+## O que NÃO faço agora
+- Não importo nada para `product_reviews`.
+- Não aprovo nenhum dos 11 casos duvidosos anteriores.
+- Não crio bloco "Clientes que amaram" na home.
+- Não mexo em slugs, produtos, SEO.
+
+Confirma para eu aplicar a migration + página?
