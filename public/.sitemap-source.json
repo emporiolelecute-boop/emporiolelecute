@@ -1,10 +1,10 @@
 {
-  "materialized_at": "2026-05-18T06:59:51.442Z",
+  "materialized_at": "2026-05-18T07:00:10.289Z",
   "source": null,
   "generated_at": null,
   "namespace": "/produtos",
   "products_count": 54,
-  "sha256": "87cc3b3b5d51a05b3349b74d6c02f1365e74d982af7e710505faa6f5602795f6",
+  "sha256": "f824fdfe47ef064a0af2085f3618a438c5b064d12721768a40f5cd775924ff8f",
   "bytes": 32206,
   "endpoint": "https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/generate-sitemap"
 }

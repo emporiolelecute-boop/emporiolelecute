@@ -99,7 +99,7 @@ async function main(): Promise<void> {
 
   // Extrai metadata dos comentários para auditoria.
   const pick = (k: string): string | null => {
-    const m = xml.match(new RegExp(`lovable:${k}\\s+([^\\s-][^\\n-]*)\\s*-->`));
+    const m = xml.match(new RegExp(`<!--\\s*lovable:${k}\\s+(.*?)\\s*-->`));
     return m ? m[1].trim() : null;
   };
   const meta = {

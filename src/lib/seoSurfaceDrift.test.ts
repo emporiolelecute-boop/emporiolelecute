@@ -51,6 +51,22 @@ describe("SEO surface drift (Phase 2.1)", () => {
     expect(xml).toContain(`${PRODUCT_PATH_PREFIX}/`);
   });
 
+  it("public/sitemap.xml foi gerado pela edge function (anti-drift)", () => {
+    const xml = read("public/sitemap.xml");
+    expect(xml).toMatch(/<!--\s*lovable:sitemap-source\s+generate-sitemap/);
+    const ns = xml.match(/<!--\s*lovable:sitemap-namespace\s+([^\s-]+)\s*-->/);
+    expect(ns?.[1], "marcador de namespace ausente").toBeTruthy();
+    expect(ns?.[1]).toBe(PRODUCT_PATH_PREFIX);
+  });
+
+  it(".sitemap-source.json existe e bate com o XML materializado", () => {
+    const xml = read("public/sitemap.xml");
+    const meta = JSON.parse(read("public/.sitemap-source.json"));
+    expect(meta.namespace).toBe(PRODUCT_PATH_PREFIX);
+    expect(meta.bytes).toBe(xml.length);
+    expect(meta.sha256).toMatch(/^[a-f0-9]{64}$/);
+  });
+
   it("public/robots.txt aponta para a origem canônica", () => {
     const robots = read("public/robots.txt");
     expect(robots).toContain(`Sitemap: ${CANONICAL_ORIGIN}/sitemap.xml`);
