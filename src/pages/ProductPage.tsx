@@ -34,6 +34,7 @@ import ProductCard from "@/components/ProductCard";
 import RelatedProducts from "@/components/RelatedProducts";
 import RelatedByTaxonomy from "@/components/RelatedByTaxonomy";
 import ProductGallery from "@/components/ProductGallery";
+import { StickyAddToCart } from "@/components/StickyAddToCart";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import ProductStructuredData from "@/components/ProductStructuredData";
