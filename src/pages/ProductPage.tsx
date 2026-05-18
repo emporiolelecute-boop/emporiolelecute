@@ -611,12 +611,22 @@ Poderia me ajudar com o valor do frete e prazos?`;
                 </div>
               </div>
 
+              {/* Resumo rápido + CTA WhatsApp com qty/personalização selecionadas */}
+              <QuickQuoteSummary
+                minQuantity={product.minQuantity}
+                productionDays={product.productionDays}
+                quantity={quantity}
+                personalization={personalization}
+                onWhatsApp={() => openWhatsApp("product_page")}
+              />
+
               {/* Note about shipping */}
               <div className="bg-primary-light/50 rounded-xl border border-primary/20 p-4 mb-6">
                 <p className="text-sm text-foreground/80 text-center">
                   <span className="font-semibold text-primary">📦 Frete:</span> O valor do frete é calculado via WhatsApp.
                 </p>
               </div>
+
 
               {/* Action Buttons */}
               <div className="flex gap-3 mb-4">
@@ -740,19 +750,21 @@ Poderia me ajudar com o valor do frete e prazos?`;
               {(() => {
                 const { url } = buildWhatsAppMessage();
                 return (
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      openWhatsApp("product_page");
-                    }}
-                    className="flex items-center justify-center gap-3 p-4 mt-4 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl font-bold shadow-lg hover:shadow-green-200 transition-all duration-300 transform hover:-translate-y-1"
-                  >
-                    <MessageCircle className="h-6 w-6" />
-                    Fazer Orçamento no WhatsApp
-                  </a>
+                  <div ref={ctaAnchorRef}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openWhatsApp("product_page");
+                      }}
+                      className="flex items-center justify-center gap-3 p-4 mt-4 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl font-bold shadow-lg hover:shadow-green-200 transition-all duration-300 transform hover:-translate-y-1"
+                    >
+                      <MessageCircle className="h-6 w-6" />
+                      Fazer Orçamento no WhatsApp
+                    </a>
+                  </div>
                 );
               })()}
             </div>
@@ -898,7 +910,7 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       <WhatsAppButton />
       <Chatbot />
 
-      {/* Sticky CTA mobile (Q1) — aparece após scroll */}
+      {/* Sticky CTA mobile — aparece quando o CTA principal sai do viewport */}
       <StickyAddToCart
         productName={product.name}
         price={`R$ ${product.price.toFixed(2).replace('.', ',')}`}
@@ -906,6 +918,10 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
         onWhatsApp={() => openWhatsApp("sticky_cta")}
         onAddToCart={handleAddToCart}
       />
+
+      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
+      <ExitIntentPopup whatsappUrl={buildWhatsAppMessage().url} />
+
     </div>
   );
 };
