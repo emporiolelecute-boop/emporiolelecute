@@ -61,6 +61,7 @@ import { buildContextualLinksForProduct } from "@/lib/linkOrchestrator";
 import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 import { resolvePrimaryAction } from "@/lib/primaryAction";
+import { logSlugEvent } from "@/lib/slugObservability";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
