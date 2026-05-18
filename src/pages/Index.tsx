@@ -26,24 +26,26 @@ const Index = () => {
       <LocalBusinessStructuredData />
       <Header />
       <main>
-        {isLoading || !sections
-          ? null
-          : sections.map((section) => {
-              const Component = HOME_SECTIONS_REGISTRY[section.component_name];
-              if (!Component) {
-                if (import.meta.env.DEV) {
-                  console.warn(
-                    `[home] Componente "${section.component_name}" não está registrado em homeSectionsRegistry.`
-                  );
+        <HomeRegistryProvider>
+          {isLoading || !sections
+            ? null
+            : sections.map((section) => {
+                const Component = HOME_SECTIONS_REGISTRY[section.component_name];
+                if (!Component) {
+                  if (import.meta.env.DEV) {
+                    console.warn(
+                      `[home] Componente "${section.component_name}" não está registrado em homeSectionsRegistry.`
+                    );
+                  }
+                  return null;
                 }
-                return null;
-              }
-              return (
-                <Suspense key={section.id} fallback={<SectionFallback />}>
-                  <Component {...(section.editable_props || {})} />
-                </Suspense>
-              );
-            })}
+                return (
+                  <Suspense key={section.id} fallback={<SectionFallback />}>
+                    <Component {...(section.editable_props || {})} />
+                  </Suspense>
+                );
+              })}
+        </HomeRegistryProvider>
       </main>
       <Footer />
       <WhatsAppButton />
