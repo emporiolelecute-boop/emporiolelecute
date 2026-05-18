@@ -1,10 +1,7 @@
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
-import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
-import { useDbCategories, useDbOccasions } from "@/hooks/useProducts";
-import { useTags } from "@/hooks/useTags";
-import { useSegments } from "@/hooks/useSegments";
+import { applyCatalogFilters, sortByFeatured, priceBoundsFrom, deriveFacets } from "@/lib/catalogFilter";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ChevronRight, ShoppingBag } from "lucide-react";
