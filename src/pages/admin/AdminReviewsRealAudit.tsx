@@ -290,6 +290,90 @@ const AdminReviewsRealAudit = () => {
     onError: (e: any) => toast({ title: 'Erro', description: e?.message, variant: 'destructive' }),
   });
 
+  // ---------- IMPORTAÇÃO AUTO 100% MATCH (confiança ≥ 95) ----------
+  const autoImport100 = useMutation({
+    mutationFn: async () => {
+      const candidates = rows.filter(r =>
+        !r.imported_review_id &&
+        r.manual_status !== 'rejected' &&
+        r.suggested_product_id &&
+        (r.suggested_confidence ?? 0) >= 95 &&
+        (r.suggested_method === 'exact' || r.suggested_method === 'normalized')
+      );
+      if (!candidates.length) throw new Error('Nenhum 100% match disponível para importar.');
+
+      let ok = 0, fail = 0;
+      for (const r of candidates) {
+        const productId = r.suggested_product_id!;
+        const sentiment = (r.elo7_sentiment || '').toLowerCase();
+        const rating = sentiment.includes('negat') ? 1 : sentiment.includes('neutr') ? 3 : 5;
+        const { data: ins, error } = await supabase.from('product_reviews').insert({
+          product_id: productId,
+          author_name: r.elo7_buyer_name || 'Cliente Elo7',
+          rating,
+          comment: r.elo7_comment,
+          source: 'elo7',
+          source_url: r.elo7_product_slug,
+          is_verified: true,
+          is_visible: true,
+          review_date: r.elo7_review_date,
+          external_review_id: r.feedback_id,
+        } as any).select('id').single();
+        if (error || !ins) { fail++; continue; }
+        await supabase.from('review_import_audit' as any).update({
+          imported_review_id: ins.id,
+          manual_status: 'confirmed',
+          reviewed_at: new Date().toISOString(),
+        }).eq('id', r.id);
+        ok++;
+      }
+      return { ok, fail, total: candidates.length };
+    },
+    onSuccess: ({ ok, fail, total }) => {
+      toast({ title: 'Importação 100% concluída', description: `${ok}/${total} importados (${fail} falhas). Restantes ficam para revisão manual.` });
+      qc.invalidateQueries({ queryKey: ['review_import_audit'] });
+    },
+    onError: (e: any) => toast({ title: 'Atenção', description: e?.message, variant: 'destructive' }),
+  });
+
+  const downloadAuditReport = (data: AuditRow[]) => {
+    const esc = (v: any) => {
+      const s = v == null ? '' : String(v).replace(/"/g, '""').replace(/[\r\n]+/g, ' ');
+      return `"${s}"`;
+    };
+    const reasonOf = (r: AuditRow) => {
+      if (r.imported_review_id) return 'Importada (100% match auto)';
+      if (r.manual_status === 'confirmed') return 'Confirmada manualmente';
+      if (r.manual_status === 'rejected') return 'Rejeitada manualmente';
+      if (r.manual_status === 'no_match') return 'Sem produto correspondente no catálogo';
+      if (r.manual_status === 'doubtful') return 'Match duvidoso — requer revisão visual';
+      if ((r.suggested_confidence ?? 0) >= 95) return 'Match alto (≥95%) ainda pendente de import';
+      if ((r.suggested_confidence ?? 0) > 0) return `Match fraco (${r.suggested_confidence}%) — fora do critério 100%`;
+      return 'Sem similaridade detectada';
+    };
+    const header = ['feedback_id','elo7_product_name','suggested_product_name','suggested_method','suggested_confidence','manual_status','imported','motivo'];
+    const lines = [header.join(',')];
+    for (const r of data) {
+      lines.push([
+        esc(r.feedback_id),
+        esc(r.elo7_product_name),
+        esc(r.suggested_product_name),
+        esc(r.suggested_method),
+        esc(r.suggested_confidence),
+        esc(r.manual_status),
+        esc(r.imported_review_id ? 'sim' : 'nao'),
+        esc(reasonOf(r)),
+      ].join(','));
+    }
+    const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `auditoria-reviews-elo7-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
