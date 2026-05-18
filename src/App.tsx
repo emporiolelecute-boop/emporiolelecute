@@ -332,8 +332,11 @@ const App = () => {
                     <TaxonomyPage kind="segmento" />
                   </Suspense>
                 } />
-
-                {/* Fase 10.2 — Rota combinatória SAFE MODE (noindex por padrão) */}
+                <Route path="/colecao/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Colecao />
+                  </Suspense>
+                } />
                 <Route path="/segmento/:segmentSlug/ocasiao/:occasionSlug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <CombinationPage />
