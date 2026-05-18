@@ -680,6 +680,8 @@ const Produtos = () => {
               </div>
             </div>
           )}
+          </div>
+          )}
         </div>
 
         {/* Sidebar filters trigger (price, prazo, personalizável, multi-tags) */}
