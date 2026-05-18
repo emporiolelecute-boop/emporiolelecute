@@ -178,7 +178,22 @@ const Produtos = () => {
   const structuralCount = structuralFilters.length;
 
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; categoryName?: string; longDescriptionRaw?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[]; segmentIds: string[]; segmentNames: string[] })[] = useMemo(() => {
+  const products: (Product & {
+    priceNum: number;
+    categoryId?: string;
+    categoryName?: string;
+    categorySlug?: string;
+    longDescriptionRaw?: string;
+    occasionIds: string[];
+    occasionNames: string[];
+    occasionSlugs: string[];
+    tagIds: string[];
+    tagNames: string[];
+    tagSlugs: string[];
+    segmentIds: string[];
+    segmentNames: string[];
+    segmentSlugs: string[];
+  })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -189,6 +204,7 @@ const Produtos = () => {
         longDescription: p.long_description || undefined,
         longDescriptionRaw: p.long_description || '',
         price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
+        priceNum: Number(p.price),
         originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
         image: p.images[0] || '/placeholder.svg',
         images: p.images,
@@ -199,16 +215,28 @@ const Produtos = () => {
         occasions: [],
         keywords: p.keywords,
         min_quantity: p.min_quantity || undefined,
+        production_days: p.production_days ?? null,
+        production_speed: p.production_speed ?? null,
+        personalization_enabled: p.personalization_enabled ?? null,
+        featured_weight: p.featured_weight ?? 0,
         categoryId: p.category_id || undefined,
         categoryName: p.category?.name,
+        categorySlug: p.category?.slug,
         occasionIds: (p.occasions || []).map(o => o.id),
         occasionNames: (p.occasions || []).map(o => o.name),
+        occasionSlugs: (p.occasions || []).map(o => o.slug),
         tagIds: (p.tags || []).map(t => t.id),
         tagNames: (p.tags || []).map(t => t.name),
+        tagSlugs: (p.tags || []).map(t => t.slug),
         segmentIds: (p.segments || []).map(s => s.id),
         segmentNames: (p.segments || []).map(s => s.name),
+        segmentSlugs: (p.segments || []).map(s => s.slug),
       }));
   }, [dbProducts]);
+
+  // Sidebar filter state (URL-synced)
+  const [sideFilters, setSideFilters] = useCatalogFiltersFromUrl();
+  const priceBounds = useMemo(() => priceBoundsFrom(products), [products]);
 
   // Filter products — search now also covers long description + segments
   const filteredProducts = useMemo(() => {
