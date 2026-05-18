@@ -1,111 +1,259 @@
-# Prerender Strategy — Hybrid SEO SPA
+# SEO Control Plane — MVP
 
-## Contexto e restrição fundamental
+## Princípio (importante para evitar regressão)
 
-O projeto roda em **Lovable hosting (SPA estática Vite)** com **Cloudflare na frente** (já configurado para `robots.txt` dinâmico). O build do Lovable **não executa headless browser** (Puppeteer/Playwright), então plugins como `vite-plugin-prerender`, `react-snap` ou `vite-plugin-ssg` **não rodam no pipeline atual**. Tentar instalá-los quebra o build.
+O projeto já tem **50 tabelas `seo_***` e a tabela genérica `**seo_check_runs**` com coluna `checks jsonb` desenhada exatamente para o caso de uso de "rodar checks e persistir findings". **Não vou criar tabelas novas** — vou reusar `seo_check_runs` com `source='control_plane'`. Isso elimina drift de schema e respeita a arquitetura existente.
 
-A única arquitetura viável **sem trocar de hospedagem** é **prerender no edge**:
+## O que vou entregar
 
-```text
-Crawler ──► Cloudflare Worker
-              │
-              ├─ UA é bot + rota crítica? ──► Edge Function `prerender` ──► HTML estático com <head> completo + JSON-LD + conteúdo SEO mínimo
-              │
-              └─ Usuário humano OU rota não-crítica ──► SPA Lovable normal (hydration React)
+### 1. Edge Function `seo-control-plane` (nova)
+
+Roda server-side todas as validações e grava 1 linha em `seo_check_runs`.
+
+**Etapas internas (ordem):**
+
+1. **Coletar fontes de verdade**
+  - `products` ativos (slug)
+  - `categories`, `occasions`, `tags` (slug + `is_indexed`)
+  - `pages` (slug)
+  - sitemap atual (fetch de `https://emporiolelecute.com.br/sitemap.xml`)
+  - registry de rotas do prerender (constante interna, espelha `resolve()` em `prerender/index.ts`)
+2. **Diffs**
+  - `sitemap_missing_from_db` — URLs órfãs no sitemap
+  - `db_missing_from_sitemap` — produtos/categorias indexáveis ausentes do sitemap
+  - `prerender_missing` — rotas no sitemap sem handler no prerender
+  - `sitemap_missing_for_prerender` — handler existe mas sitemap não tem (warning)
+3. **Bot simulation** (amostra de 5 rotas críticas: `/`, `/produtos`, 1 produto random, 1 categoria random, 1 rota inválida)
+  - Chama a Edge `prerender?path=...` direto (cross-function call, mesma região)
+  - Valida no HTML retornado: `<title>` presente e não vazio; `<meta name="description">`; `<link rel="canonical">`; `og:image`; pelo menos 1 `<script type="application/ld+json">` parseável; `noindex` correto para rota inválida
+  - Resultados anexados como findings
+4. **Classificação por severidade**
+  - 🔴 crítico: prerender de rota indexável quebrado, JSON-LD ausente em produto, 404 retornando index
+  - 🟠 warning: drift sitemap↔DB, OG ausente
+  - 🟢 ok: tudo presente
+5. **Persistir** 1 linha em `seo_check_runs`:
+  ```json
+   { source: "control_plane", total, passed, errors, warnings, checks: [{id, severity, category, message, url?, evidence?}, ...] }
+  ```
+
+### 2. Página `/admin/seo-control-plane` (nova)
+
+Lê últimas 10 runs de `seo_check_runs` filtradas por `source='control_plane'`. Mostra:
+
+- Botão **"Run now"** (chama a edge function on-demand)
+- Status pill da última run (🔴/🟠/🟢)
+- Cards: Sitemap coverage, Prerender coverage, Bot simulation, Drift alerts
+- Tabela: últimas 10 runs com expandable de findings
+- Cache headers do prerender (extraídos do bot simulation step)
+
+### 3. Adicionar rota em `App.tsx`
+
+- `/admin/seo-control-plane` → novo componente lazy-loaded
+
+### 4. (Opcional, depois) Cron semanal
+
+Não vou criar agora — o projeto já tem muitos crons (`seo_check_runs` já é alimentado por `seo-checks`). Documento como ligar; user decide se quer.
+
+## Arquivos
+
+1. **CRIAR** `supabase/functions/seo-control-plane/index.ts` — orquestrador.
+2. **CRIAR** `src/pages/admin/AdminSeoControlPlane.tsx` — UI.
+3. **CRIAR** `src/hooks/useSeoControlPlane.ts` — fetch últimas runs + trigger.
+4. **EDITAR** `src/App.tsx` — adicionar route + lazy import.
+
+## Não-objetivos (cuidado contra escopo creep)
+
+- ❌ Não criar nova tabela (reuso `seo_check_runs`).
+- ❌ Não escrever no DB nada além da linha de run (read-only sobre dados).
+- ❌ Não fazer scraping de Google ou serviço externo.
+- ❌ Não adicionar item ao sidebar de admin agora (rota acessível por URL direta + entry futura no AdminSeoCommandCenter — sidebar já tem 50+ entradas seo_*).
+- ❌ Não criar cron ainda.
+
+## Riscos e mitigação
+
+
+| Risco                                                    | Mitigação                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Cross-function call ao prerender pode adicionar latência | timeout 10s, fetch em paralelo, máx 5 rotas                               |
+| `seo_check_runs.checks` JSON cresce muito                | Limitar findings a 100 por run, truncar evidence                          |
+| Fetch do sitemap em prod pode falhar em preview          | Try/catch + finding 🟠 "sitemap inacessível" em vez de erro fatal         |
+| Falsos positivos de "rota indexável sem prerender"       | Lista de exclusão hardcoded (admin/, carrinho, etc.) idêntica à do Worker |
+
+
+## Critério de sucesso
+
+- Rodar "Run now" no admin produz uma linha em `seo_check_runs` em < 15s.
+- Para cada rota crítica, 5 validações (title/desc/canonical/og/jsonld) com pass/fail visível.
+- Diff DB↔sitemap detecta um produto novo criado e ainda não publicado no sitemap.
+- Rota inválida é marcada como 🔴 se prerender devolver `index,follow`.
+- Zero schema migration; zero mudança no site público.
+
+&nbsp;
+
+Aqui está o **texto de adendo técnico direto para colar junto ao plano do Lovable**, sem interpretação adicional:
+
+---
+
+# 🔧 ADENDO TÉCNICO OBRIGATÓRIO — SEO CONTROL PLANE (STABILITY PATCH)
+
+Este adendo complementa o plano “SEO Control Plane — MVP” e deve ser aplicado **antes da implementação em produção** para garantir consistência de dados, evitar falsos positivos e estabilizar validações de prerender.
+
+---
+
+## 1. Snapshot temporal consistente (OBRIGATÓRIO)
+
+Toda execução do control plane deve usar um **timestamp único de referência** para todas as fontes de dados.
+
+### Requisito:
+
+- Definir no início da execução:
+
+```ts
+const run_timestamp = new Date().toISOString();
+
 ```
 
-Isso resolve os 4 critérios de sucesso (Googlebot sem JS, social crawlers, sitemap alinhado, hidratação sem conflito) sem mover o projeto para Next.js/SSR.
+### Aplicação obrigatória:
 
-## Matriz de rotas (decisão de prerender)
+- Queries de DB (`products`, `categories`, `occasions`, `pages`) devem considerar apenas registros com:
 
-| Rota | Indexável | Depende de JS hoje | Prerender |
-|---|---|---|---|
-| `/` | sim | parcial (Helmet) | 🔴 SIM |
-| `/produtos` | sim | sim (DynamicSEO) | 🔴 SIM |
-| `/produto/:slug` | sim | sim (Product JSON-LD) | 🔴 SIM (top N) |
-| `/categoria/:slug` | sim | sim | 🔴 SIM (todas) |
-| `/ocasiao/:slug` | sim | sim | 🟠 SIM |
-| `/tag/:slug` | sim | sim | 🟠 SIM |
-| `/lembrancinhas-*` (landings) | sim | sim | 🔴 SIM |
-| `/sobre`, `/contato`, `/envio`, `/orcamento`, `/depoimentos`, `/blog`, `/blog/:slug` | sim | parcial | 🟠 SIM |
-| `/buscar`, `/carrinho`, `/rastrear`, `/loja` | não | n/a | ❌ NÃO |
-| `/admin/*` | não (robots) | n/a | ❌ NÃO |
-| `/404` (qualquer rota inválida) | não | risco soft-404 | 🔴 SIM (HTML estático com `noindex`) |
+```sql
+updated_at <= run_timestamp
 
-## Arquitetura técnica
-
-### 1. Edge Function `prerender` (Supabase)
-Nova função que recebe `?path=/produto/abc` e retorna HTML completo:
-
-- Lê dados reais do Postgres (produto, categoria, ocasião, landing) via service role.
-- Monta `<head>` completo: title, description, canonical, OG, Twitter, JSON-LD apropriado por rota (Product, CollectionPage, ItemList, Organization, BreadcrumbList).
-- Inclui `<body>` com conteúdo SEO mínimo legível (h1, descrição, lista de produtos, links internos para crawl).
-- Inclui o `<div id="root">` + `<script type="module" src="/assets/index-[hash].js">` igual ao `index.html` — assim quando o navegador real chega via fallback, o React hidrata normalmente.
-- Cache `s-maxage=600, stale-while-revalidate=86400`.
-- Para rota inválida: retorna 200 com `<meta name="robots" content="noindex,follow">` e conteúdo de NotFound (resolve soft-404).
-
-### 2. Cloudflare Worker (extensão do existente)
-Adicionar lógica de roteamento ao worker que já serve `/robots.txt`:
-
-```js
-const PRERENDER = "https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/prerender";
-const BOT_UA = /googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot|discordbot|applebot/i;
-const PRERENDER_PATHS = /^\/(produtos|produto\/|categoria\/|ocasiao\/|tag\/|lembrancinhas|sobre|contato|envio|orcamento|depoimentos|blog)/;
-
-// Se UA é bot E (rota é prerender OU "/"), faz fetch do edge function com cache 10min
-// Caso contrário: passa direto pro Lovable (SPA)
 ```
 
-Decisão **bot-aware** (não prerender para humanos) porque:
-- Usuário humano não precisa do prerender (hidratação React entrega UX completa).
-- Reduz custo da Edge Function em ~99% do tráfego.
-- Elimina risco de divergência de hidratação (humano nunca vê o HTML prerenderizado).
-- Social crawlers (que são o caso crítico do `og:image`) **são bots por UA** — eles recebem o HTML correto.
+- Sitemap fetch deve ser tratado como snapshot da execução (cache bust obrigatório por run).
 
-### 3. Sitemap alignment
-A função `generate-sitemap` já existe. Adicionar validação cruzada:
-- Lista de rotas no sitemap = lista de rotas que a Edge `prerender` sabe renderizar.
-- Job semanal compara e loga drift em `seo_health_runs`.
+### Objetivo:
 
-### 4. Helmet permanece (não remover)
-- Prerender = **fonte primária** para bots.
-- Helmet = **fonte primária** para SPA pós-hydration (atualiza título ao navegar client-side).
-- Como bot nunca executa JS, Helmet nunca sobrescreve o prerender no bot. Como humano nunca recebe o prerender, não há conflito.
-- **Zero duplicação de JSON-LD**: o HTML prerenderizado contém JSON-LD; quando o React hidrata no humano, Helmet injeta o mesmo JSON-LD — mas isso só acontece no humano, que não importa para SEO.
+Evitar falsos drift causados por diferenças temporais entre:
 
-## Arquivos que vou criar/editar
+- DB state
+- sitemap state
+- prerender state
 
-1. **CRIAR** `supabase/functions/prerender/index.ts` — função edge que renderiza HTML por rota.
-2. **EDITAR** `docs/cloudflare-worker-robots.md` — adicionar segunda versão do worker com prerender + instruções.
-3. **CRIAR** `docs/PRERENDER_STRATEGY.md` — documentação da estratégia, lista de UAs, rollback.
-4. **CRIAR** `supabase/functions/prerender/_tests/` — fixtures e testes unitários do gerador HTML.
-5. **EDITAR** `supabase/functions/generate-sitemap/index.ts` — adicionar marker `<!-- prerender:ok -->` para validação.
-6. **CRIAR** `src/pages/admin/AdminPrerenderHealth.tsx` — dashboard que mostra: rotas conhecidas, cache hit rate (via header), última renderização, drift vs sitemap.
-7. **EDITAR** `src/App.tsx` — adicionar rota `/admin/prerender-health`.
+---
 
-**Nenhuma mudança em `vite.config.ts`, `package.json` runtime deps, ou no React app cliente.** Zero risco de regressão visual ou de comportamento para usuários humanos.
+## 2. Expansão mínima da simulação de bots (OBRIGATÓRIO)
 
-## Plano de rollback
-1. Reverter Worker para versão atual (só serve `/robots.txt`) — 1 clique no Cloudflare.
-2. Deletar Edge Function `prerender` — bots voltam a ver SPA atual (estado atual).
-3. Reverter PR de código (admin dashboard fica órfão, sem efeito).
+Substituir amostragem fixa de 5 rotas por:
 
-Tempo de rollback: **< 5 minutos**, sem downtime.
+### Conjunto de validação:
 
-## Impacto esperado
+- 5 rotas fixas críticas:
+  - `/`
+  - `/produtos`
+  - `/produto/:slug` (1 exemplo)
+  - `/categoria/:slug` (1 exemplo)
+  - `/rota-invalida`
+- &nbsp;
 
-| Métrica | Antes | Depois |
-|---|---|---|
-| Googlebot vê `<title>` correto sem JS | só `/` | todas rotas críticas |
-| WhatsApp/LinkedIn preview por produto | só fallback genérico | título + descrição + imagem do produto |
-| Soft-404 risk | alto (200 + index) | zero (200 + noindex no HTML) |
-| Time-to-indexable | depende de Googlebot rodar JS (lento) | imediato (HTML estático) |
-| Custo Cloudflare/Supabase | n/a | ~$0–2/mês (bots = baixo volume) |
+- amostragem dinâmica:
 
-## Pré-requisitos antes de eu começar
+- 5 produtos aleatórios
+- 3 categorias aleatórias
+- 2 landings SEO aleatórias
 
-Preciso confirmar 2 pontos:
+### Objetivo:
 
-1. **Cloudflare Worker**: você confirma que o domínio `emporiolelecute.com.br` já passa por Cloudflare (proxied/laranja) e que eu posso assumir que você vai atualizar o Worker manualmente com o snippet que vou documentar? (Eu não tenho acesso direto ao Cloudflare — só consigo escrever o código + doc.)
+Garantir cobertura estatística mínima para detectar:
 
-2. **Escopo do MVP**: começamos por **`/` + `/produto/:slug` + `/categoria/:slug` + 404** (cobre 80% do valor de SEO/social) e itero o resto depois? Ou já entregamos todas as rotas da matriz acima de uma vez?
+- produtos sem JSON-LD
+- categorias sem OG
+- landings sem metadata
+- drift silencioso em subconjuntos
+
+---
+
+## 3. Classificação de severidade com dimensão de impacto (OBRIGATÓRIO)
+
+Substituir modelo atual por estrutura expandida:
+
+Cada finding deve conter:
+
+```json
+{
+  "severity": "critical | warning | ok",
+  "impact": "indexation | social_preview | data_integrity"
+}
+
+```
+
+### Regras:
+
+- **indexation** → Google SEO (ranking / crawl / index)
+- **social_preview** → WhatsApp / LinkedIn / Twitter unfurl
+- **data_integrity** → sitemap / DB / prerender inconsistencies
+
+---
+
+## 4. Proteção contra timeout de prerender (OBRIGATÓRIO)
+
+Todas as chamadas para `prerender` devem ter controle de timeout:
+
+### Regra:
+
+- timeout máximo: **10 segundos**
+
+### Comportamento:
+
+- se timeout exceder:
+  - NÃO falhar a execução
+  - registrar finding:
+
+```json
+{
+  "severity": "warning",
+  "message": "prerender timeout exceeded",
+  "impact": "indexation"
+}
+
+```
+
+---
+
+## 5. Normalização de cache de sitemap (OBRIGATÓRIO)
+
+Ao buscar sitemap:
+
+- sempre aplicar cache bust por execução
+- não reutilizar cache entre runs diferentes
+
+Exemplo:
+
+```
+/sitemap.xml?run_timestamp=...
+
+```
+
+### Objetivo:
+
+Evitar comparação de snapshots diferentes entre runs consecutivos.
+
+---
+
+## 6. Regra de consistência final (critério de validação)
+
+O sistema só é considerado estável quando:
+
+- DB snapshot = sitemap snapshot = prerender snapshot (mesmo run_timestamp)
+- bot simulation cobre:
+  - rotas críticas
+  - amostragem estatística de conteúdo dinâmico
+- nenhum finding crítico de:
+  - JSON-LD ausente em produto
+  - 404 sem noindex
+  - prerender timeout não tratado
+
+---
+
+## 7. Garantia de não regressão
+
+Este adendo não altera:
+
+- schema de banco de dados
+- frontend React
+- worker Cloudflare existente
+- lógica de prerender atual
+
+Apenas adiciona **camada de consistência e validação temporal ao control plane**.
