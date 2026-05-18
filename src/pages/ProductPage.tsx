@@ -390,7 +390,7 @@ const ProductPage = () => {
         description={product.description || `Lembrancinha artesanal ${product.name}`}
         price={product.price}
         images={product.images}
-        slug={product.slug}
+        slug={canonicalSlug}
         rating={reviewStats?.avg_rating ? Number(reviewStats.avg_rating) : undefined}
         reviewCount={reviewStats?.review_count}
         productionDays={product.productionDays}
