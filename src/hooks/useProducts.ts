@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { resolveProductSlug, recordProductSlugHit, type ResolvedVia } from '@/lib/productResolver';
+import { resolveProductSlug, recordProductSlugHit, type ResolvedVia, type ResolvedSlug } from '@/lib/productResolver';
 import { logSlugEvent } from '@/lib/slugObservability';
 
 export interface DbProductSlugMeta {
