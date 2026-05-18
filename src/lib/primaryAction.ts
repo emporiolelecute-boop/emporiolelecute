@@ -28,14 +28,11 @@ export interface ProductLike {
   is_active?: boolean | null;
   personalization_enabled?: boolean | null;
   stock_status?: string | null;
-  // Aceitamos qualquer formato — só usamos os campos acima.
-  [key: string]: unknown;
 }
 
 export interface KitLike {
   is_active?: boolean | null;
   bundle_type?: string | null;
-  [key: string]: unknown;
 }
 
 /** Resolve a ação primária para um produto individual (PDP, card, sticky CTA). */
