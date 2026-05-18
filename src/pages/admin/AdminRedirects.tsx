@@ -73,11 +73,11 @@ export default function AdminRedirects() {
           <div className="space-y-4">
             <div>
               <Label>De (caminho antigo)</Label>
-              <Input placeholder="/produtos/lembrancinha-antiga" value={edit.from_path ?? ""} onChange={(e) => setEdit({ ...edit, from_path: e.target.value })} />
+              <Input placeholder="/produtos/lembrancinha-antiga (legado) ou /produto/nova" value={edit.from_path ?? ""} onChange={(e) => setEdit({ ...edit, from_path: e.target.value })} />
             </div>
             <div>
               <Label>Para (caminho novo)</Label>
-              <Input placeholder="/produtos/lembrancinha-nova" value={edit.to_path ?? ""} onChange={(e) => setEdit({ ...edit, to_path: e.target.value })} />
+              <Input placeholder="/produto/lembrancinha-nova" value={edit.to_path ?? ""} onChange={(e) => setEdit({ ...edit, to_path: e.target.value })} />
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
