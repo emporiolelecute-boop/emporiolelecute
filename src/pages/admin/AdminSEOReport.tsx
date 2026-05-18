@@ -20,7 +20,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSEOConfig } from '@/hooks/useStoreSettings';
-import { urls } from '@/lib/urls';
+import { urls as urlBuilders } from '@/lib/urls';
 
 interface SEOStats {
   totalProducts: number;
@@ -99,7 +99,7 @@ const AdminSEOReport = () => {
         { url: siteUrl, status: 'pending' },
         { url: `${siteUrl}/produtos`, status: 'pending' },
         ...(sampleProducts?.map(p => ({
-          url: urls.productAbsolute(p.slug, siteUrl),
+          url: urlBuilders.productAbsolute(p.slug, siteUrl),
           status: 'pending' as const,
         })) || []),
       ];
