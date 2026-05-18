@@ -160,14 +160,9 @@ const AdminProductForm = () => {
     }
   }, [existingProduct, isEditing]);
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
+  // Fase 4.1: gerador token-aware. Nunca corta no meio de palavra,
+  // remove stopwords antes de cortar tokens semânticos, jamais emite hash.
+  const generateSlug = (name: string) => generateSafeSlug(name);
 
   const handleNameChange = (name: string) => {
     setFormData((prev) => ({
