@@ -32,7 +32,6 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import RelatedProducts from "@/components/RelatedProducts";
-import RelatedByTaxonomy from "@/components/RelatedByTaxonomy";
 import RelatedSmart from "@/components/RelatedSmart";
 import ProductGallery from "@/components/ProductGallery";
 import { StickyAddToCart } from "@/components/StickyAddToCart";
