@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import type { DbOccasion, DbCategory, DbTag, DbSegment } from "@/hooks/useProducts";
+export interface FacetItem { id: string; name: string; slug: string; count?: number }
 
 export type SpeedKey = "rapido" | "normal" | "longo";
 
