@@ -16,21 +16,20 @@
 export const CANONICAL_ORIGIN = "https://emporiolelecute.com.br";
 
 /**
- * Prefixo público atual de URL de produto.
+ * Prefixo público canônico de URL de produto.
  *
- * Fase 2.0 = `/produtos` (plural). Fase 2.2 vira `/produto` (singular).
+ * Fase 2.2 (FLIPPED): `/produto` (singular) é o canônico.
+ * `/produtos` (plural) virou legado — preservado indefinidamente via
+ * `LegacyProductRedirect` (replace client-side para o novo namespace).
  */
-export const PRODUCT_PATH_PREFIX = "/produtos";
+export const PRODUCT_PATH_PREFIX = "/produto";
 
 /**
- * Prefixo legado pós-flip. Mantido como constante para que o
- * `LegacyProductRedirect` e a observabilidade `legacy_namespace_hit`
- * possam referenciá-lo sem hardcode duplicado.
- *
- * Fase 2.0: ainda é o prefixo principal — `LEGACY_PRODUCT_PATH_PREFIX`
- * representa o prefixo que será marcado como legado na Fase 2.2.
+ * Prefixo legado pós-flip Fase 2.2. Continua respondendo (coexistência
+ * longa) mas o `LegacyProductRedirect` faz replace para o canônico.
+ * Observabilidade emite `legacy_namespace_hit` em cada acesso.
  */
-export const LEGACY_PRODUCT_PATH_PREFIX = "/produto";
+export const LEGACY_PRODUCT_PATH_PREFIX = "/produtos";
 
 export const urls = {
   /** URL relativa de um produto pelo seu slug primário. */

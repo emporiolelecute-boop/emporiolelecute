@@ -147,6 +147,8 @@ import AdminErrorBoundary from "./components/AdminErrorBoundary";
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
 import CanonicalNormalizer from "./components/CanonicalNormalizer";
+import { logSlugEvent } from "./lib/slugObservability";
+import { urls, PRODUCT_PATH_PREFIX, LEGACY_PRODUCT_PATH_PREFIX } from "./lib/urls";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -175,16 +177,31 @@ const ReducedMotionMount = () => {
 
 
 /**
- * Fase A — Redirect canônico 1-hop: /produto/:slug → /produtos/:slug
- * Preserva query string e hash. Usa `replace` para não poluir o histórico
- * (equivalente client-side de um 301; o hosting Lovable serve sempre
- * index.html, então não há camada de servidor onde aplicar 301 real).
+ * Fase 2.2 — Redirect canônico 1-hop: /produtos/:slug (legado) → /produto/:slug.
+ * Preserva query string, hash e aliases (a resolução de alias acontece em
+ * ProductPage via product_slugs resolver). Usa `replace` para não poluir o
+ * histórico — equivalente client-side de 301 (Lovable hosting é static-first,
+ * não há camada server-side para emitir 301 real). Emite `legacy_namespace_hit`.
  */
 const LegacyProductRedirect = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
+  useEffect(() => {
+    logSlugEvent({
+      event: "legacy_namespace_hit",
+      legacyPrefix: LEGACY_PRODUCT_PATH_PREFIX,
+      targetPrefix: PRODUCT_PATH_PREFIX,
+      matchedSlug: slug,
+      pathname: location.pathname,
+    });
+  }, [slug, location.pathname]);
   if (!slug) return <Navigate to="/produtos" replace />;
-  return <Navigate to={`/produtos/${slug}${location.search}${location.hash}`} replace />;
+  return (
+    <Navigate
+      to={`${urls.product(slug)}${location.search}${location.hash}`}
+      replace
+    />
+  );
 };
 
 const App = () => {
@@ -247,13 +264,14 @@ const App = () => {
                     <Buscar />
                   </Suspense>
                 } />
-                <Route path="/produtos/:slug" element={
+                {/* Fase 2.2 (FLIPPED) — /produto/:slug é canônico. */}
+                <Route path="/produto/:slug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <ProductPage />
                   </Suspense>
                 } />
-                {/* Fase A — Canonical: /produto/:slug é forma legada; redireciona 1-hop para /produtos/:slug, preservando query/hash. */}
-                <Route path="/produto/:slug" element={<LegacyProductRedirect />} />
+                {/* Legado coexistente: /produtos/:slug → replace para canônico. */}
+                <Route path="/produtos/:slug" element={<LegacyProductRedirect />} />
                 <Route path="/produto" element={<Navigate to="/produtos" replace />} />
                 <Route path="/carrinho" element={
                   <Suspense fallback={<PageSkeleton />}>

@@ -12,10 +12,10 @@
 
 export const CANONICAL_ORIGIN = "https://emporiolelecute.com.br";
 
-/** Prefixo público de URL de produto. Espelha PRODUCT_PATH_PREFIX do frontend. */
-export const PRODUCT_PATH_PREFIX = "/produtos";
+/** Prefixo público canônico (Fase 2.2 FLIPPED: singular). Espelha frontend. */
+export const PRODUCT_PATH_PREFIX = "/produto";
 
-export const LEGACY_PRODUCT_PATH_PREFIX = "/produto";
+export const LEGACY_PRODUCT_PATH_PREFIX = "/produtos";
 
 /** URL relativa de produto pelo slug primário. */
 export function productPath(slug: string): string {
