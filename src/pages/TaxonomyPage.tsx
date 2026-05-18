@@ -128,6 +128,29 @@ const TaxonomyPage = ({ kind }: Props) => {
 
   const dbProducts = productsQuery.data ?? [];
 
+  // ============ FILTROS ============
+  const { data: dbCategories } = useDbCategories();
+  const { data: dbOccasions } = useDbOccasions();
+  const { data: dbTags } = useTags();
+  const { data: dbSegments } = useSegments();
+  const [filters, setFilters] = useCatalogFiltersFromUrl();
+
+  const normalized = useMemo(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (dbProducts as any[]).map((p) => ({
+        ...p,
+        occasions: (p.occasions || []).map((x: { occasion: unknown }) => x.occasion).filter(Boolean),
+        tags: (p.tags || []).map((x: { tag: unknown }) => x.tag).filter(Boolean),
+        segments: (p.segments || []).map((x: { segment: unknown }) => x.segment).filter(Boolean),
+      })),
+    [dbProducts]
+  );
+
+  const priceBounds = useMemo(() => priceBoundsFrom(normalized), [normalized]);
+  const filtered = useMemo(() => sortByFeatured(applyCatalogFilters(normalized, filters)), [normalized, filters]);
+  const filteredLimited = filtered.slice(0, MAX_PRODUCTS);
+
   // 3. Taxonomias relacionadas (linking cruzado) — uma query por relação
   const productIds = useMemo(() => dbProducts.map((p) => p.id), [dbProducts]);
 
