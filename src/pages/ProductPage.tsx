@@ -518,6 +518,13 @@ const ProductPage = () => {
                   Frete reduzido
                 </Badge>
               </div>
+
+              {/* Reviews under the gallery thumbnails — compact, 3 shown + "Ver mais" */}
+              {dbProduct?.id && (
+                <div className="hidden lg:block">
+                  <ProductReviews productId={dbProduct.id} variant="compact" initialLimit={3} />
+                </div>
+              )}
             </div>
 
             {/* Info Section - Reference Style */}
