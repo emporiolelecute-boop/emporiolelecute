@@ -236,7 +236,7 @@ const Produtos = () => {
 
   // Sidebar filter state (URL-synced)
   const [sideFilters, setSideFilters] = useCatalogFiltersFromUrl();
-  const priceBounds = useMemo(() => priceBoundsFrom(products), [products]);
+  const priceBounds = useMemo(() => priceBoundsFrom(products.map(p => ({ price: p.priceNum }))), [products]);
 
   // Filter products — search now also covers long description + segments
   const filteredProducts = useMemo(() => {
