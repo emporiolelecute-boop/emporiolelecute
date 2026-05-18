@@ -36,8 +36,10 @@ const Colecao = () => {
     [collection]
   );
   const priceBounds = useMemo(() => priceBoundsFrom(normalized), [normalized]);
+  // Ordenação: respeita `collection_products.position` (já vem ordenado do hook);
+  // featured_weight só atua como desempate quando posições forem iguais (raro).
   const filtered = useMemo(
-    () => sortByFeatured(applyCatalogFilters(normalized, filters)),
+    () => applyCatalogFilters(normalized, filters),
     [normalized, filters]
   );
 
