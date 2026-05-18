@@ -966,22 +966,32 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       {/* Sticky CTA mobile — aparece quando o CTA principal sai do viewport */}
       <StickyAddToCart
         productName={product.name}
+        productSlug={product.slug}
         price={`R$ ${product.price.toFixed(2).replace('.', ',')}`}
         isVisible={showStickyCta}
         onWhatsApp={() => openWhatsApp("sticky_cta")}
         onAddToCart={handleAddToCart}
+        enabled={ctaConfig?.sticky?.enabled !== false}
+        buttonLabel={ctaConfig?.sticky?.buttonLabel}
       />
 
-      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
-      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
+      {/* Exit intent popup — usa getWhatsappUrl para garantir estado fresco no clique */}
       <ExitIntentPopup
-        whatsappUrl={buildWhatsAppMessage().url}
+        getWhatsappUrl={() => buildWhatsAppMessage().url}
         productName={product.name}
         productSlug={product.slug}
         minQuantity={product.minQuantity}
         productionDays={product.productionDays}
         quantity={quantity}
-        personalized={Boolean(personalization?.trim())}
+        personalized={Boolean(normalizePersonalization(personalization))}
+        enabled={ctaConfig?.exitPopup?.enabled !== false}
+        title={ctaConfig?.exitPopup?.title}
+        description={ctaConfig?.exitPopup?.description}
+        ctaLabel={ctaConfig?.exitPopup?.ctaLabel}
+        dismissLabel={ctaConfig?.exitPopup?.dismissLabel}
+        maxPerSession={ctaConfig?.exitPopup?.maxPerSession}
+        cooldownMinutes={ctaConfig?.exitPopup?.cooldownMinutes}
+        armDelayMs={ctaConfig?.exitPopup?.armDelayMs}
       />
 
     </div>
