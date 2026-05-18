@@ -131,8 +131,13 @@ export function useDbProduct(slug: string) {
     queryKey: ['product', slug],
     queryFn: async () => {
       const resolved = await resolveProductSlug(slug);
-      if (!resolved) {
-        logSlugEvent('unknown_slug', { matchedSlug: slug });
+
+      if (resolved.status === 'unknown') {
+        logSlugEvent({ event: 'unknown_slug', matchedSlug: resolved.matchedSlug });
+        return null;
+      }
+      if (resolved.status === 'inactive') {
+        logSlugEvent({ event: 'inactive_alias_attempt', matchedSlug: resolved.matchedSlug });
         return null;
       }
 
@@ -140,13 +145,15 @@ export function useDbProduct(slug: string) {
       recordProductSlugHit(resolved.matchedSlug);
 
       if (resolved.resolvedVia === 'alias') {
-        logSlugEvent('alias_hit', {
+        logSlugEvent({
+          event: 'alias_hit',
           matchedSlug: resolved.matchedSlug,
           primarySlug: resolved.primarySlug,
           productId: resolved.productId,
         });
       } else if (resolved.resolvedVia === 'historical') {
-        logSlugEvent('historical_hit', {
+        logSlugEvent({
+          event: 'historical_hit',
           matchedSlug: resolved.matchedSlug,
           primarySlug: resolved.primarySlug,
           productId: resolved.productId,
@@ -167,8 +174,8 @@ export function useDbProduct(slug: string) {
 
       if (error) throw error;
       if (!product) {
-        // product_slugs apontou para produto inexistente — inconsistência estrutural
-        logSlugEvent('structural_inconsistency', {
+        logSlugEvent({
+          event: 'structural_inconsistency',
           reason: 'resolved_product_id_not_found',
           productId: resolved.productId,
           matchedSlug: resolved.matchedSlug,
@@ -177,10 +184,10 @@ export function useDbProduct(slug: string) {
         return null;
       }
 
-      // Sanity check: product.slug deve coincidir com primarySlug.
+      // Drift: products.slug deve coincidir com primarySlug.
       if (product.slug !== resolved.primarySlug) {
-        logSlugEvent('structural_inconsistency', {
-          reason: 'products_slug_diverges_from_primary',
+        logSlugEvent({
+          event: 'slug_drift_detected',
           productId: resolved.productId,
           matchedSlug: resolved.matchedSlug,
           primarySlug: resolved.primarySlug,
