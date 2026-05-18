@@ -416,7 +416,7 @@ const ProductPage = () => {
           ...(dbProduct?.category && !dbProduct?.segments?.[0] && !dbProduct?.occasions?.[0]
             ? [{ name: dbProduct.category.name, url: `https://emporiolelecute.com.br/categoria/${dbProduct.category.slug}` }]
             : []),
-          { name: product.name, url: `https://emporiolelecute.com.br/produtos/${product.slug}` },
+          { name: product.name, url: canonicalUrl },
         ]}
       />
       <Header />
