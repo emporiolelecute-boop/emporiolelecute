@@ -1,0 +1,10 @@
+{
+  "materialized_at": "2026-05-18T07:00:52.796Z",
+  "source": "generate-sitemap@v2.1b",
+  "generated_at": "2026-05-18T07:00:52.702Z",
+  "namespace": "/produtos",
+  "products_count": 54,
+  "sha256": "e7b5d4c9e9f125c4056eb3cd8fbd575b9a1150fe52bd859d5cb200d8977c27bc",
+  "bytes": 32206,
+  "endpoint": "https://xfqffqxqiuqauefrrcxn.supabase.co/functions/v1/generate-sitemap"
+}
