@@ -16,6 +16,10 @@ export default class AdminErrorBoundary extends Component<{ children: ReactNode 
   }
 
   componentDidCatch(err: Error) {
+    logTelemetryEvent("ui_error_boundary", `admin:${err.message || "unknown"}`, {
+      scope: "admin",
+      route: typeof location !== "undefined" ? location.pathname : "",
+    });
     try {
       void (supabase as any).from("stale_bundle_logs").insert({
         route: typeof location !== "undefined" ? location.pathname : "",
