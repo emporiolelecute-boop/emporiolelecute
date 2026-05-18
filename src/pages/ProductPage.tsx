@@ -108,15 +108,16 @@ const ProductPage = () => {
       observer.observe(anchor);
       return () => observer.disconnect();
     }
-    // Fallback: gatilho relativo à altura da viewport (não fixo em 520px).
+    // Fallback: gatilho relativo à altura da viewport (ratio configurável).
+    const ratio = ctaConfig?.sticky?.scrollViewportRatio ?? 0.7;
     const onScroll = () => {
-      const threshold = Math.max(320, window.innerHeight * 0.7);
+      const threshold = Math.max(320, window.innerHeight * ratio);
       setShowStickyCta(window.scrollY > threshold);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [dbProduct?.id]);
+  }, [dbProduct?.id, ctaConfig?.sticky?.scrollViewportRatio]);
 
   // Convert to display format
   const product = dbProduct ? {
