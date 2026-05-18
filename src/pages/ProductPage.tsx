@@ -972,8 +972,12 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
             </section>
           )}
 
-          {/* Fase 7 — Avaliações */}
-          {dbProduct?.id && <ProductReviews productId={dbProduct.id} />}
+          {/* Fase 7 — Avaliações (mobile/tablet: aqui; desktop: ao lado da galeria) */}
+          {dbProduct?.id && (
+            <div className="lg:hidden">
+              <ProductReviews productId={dbProduct.id} initialLimit={3} />
+            </div>
+          )}
 
           {/* Fase 7 — Temas relacionados (descoberta visual; tags não-indexáveis) */}
           {dbProduct?.tags && dbProduct.tags.length > 0 && (
