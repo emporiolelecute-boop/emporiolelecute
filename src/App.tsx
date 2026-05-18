@@ -147,6 +147,8 @@ import AdminErrorBoundary from "./components/AdminErrorBoundary";
 import RedirectHandler from "./components/RedirectHandler";
 import TrackingScripts from "./components/TrackingScripts";
 import CanonicalNormalizer from "./components/CanonicalNormalizer";
+import { logSlugEvent } from "./lib/slugObservability";
+import { urls, PRODUCT_PATH_PREFIX, LEGACY_PRODUCT_PATH_PREFIX } from "./lib/urls";
 
 const queryClient = new QueryClient({
   defaultOptions: {
