@@ -7,6 +7,8 @@ import ProductCard from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/ProductSkeleton";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
+import { useHomeRegistry } from "@/contexts/HomeRegistry";
+import { sortByHomePriority } from "@/lib/homePriority";
 
 const STORAGE_KEY = "bestsellers:selection:v2";
 const TTL_MS = 1000 * 60 * 60 * 24; // 24h — same selection across reloads / sessions
@@ -44,28 +46,45 @@ const shuffle = <T,>(arr: T[]): T[] => {
 
 const BestSellers = () => {
   const { data: dbProducts, isLoading } = useDbProducts();
+  const registry = useHomeRegistry();
 
   const { products, totalActive } = useMemo(() => {
     const active = (dbProducts || []).filter(p => p.is_active);
-    const desiredMax = 16; // up to 4 rows of 4 on desktop, parity-aligned
+    // Sprint final — dedupe global da home: descarta produtos já reivindicados
+    // por blocos anteriores. Restantes vão por score editorial determinístico.
+    const remainingIds = new Set(registry.filterProducts(active.map(p => p.id)));
+    const candidates = active.filter(p => remainingIds.has(p.id));
+    const desiredMax = 16;
+    const pool = candidates.length > 0 ? candidates : active; // fallback se tudo já foi reivindicado
     const targetCount = Math.min(
-      active.length >= 4 ? Math.floor(active.length / 4) * 4 : active.length,
+      pool.length >= 4 ? Math.floor(pool.length / 4) * 4 : pool.length,
       desiredMax
     );
 
-    let chosen: typeof active = [];
+    // Score editorial: featured_weight + badge manual.
+    const sorted = sortByHomePriority(
+      pool.map(p => ({
+        ...p,
+        featured_weight: (p as any).featured_weight ?? 0,
+        badge: p.badge,
+      }))
+    );
+    const chosen = sorted.slice(0, targetCount);
+
+    // Cache curto-circuita re-ordenações entre navegações.
     const cached = readCache();
-    if (cached) {
-      const byId = new Map(active.map(p => [p.id, p]));
-      chosen = cached.ids.map(id => byId.get(id)).filter(Boolean) as typeof active;
+    let finalChosen = chosen;
+    if (cached && targetCount > 0) {
+      const byId = new Map(chosen.map(p => [p.id, p]));
+      const restored = cached.ids.map(id => byId.get(id)).filter(Boolean) as typeof chosen;
+      if (restored.length === targetCount) finalChosen = restored;
     }
+    if (finalChosen.length > 0) writeCache(finalChosen.map(p => p.id));
 
-    if (chosen.length !== targetCount) {
-      chosen = shuffle(active).slice(0, targetCount);
-      if (chosen.length > 0) writeCache(chosen.map(p => p.id));
-    }
+    // Claim no registry para próximos blocos não repetirem.
+    registry.claimProducts(finalChosen.map(p => p.id));
 
-    const mapped: Product[] = chosen.map(p => ({
+    const mapped: Product[] = finalChosen.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -85,7 +104,7 @@ const BestSellers = () => {
     }));
 
     return { products: mapped, totalActive: active.length };
-  }, [dbProducts]);
+  }, [dbProducts, registry]);
 
   // ItemList JSON-LD (SEO)
   const itemListJsonLd = useMemo(() => {

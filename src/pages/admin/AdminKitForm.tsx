@@ -16,6 +16,8 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { KitBundleType } from "@/hooks/useKits";
+import { useFormAutosave, useUnsavedChangesPrompt } from "@/hooks/useFormAutosave";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 interface KitItem {
   product_id: string;
@@ -55,6 +57,7 @@ export default function AdminKitForm() {
   const [items, setItems] = useState<KitItem[]>([]);
   const [productSearch, setProductSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const { data: existing, isLoading } = useQuery({
     queryKey: ["admin-kit", id],
@@ -69,6 +72,19 @@ export default function AdminKitForm() {
       return data;
     },
   });
+
+  // Sprint final — autosave de rascunho. Wraps form+items num único snapshot.
+  const autosave = useFormAutosave(
+    `kit:${id ?? "novo"}`,
+    { form, items },
+    (snap) => {
+      setForm(snap.form);
+      setItems(snap.items);
+      setDirty(true);
+    },
+    { enabled: !isLoading },
+  );
+  useUnsavedChangesPrompt(dirty || saving);
 
   useEffect(() => {
     if (!existing) return;
@@ -92,7 +108,15 @@ export default function AdminKitForm() {
         .sort((a, b) => a.position - b.position)
         .map((r) => ({ product_id: r.product_id, quantity: r.quantity ?? 1 }))
     );
+    setDirty(false);
   }, [existing]);
+
+  // Marca dirty em qualquer edição após o load inicial.
+  useEffect(() => {
+    if (isLoading) return;
+    setDirty(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, items]);
 
   const productMap = useMemo(() => {
     const m = new Map<string, { id: string; name: string; slug: string; images: string[]; min_quantity: number }>();
@@ -178,6 +202,8 @@ export default function AdminKitForm() {
       qc.invalidateQueries({ queryKey: ["kits"] });
       qc.invalidateQueries({ queryKey: ["kit"] });
       qc.invalidateQueries({ queryKey: ["kits-of-product"] });
+      autosave.clear();
+      setDirty(false);
       toast({ title: "Kit salvo" });
       if (!isEdit) navigate(`/admin/kits/${kid}`);
     },
@@ -214,6 +240,16 @@ export default function AdminKitForm() {
           </Button>
         </div>
       </div>
+
+      {autosave.hasDraft && (
+        <div className="rounded-md border border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3 text-sm">
+          <span>Rascunho local encontrado para este kit.</span>
+          <div className="flex gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={autosave.discard}>Descartar</Button>
+            <Button type="button" variant="outline" size="sm" onClick={autosave.restore}>Restaurar</Button>
+          </div>
+        </div>
+      )}
 
       <Card>
         <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
@@ -379,6 +415,13 @@ export default function AdminKitForm() {
           </div>
         </CardContent>
       </Card>
+      <StickySaveBar
+        dirty={dirty}
+        saving={saving}
+        savedAt={autosave.savedAt}
+        onSave={() => { setSaving(true); save.mutate(); }}
+        hint={items.length > 0 ? `${items.length} item(s) no kit` : undefined}
+      />
     </form>
   );
 }

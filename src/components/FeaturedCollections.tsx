@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useCollections } from "@/hooks/useCollections";
 import { optimizeImage } from "@/lib/image";
+import { useHomeRegistry } from "@/contexts/HomeRegistry";
 
 interface FeaturedCollectionsProps {
   title?: string;
@@ -14,10 +16,20 @@ const FeaturedCollections = ({
   maxItems = 6,
 }: FeaturedCollectionsProps) => {
   const { data: collections, isLoading } = useCollections({ onlyHome: true, onlyActive: true });
-  const items = (collections ?? [])
-    .slice()
-    .sort((a, b) => (a.home_position ?? 0) - (b.home_position ?? 0))
-    .slice(0, Math.max(1, Math.min(maxItems, 12)));
+  const registry = useHomeRegistry();
+
+  const items = useMemo(() => {
+    const sorted = (collections ?? [])
+      .slice()
+      .sort((a, b) => (a.home_position ?? 0) - (b.home_position ?? 0));
+    // Sprint final — dedupe global de coleções entre blocos.
+    const remaining = new Set(registry.filterCollections(sorted.map((c) => c.slug)));
+    const filtered = sorted.filter((c) => remaining.has(c.slug));
+    const pool = filtered.length > 0 ? filtered : sorted;
+    const chosen = pool.slice(0, Math.max(1, Math.min(maxItems, 12)));
+    registry.claimCollections(chosen.map((c) => c.slug));
+    return chosen;
+  }, [collections, maxItems, registry]);
 
   if (!isLoading && items.length === 0) return null;
 

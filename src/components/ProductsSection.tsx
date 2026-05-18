@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -5,15 +6,29 @@ import ProductCard from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/ProductSkeleton";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
+import { useHomeRegistry } from "@/contexts/HomeRegistry";
+import { sortByHomePriority } from "@/lib/homePriority";
 
 const ProductsSection = () => {
   const { data: dbProducts, isLoading } = useDbProducts();
+  const registry = useHomeRegistry();
 
-  // Convert db products to Product format for ProductCard - show 6 featured (most recent)
-  const products: Product[] = (dbProducts || [])
-    .filter(p => p.is_active)
-    .slice(0, 6)
-    .map(p => ({
+  const { products, totalProducts } = useMemo(() => {
+    const active = (dbProducts || []).filter(p => p.is_active);
+    // Sprint final — exclui produtos já mostrados em blocos anteriores.
+    const remainingIds = new Set(registry.filterProducts(active.map(p => p.id)));
+    const pool = active.filter(p => remainingIds.has(p.id));
+    const ordered = sortByHomePriority(
+      (pool.length > 0 ? pool : active).map(p => ({
+        ...p,
+        featured_weight: (p as any).featured_weight ?? 0,
+        badge: p.badge,
+      }))
+    ).slice(0, 6);
+
+    registry.claimProducts(ordered.map(p => p.id));
+
+    const mapped: Product[] = ordered.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -32,7 +47,8 @@ const ProductsSection = () => {
       min_quantity: p.min_quantity || undefined,
     }));
 
-  const totalProducts = dbProducts?.filter(p => p.is_active).length || 0;
+    return { products: mapped, totalProducts: active.length };
+  }, [dbProducts, registry]);
 
   return (
     <section 

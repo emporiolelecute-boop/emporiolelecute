@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useKits, type KitBundleType } from "@/hooks/useKits";
 import { optimizeImage } from "@/lib/image";
 import { event as gaEvent } from "@/lib/analytics";
+import { useHomeRegistry } from "@/contexts/HomeRegistry";
 
 interface FeaturedKitsProps {
   title?: string;
@@ -24,16 +25,23 @@ const FeaturedKits = ({
   maxItems = 3,
 }: FeaturedKitsProps) => {
   const { data: kits, isLoading } = useKits({ onlyActive: true, onlyHome: true });
+  const registry = useHomeRegistry();
 
   const items = useMemo(() => {
     const list = (kits ?? []).filter(
       (k) => bundleType === "all" || k.bundle_type === bundleType
     );
-    return list
+    // Sprint final — dedupe global: kits já mostrados em outros blocos saem.
+    const remaining = new Set(registry.filterKits(list.map((k) => k.slug)));
+    const filtered = list.filter((k) => remaining.has(k.slug));
+    const pool = filtered.length > 0 ? filtered : list;
+    const chosen = pool
       .slice()
       .sort((a, b) => (a.home_position ?? 0) - (b.home_position ?? 0))
       .slice(0, Math.max(1, Math.min(maxItems, 12)));
-  }, [kits, bundleType, maxItems]);
+    registry.claimKits(chosen.map((k) => k.slug));
+    return chosen;
+  }, [kits, bundleType, maxItems, registry]);
 
   if (!isLoading && items.length === 0) return null;
 
