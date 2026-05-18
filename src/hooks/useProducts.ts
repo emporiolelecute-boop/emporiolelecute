@@ -47,6 +47,8 @@ export interface DbProduct {
   occasions?: DbOccasion[];
   tags?: DbTag[];
   segments?: DbSegment[];
+  // Fase 1 — metadata de resolução de slug (populated by useDbProduct)
+  __slugMeta?: DbProductSlugMeta;
 }
 
 export interface DbSegment {
