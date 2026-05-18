@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- lovable:sitemap-source generate-sitemap@v2.1b -->
-<!-- lovable:sitemap-generated-at 2026-05-18T07:00:52.702Z -->
-<!-- lovable:sitemap-namespace /produtos -->
+<!-- lovable:sitemap-generated-at 2026-05-18T07:06:36.426Z -->
+<!-- lovable:sitemap-namespace /produto -->
 <!-- lovable:sitemap-products-count 54 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
@@ -16,7 +16,7 @@
   
   <!-- Products Catalog -->
   <url>
-    <loc>https://emporiolelecute.com.br/produtos</loc>
+    <loc>https://emporiolelecute.com.br/produto</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
@@ -24,7 +24,7 @@
   
   <!-- Individual Product Pages -->
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-borboleta-cute-32w6</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-borboleta-cute-32w6</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -34,7 +34,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/escalda-pes-sache-personalizado-2ur6</loc>
+    <loc>https://emporiolelecute.com.br/produto/escalda-pes-sache-personalizado-2ur6</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -44,7 +44,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-margarida-azxn</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-margarida-azxn</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -54,7 +54,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-cavalinho-letra-com-tag-personalizada-bigf</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-cavalinho-letra-com-tag-personalizada-bigf</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -64,7 +64,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/escalda-pes-lembrancinha-personalizada</loc>
+    <loc>https://emporiolelecute.com.br/produto/escalda-pes-lembrancinha-personalizada</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -74,7 +74,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-fundo-do-mar-6g52</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-fundo-do-mar-6g52</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -84,7 +84,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-letra-brasao-coracao-na-caixinha-h0yj</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-letra-brasao-coracao-na-caixinha-h0yj</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -94,7 +94,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-nome-3-letras-personalizado-js6l</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-nome-3-letras-personalizado-js6l</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -104,7 +104,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-fundo-do-mar-letra-mini-cora-ii6z</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-fundo-do-mar-letra-mini-cora-ii6z</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -114,7 +114,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-nome-4-letras-personalizado-jzsa</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-nome-4-letras-personalizado-jzsa</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -124,7 +124,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-margarida-na-caixinha-61re</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-margarida-na-caixinha-61re</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -134,7 +134,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/mini-vela-na-latinha-personalizada-mini-terco-y5yi</loc>
+    <loc>https://emporiolelecute.com.br/produto/mini-vela-na-latinha-personalizada-mini-terco-y5yi</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -144,7 +144,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-vela-latinha-y5yi</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-vela-latinha-y5yi</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -154,7 +154,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/vela-ursinho-grande-perfumada-y5yi</loc>
+    <loc>https://emporiolelecute.com.br/produto/vela-ursinho-grande-perfumada-y5yi</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -164,7 +164,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/mini-vela-na-latinha-personalizada-com-mensagem-se-y5yi</loc>
+    <loc>https://emporiolelecute.com.br/produto/mini-vela-na-latinha-personalizada-com-mensagem-se-y5yi</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -174,7 +174,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/mini-vela-bubble-perfumada-4wha</loc>
+    <loc>https://emporiolelecute.com.br/produto/mini-vela-bubble-perfumada-4wha</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -184,7 +184,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-pezinho-no-tule-com-tag-pers-5lva</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-pezinho-no-tule-com-tag-pers-5lva</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -194,7 +194,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-cavalinho-cute-letra-com-tag-personalizad-bwvf</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-cavalinho-cute-letra-com-tag-personalizad-bwvf</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -204,7 +204,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-lembrancinha-natal-fi1v</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-lembrancinha-natal-fi1v</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -214,7 +214,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-solzinho-letra-nuvem-d4en</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-solzinho-letra-nuvem-d4en</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -224,7 +224,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-fundo-do-mar-2-letra-d4en</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-fundo-do-mar-2-letra-d4en</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -234,7 +234,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-patinho-com-tag-personalizad-exvf</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-patinho-com-tag-personalizad-exvf</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -244,7 +244,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-brasao-15-anos-f4pv</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-brasao-15-anos-f4pv</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -254,7 +254,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-sereia-fundo-do-mar-f4pv</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-sereia-fundo-do-mar-f4pv</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -264,7 +264,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-safari-cute-exvf</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-safari-cute-exvf</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -274,7 +274,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-anjinho-cute-letra-com-tag-personaliz-ciej</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-anjinho-cute-letra-com-tag-personaliz-ciej</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -284,7 +284,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-patinho-letra-mini-coracao-c55y</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-patinho-letra-mini-coracao-c55y</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -294,7 +294,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-chuva-de-amor-c55y</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-chuva-de-amor-c55y</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -304,7 +304,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-brasao-2-letras-bwvf</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-brasao-2-letras-bwvf</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -314,7 +314,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-ursinho-1-letra-mini-coracao-bigf</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-ursinho-1-letra-mini-coracao-bigf</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -324,7 +324,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/vela-margarida-perfumada-azxn</loc>
+    <loc>https://emporiolelecute.com.br/produto/vela-margarida-perfumada-azxn</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -334,7 +334,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-borboleta-letra-coracao-61re</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-borboleta-letra-coracao-61re</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -344,7 +344,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-pezinho-1-letra-coracao-542c</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-pezinho-1-letra-coracao-542c</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -354,7 +354,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-safari-circo-letra-542c</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-safari-circo-letra-542c</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -364,7 +364,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-nome-5-letras-personalizado-k76t</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-nome-5-letras-personalizado-k76t</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -374,7 +374,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-letra-brasao-espirito-santo-com-mini-terc-hxsv</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-letra-brasao-espirito-santo-com-mini-terc-hxsv</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -384,7 +384,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-solzinho-nuvem-iben</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-solzinho-nuvem-iben</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -394,7 +394,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-letra-inicial-brasao-com-tag-personalizad-hquh</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-letra-inicial-brasao-com-tag-personalizad-hquh</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -404,7 +404,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-letra-brasao-coracao-hg1f</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-letra-brasao-coracao-hg1f</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -414,7 +414,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-mini-carrinho-letra-4wha</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-mini-carrinho-letra-4wha</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -424,7 +424,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-dinossauro-cute-letra-mini-c-irm7</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-dinossauro-cute-letra-mini-c-irm7</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -434,7 +434,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-divino-espirito-santo-com-mini-terco-4wha</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-divino-espirito-santo-com-mini-terco-4wha</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -444,7 +444,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/vela-margarida-perfumada-fi1v</loc>
+    <loc>https://emporiolelecute.com.br/produto/vela-margarida-perfumada-fi1v</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -454,7 +454,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-safari-cute-com-tag-personal-fqf9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-safari-cute-com-tag-personal-fqf9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -464,7 +464,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-balao-letra-nuvem-fqf9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-balao-letra-nuvem-fqf9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -474,7 +474,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-flor-de-cerejeira-letra-fqf9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-flor-de-cerejeira-letra-fqf9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -484,7 +484,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-arco-6ev9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-arco-6ev9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -494,7 +494,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-mini-carrinho-2-letras-6ev9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-mini-carrinho-2-letras-6ev9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -504,7 +504,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-lembrancinha-rosa-aberta-na-caixinha-6ev9</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-lembrancinha-rosa-aberta-na-caixinha-6ev9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -514,7 +514,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-nome-6-letras-personalizado-6ev9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-nome-6-letras-personalizado-6ev9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -524,7 +524,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/kit-wax-melts-difuso-rechaud-2tqg</loc>
+    <loc>https://emporiolelecute.com.br/produto/kit-wax-melts-difuso-rechaud-2tqg</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -534,7 +534,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/sabonete-foguete-letra-com-tag-personalizada-6ev9</loc>
+    <loc>https://emporiolelecute.com.br/produto/sabonete-foguete-letra-com-tag-personalizada-6ev9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -544,7 +544,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-pezinho-coracao-6ev9</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-pezinho-coracao-6ev9</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -554,7 +554,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://emporiolelecute.com.br/produtos/lembrancinha-sabonete-coracao-amore-32w6</loc>
+    <loc>https://emporiolelecute.com.br/produto/lembrancinha-sabonete-coracao-amore-32w6</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
