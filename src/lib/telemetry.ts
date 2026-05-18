@@ -11,7 +11,35 @@ type ErrorSource =
   | "unhandled-rejection"
   | "fetch-error"
   | "xhr-error"
-  | "manual";
+  | "manual"
+  // Sprint 4 — fase final: eventos operacionais nomeados.
+  | "ui_error_boundary"
+  | "supabase_query_slow"
+  | "image_load_fail"
+  | "cta_resolution_fail";
+
+/**
+ * Sprint 4 — emite um evento operacional nomeado para a tabela de telemetria.
+ * Use para sinais de degradação que NÃO são exceptions (queries lentas,
+ * falha de imagem, CTA inconsistente). Throttled e best-effort como os erros.
+ */
+export function logTelemetryEvent(
+  event:
+    | "ui_error_boundary"
+    | "supabase_query_slow"
+    | "image_load_fail"
+    | "cta_resolution_fail",
+  message: string,
+  extra?: Record<string, unknown>,
+) {
+  void logClientError({ source: event, message, extra });
+}
+
+// Limite acima do qual uma query Supabase é considerada lenta.
+const SUPABASE_SLOW_MS = Math.max(
+  500,
+  Number((import.meta as any).env?.VITE_SUPABASE_SLOW_MS) || 2500,
+);
 
 interface LogParams {
   source: ErrorSource;
