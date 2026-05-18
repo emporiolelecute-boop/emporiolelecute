@@ -66,3 +66,16 @@ Ação direta de compra/lead.
 ---
 
 **Última revisão:** Sprint 4. Próxima revisão obrigatória ao adicionar checkout próprio.
+
+## Observabilidade operacional (Sprint 4 — fase final)
+
+Eventos de **degradação** persistidos em `stale_bundle_logs` via `logTelemetryEvent()` em `src/lib/telemetry.ts`. Não são eventos GA4 — servem para o painel admin detectar regressões antes do usuário reclamar.
+
+| Evento | Disparo | Payload-chave |
+|---|---|---|
+| `ui_error_boundary` | React error boundary capturou erro (root ou admin) | `scope` (`root`/`admin`), `componentStack` |
+| `supabase_query_slow` | Requisição `/rest/v1/*` ou `/functions/v1/*` levou ≥ `VITE_SUPABASE_SLOW_MS` (default 2500ms) e retornou < 500 | `url`, `method`, `status`, `durationMs` |
+| `image_load_fail` | `<img>` em `BlurImage` ou `LazyImage` disparou `onError` | `src`, `alt` |
+| `cta_resolution_fail` | `resolvePrimaryAction`/`resolveKitPrimaryAction` lançou exceção (fallback aplicado) | dados defensivos do produto |
+
+Todos passam pelo throttle de 10s do telemetry e respeitam o `correlation_id` da sessão.
