@@ -5,46 +5,93 @@ import { MessageCircle, Gift, Package, Clock } from "lucide-react";
 import { event as trackEvent } from "@/lib/analytics";
 
 interface ExitIntentPopupProps {
-  /** Mensagem pronta para o WhatsApp ao clicar no CTA. */
-  whatsappUrl: string;
+  /** URL pronta para abrir o WhatsApp. Deve sempre refletir o estado atual (quantidade/personalização). */
+  getWhatsappUrl: () => string;
   productName: string;
   productSlug: string;
   minQuantity: number;
   productionDays: number;
   quantity: number;
   personalized: boolean;
-  /** Chave usada para evitar reaparição na mesma sessão. */
-  storageKey?: string;
-  /** Atraso mínimo (ms) antes de armar o gatilho. */
+  enabled?: boolean;
+  title?: string;
+  description?: string;
+  ctaLabel?: string;
+  dismissLabel?: string;
+  /** Máximo de exibições por sessão. */
+  maxPerSession?: number;
+  /** Tempo mínimo (minutos) entre exibições. */
+  cooldownMinutes?: number;
   armDelayMs?: number;
 }
 
-const SESSION_FLAG = "__exit_intent_shown__";
+const STATE_KEY = "__exit_intent_state__";
+
+interface PopupState {
+  shownCount: number;
+  lastShown: number;
+}
+
+function readState(): PopupState {
+  try {
+    const raw = sessionStorage.getItem(STATE_KEY);
+    if (!raw) return { shownCount: 0, lastShown: 0 };
+    const parsed = JSON.parse(raw);
+    return { shownCount: Number(parsed.shownCount) || 0, lastShown: Number(parsed.lastShown) || 0 };
+  } catch {
+    return { shownCount: 0, lastShown: 0 };
+  }
+}
+
+function writeState(s: PopupState) {
+  try { sessionStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch { /* noop */ }
+}
 
 export const ExitIntentPopup = ({
-  whatsappUrl,
+  getWhatsappUrl,
   productName,
   productSlug,
   minQuantity,
   productionDays,
   quantity,
   personalized,
-  storageKey = SESSION_FLAG,
+  enabled = true,
+  title = "Espera! Posso te ajudar?",
+  description = "Antes de sair, fale com a gente no WhatsApp.",
+  ctaLabel = "Falar no WhatsApp",
+  dismissLabel = "Continuar navegando",
+  maxPerSession = 1,
+  cooldownMinutes = 30,
   armDelayMs = 8000,
 }: ExitIntentPopupProps) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
     if (typeof window === "undefined") return;
-    if (sessionStorage.getItem(storageKey) === "1") return;
 
     let armed = false;
     const armTimer = window.setTimeout(() => { armed = true; }, armDelayMs);
 
+    const canShow = (reason: string): boolean => {
+      const s = readState();
+      const cooldownMs = cooldownMinutes * 60_000;
+      if (s.shownCount >= maxPerSession) {
+        trackEvent("exit_popup_blocked", { reason, rule: "max_per_session", product_slug: productSlug });
+        return false;
+      }
+      if (s.lastShown && Date.now() - s.lastShown < cooldownMs) {
+        trackEvent("exit_popup_blocked", { reason, rule: "cooldown", product_slug: productSlug });
+        return false;
+      }
+      return true;
+    };
+
     const trigger = (reason: "mouse_out" | "scroll_up" | "visibility") => {
       if (!armed) return;
-      if (sessionStorage.getItem(storageKey) === "1") return;
-      sessionStorage.setItem(storageKey, "1");
+      if (!canShow(reason)) return;
+      const s = readState();
+      writeState({ shownCount: s.shownCount + 1, lastShown: Date.now() });
       setOpen(true);
       trackEvent("exit_popup_open", {
         reason,
@@ -85,7 +132,7 @@ export const ExitIntentPopup = ({
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [storageKey, armDelayMs, productSlug, quantity, personalized]);
+  }, [enabled, armDelayMs, cooldownMinutes, maxPerSession, productSlug, quantity, personalized]);
 
   const handleOpenChange = (next: boolean) => {
     if (!next && open) {
@@ -95,11 +142,9 @@ export const ExitIntentPopup = ({
   };
 
   const handleWhatsApp = () => {
-    trackEvent("exit_popup_whatsapp_click", {
-      product_slug: productSlug,
-      quantity,
-      personalized,
-    });
+    trackEvent("exit_popup_whatsapp_click", { product_slug: productSlug, quantity, personalized });
+    const url = getWhatsappUrl();
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
     setOpen(false);
   };
 
@@ -108,6 +153,8 @@ export const ExitIntentPopup = ({
     setOpen(false);
   };
 
+  if (!enabled) return null;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
@@ -115,54 +162,30 @@ export const ExitIntentPopup = ({
           <div className="mx-auto mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Gift className="h-6 w-6" />
           </div>
-          <DialogTitle className="text-center font-display text-2xl">
-            Espera! Posso te ajudar com {productName}?
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            Tire dúvidas e receba um orçamento rápido pelo WhatsApp — sem compromisso.
-          </DialogDescription>
+          <DialogTitle className="text-center">{title}</DialogTitle>
+          <DialogDescription className="text-center">{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-2 my-2">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
-            <Package className="h-4 w-4 text-primary shrink-0" />
-            <div className="leading-tight">
-              <div className="text-[10px] uppercase text-muted-foreground">Mínimo</div>
-              <div className="text-sm font-bold text-foreground">{minQuantity} un.</div>
-            </div>
+        <div className="rounded-md bg-muted/40 p-3 text-sm">
+          <p className="font-semibold mb-2 truncate">{productName}</p>
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
+            <span className="inline-flex items-center gap-1"><Package className="h-3 w-3" /> mín. {minQuantity} un.</span>
+            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {productionDays} dias</span>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
-            <Clock className="h-4 w-4 text-primary shrink-0" />
-            <div className="leading-tight">
-              <div className="text-[10px] uppercase text-muted-foreground">Prazo</div>
-              <div className="text-sm font-bold text-foreground">{productionDays} dias</div>
-            </div>
-          </div>
+          <p className="text-xs">
+            Sua seleção: <span className="font-medium text-foreground">{quantity} un.{personalized ? " · com personalização" : ""}</span>
+          </p>
         </div>
 
-        <p className="text-xs text-center text-muted-foreground mb-2">
-          Vamos enviar seu pedido com{" "}
-          <span className="font-semibold text-foreground">{quantity} unidade{quantity > 1 ? "s" : ""}</span>
-          {personalized ? " e personalização" : ""}.
-        </p>
-
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 mt-2">
           <Button
-            asChild
-            className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold"
             onClick={handleWhatsApp}
+            className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold"
           >
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Falar no WhatsApp agora
-            </a>
+            <MessageCircle className="h-4 w-4 mr-2" /> {ctaLabel}
           </Button>
-          <Button
-            variant="ghost"
-            className="w-full text-muted-foreground"
-            onClick={handleDismiss}
-          >
-            Continuar navegando
+          <Button variant="ghost" onClick={handleDismiss} className="w-full">
+            {dismissLabel}
           </Button>
         </div>
       </DialogContent>
