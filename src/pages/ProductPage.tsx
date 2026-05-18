@@ -70,7 +70,8 @@ const ProductPage = () => {
   const { data: reviewStats } = useProductReviewStats(dbProduct?.id);
   const { addItem } = useCart();
   const { data: semanticCtx } = useSemanticContext();
-  
+  const { data: ctaConfig } = useConversionCtaConfig();
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
   const [quantityInput, setQuantityInput] = useState<string>("10");
@@ -79,6 +80,12 @@ const ProductPage = () => {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const ctaAnchorRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+
+  // Ref sempre fresco com estado atual — garante que callbacks (sticky, popup, summary)
+  // construam a mensagem com a quantidade/personalização do momento do clique,
+  // sem depender de closures eventualmente desatualizadas.
+  const valuesRef = useRef({ quantity, personalization });
+  valuesRef.current = { quantity, personalization };
 
   // Sticky CTA: aparece quando o CTA principal sai do viewport (qualquer altura de tela)
   // e some quando o usuário volta para ele. Fallback por scroll caso o ref não exista.
