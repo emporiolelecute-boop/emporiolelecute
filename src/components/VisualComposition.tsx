@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sortByFeatured } from "@/lib/catalogFilter";
 import { optimizeImage } from "@/lib/image";
+import { urls } from "@/lib/urls";
 
 interface MiniTax { id: string; name: string; slug: string }
 
@@ -88,7 +89,7 @@ export default function VisualComposition({ currentProductId, occasions, limit =
         {items.map((p, i) => (
           <Link
             key={p.id}
-            to={`/produtos/${p.slug}`}
+            to={urls.product(p.slug)}
             className={`group relative block rounded-xl overflow-hidden bg-muted aspect-square ${
               i === 0 ? "col-span-2 row-span-2 aspect-auto md:aspect-[2/2]" : ""
             }`}

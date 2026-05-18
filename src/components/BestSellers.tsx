@@ -9,6 +9,7 @@ import { useDbProducts } from "@/hooks/useProducts";
 import type { Product } from "@/data/products";
 import { useHomeRegistry } from "@/contexts/HomeRegistry";
 import { sortByHomePriority } from "@/lib/homePriority";
+import { urls, CANONICAL_ORIGIN } from "@/lib/urls";
 
 const STORAGE_KEY = "bestsellers:selection:v2";
 const TTL_MS = 1000 * 60 * 60 * 24; // 24h — same selection across reloads / sessions

@@ -20,12 +20,13 @@ import { useDbProducts, type DbProduct } from "@/hooks/useProducts";
 import { LEMBRANCINHAS_LANDINGS, getLandingByRouteSlug, type LembrancinhasLandingConfig } from "@/data/lembrancinhasLandings";
 import { useOccasionLanding, usePublishedOccasionLandings, usePreviewOccasionLanding, type OccasionLanding } from "@/hooks/useOccasionLandings";
 import type { Product } from "@/data/products";
+import { urls, CANONICAL_ORIGIN } from "@/lib/urls";
 
 interface Props {
   configKey: string;
 }
 
-const SITE = "https://emporiolelecute.com.br";
+const SITE = CANONICAL_ORIGIN;
 
 /** Maps a DB row into the same shape the template expects (mirrors LembrancinhasLandingConfig). */
 const dbToConfig = (row: OccasionLanding): LembrancinhasLandingConfig => ({
@@ -58,7 +59,7 @@ const dbToProduct = (p: DbProduct): Product => ({
   originalPrice: p.original_price ? `R$ ${Number(p.original_price).toFixed(2).replace(".", ",")}` : undefined,
   image: p.images?.[0] || "",
   images: p.images || [],
-  link: `${SITE}/produtos/${p.slug}`,
+  link: urls.productAbsolute(p.slug, SITE),
   badge: p.badge || undefined,
   rating: Number(p.rating || 5),
   category: "outros" as const,

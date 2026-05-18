@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { urls, CANONICAL_ORIGIN } from '@/lib/urls';
 
 interface ReviewItem {
   author_name: string;
@@ -42,8 +43,8 @@ const ProductStructuredData = ({
   material,
   sku,
 }: ProductStructuredDataProps) => {
-  const baseUrl = "https://emporiolelecute.com.br";
-  const productUrl = `${baseUrl}/produtos/${slug}`;
+  const baseUrl = CANONICAL_ORIGIN;
+  const productUrl = urls.productCanonical(slug);
 
   // Calculate priceValidUntil - one year from now in YYYY-MM-DD format
   const priceValidUntil = new Date();

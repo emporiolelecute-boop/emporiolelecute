@@ -9,6 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
 import { optimizeImage } from "@/lib/image";
+import { urls } from "@/lib/urls";
 import { toast } from "@/hooks/use-toast";
 
 interface MiniTax { id: string; name: string; slug: string }
@@ -173,7 +174,7 @@ export default function CrossSellComplete({
   const handleWhatsAppItem = (p: Row) => {
     const msg =
       `Olá! Estou montando um kit a partir do produto *${currentProductSlug}* e gostaria de incluir também: *${p.name}* (qtd ${p.min_quantity || 1}).\n\n` +
-      `🔗 ${window.location.origin}/produtos/${p.slug}\n\n` +
+      `🔗 ${urls.productShare(p.slug)}\n\n` +
       `Poderia me passar valor e frete?`;
     const url = buildWhatsAppUrl({
       phone,
@@ -204,7 +205,7 @@ export default function CrossSellComplete({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {items.map((p) => (
           <div key={p.id} className="group rounded-xl border bg-card overflow-hidden flex flex-col">
-            <Link to={`/produtos/${p.slug}`} className="block relative">
+            <Link to={urls.product(p.slug)} className="block relative">
               <img
                 src={optimizeImage(p.images?.[0] || "/placeholder.svg", { width: 320 })}
                 alt={p.name}
@@ -219,7 +220,7 @@ export default function CrossSellComplete({
               </Badge>
             </Link>
             <div className="p-3 flex-1 flex flex-col gap-2">
-              <Link to={`/produtos/${p.slug}`} className="block hover:text-primary transition-colors">
+              <Link to={urls.product(p.slug)} className="block hover:text-primary transition-colors">
                 <p className="text-sm font-medium line-clamp-2 leading-snug">{p.name}</p>
               </Link>
               <p className="text-sm font-semibold text-foreground">
