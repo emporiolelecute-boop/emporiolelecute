@@ -133,7 +133,8 @@ const ProductPage = () => {
     if (didReplaceRef.current) return;
     const targetPath = `/produtos/${meta.primarySlug}`;
     if (window.location.pathname === targetPath) {
-      logSlugEvent("loop_prevented", {
+      logSlugEvent({
+        event: "loop_prevented",
         matchedSlug: meta.matchedSlug,
         primarySlug: meta.primarySlug,
         pathname: window.location.pathname,
