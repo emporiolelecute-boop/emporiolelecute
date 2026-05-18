@@ -29,6 +29,9 @@ export interface DbProduct {
   personalization_label: string | null;
   personalization_placeholder: string | null;
   google_product_category: string | null;
+  // Sprint 2 — discovery
+  featured_weight?: number | null;
+  production_speed?: 'rapido' | 'normal' | 'longo' | null;
   // Relations (populated by joins)
   category?: DbCategory | null;
   occasions?: DbOccasion[];
