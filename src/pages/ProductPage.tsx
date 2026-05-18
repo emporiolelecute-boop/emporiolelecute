@@ -710,37 +710,17 @@ Poderia me ajudar com o valor do frete e prazos?`;
                 </div>
               )}
 
-              {/* WhatsApp — CTA inteligente Fase 7 */}
+              {/* WhatsApp — CTA inteligente (mensagem enriquecida via buildWhatsAppMessage) */}
               {(() => {
-                const utmCampaign = `produto_${product.slug}`;
-                const ctxParts: string[] = [];
-                if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
-                if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
-                if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
-                const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
-                const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
-
-📝 *Detalhes:*
-- Quantidade: ${quantity} unidades
-${personalization ? `- Personalização: ${personalization}` : ''}- Link: ${window.location.href}
-
-Poderia me ajudar com o valor do frete e prazos?`;
-                const waUrl = buildWhatsAppUrl({
-                  phone,
-                  message: waMsg,
-                  utm_source: "pdp",
-                  utm_medium: "whatsapp_cta",
-                  utm_campaign: utmCampaign,
-                  utm_content: product.slug,
-                });
+                const { url } = buildWhatsAppMessage();
                 return (
                   <a
-                    href={waUrl}
+                    href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => {
-                      trackInquiry(product.name, product.id);
-                      trackWhatsAppClick({ source: "product_page", context: product.slug, utm_campaign: utmCampaign });
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openWhatsApp("product_page");
                     }}
                     className="flex items-center justify-center gap-3 p-4 mt-4 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl font-bold shadow-lg hover:shadow-green-200 transition-all duration-300 transform hover:-translate-y-1"
                   >
