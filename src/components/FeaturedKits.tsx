@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useKits, type KitBundleType } from "@/hooks/useKits";
 import { optimizeImage } from "@/lib/image";
 import { event as gaEvent } from "@/lib/analytics";
+import { useHomeRegistry } from "@/contexts/HomeRegistry";
 
 interface FeaturedKitsProps {
   title?: string;
