@@ -15,6 +15,10 @@ export interface Product {
   occasions: ("maternidade" | "cha-bebe" | "batizado" | "casamento" | "aniversario" | "corporativo")[];
   keywords: string[];
   min_quantity?: number;
+  production_days?: number | null;
+  production_speed?: 'rapido' | 'normal' | 'longo' | null;
+  personalization_enabled?: boolean | null;
+  featured_weight?: number | null;
 }
 
 export const products: Product[] = [];
