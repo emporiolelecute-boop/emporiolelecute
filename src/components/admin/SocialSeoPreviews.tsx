@@ -1,6 +1,7 @@
 // Fase 8 — Pré-visualizações Google / OG (WhatsApp/Facebook) / Pinterest.
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
+import { PRODUCT_PATH_PREFIX } from '@/lib/urls';
 
 interface Props {
   title: string;
@@ -18,7 +19,7 @@ const DESC_MAX = 160;
 const truncate = (s: string, max: number) =>
   s.length <= max ? s : s.slice(0, max - 1).trimEnd() + '…';
 
-const SocialSeoPreviews = ({ title, description, slug, imageUrl, pathPrefix = '/produtos/' }: Props) => {
+const SocialSeoPreviews = ({ title, description, slug, imageUrl, pathPrefix = `${PRODUCT_PATH_PREFIX}/` }: Props) => {
   const safeTitle = (title || '').trim();
   const safeDesc = (description || '').trim();
   const url = `https://${HOST}${pathPrefix}${slug || 'slug'}`;
