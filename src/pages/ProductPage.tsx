@@ -685,62 +685,74 @@ const ProductPage = () => {
               </div>
 
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 mb-4">
-                <Button 
-                  size="lg" 
-                  className={`flex-1 rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all ${
-                    addedToCart 
-                      ? 'bg-green-500 hover:bg-green-600 text-white' 
-                      : 'bg-primary hover:bg-primary-dark text-primary-foreground'
-                  }`}
-                  onClick={handleAddToCart}
-                >
-                  {addedToCart ? (
-                    <>
-                      <CheckCircle2 className="h-5 w-5 mr-2" />
-                      Adicionado!
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Adicionar ao Carrinho
-                    </>
-                  )}
-                </Button>
+              {/* Sprint 4 — CTA primário decidido por resolvePrimaryAction(product) */}
+              {(() => {
+                const action = resolvePrimaryAction(dbProduct);
+                const isWaPrimary = action.primary === "whatsapp";
+                const cartBtn = (primary: boolean) => (
+                  <Button
+                    size="lg"
+                    className={`flex-1 rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all ${
+                      addedToCart
+                        ? "bg-green-500 hover:bg-green-600 text-white"
+                        : primary
+                          ? "bg-primary hover:bg-primary-dark text-primary-foreground"
+                          : "bg-card border-2 border-primary text-primary hover:bg-primary/10"
+                    }`}
+                    variant={primary ? "default" : "outline"}
+                    onClick={handleAddToCart}
+                  >
+                    {addedToCart ? (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 mr-2" />
+                        Adicionado!
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        {primary ? "Adicionar ao Carrinho" : "Adicionar ao carrinho"}
+                      </>
+                    )}
+                  </Button>
+                );
+                return (
+                  <>
+                    <div className="flex gap-3 mb-4">
+                      {isWaPrimary ? null : cartBtn(true)}
+                      {/* Favorite */}
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="px-4"
+                        onClick={() => setIsFavorite(!isFavorite)}
+                      >
+                        <Heart className={`h-5 w-5 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
+                      </Button>
+                      {/* Share */}
+                      <Button variant="outline" size="lg" className="px-4" onClick={handleShare}>
+                        <Share2 className="h-5 w-5" />
+                      </Button>
+                    </div>
 
-                {/* Favorite Button */}
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="px-4"
-                  onClick={() => setIsFavorite(!isFavorite)}
-                >
-                  <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                </Button>
+                    {/* Para WhatsApp-first (personalizado): carrinho aparece como secundário sutil */}
+                    {isWaPrimary && (
+                      <div className="mb-4">{cartBtn(false)}</div>
+                    )}
 
-                {/* Share Button */}
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="px-4"
-                  onClick={handleShare}
-                >
-                  <Share2 className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Go to Cart Button - Shows after adding to cart */}
-              {addedToCart && (
-                <Button 
-                  size="lg" 
-                  className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all mb-4"
-                  onClick={() => navigate('/carrinho')}
-                >
-                  Finalizar Compra Agora
-                  <ChevronRight className="h-5 w-5 ml-2" />
-                </Button>
-              )}
+                    {/* Go to Cart Button - Shows after adding to cart */}
+                    {addedToCart && (
+                      <Button
+                        size="lg"
+                        className="w-full bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all mb-4"
+                        onClick={() => navigate("/carrinho")}
+                      >
+                        Finalizar Compra Agora
+                        <ChevronRight className="h-5 w-5 ml-2" />
+                      </Button>
+                    )}
+                  </>
+                );
+              })()}
 
 
               {/* Payment Methods */}
