@@ -47,7 +47,7 @@ import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { useProductReviews, useProductReviewStats } from "@/hooks/useProductReviews";
 import ProductReviews from "@/components/ProductReviews";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
-import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick } from "@/lib/analytics";
+import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick, event as trackEvent } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useCart } from "@/contexts/CartContext";
 import { useSemanticContext } from "@/hooks/useSemanticContext";
@@ -230,12 +230,22 @@ Poderia me ajudar com o valor do frete e prazos?`;
     };
   };
 
-  const openWhatsApp = (source: "product_page" | "sticky_cta" = "product_page") => {
+  const openWhatsApp = (
+    source: "product_page" | "sticky_cta" | "quick_summary" | "exit_popup" = "product_page"
+  ) => {
     if (!product) return;
     const { url, utmCampaign } = buildWhatsAppMessage();
     if (!url) return;
     trackInquiry(product.name, product.id);
     trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
+    // Evento granular adicional para o funil de PDP
+    trackEvent("pdp_whatsapp_click", {
+      source,
+      product_id: product.id,
+      product_slug: product.slug,
+      quantity,
+      personalized: Boolean(personalization?.trim()),
+    });
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
@@ -617,7 +627,7 @@ Poderia me ajudar com o valor do frete e prazos?`;
                 productionDays={product.productionDays}
                 quantity={quantity}
                 personalization={personalization}
-                onWhatsApp={() => openWhatsApp("product_page")}
+                onWhatsApp={() => openWhatsApp("quick_summary")}
               />
 
               {/* Note about shipping */}
@@ -920,7 +930,16 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       />
 
       {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
-      <ExitIntentPopup whatsappUrl={buildWhatsAppMessage().url} />
+      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
+      <ExitIntentPopup
+        whatsappUrl={buildWhatsAppMessage().url}
+        productName={product.name}
+        productSlug={product.slug}
+        minQuantity={product.minQuantity}
+        productionDays={product.productionDays}
+        quantity={quantity}
+        personalized={Boolean(personalization?.trim())}
+      />
 
     </div>
   );
