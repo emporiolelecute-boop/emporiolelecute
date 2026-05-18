@@ -61,6 +61,7 @@ import { buildContextualLinksForProduct } from "@/lib/linkOrchestrator";
 import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
 import { resolvePrimaryAction } from "@/lib/primaryAction";
+import { logSlugEvent } from "@/lib/slugObservability";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -122,6 +123,32 @@ const ProductPage = () => {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [dbProduct?.id, ctaConfig?.sticky?.scrollViewportRatio]);
+
+  // Fase 1 — Replace controlado para slug primário.
+  // Blindagens: didReplaceRef (1x por mount) + checagem de pathname atual.
+  const didReplaceRef = useRef(false);
+  useEffect(() => {
+    const meta = dbProduct?.__slugMeta;
+    if (!meta || !meta.shouldRedirect) return;
+    if (didReplaceRef.current) return;
+    const targetPath = `/produtos/${meta.primarySlug}`;
+    if (window.location.pathname === targetPath) {
+      logSlugEvent("loop_prevented", {
+        matchedSlug: meta.matchedSlug,
+        primarySlug: meta.primarySlug,
+        pathname: window.location.pathname,
+      });
+      return;
+    }
+    didReplaceRef.current = true;
+    logSlugEvent("replace_executed", {
+      matchedSlug: meta.matchedSlug,
+      primarySlug: meta.primarySlug,
+      productId: dbProduct?.id,
+      pathname: window.location.pathname,
+    });
+    navigate(targetPath, { replace: true });
+  }, [dbProduct?.__slugMeta, dbProduct?.id, navigate]);
 
   // Convert to display format
   const product = dbProduct ? {
@@ -330,6 +357,19 @@ const ProductPage = () => {
   // Generate product code from ID
   const productCode = product.id.slice(0, 8).toUpperCase();
 
+  // Fase 1 — Canonical slug deriva SEMPRE de __slugMeta.primarySlug.
+  // Sem fallback silencioso: ausência é inconsistência estrutural.
+  const slugMeta = dbProduct?.__slugMeta;
+  if (!slugMeta?.primarySlug) {
+    logSlugEvent("structural_inconsistency", {
+      reason: "missing_primary_slug_meta",
+      productId: dbProduct?.id,
+      matchedSlug: slug,
+    });
+  }
+  const canonicalSlug = slugMeta?.primarySlug ?? product.slug;
+  const canonicalUrl = `https://emporiolelecute.com.br/produtos/${canonicalSlug}`;
+
   return (
     <div className="min-h-screen bg-background">
       {/* SEO and Structured Data — Fase 7 */}
@@ -342,7 +382,7 @@ const ProductPage = () => {
           return raw.length > 160 ? raw.slice(0, 157).trimEnd() + '…' : raw;
         })()}
         image={product.images[0] || undefined}
-        url={`https://emporiolelecute.com.br/produtos/${product.slug}`}
+        url={canonicalUrl}
         type="product"
       />
       <ProductStructuredData
@@ -350,7 +390,7 @@ const ProductPage = () => {
         description={product.description || `Lembrancinha artesanal ${product.name}`}
         price={product.price}
         images={product.images}
-        slug={product.slug}
+        slug={canonicalSlug}
         rating={reviewStats?.avg_rating ? Number(reviewStats.avg_rating) : undefined}
         reviewCount={reviewStats?.review_count}
         productionDays={product.productionDays}
@@ -376,7 +416,7 @@ const ProductPage = () => {
           ...(dbProduct?.category && !dbProduct?.segments?.[0] && !dbProduct?.occasions?.[0]
             ? [{ name: dbProduct.category.name, url: `https://emporiolelecute.com.br/categoria/${dbProduct.category.slug}` }]
             : []),
-          { name: product.name, url: `https://emporiolelecute.com.br/produtos/${product.slug}` },
+          { name: product.name, url: canonicalUrl },
         ]}
       />
       <Header />
@@ -894,7 +934,7 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
                 "@type": "Article",
                 headline: `Sobre ${product.name}`,
                 articleBody: dbProduct.editorial_content.slice(0, 4000),
-                mainEntityOfPage: `https://emporiolelecute.com.br/produtos/${product.slug}`,
+                mainEntityOfPage: canonicalUrl,
                 author: { "@type": "Organization", name: "Empório LeleCute" },
               }) }} />
             </section>

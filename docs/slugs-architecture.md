@@ -93,3 +93,76 @@ sem impacto — não há consumidores.
   num único ponto.
 - **Fase 3**: admin de slugs (lista, promover, criar alias, remover).
 - **Fase 4**: unificar com `public.redirects` (deprecar trigger antiga).
+
+---
+
+## Fase 1 — Runtime resolver ativo (SAFE)
+
+**Status:** implementada. Nada de rota/sitemap/redirect SEO mudou.
+
+### Contratos
+
+- **Lookup oficial:** `useDbProduct(slug)` resolve via RPC `resolve_product_slug` (Fase 0) + fetch por `id`. `products.slug` deixa de ser usado como chave de busca pública.
+- **`__slugMeta`** anexado ao produto retornado:
+  - `matchedSlug` — slug efetivamente acessado (normalizado).
+  - `primarySlug` — slug canônico atual do produto.
+  - `isPrimary` — `matchedSlug === primarySlug`.
+  - `shouldRedirect` — `!isPrimary`.
+  - `resolvedVia` — `'primary' | 'alias' | 'historical'`
+    - `primary` → slug canônico atual
+    - `alias` → slug não-primário com `source IN ('manual','alias')`
+    - `historical` → slug não-primário com qualquer outro source (rename, legacy, import)
+
+### Replace controlado
+
+`ProductPage` faz `navigate(/produtos/${primarySlug}, { replace: true })` quando `shouldRedirect=true`. Blindagens:
+
+1. `didReplaceRef` — só dispara uma vez por mount.
+2. `window.location.pathname !== targetPath` — evita double replace, StrictMode loops e race conditions.
+
+Permanece sob `/produtos/` (a rota `/produto/:slug` legada continua intacta via `LegacyProductRedirect`).
+
+### Canonical
+
+- `canonicalSlug = __slugMeta.primarySlug` (estrito).
+- Sem fallback silencioso: `primarySlug` ausente é **inconsistência estrutural** e gera `console.error` via `logSlugEvent('structural_inconsistency')`. Fallback de emergência para `product.slug` apenas para evitar render quebrado.
+- Usado em: `DynamicSEO.url`, `ProductStructuredData.slug`, `BreadcrumbStructuredData` (último item) e `mainEntityOfPage` do schema.
+
+### Alias inativo — contrato explícito
+
+`is_active=false` no `product_slugs` → `resolveProductSlug` retorna `null` → `useDbProduct` retorna `null` → **404 definitivo**. Sem redirect, sem soft canonical, sem fallback. Para reativar um slug, promova-o no admin (Fase 3) ou edite no DB.
+
+### Observabilidade
+
+Helper único: `src/lib/slugObservability.ts` → `logSlugEvent(event, payload)`.
+
+Eventos emitidos hoje:
+
+- `alias_hit` — hit em alias manual.
+- `historical_hit` — hit em slug histórico (rename/legacy/import).
+- `replace_executed` — replace para `primarySlug` disparado.
+- `loop_prevented` — pathname já igual ao alvo, replace abortado.
+- `unknown_slug` — `resolveProductSlug` retornou `null` por slug desconhecido.
+- `structural_inconsistency` — `console.error`. Causas: `primarySlug` ausente no meta, `products.slug` divergindo de `primarySlug`, `product_id` resolvido sem produto correspondente.
+
+Telemetria DB: `record_product_slug_hit(matchedSlug)` fire-and-forget em todo hit válido.
+
+### Arquivos tocados (Fase 1)
+
+- `src/lib/productResolver.ts` — adiciona `resolvedVia` ao retorno.
+- `src/lib/slugObservability.ts` — novo, helper único de logs.
+- `src/hooks/useProducts.ts` — `useDbProduct` reescrito; expõe `DbProductSlugMeta`.
+- `src/pages/ProductPage.tsx` — replace controlado + canonical via `primarySlug`.
+- `src/lib/productResolver.test.ts` — testes do resolver com classify.
+
+### O que NÃO mudou
+
+- Rota pública `/produtos/:slug`.
+- `LegacyProductRedirect` em `/produto/:slug`.
+- Sitemap, robots, `redirects` table, `RedirectHandler`.
+- Helpers `urls.ts` (continuam apontando `/produtos/`).
+- Todas as outras páginas (Loja, Buscar, Produtos, admin, etc).
+
+### Rollback
+
+Reverter 4 arquivos (`useProducts.ts`, `ProductPage.tsx`, `productResolver.ts`, `slugObservability.ts`). Schema Fase 0 permanece intacto.

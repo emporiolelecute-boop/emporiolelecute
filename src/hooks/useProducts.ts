@@ -1,5 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveProductSlug, recordProductSlugHit, type ResolvedVia } from '@/lib/productResolver';
+import { logSlugEvent } from '@/lib/slugObservability';
+
+export interface DbProductSlugMeta {
+  matchedSlug: string;
+  primarySlug: string;
+  isPrimary: boolean;
+  shouldRedirect: boolean;
+  resolvedVia: ResolvedVia;
+}
 
 export interface DbProduct {
   id: string;
@@ -37,6 +47,8 @@ export interface DbProduct {
   occasions?: DbOccasion[];
   tags?: DbTag[];
   segments?: DbSegment[];
+  // Fase 1 — metadata de resolução de slug (populated by useDbProduct)
+  __slugMeta?: DbProductSlugMeta;
 }
 
 export interface DbSegment {
@@ -111,11 +123,36 @@ export function useDbProducts() {
   });
 }
 
-// Fetch single product by slug with relations (optimized single query with nested selects)
+// Fetch single product by slug (or alias / historical slug).
+// Fase 1: resolução via product_slugs (RPC resolve_product_slug) +
+// fetch por id. Expõe __slugMeta para a página decidir replace/canonical.
 export function useDbProduct(slug: string) {
   return useQuery({
     queryKey: ['product', slug],
     queryFn: async () => {
+      const resolved = await resolveProductSlug(slug);
+      if (!resolved) {
+        logSlugEvent('unknown_slug', { matchedSlug: slug });
+        return null;
+      }
+
+      // Telemetria fire-and-forget
+      recordProductSlugHit(resolved.matchedSlug);
+
+      if (resolved.resolvedVia === 'alias') {
+        logSlugEvent('alias_hit', {
+          matchedSlug: resolved.matchedSlug,
+          primarySlug: resolved.primarySlug,
+          productId: resolved.productId,
+        });
+      } else if (resolved.resolvedVia === 'historical') {
+        logSlugEvent('historical_hit', {
+          matchedSlug: resolved.matchedSlug,
+          primarySlug: resolved.primarySlug,
+          productId: resolved.productId,
+        });
+      }
+
       const { data: product, error } = await supabase
         .from('products')
         .select(`
@@ -125,11 +162,31 @@ export function useDbProduct(slug: string) {
           tags:product_tags(tag:tags(*)),
           segments:product_segments(segment:segments(id,name,slug))
         `)
-        .eq('slug', slug)
+        .eq('id', resolved.productId)
         .maybeSingle();
 
       if (error) throw error;
-      if (!product) return null;
+      if (!product) {
+        // product_slugs apontou para produto inexistente — inconsistência estrutural
+        logSlugEvent('structural_inconsistency', {
+          reason: 'resolved_product_id_not_found',
+          productId: resolved.productId,
+          matchedSlug: resolved.matchedSlug,
+          primarySlug: resolved.primarySlug,
+        });
+        return null;
+      }
+
+      // Sanity check: product.slug deve coincidir com primarySlug.
+      if (product.slug !== resolved.primarySlug) {
+        logSlugEvent('structural_inconsistency', {
+          reason: 'products_slug_diverges_from_primary',
+          productId: resolved.productId,
+          matchedSlug: resolved.matchedSlug,
+          primarySlug: resolved.primarySlug,
+          productSlug: product.slug,
+        });
+      }
 
       return {
         ...product,
@@ -142,6 +199,13 @@ export function useDbProduct(slug: string) {
         segments: (product.segments || [])
           .map((ps: { segment: DbSegment }) => ps.segment)
           .filter(Boolean),
+        __slugMeta: {
+          matchedSlug: resolved.matchedSlug,
+          primarySlug: resolved.primarySlug,
+          isPrimary: resolved.isPrimary,
+          shouldRedirect: resolved.shouldRedirect,
+          resolvedVia: resolved.resolvedVia,
+        },
       } as DbProduct;
     },
     enabled: !!slug,
