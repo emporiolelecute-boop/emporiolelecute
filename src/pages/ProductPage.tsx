@@ -161,18 +161,58 @@ const ProductPage = () => {
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      toast({ 
-        title: "Link copiado!", 
-        description: "O link do produto foi copiado para a área de transferência." 
+      toast({
+        title: "Link copiado!",
+        description: "O link do produto foi copiado para a área de transferência."
       });
     } catch {
-      toast({ 
-        title: "Erro ao copiar", 
-        description: "Não foi possível copiar o link.", 
-        variant: "destructive" 
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o link.",
+        variant: "destructive"
       });
     }
   };
+
+  // ---- WhatsApp builder reutilizado pelo CTA inline e sticky mobile ----
+  const buildWhatsAppMessage = () => {
+    if (!product) return { url: "", utmCampaign: "" };
+    const utmCampaign = `produto_${product.slug}`;
+    const ctxParts: string[] = [];
+    if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
+    if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
+    if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
+    const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
+    const imgLine = product.images?.[0] ? `\n🖼️ Imagem: ${product.images[0]}` : '';
+    const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
+
+📝 *Detalhes:*
+- Quantidade: ${quantity} unidades
+${personalization ? `- Personalização: ${personalization}\n` : ''}- Link: ${window.location.href}${imgLine}
+
+Poderia me ajudar com o valor do frete e prazos?`;
+    return {
+      url: buildWhatsAppUrl({
+        phone,
+        message: waMsg,
+        utm_source: "pdp",
+        utm_medium: "whatsapp_cta",
+        utm_campaign: utmCampaign,
+        utm_content: product.slug,
+      }),
+      utmCampaign,
+    };
+  };
+
+  const openWhatsApp = (source: "product_page" | "sticky_cta" = "product_page") => {
+    if (!product) return;
+    const { url, utmCampaign } = buildWhatsAppMessage();
+    if (!url) return;
+    trackInquiry(product.name, product.id);
+    trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
 
   if (isLoading) {
     return (
