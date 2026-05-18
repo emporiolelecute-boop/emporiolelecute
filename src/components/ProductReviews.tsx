@@ -7,6 +7,10 @@ import { event as gaEvent } from '@/lib/analytics';
 
 interface Props {
   productId: string;
+  /** initial number of reviews shown; rest collapsed behind "Ver mais" */
+  initialLimit?: number;
+  /** compact layout (single column, tighter cards) ideal for placing under the gallery thumbnails */
+  variant?: 'default' | 'compact';
 }
 
 const formatDate = (iso: string | null) => {
