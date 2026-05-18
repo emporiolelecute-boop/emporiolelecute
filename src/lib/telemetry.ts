@@ -197,6 +197,7 @@ function installFetchCapture() {
     const start = Date.now();
     try {
       const res = await orig(input as RequestInfo, init);
+      const duration = Date.now() - start;
       if (res.status >= 500 && !shouldSkipUrl(url)) {
         void logClientError({
           source: "fetch-error",
@@ -206,10 +207,23 @@ function installFetchCapture() {
             method,
             status: res.status,
             statusText: res.statusText,
-            durationMs: Date.now() - start,
+            durationMs: duration,
             requestBody: safeBodyPreview(init),
           },
         });
+      }
+      // Sprint 4 — query Supabase lenta (REST ou RPC). Ignora telemetria.
+      if (
+        duration >= SUPABASE_SLOW_MS &&
+        !shouldSkipUrl(url) &&
+        /\/(rest|functions)\/v1\//.test(url) &&
+        res.status < 500
+      ) {
+        logTelemetryEvent(
+          "supabase_query_slow",
+          `slow ${method} ${url} ${duration}ms`,
+          { url, method, status: res.status, durationMs: duration },
+        );
       }
       return res;
     } catch (err) {
