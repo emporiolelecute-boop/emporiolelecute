@@ -382,7 +382,7 @@ const ProductPage = () => {
           return raw.length > 160 ? raw.slice(0, 157).trimEnd() + '…' : raw;
         })()}
         image={product.images[0] || undefined}
-        url={`https://emporiolelecute.com.br/produtos/${product.slug}`}
+        url={canonicalUrl}
         type="product"
       />
       <ProductStructuredData
