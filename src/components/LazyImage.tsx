@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { logTelemetryEvent } from "@/lib/telemetry";
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -77,6 +78,9 @@ export const LazyImage = ({
           decoding="async"
           draggable={false}
           onLoad={() => setLoaded(true)}
+          onError={() =>
+            logTelemetryEvent("image_load_fail", `LazyImage ${src}`, { src, alt })
+          }
           className={cn(
             "w-full h-full object-cover transition-opacity duration-500",
             loaded ? "opacity-100" : "opacity-0",

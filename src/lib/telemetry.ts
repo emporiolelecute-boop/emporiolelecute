@@ -11,7 +11,35 @@ type ErrorSource =
   | "unhandled-rejection"
   | "fetch-error"
   | "xhr-error"
-  | "manual";
+  | "manual"
+  // Sprint 4 — fase final: eventos operacionais nomeados.
+  | "ui_error_boundary"
+  | "supabase_query_slow"
+  | "image_load_fail"
+  | "cta_resolution_fail";
+
+/**
+ * Sprint 4 — emite um evento operacional nomeado para a tabela de telemetria.
+ * Use para sinais de degradação que NÃO são exceptions (queries lentas,
+ * falha de imagem, CTA inconsistente). Throttled e best-effort como os erros.
+ */
+export function logTelemetryEvent(
+  event:
+    | "ui_error_boundary"
+    | "supabase_query_slow"
+    | "image_load_fail"
+    | "cta_resolution_fail",
+  message: string,
+  extra?: Record<string, unknown>,
+) {
+  void logClientError({ source: event, message, extra });
+}
+
+// Limite acima do qual uma query Supabase é considerada lenta.
+const SUPABASE_SLOW_MS = Math.max(
+  500,
+  Number((import.meta as any).env?.VITE_SUPABASE_SLOW_MS) || 2500,
+);
 
 interface LogParams {
   source: ErrorSource;
@@ -169,6 +197,7 @@ function installFetchCapture() {
     const start = Date.now();
     try {
       const res = await orig(input as RequestInfo, init);
+      const duration = Date.now() - start;
       if (res.status >= 500 && !shouldSkipUrl(url)) {
         void logClientError({
           source: "fetch-error",
@@ -178,10 +207,23 @@ function installFetchCapture() {
             method,
             status: res.status,
             statusText: res.statusText,
-            durationMs: Date.now() - start,
+            durationMs: duration,
             requestBody: safeBodyPreview(init),
           },
         });
+      }
+      // Sprint 4 — query Supabase lenta (REST ou RPC). Ignora telemetria.
+      if (
+        duration >= SUPABASE_SLOW_MS &&
+        !shouldSkipUrl(url) &&
+        /\/(rest|functions)\/v1\//.test(url) &&
+        res.status < 500
+      ) {
+        logTelemetryEvent(
+          "supabase_query_slow",
+          `slow ${method} ${url} ${duration}ms`,
+          { url, method, status: res.status, durationMs: duration },
+        );
       }
       return res;
     } catch (err) {
