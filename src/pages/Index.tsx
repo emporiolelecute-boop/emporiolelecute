@@ -9,6 +9,7 @@ import WebSiteStructuredData from "@/components/WebSiteStructuredData";
 import LocalBusinessStructuredData from "@/components/LocalBusinessStructuredData";
 import { useHomeSectionsPublic } from "@/hooks/useHomeSections";
 import { HOME_SECTIONS_REGISTRY } from "@/lib/homeSectionsRegistry";
+import { HomeRegistryProvider } from "@/contexts/HomeRegistry";
 
 const SectionFallback = () => (
   <div className="h-32 md:h-48 animate-pulse bg-muted/30" aria-hidden />
