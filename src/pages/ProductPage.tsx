@@ -47,7 +47,7 @@ import { useDbProduct, useDbProducts } from "@/hooks/useProducts";
 import { useProductReviews, useProductReviewStats } from "@/hooks/useProductReviews";
 import ProductReviews from "@/components/ProductReviews";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
-import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick, event as trackEvent } from "@/lib/analytics";
+import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick, trackFunnelEvent } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { toast as sonnerToast } from "sonner";
 import { useConversionCtaConfig } from "@/hooks/useConversionCtaConfig";
@@ -259,7 +259,7 @@ const ProductPage = () => {
 
     trackInquiry(product.name, product.id);
     trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
-    trackEvent("pdp_whatsapp_click", {
+    trackFunnelEvent("pdp_whatsapp_click", {
       source,
       product_id: product.id,
       product_slug: product.slug,
@@ -275,7 +275,7 @@ const ProductPage = () => {
         { duration: ctaConfig?.toast?.durationMs ?? 4000 }
       );
     }
-    trackEvent("whatsapp_click_confirmed", {
+    trackFunnelEvent("whatsapp_click_confirmed", {
       source,
       product_id: product.id,
       product_slug: product.slug,

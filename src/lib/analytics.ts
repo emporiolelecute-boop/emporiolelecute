@@ -129,3 +129,69 @@ export const usePageTracking = () => {
     /* TrackingScripts dispara page_view via gtag/fbq quando configurado */
   }, [location]);
 };
+
+// ============================================================================
+// Funil de conversão PDP — eventos GA + persistência no banco
+// (tabela pdp_funnel_events) para o painel admin de funil.
+// ============================================================================
+
+const FUNNEL_EVENTS = new Set([
+  "pdp_sticky_view",
+  "pdp_quick_summary_view",
+  "pdp_whatsapp_click",
+  "whatsapp_click_confirmed",
+  "exit_popup_open",
+  "exit_popup_blocked",
+  "exit_popup_close",
+  "exit_popup_whatsapp_click",
+]);
+
+const SESSION_KEY = "__pdp_funnel_sid__";
+const getSessionId = (): string => {
+  if (typeof window === "undefined") return "ssr";
+  try {
+    let sid = sessionStorage.getItem(SESSION_KEY);
+    if (!sid) {
+      sid = (crypto?.randomUUID?.() ?? `sid_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
+      sessionStorage.setItem(SESSION_KEY, sid);
+    }
+    return sid;
+  } catch {
+    return "no_storage";
+  }
+};
+
+export interface FunnelPayload {
+  source?: string;
+  product_slug?: string;
+  quantity?: number;
+  personalized?: boolean;
+  [k: string]: any;
+}
+
+/**
+ * Registra evento do funil:
+ *  1) dispara em GA (compat com `event()`)
+ *  2) persiste em `pdp_funnel_events` para o painel admin (fire-and-forget)
+ */
+export const trackFunnelEvent = (name: string, payload: FunnelPayload = {}) => {
+  event(name, payload);
+  if (!FUNNEL_EVENTS.has(name)) return;
+  if (typeof window === "undefined") return;
+
+  import("@/integrations/supabase/client")
+    .then(({ supabase }) => {
+      const { source, product_slug, quantity, personalized, ...rest } = payload;
+      return supabase.from("pdp_funnel_events").insert({
+        event_name: name,
+        source: source ?? null,
+        product_slug: product_slug ?? null,
+        quantity:
+          typeof quantity === "number" ? Math.max(0, Math.min(99999, Math.floor(quantity))) : null,
+        personalized: typeof personalized === "boolean" ? personalized : null,
+        session_id: getSessionId(),
+        meta: Object.keys(rest).length ? (rest as any) : null,
+      });
+    })
+    .catch(() => { /* fire-and-forget — telemetria nunca quebra a UX */ });
+};

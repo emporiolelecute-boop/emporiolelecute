@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
 const KEY = "conversion_cta_config";
@@ -119,33 +120,89 @@ export const useConversionCtaConfig = () =>
     },
   });
 
+// -------------------- Zod schema (validação robusta) --------------------
+// Aplicado antes de gravar — rejeita payloads que poderiam quebrar o template
+// do WhatsApp ou as regras do popup.
+const stickySchema = z.object({
+  enabled: z.boolean(),
+  buttonLabel: z.string().trim().min(1, "Texto do botão obrigatório").max(40),
+  scrollViewportRatio: z.coerce.number().min(0.1).max(1),
+});
+
+const quickSummarySchema = z.object({
+  enabled: z.boolean(),
+  title: z.string().trim().min(1).max(80),
+  minLabel: z.string().trim().min(1).max(20),
+  prazoLabel: z.string().trim().min(1).max(20),
+  shippingLabel: z.string().trim().min(1).max(20),
+  shippingValue: z.string().trim().min(1).max(40),
+  ctaLabel: z.string().trim().min(1).max(60),
+});
+
+const exitPopupSchema = z.object({
+  enabled: z.boolean(),
+  title: z.string().trim().min(1).max(100),
+  description: z.string().trim().min(1).max(400),
+  ctaLabel: z.string().trim().min(1).max(60),
+  dismissLabel: z.string().trim().min(1).max(60),
+  maxPerSession: z.coerce.number().int().min(1).max(5),
+  cooldownMinutes: z.coerce.number().int().min(1).max(720),
+  armDelayMs: z.coerce.number().int().min(0).max(60_000),
+});
+
+// Placeholders permitidos no template (qualquer outro vira literal, mas avisamos)
+const ALLOWED_PLACEHOLDERS = new Set([
+  "produto", "qtd", "preco", "link", "imagem",
+  "categoria", "ocasiao", "segmento", "contexto",
+  "personalizacao", "personalizacao_linha", "imagem_linha",
+]);
+
+const whatsappTemplateSchema = z.object({
+  template: z
+    .string()
+    .min(20, "Template muito curto")
+    .max(2000, "Template muito longo")
+    .refine((t) => /\{produto\}/.test(t), "Template deve conter {produto}")
+    .refine((t) => /\{qtd\}/.test(t), "Template deve conter {qtd}")
+    .refine((t) => /\{link\}/.test(t), "Template deve conter {link}")
+    .refine((t) => {
+      // Nenhum placeholder desconhecido
+      const used = Array.from(t.matchAll(/\{(\w+)\}/g)).map((m) => m[1]);
+      return used.every((p) => ALLOWED_PLACEHOLDERS.has(p));
+    }, "Template contém placeholder desconhecido. Use apenas: " + [...ALLOWED_PLACEHOLDERS].map(p => `{${p}}`).join(" ")),
+});
+
+const toastSchema = z.object({
+  enabled: z.boolean(),
+  message: z.string().trim().min(1).max(200),
+  durationMs: z.coerce.number().int().min(1000).max(15_000),
+});
+
+export const conversionCtaConfigSchema = z.object({
+  sticky: stickySchema,
+  quickSummary: quickSummarySchema,
+  exitPopup: exitPopupSchema,
+  whatsappTemplate: whatsappTemplateSchema,
+  toast: toastSchema,
+});
+
+/** Valida (e normaliza) o config. Lança Error com mensagem amigável se inválido. */
+export function validateConversionCtaConfig(cfg: unknown): ConversionCtaConfig {
+  const result = conversionCtaConfigSchema.safeParse(cfg);
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((i) => `• ${i.path.join(".") || "(root)"}: ${i.message}`)
+      .join("\n");
+    throw new Error(`Configuração inválida:\n${issues}`);
+  }
+  return result.data as ConversionCtaConfig;
+}
+
 export const useSaveConversionCtaConfig = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (cfg: ConversionCtaConfig) => {
-      // sanity clamps
-      const safe: ConversionCtaConfig = {
-        ...cfg,
-        sticky: {
-          ...cfg.sticky,
-          buttonLabel: (cfg.sticky.buttonLabel || "").slice(0, 40),
-          scrollViewportRatio: Math.min(1, Math.max(0.1, Number(cfg.sticky.scrollViewportRatio) || 0.7)),
-        },
-        exitPopup: {
-          ...cfg.exitPopup,
-          maxPerSession: Math.max(1, Math.min(5, Math.floor(Number(cfg.exitPopup.maxPerSession) || 1))),
-          cooldownMinutes: Math.max(1, Math.min(720, Math.floor(Number(cfg.exitPopup.cooldownMinutes) || 30))),
-          armDelayMs: Math.max(0, Math.min(60_000, Math.floor(Number(cfg.exitPopup.armDelayMs) || 8000))),
-        },
-        whatsappTemplate: {
-          template: (cfg.whatsappTemplate.template || "").slice(0, 2000),
-        },
-        toast: {
-          ...cfg.toast,
-          message: (cfg.toast.message || "").slice(0, 200),
-          durationMs: Math.max(1000, Math.min(15_000, Math.floor(Number(cfg.toast.durationMs) || 4000))),
-        },
-      };
+      const safe = validateConversionCtaConfig(cfg);
       const { data: existing } = await supabase
         .from("store_settings")
         .select("id")

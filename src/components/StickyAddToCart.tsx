@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { ShoppingCart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { event as trackEvent } from "@/lib/analytics";
+import { trackFunnelEvent } from "@/lib/analytics";
 
 interface StickyAddToCartProps {
   productName: string;
@@ -30,7 +30,7 @@ export const StickyAddToCart = ({
   useEffect(() => {
     if (!enabled || !isVisible || viewedRef.current) return;
     viewedRef.current = true;
-    trackEvent("pdp_sticky_view", { product_slug: productSlug });
+    trackFunnelEvent("pdp_sticky_view", { product_slug: productSlug });
   }, [enabled, isVisible, productSlug]);
 
   if (!enabled) return null;
