@@ -1286,6 +1286,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pdp_funnel_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          meta: Json | null
+          personalized: boolean | null
+          product_slug: string | null
+          quantity: number | null
+          session_id: string | null
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          meta?: Json | null
+          personalized?: boolean | null
+          product_slug?: string | null
+          quantity?: number | null
+          session_id?: string | null
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          meta?: Json | null
+          personalized?: boolean | null
+          product_slug?: string | null
+          quantity?: number | null
+          session_id?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       product_occasions: {
         Row: {
           occasion_id: string
@@ -5342,6 +5378,7 @@ export type Database = {
         Args: { _order_id: string }
         Returns: Json
       }
+      cleanup_pdp_funnel_events: { Args: never; Returns: undefined }
       cleanup_seo_url_status: { Args: never; Returns: undefined }
       cleanup_stale_bundle_logs: { Args: never; Returns: Json }
       create_order_with_items: {
@@ -5393,6 +5430,10 @@ export type Database = {
           status: string
           username: string
         }[]
+      }
+      pdp_funnel_stats: {
+        Args: { _from?: string; _to?: string }
+        Returns: Json
       }
       promote_user_to_admin: { Args: { _email: string }; Returns: Json }
       refresh_admin_audit_timeline: { Args: never; Returns: Json }
