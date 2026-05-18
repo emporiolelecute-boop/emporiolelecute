@@ -224,6 +224,18 @@ const AdminProductForm = () => {
       return;
     }
 
+    // Fase 4.1: bloqueia hash residual / slug gigante.
+    const quality = assessSlugQuality(formData.slug);
+    if (quality.severity === 'error') {
+      trackAdminEvent('slug_generation_blocked', 'products');
+      toast({
+        title: 'Slug com problema',
+        description: quality.issues[0] ?? 'Corrija o slug antes de salvar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Peso obrigatório para novos produtos (evita erros no cálculo de frete)
     const weightNum = formData.weight ? parseFloat(formData.weight) : 0;
     if (!isEditing && (!weightNum || weightNum <= 0)) {
