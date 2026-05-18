@@ -175,16 +175,31 @@ const ReducedMotionMount = () => {
 
 
 /**
- * Fase A — Redirect canônico 1-hop: /produto/:slug → /produtos/:slug
- * Preserva query string e hash. Usa `replace` para não poluir o histórico
- * (equivalente client-side de um 301; o hosting Lovable serve sempre
- * index.html, então não há camada de servidor onde aplicar 301 real).
+ * Fase 2.2 — Redirect canônico 1-hop: /produtos/:slug (legado) → /produto/:slug.
+ * Preserva query string, hash e aliases (a resolução de alias acontece em
+ * ProductPage via product_slugs resolver). Usa `replace` para não poluir o
+ * histórico — equivalente client-side de 301 (Lovable hosting é static-first,
+ * não há camada server-side para emitir 301 real). Emite `legacy_namespace_hit`.
  */
 const LegacyProductRedirect = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
+  useEffect(() => {
+    logSlugEvent({
+      event: "legacy_namespace_hit",
+      legacyPrefix: LEGACY_PRODUCT_PATH_PREFIX,
+      targetPrefix: PRODUCT_PATH_PREFIX,
+      matchedSlug: slug,
+      pathname: location.pathname,
+    });
+  }, [slug, location.pathname]);
   if (!slug) return <Navigate to="/produtos" replace />;
-  return <Navigate to={`/produtos/${slug}${location.search}${location.hash}`} replace />;
+  return (
+    <Navigate
+      to={`${urls.product(slug)}${location.search}${location.hash}`}
+      replace
+    />
+  );
 };
 
 const App = () => {
