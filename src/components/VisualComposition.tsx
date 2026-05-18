@@ -12,10 +12,10 @@ interface Props {
   limit?: number;
 }
 
-const FIELDS = "id, slug, name, images, is_active, featured_weight, rating, created_at, category_id";
+const FIELDS = "id, slug, name, price, images, is_active, featured_weight, rating, created_at, category_id";
 
 interface Row {
-  id: string; slug: string; name: string; images: string[]; is_active: boolean;
+  id: string; slug: string; name: string; price: number; images: string[]; is_active: boolean;
   featured_weight: number | null; rating: number; created_at: string; category_id: string | null;
 }
 
