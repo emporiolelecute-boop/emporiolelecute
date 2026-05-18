@@ -508,6 +508,11 @@ const App = () => {
                       <AdminCronStatus />
                     </Suspense>
                   } />
+                  <Route path="seo-control-plane" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminSeoControlPlane />
+                    </Suspense>
+                  } />
                   <Route path="landings" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminOccasionLandings />
