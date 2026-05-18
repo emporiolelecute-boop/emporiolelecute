@@ -549,6 +549,11 @@ const App = () => {
                       <AdminTracking />
                     </Suspense>
                   } />
+                  <Route path="conversao" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminConversionCTA />
+                    </Suspense>
+                  } />
                   <Route path="usuarios" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminUsers />
