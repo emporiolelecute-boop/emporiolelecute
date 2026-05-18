@@ -55,6 +55,26 @@ export type SlugLogEvent =
       event: "legacy_namespace_hit";
       legacyPrefix: string;
       targetPrefix: string;
+    } & BaseLog)
+  // Fase 2.1 — drift de superfícies SEO. Inertes em produção até a Fase 2.2
+  // (sinalizam discrepância entre helper canônico e superfície externa).
+  | ({
+      event: "canonical_namespace_mismatch";
+      expectedPrefix: string;
+      actualPrefix: string;
+      url: string;
+    } & BaseLog)
+  | ({
+      event: "merchant_url_mismatch";
+      expectedPrefix: string;
+      actualPrefix: string;
+      url: string;
+    } & BaseLog)
+  | ({
+      event: "sitemap_namespace_mismatch";
+      expectedPrefix: string;
+      actualPrefix: string;
+      url: string;
     } & BaseLog);
 
 export type SlugEventName = SlugLogEvent["event"];
@@ -66,6 +86,9 @@ const ERROR_EVENTS: ReadonlySet<SlugEventName> = new Set([
   "structural_inconsistency",
   "slug_drift_detected",
   "canonical_mismatch",
+  "canonical_namespace_mismatch",
+  "merchant_url_mismatch",
+  "sitemap_namespace_mismatch",
 ]);
 
 export function logSlugEvent(payload: SlugLogEvent): void {
