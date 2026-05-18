@@ -60,6 +60,7 @@ import { useSemanticContext } from "@/hooks/useSemanticContext";
 import { buildContextualLinksForProduct } from "@/lib/linkOrchestrator";
 import SemanticLinkingBlock from "@/components/SemanticLinkingBlock";
 import type { Product } from "@/data/products";
+import { resolvePrimaryAction } from "@/lib/primaryAction";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
