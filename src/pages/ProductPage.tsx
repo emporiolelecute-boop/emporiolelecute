@@ -133,7 +133,8 @@ const ProductPage = () => {
     if (didReplaceRef.current) return;
     const targetPath = `/produtos/${meta.primarySlug}`;
     if (window.location.pathname === targetPath) {
-      logSlugEvent("loop_prevented", {
+      logSlugEvent({
+        event: "loop_prevented",
         matchedSlug: meta.matchedSlug,
         primarySlug: meta.primarySlug,
         pathname: window.location.pathname,
@@ -141,7 +142,8 @@ const ProductPage = () => {
       return;
     }
     didReplaceRef.current = true;
-    logSlugEvent("replace_executed", {
+    logSlugEvent({
+      event: "replace_executed",
       matchedSlug: meta.matchedSlug,
       primarySlug: meta.primarySlug,
       productId: dbProduct?.id,
@@ -361,7 +363,8 @@ const ProductPage = () => {
   // Sem fallback silencioso: ausência é inconsistência estrutural.
   const slugMeta = dbProduct?.__slugMeta;
   if (!slugMeta?.primarySlug) {
-    logSlugEvent("structural_inconsistency", {
+    logSlugEvent({
+      event: "structural_inconsistency",
       reason: "missing_primary_slug_meta",
       productId: dbProduct?.id,
       matchedSlug: slug,
@@ -369,6 +372,24 @@ const ProductPage = () => {
   }
   const canonicalSlug = slugMeta?.primarySlug ?? product.slug;
   const canonicalUrl = `https://emporiolelecute.com.br/produtos/${canonicalSlug}`;
+
+  // Fase 1.5 — observabilidade de canonical_mismatch: se já houve replace
+  // (ou nem deveria ter), o pathname final precisa bater com o canonical.
+  // Só roda quando a meta está estabilizada e o replace já não é mais devido.
+  useEffect(() => {
+    if (!slugMeta || slugMeta.shouldRedirect) return;
+    const expected = `/produtos/${canonicalSlug}`;
+    const actual = window.location.pathname;
+    if (actual !== expected) {
+      logSlugEvent({
+        event: "canonical_mismatch",
+        expected,
+        actual,
+        primarySlug: canonicalSlug,
+        productId: dbProduct?.id,
+      });
+    }
+  }, [slugMeta, canonicalSlug, dbProduct?.id]);
 
   return (
     <div className="min-h-screen bg-background">

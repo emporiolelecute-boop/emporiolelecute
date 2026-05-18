@@ -166,3 +166,94 @@ Telemetria DB: `record_product_slug_hit(matchedSlug)` fire-and-forget em todo hi
 ### Rollback
 
 Reverter 4 arquivos (`useProducts.ts`, `ProductPage.tsx`, `productResolver.ts`, `slugObservability.ts`). Schema Fase 0 permanece intacto.
+
+---
+
+## Fase 1.5 — Auditoria operacional + observabilidade estruturada (SAFE)
+
+**Status:** implementada. Zero mudanças públicas; apenas logging, tipagem e diagnósticos.
+
+### Precedência arquitetural oficial (ordem de resolução)
+
+Esta é a ordem oficial executada hoje quando o usuário acessa `/produtos/:slug`:
+
+```
+1. RedirectHandler (client)            — match exato em redirects.from_path
+   └─ se hit → navigate(to_path, replace)         [precedência mais alta]
+2. ProductPage mount
+3. useDbProduct → resolveProductSlug (RPC product_slugs)
+   ├─ status='unknown'  → 404
+   ├─ status='inactive' → 404 (sem redirect, sem soft canonical)
+   └─ status='ok' → fetch produto por id
+4. Canonical correction (useEffect)
+   └─ se matchedSlug ≠ primarySlug → navigate(/produtos/primarySlug, replace)
+5. canonical_mismatch observer
+   └─ se pathname final ≠ /produtos/primarySlug → console.error
+```
+
+**Quem vence em colisão:** o que disparar primeiro. `RedirectHandler` corre em `useEffect` no shell do app (level alto), `ProductPage` corre em `useEffect` no componente. Em prática, `RedirectHandler` tende a vencer porque seu effect roda antes do produto resolver. Quando ambos apontam para o mesmo target (caso comum após rename, porque o trigger sincroniza), há **double navigate no-op** — o segundo `navigate` é absorvido pelo react-router (pathname já é o alvo) e o `loop_prevented` é emitido.
+
+### Dívida arquitetural conhecida (Fase 2)
+
+> ⚠️ **Risco futuro:** `redirects` e `product_slugs` compartilham o namespace `/produtos/%`.
+>
+> Hoje **não há conflito** (0 redirects em `/produtos/%` e o trigger `auto_create_redirect_on_slug_change` mantém ambos os sistemas alinhados ao renomear). Porém:
+>
+> - Dois sistemas escrevendo no mesmo namespace é frágil por design.
+> - Em SSR/prerender, edge redirect, ou CDN cache layer, precedência ambígua pode causar comportamento divergente entre client e edge.
+> - Migração para `/produto/:slug` deve unificar: redirect entry para `/produtos/%` deve ser **gerada a partir de** `product_slugs` (single source of truth), não em paralelo.
+>
+> **Decisão Fase 2:** depreciar `redirects` para `/produtos/%`. Substituir por edge function que consulta `product_slugs` diretamente.
+
+### Observabilidade — eventos disponíveis
+
+Helper: `src/lib/slugObservability.ts`. Discriminated union tipado por evento.
+
+| Evento | Severidade | Quando emite |
+|---|---|---|
+| `alias_hit` | debug | Hit em alias manual (`source ∈ {manual, alias}`) |
+| `historical_hit` | debug | Hit em slug histórico (rename/legacy/import) |
+| `replace_executed` | debug | Replace controlado disparou |
+| `loop_prevented` | debug | Pathname já é o alvo; replace abortado |
+| `unknown_slug` | debug | Slug desconhecido (404) — **mantido para granularidade histórica** |
+| `inactive_alias_attempt` | debug | Slug existe mas `is_active=false` (404 explícito) |
+| `slug_resolution_failed` | debug | RPC falhou ou normalização vazia |
+| `structural_inconsistency` | **error** | Produto não encontrado por id, metadata ausente, etc |
+| `slug_drift_detected` | **error** | `products.slug` ≠ `primarySlug` em `product_slugs` |
+| `canonical_mismatch` | **error** | Pathname estabilizado ≠ `/produtos/${primarySlug}` |
+| `redirect_chain_detected` | debug | `RedirectHandler` matou um `from_path` em `/produtos/%` (sinaliza dívida arquitetural) |
+
+### Resolver discriminado (Fase 1.5)
+
+`resolveProductSlug()` agora retorna union discriminada:
+
+```ts
+type ResolveResult =
+  | { status: 'ok'; productId; matchedSlug; primarySlug; ... }
+  | { status: 'inactive'; matchedSlug }
+  | { status: 'unknown'; matchedSlug };
+```
+
+Permite distinguir 404 de slug inexistente vs 404 de alias desativado — essencial para telemetria e futura UX (ex: página de slug desativado com sugestão).
+
+### Diagnósticos SQL
+
+Arquivo: `docs/slugs-diagnostics.sql` — 9 queries de inspeção operacional (top aliases, drift, órfãos, conflitos redirects×product_slugs). Rodar manualmente em qualquer momento; nenhuma muta dados.
+
+### Arquivos tocados (Fase 1.5)
+
+- `src/lib/slugObservability.ts` — discriminated union tipado, novos eventos.
+- `src/lib/productResolver.ts` — retorno discriminado `ok|inactive|unknown`.
+- `src/lib/productResolver.test.ts` — cobertura dos novos status.
+- `src/hooks/useProducts.ts` — adapta para novo contrato, emite `inactive_alias_attempt` e `slug_drift_detected`.
+- `src/pages/ProductPage.tsx` — observer de `canonical_mismatch`.
+- `src/components/RedirectHandler.tsx` — emite `redirect_chain_detected` em `/produtos/%`.
+- `docs/slugs-diagnostics.sql` — novo.
+
+### O que NÃO mudou
+
+Rotas, sitemap, redirects ativos, canonical público, `App.tsx`, comportamento de usuário. Zero migrações.
+
+### Rollback
+
+Reverter os 7 arquivos. Schema intacto.
