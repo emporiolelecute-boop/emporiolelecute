@@ -195,7 +195,15 @@ Deno.serve(async (req) => {
   </url>`).join('\n');
 
     // Generate sitemap XML
+    // Fase 2.1b — metadata operacional para materialização auditável.
+    // Marcadores `lovable:sitemap-source` permitem ao script/test confirmar
+    // que `public/sitemap.xml` foi gerado por esta função (anti-drift).
+    const generatedAt = new Date().toISOString()
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- lovable:sitemap-source generate-sitemap@v2.1b -->
+<!-- lovable:sitemap-generated-at ${generatedAt} -->
+<!-- lovable:sitemap-namespace ${PRODUCT_PATH_PREFIX} -->
+<!-- lovable:sitemap-products-count ${products?.length ?? 0} -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   
