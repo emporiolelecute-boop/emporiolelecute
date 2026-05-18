@@ -17,6 +17,17 @@ export const RedirectHandler = () => {
     if (!redirects?.length) return;
     const match = redirects.find((r) => r.from_path === location.pathname);
     if (!match) return;
+    // Fase 1.5 — alerta de dívida arquitetural: redirect em /produtos/% pode
+    // colidir com product_slugs resolver. Hoje o trigger mantém ambos
+    // consistentes, mas a precedência precisa ser unificada na Fase 2.
+    if (match.from_path.startsWith("/produtos/")) {
+      logSlugEvent({
+        event: "redirect_chain_detected",
+        hopFrom: match.from_path,
+        hopTo: match.to_path,
+        pathname: location.pathname,
+      });
+    }
     // Fire-and-forget hit counter
     supabase
       .from("redirects")
