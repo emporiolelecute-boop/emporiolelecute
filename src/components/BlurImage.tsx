@@ -1,6 +1,7 @@
 import { useState, ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { optimizeImage, buildSrcSet } from "@/lib/image";
+import { logTelemetryEvent } from "@/lib/telemetry";
 
 interface BlurImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "loading"> {
   src: string;
