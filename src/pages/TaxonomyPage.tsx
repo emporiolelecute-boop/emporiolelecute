@@ -366,10 +366,10 @@ const TaxonomyPage = ({ kind }: Props) => {
             <CatalogFilters
               values={filters}
               onChange={setFilters}
-              occasions={dbOccasions}
-              categories={dbCategories}
-              tags={dbTags}
-              segments={dbSegments}
+              occasions={facets.occasions}
+              categories={facets.categories}
+              tags={facets.tags}
+              segments={facets.segments}
               priceBounds={priceBounds}
               totalCount={filtered.length}
               hide={{
