@@ -81,6 +81,8 @@ const AdminProductForm = () => {
     personalization_placeholder: 'Digite o nome, data ou mensagem para personalização...',
     google_product_category: '',
     editorial_content: '',
+    featured_weight: '0',
+    production_speed: '' as '' | 'rapido' | 'normal' | 'longo',
   });
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
