@@ -75,7 +75,10 @@ export const BlurImage = ({
           // @ts-expect-error – fetchpriority is a valid HTML attribute, not yet typed
           fetchpriority={priority ? "high" : "auto"}
           onLoad={() => setLoaded(true)}
-          onError={() => setErrored(true)}
+          onError={() => {
+            setErrored(true);
+            logTelemetryEvent("image_load_fail", `BlurImage ${src}`, { src, alt });
+          }}
           className={cn(
             "w-full h-full object-contain transition-opacity duration-500",
             loaded ? "opacity-100" : "opacity-0",
