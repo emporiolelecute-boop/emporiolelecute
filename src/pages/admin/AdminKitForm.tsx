@@ -16,6 +16,8 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useDbProducts } from "@/hooks/useProducts";
 import type { KitBundleType } from "@/hooks/useKits";
+import { useFormAutosave, useUnsavedChangesPrompt } from "@/hooks/useFormAutosave";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 interface KitItem {
   product_id: string;
