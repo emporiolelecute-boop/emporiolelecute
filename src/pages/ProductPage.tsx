@@ -319,6 +319,25 @@ const ProductPage = () => {
   };
 
 
+  // Fase 1.5 — observabilidade canonical_mismatch (DEVE rodar antes de qualquer early-return
+  // para manter contagem estável de hooks entre renders).
+  const _slugMetaForEffect = dbProduct?.__slugMeta;
+  const _canonicalSlugForEffect = _slugMetaForEffect?.primarySlug ?? dbProduct?.slug ?? '';
+  useEffect(() => {
+    if (!_slugMetaForEffect || _slugMetaForEffect.shouldRedirect || !_canonicalSlugForEffect) return;
+    const expected = urls.product(_canonicalSlugForEffect);
+    const actual = window.location.pathname;
+    if (actual !== expected) {
+      logSlugEvent({
+        event: "canonical_mismatch",
+        expected,
+        actual,
+        primarySlug: _canonicalSlugForEffect,
+        productId: dbProduct?.id,
+      });
+    }
+  }, [_slugMetaForEffect, _canonicalSlugForEffect, dbProduct?.id]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
