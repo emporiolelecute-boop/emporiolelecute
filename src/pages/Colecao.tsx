@@ -10,7 +10,7 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
 import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
-import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
+import { applyCatalogFilters, priceBoundsFrom } from "@/lib/catalogFilter";
 import { useCollectionBySlug } from "@/hooks/useCollections";
 import { useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
