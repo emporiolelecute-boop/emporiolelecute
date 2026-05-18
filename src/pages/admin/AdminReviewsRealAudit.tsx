@@ -353,17 +353,39 @@ const AdminReviewsRealAudit = () => {
         <TabsContent value="commit" className="space-y-3">
           <Card>
             <CardHeader><CardTitle>Importar para o site</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm">
-                Pronto para importar: <strong>{counts.confirmed - counts.imported}</strong> confirmadas.
-              </p>
-              <Button onClick={() => importConfirmed.mutate()} disabled={importConfirmed.isPending || (counts.confirmed - counts.imported) === 0}>
-                {importConfirmed.isPending ? 'Importando…' : 'Importar confirmadas agora'}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                Insere em <code>product_reviews</code> com <code>source='elo7'</code> e <code>external_review_id</code>=feedback_id.
-                Idempotente: re-execução não duplica.
-              </p>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                <p className="text-sm font-medium">⚡ Importação automática segura (100% match)</p>
+                <p className="text-xs text-muted-foreground">
+                  Confirma e importa apenas linhas cujo nome bate exatamente (método <code>exact</code> ou <code>normalized</code>, confiança ≥ 95).
+                  As demais ficam para revisão manual.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => autoImport100.mutate()}
+                    disabled={autoImport100.isPending}
+                  >
+                    {autoImport100.isPending ? 'Processando…' : 'Importar somente 100% match'}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => downloadAuditReport(rows)}>
+                    Baixar relatório de auditoria (CSV)
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t pt-3">
+                <p className="text-sm">
+                  Confirmadas manualmente prontas para importar: <strong>{counts.confirmed - counts.imported}</strong>.
+                </p>
+                <Button onClick={() => importConfirmed.mutate()} disabled={importConfirmed.isPending || (counts.confirmed - counts.imported) === 0} className="mt-2">
+                  {importConfirmed.isPending ? 'Importando…' : 'Importar confirmadas agora'}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Insere em <code>product_reviews</code> com <code>source='elo7'</code> e <code>external_review_id</code>=feedback_id.
+                  Idempotente: re-execução não duplica.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
