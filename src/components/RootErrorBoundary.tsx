@@ -21,6 +21,10 @@ export default class RootErrorBoundary extends Component<{ children: ReactNode }
       stack: err.stack,
       componentStack: info.componentStack || undefined,
     });
+    logTelemetryEvent("ui_error_boundary", `root:${err.message || "unknown"}`, {
+      scope: "root",
+      componentStack: (info.componentStack || "").slice(0, 500),
+    });
   }
 
   render() {
