@@ -81,23 +81,79 @@ export type SlugEventName = SlugLogEvent["event"];
 
 const PREFIX = "[slug]";
 
-// Eventos críticos vão para console.error; demais para console.debug.
-const ERROR_EVENTS: ReadonlySet<SlugEventName> = new Set([
-  "structural_inconsistency",
-  "slug_drift_detected",
-  "canonical_mismatch",
-  "canonical_namespace_mismatch",
-  "merchant_url_mismatch",
-  "sitemap_namespace_mismatch",
-]);
+/**
+ * Fase 2.3 — severidade explícita por evento (operacional).
+ * error → console.error + buffer + amostragem 100%.
+ * warn  → console.warn + buffer + amostragem 100%.
+ * info  → console.debug + buffer + sujeito a sampling.
+ * debug → console.debug + buffer + sujeito a sampling.
+ */
+const SEVERITY: Record<SlugEventName, "error" | "warn" | "info" | "debug"> = {
+  alias_hit: "debug",
+  historical_hit: "debug",
+  replace_executed: "info",
+  loop_prevented: "warn",
+  unknown_slug: "info",
+  slug_resolution_failed: "warn",
+  inactive_alias_attempt: "info",
+  structural_inconsistency: "error",
+  slug_drift_detected: "error",
+  canonical_mismatch: "error",
+  redirect_chain_detected: "warn",
+  legacy_namespace_hit: "info",
+  canonical_namespace_mismatch: "error",
+  merchant_url_mismatch: "error",
+  sitemap_namespace_mismatch: "error",
+};
+
+/** Sampling — críticos sempre 1; alta-frequência reduzidos para não poluir. */
+const SAMPLING: Partial<Record<SlugEventName, number>> = {
+  alias_hit: 0.2,
+  historical_hit: 0.2,
+  legacy_namespace_hit: 0.25,
+};
+
+/**
+ * Ring buffer in-memory para inspeção ad-hoc no devtools.
+ * Acesse via `window.__slugEvents` (apenas browser). Não persiste entre reloads.
+ * Mantido pequeno (200 entries) para não vazar memória.
+ */
+const BUFFER_MAX = 200;
+const buffer: Array<Record<string, unknown>> = [];
+
+function pushBuffer(entry: Record<string, unknown>) {
+  buffer.push(entry);
+  if (buffer.length > BUFFER_MAX) buffer.splice(0, buffer.length - BUFFER_MAX);
+  if (typeof window !== "undefined") {
+    (window as unknown as { __slugEvents?: unknown[] }).__slugEvents = buffer;
+  }
+}
+
+export function getSlugEventBuffer(): ReadonlyArray<Record<string, unknown>> {
+  return buffer;
+}
 
 export function logSlugEvent(payload: SlugLogEvent): void {
-  const entry = { ...payload, ts: new Date().toISOString() };
-  if (ERROR_EVENTS.has(payload.event)) {
-    // eslint-disable-next-line no-console
-    console.error(PREFIX, entry);
-    return;
-  }
-  // eslint-disable-next-line no-console
-  console.debug(PREFIX, entry);
+  const severity = SEVERITY[payload.event] ?? "debug";
+  const sampleRate = SAMPLING[payload.event] ?? 1;
+  if (severity !== "error" && Math.random() > sampleRate) return;
+
+  const entry = {
+    ...payload,
+    severity,
+    source: "client" as const,
+    ts: new Date().toISOString(),
+  };
+  pushBuffer(entry);
+
+  const sink =
+    severity === "error"
+      ? // eslint-disable-next-line no-console
+        console.error
+      : severity === "warn"
+        ? // eslint-disable-next-line no-console
+          console.warn
+        : // eslint-disable-next-line no-console
+          console.debug;
+  sink(PREFIX, entry);
 }
