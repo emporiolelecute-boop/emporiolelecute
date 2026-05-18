@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import type { AdminReview } from '@/hooks/useAdminProductReviews';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 const SOURCES = ['manual', 'elo7', 'whatsapp', 'instagram', 'google', 'site', 'outros'];
 
@@ -34,6 +35,8 @@ const empty: Partial<AdminReview> = {
   is_featured: false,
   is_visible: true,
   review_date: '',
+  images: [],
+  position: 0,
 };
 
 const ProductReviewForm = ({
@@ -65,6 +68,8 @@ const ProductReviewForm = ({
       source_url: form.source_url || null,
       external_review_id: form.external_review_id || null,
       review_date: form.review_date || null,
+      images: Array.isArray(form.images) ? form.images : [],
+      position: Number(form.position ?? 0) || 0,
     });
   };
 
