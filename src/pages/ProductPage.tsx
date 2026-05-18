@@ -142,7 +142,8 @@ const ProductPage = () => {
       return;
     }
     didReplaceRef.current = true;
-    logSlugEvent("replace_executed", {
+    logSlugEvent({
+      event: "replace_executed",
       matchedSlug: meta.matchedSlug,
       primarySlug: meta.primarySlug,
       productId: dbProduct?.id,
