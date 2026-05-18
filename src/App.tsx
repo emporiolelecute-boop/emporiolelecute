@@ -65,6 +65,7 @@ const AdminHeroSlides = lazyWithRetry(() => import("./pages/admin/AdminHeroSlide
 const AdminTestimonials = lazyWithRetry(() => import("./pages/admin/AdminTestimonials"), "AdminTestimonials");
 const AdminProductReviews = lazyWithRetry(() => import("./pages/admin/AdminProductReviews"), "AdminProductReviews");
 const AdminReviewsRealAudit = lazyWithRetry(() => import("./pages/admin/AdminReviewsRealAudit"), "AdminReviewsRealAudit");
+const AdminSitemapStatus = lazyWithRetry(() => import("./pages/admin/AdminSitemapStatus"), "AdminSitemapStatus");
 const AdminProductsHealth = lazyWithRetry(() => import("./pages/admin/AdminProductsHealth"), "AdminProductsHealth");
 const AdminCoupons = lazyWithRetry(() => import("./pages/admin/AdminCoupons"), "AdminCoupons");
 const AdminRedirects = lazyWithRetry(() => import("./pages/admin/AdminRedirects"), "AdminRedirects");
