@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft, MessageCircle, Sparkles, Heart, Truck } from "lucide-react";
+import { Search, Grid, List, ShoppingBag, Loader2, Tag, ChevronRight, ChevronLeft, MessageCircle, Sparkles, Heart, Truck, SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
