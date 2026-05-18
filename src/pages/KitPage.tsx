@@ -249,13 +249,13 @@ export default function KitPage() {
                       </p>
                       <p className="text-[11px] text-muted-foreground mt-1">Frete calculado via WhatsApp</p>
                     </div>
-                    <Button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600 text-white">
+                    <Button onClick={handleAddAllToCart} className="w-full bg-primary hover:bg-primary-dark text-primary-foreground">
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      Adicionar kit ao carrinho
+                    </Button>
+                    <Button onClick={handleWhatsApp} variant="outline" className="w-full border-green-500 text-green-600 hover:bg-green-50">
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Enviar kit pelo WhatsApp
-                    </Button>
-                    <Button onClick={handleAddAllToCart} variant="outline" className="w-full">
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      Adicionar todos ao carrinho
                     </Button>
                   </CardContent>
                 </Card>
