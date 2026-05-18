@@ -662,6 +662,11 @@ const App = () => {
                       <AdminProductReviews />
                     </Suspense>
                   } />
+                  <Route path="reviews-real-audit" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminReviewsRealAudit />
+                    </Suspense>
+                  } />
                   <Route path="auditoria" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminAudit />
