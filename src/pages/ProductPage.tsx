@@ -627,7 +627,7 @@ Poderia me ajudar com o valor do frete e prazos?`;
                 productionDays={product.productionDays}
                 quantity={quantity}
                 personalization={personalization}
-                onWhatsApp={() => openWhatsApp("product_page")}
+                onWhatsApp={() => openWhatsApp("quick_summary")}
               />
 
               {/* Note about shipping */}
@@ -930,7 +930,16 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       />
 
       {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
-      <ExitIntentPopup whatsappUrl={buildWhatsAppMessage().url} />
+      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
+      <ExitIntentPopup
+        whatsappUrl={buildWhatsAppMessage().url}
+        productName={product.name}
+        productSlug={product.slug}
+        minQuantity={product.minQuantity}
+        productionDays={product.productionDays}
+        quantity={quantity}
+        personalized={Boolean(personalization?.trim())}
+      />
 
     </div>
   );
