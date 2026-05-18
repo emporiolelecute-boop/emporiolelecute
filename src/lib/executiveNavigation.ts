@@ -163,6 +163,7 @@ export const EXECUTIVE_NAV: NavGroup[] = [
       { label: "Configurações", path: "/admin/configuracoes", icon: "Settings" },
       { label: "Merchant Feed", path: "/admin/merchant-feed", icon: "Rss" },
       { label: "SEO & Sitemap", path: "/admin/seo", icon: "Search" },
+      { label: "Sitemap → Google", path: "/admin/sitemap-status", icon: "Activity" },
       { label: "SEO Dashboard", path: "/admin/seo-dashboard", icon: "BarChart3" },
       { label: "Telemetria", path: "/admin/telemetria", icon: "Activity" },
       { label: "Cron", path: "/admin/cron", icon: "Clock" },
