@@ -202,6 +202,8 @@ export default function AdminKitForm() {
       qc.invalidateQueries({ queryKey: ["kits"] });
       qc.invalidateQueries({ queryKey: ["kit"] });
       qc.invalidateQueries({ queryKey: ["kits-of-product"] });
+      autosave.clear();
+      setDirty(false);
       toast({ title: "Kit salvo" });
       if (!isEdit) navigate(`/admin/kits/${kid}`);
     },
