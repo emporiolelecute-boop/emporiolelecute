@@ -10,7 +10,7 @@ import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
 import ItemListStructuredData from "@/components/ItemListStructuredData";
 import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
-import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
+import { applyCatalogFilters, priceBoundsFrom } from "@/lib/catalogFilter";
 import { useCollectionBySlug } from "@/hooks/useCollections";
 import { useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
@@ -36,8 +36,10 @@ const Colecao = () => {
     [collection]
   );
   const priceBounds = useMemo(() => priceBoundsFrom(normalized), [normalized]);
+  // Ordenação: respeita `collection_products.position` (já vem ordenado do hook);
+  // featured_weight só atua como desempate quando posições forem iguais (raro).
   const filtered = useMemo(
-    () => sortByFeatured(applyCatalogFilters(normalized, filters)),
+    () => applyCatalogFilters(normalized, filters),
     [normalized, filters]
   );
 

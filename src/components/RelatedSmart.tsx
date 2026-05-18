@@ -51,13 +51,35 @@ const RelatedSmart = ({ currentProductId, occasions, tags, category, limit = 8 }
   const tagIds = (tags || []).map((t) => t.id);
   const categoryId = category?.id || null;
 
+  type Reason = "ocasiao" | "tags" | "categoria" | "popular";
+  const REASON_LABEL: Record<Reason, string> = {
+    ocasiao: "Mesma ocasião",
+    tags: "Combina com este produto",
+    categoria: "Mesma categoria",
+    popular: "Clientes também pediram",
+  };
+
   const { data } = useQuery({
     queryKey: ["related-smart", currentProductId, occIds, tagIds, categoryId, limit],
+    staleTime: 60_000,
     queryFn: async () => {
-      const collected = new Map<string, Row>();
-      const wantedFrom = (source: "ocasiao" | "tags" | "categoria") =>
-        ({ source, items: [] as Row[] });
-      const buckets: Record<string, { source: string; items: Row[] }> = {};
+      const collected = new Map<string, Row & { _reason: Reason }>();
+      const perCategoryCount = new Map<string, number>();
+      const MAX_PER_CATEGORY = Math.max(2, Math.ceil(limit / 2));
+
+      const tryAdd = (p: Row, reason: Reason) => {
+        if (collected.has(p.id)) return false;
+        if (collected.size >= limit) return false;
+        const cat = p.category_id || "_none";
+        const used = perCategoryCount.get(cat) || 0;
+        // Aplicar limite por categoria apenas enquanto ainda há outras categorias possíveis
+        if (used >= MAX_PER_CATEGORY && collected.size + (limit - collected.size) > MAX_PER_CATEGORY) {
+          return false;
+        }
+        collected.set(p.id, { ...p, _reason: reason });
+        perCategoryCount.set(cat, used + 1);
+        return true;
+      };
 
       const need = () => limit - collected.size;
 
@@ -70,9 +92,9 @@ const RelatedSmart = ({ currentProductId, occasions, tags, category, limit = 8 }
         const items = ((rows as Array<{ product: Row | null }> | null) ?? [])
           .map((r) => r.product)
           .filter((p): p is Row => !!p && p.is_active && p.id !== currentProductId);
-        buckets.ocasiao = { source: "ocasiao", items };
         for (const p of sortByFeatured(items)) {
-          if (!collected.has(p.id) && need() > 0) collected.set(p.id, p);
+          if (need() <= 0) break;
+          tryAdd(p, "ocasiao");
         }
       }
 
@@ -86,7 +108,8 @@ const RelatedSmart = ({ currentProductId, occasions, tags, category, limit = 8 }
           .map((r) => r.product)
           .filter((p): p is Row => !!p && p.is_active && p.id !== currentProductId);
         for (const p of sortByFeatured(items)) {
-          if (!collected.has(p.id) && need() > 0) collected.set(p.id, p);
+          if (need() <= 0) break;
+          tryAdd(p, "tags");
         }
       }
 
@@ -100,11 +123,12 @@ const RelatedSmart = ({ currentProductId, occasions, tags, category, limit = 8 }
           .neq("id", currentProductId);
         const items = ((rows as Row[] | null) ?? []);
         for (const p of sortByFeatured(items)) {
-          if (!collected.has(p.id) && need() > 0) collected.set(p.id, p);
+          if (need() <= 0) break;
+          tryAdd(p, "categoria");
         }
       }
 
-      // 4) Fallback determinístico: produtos ativos recentes ordenados por featured_weight
+      // 4) Fallback determinístico
       if (need() > 0) {
         const { data: rows } = await supabase
           .from("products")
@@ -116,15 +140,16 @@ const RelatedSmart = ({ currentProductId, occasions, tags, category, limit = 8 }
           .limit(limit * 3);
         const items = ((rows as Row[] | null) ?? []);
         for (const p of sortByFeatured(items)) {
-          if (!collected.has(p.id) && need() > 0) collected.set(p.id, p);
+          if (need() <= 0) break;
+          tryAdd(p, "popular");
         }
       }
 
-      return [...collected.values()].slice(0, limit);
+      return { items: [...collected.values()].slice(0, limit), reasonLabel: REASON_LABEL };
     },
   });
 
-  const items = data ?? [];
+  const items = data?.items ?? [];
   if (items.length === 0) return null;
 
   // Pick the strongest taxonomy for the "ver todos" link
@@ -162,7 +187,14 @@ const RelatedSmart = ({ currentProductId, occasions, tags, category, limit = 8 }
         )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-        {items.map((p) => <ProductCard key={p.id} product={toCardProduct(p)} />)}
+        {items.map((p) => (
+          <div key={p.id} className="relative">
+            <span className="absolute z-10 top-2 left-2 text-[10px] uppercase tracking-wider bg-background/90 backdrop-blur text-foreground/80 px-2 py-0.5 rounded-full border shadow-sm">
+              {data!.reasonLabel[p._reason]}
+            </span>
+            <ProductCard product={toCardProduct(p)} />
+          </div>
+        ))}
       </div>
     </section>
   );

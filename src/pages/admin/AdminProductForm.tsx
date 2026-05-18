@@ -727,6 +727,19 @@ const AdminProductForm = () => {
                 <p className="text-xs text-muted-foreground">
                   Force a faixa exibida no filtro e badge do card, independentemente dos dias.
                 </p>
+                {(() => {
+                  const days = parseInt(formData.production_days) || 0;
+                  const override = formData.production_speed as 'rapido' | 'normal' | 'longo' | '';
+                  const eff = override || (days <= 0 ? null : days <= 3 ? 'rapido' : days <= 7 ? 'normal' : 'longo');
+                  const label = eff === 'rapido' ? 'Pronta entrega' : eff === 'normal' ? 'Prazo normal' : eff === 'longo' ? 'Sob encomenda' : '—';
+                  return (
+                    <div className="text-xs rounded-md bg-muted/50 border px-2 py-1.5">
+                      <span className="text-muted-foreground">Bucket resultante: </span>
+                      <span className="font-medium text-foreground">{label}</span>
+                      {override && <span className="ml-1 text-primary">(override)</span>}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </CardContent>

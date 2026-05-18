@@ -183,10 +183,17 @@ export default function AdminCollectionForm() {
           <Button asChild variant="ghost" size="sm"><Link to="/admin/colecoes"><ArrowLeft className="h-4 w-4" /></Link></Button>
           <h1 className="text-2xl font-display font-semibold">{isEdit ? "Editar coleção" : "Nova coleção"}</h1>
         </div>
-        <Button type="submit" disabled={saving}>
-          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-          Salvar
-        </Button>
+        <div className="flex items-center gap-2">
+          {isEdit && form.slug && (
+            <Button asChild type="button" variant="outline" size="sm">
+              <a href={`/colecao/${form.slug}`} target="_blank" rel="noreferrer">Preview</a>
+            </Button>
+          )}
+          <Button type="submit" disabled={saving}>
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            Salvar
+          </Button>
+        </div>
       </div>
 
       <Card>
