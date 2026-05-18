@@ -230,12 +230,22 @@ Poderia me ajudar com o valor do frete e prazos?`;
     };
   };
 
-  const openWhatsApp = (source: "product_page" | "sticky_cta" = "product_page") => {
+  const openWhatsApp = (
+    source: "product_page" | "sticky_cta" | "quick_summary" | "exit_popup" = "product_page"
+  ) => {
     if (!product) return;
     const { url, utmCampaign } = buildWhatsAppMessage();
     if (!url) return;
     trackInquiry(product.name, product.id);
     trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
+    // Evento granular adicional para o funil de PDP
+    event("pdp_whatsapp_click", {
+      source,
+      product_id: product.id,
+      product_slug: product.slug,
+      quantity,
+      personalized: Boolean(personalization?.trim()),
+    });
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
