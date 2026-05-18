@@ -1,10 +1,7 @@
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
-import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
-import { useDbCategories, useDbOccasions } from "@/hooks/useProducts";
-import { useTags } from "@/hooks/useTags";
-import { useSegments } from "@/hooks/useSegments";
+import { applyCatalogFilters, sortByFeatured, priceBoundsFrom, deriveFacets } from "@/lib/catalogFilter";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ChevronRight, ShoppingBag } from "lucide-react";
@@ -129,10 +126,6 @@ const TaxonomyPage = ({ kind }: Props) => {
   const dbProducts = productsQuery.data ?? [];
 
   // ============ FILTROS ============
-  const { data: dbCategories } = useDbCategories();
-  const { data: dbOccasions } = useDbOccasions();
-  const { data: dbTags } = useTags();
-  const { data: dbSegments } = useSegments();
   const [filters, setFilters] = useCatalogFiltersFromUrl();
 
   const normalized = useMemo(
@@ -146,6 +139,9 @@ const TaxonomyPage = ({ kind }: Props) => {
       })),
     [dbProducts]
   );
+
+  // Facets derived from the current taxonomy subset (not global lists)
+  const facets = useMemo(() => deriveFacets(normalized), [normalized]);
 
   const priceBounds = useMemo(() => priceBoundsFrom(normalized), [normalized]);
   const filtered = useMemo(() => sortByFeatured(applyCatalogFilters(normalized, filters)), [normalized, filters]);
@@ -370,10 +366,10 @@ const TaxonomyPage = ({ kind }: Props) => {
             <CatalogFilters
               values={filters}
               onChange={setFilters}
-              occasions={dbOccasions}
-              categories={dbCategories}
-              tags={dbTags}
-              segments={dbSegments}
+              occasions={facets.occasions}
+              categories={facets.categories}
+              tags={facets.tags}
+              segments={facets.segments}
               priceBounds={priceBounds}
               totalCount={filtered.length}
               hide={{

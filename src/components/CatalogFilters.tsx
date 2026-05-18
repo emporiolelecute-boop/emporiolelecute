@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import type { DbOccasion, DbCategory, DbTag, DbSegment } from "@/hooks/useProducts";
+export interface FacetItem { id: string; name: string; slug: string; count?: number }
 
 export type SpeedKey = "rapido" | "normal" | "longo";
 
@@ -35,10 +35,10 @@ export const EMPTY_FILTERS: CatalogFilterValues = {
 export interface CatalogFiltersProps {
   values: CatalogFilterValues;
   onChange: (v: CatalogFilterValues) => void;
-  occasions?: DbOccasion[];
-  categories?: DbCategory[];
-  tags?: DbTag[];
-  segments?: DbSegment[];
+  occasions?: FacetItem[];
+  categories?: FacetItem[];
+  tags?: FacetItem[];
+  segments?: FacetItem[];
   priceBounds: { min: number; max: number };
   /** Hide a facet because the page is already scoped to it */
   hide?: { category?: boolean; occasion?: boolean; segment?: boolean };
