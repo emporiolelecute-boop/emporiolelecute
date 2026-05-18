@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Gift, Package, Clock } from "lucide-react";
-import { event as trackEvent } from "@/lib/analytics";
+import { trackFunnelEvent } from "@/lib/analytics";
 
 interface ExitIntentPopupProps {
   /** URL pronta para abrir o WhatsApp. Deve sempre refletir o estado atual (quantidade/personalização). */
@@ -77,11 +77,11 @@ export const ExitIntentPopup = ({
       const s = readState();
       const cooldownMs = cooldownMinutes * 60_000;
       if (s.shownCount >= maxPerSession) {
-        trackEvent("exit_popup_blocked", { reason, rule: "max_per_session", product_slug: productSlug });
+        trackFunnelEvent("exit_popup_blocked", { reason, rule: "max_per_session", product_slug: productSlug });
         return false;
       }
       if (s.lastShown && Date.now() - s.lastShown < cooldownMs) {
-        trackEvent("exit_popup_blocked", { reason, rule: "cooldown", product_slug: productSlug });
+        trackFunnelEvent("exit_popup_blocked", { reason, rule: "cooldown", product_slug: productSlug });
         return false;
       }
       return true;
@@ -93,7 +93,7 @@ export const ExitIntentPopup = ({
       const s = readState();
       writeState({ shownCount: s.shownCount + 1, lastShown: Date.now() });
       setOpen(true);
-      trackEvent("exit_popup_open", {
+      trackFunnelEvent("exit_popup_open", {
         reason,
         product_slug: productSlug,
         quantity,
@@ -136,20 +136,20 @@ export const ExitIntentPopup = ({
 
   const handleOpenChange = (next: boolean) => {
     if (!next && open) {
-      trackEvent("exit_popup_close", { method: "dismiss", product_slug: productSlug });
+      trackFunnelEvent("exit_popup_close", { method: "dismiss", product_slug: productSlug });
     }
     setOpen(next);
   };
 
   const handleWhatsApp = () => {
-    trackEvent("exit_popup_whatsapp_click", { product_slug: productSlug, quantity, personalized });
+    trackFunnelEvent("exit_popup_whatsapp_click", { product_slug: productSlug, quantity, personalized });
     const url = getWhatsappUrl();
     if (url) window.open(url, "_blank", "noopener,noreferrer");
     setOpen(false);
   };
 
   const handleDismiss = () => {
-    trackEvent("exit_popup_close", { method: "continue", product_slug: productSlug });
+    trackFunnelEvent("exit_popup_close", { method: "continue", product_slug: productSlug });
     setOpen(false);
   };
 

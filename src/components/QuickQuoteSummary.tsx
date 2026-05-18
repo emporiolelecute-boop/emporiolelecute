@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { MessageCircle, Package, Clock, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { event as trackEvent } from "@/lib/analytics";
+import { trackFunnelEvent } from "@/lib/analytics";
 import { normalizePersonalization, normalizeQuantity } from "@/lib/whatsappTemplate";
 
 interface QuickQuoteSummaryProps {
@@ -39,7 +39,7 @@ export const QuickQuoteSummary = ({
   useEffect(() => {
     if (!enabled || viewedRef.current) return;
     viewedRef.current = true;
-    trackEvent("pdp_quick_summary_view", { product_slug: productSlug });
+    trackFunnelEvent("pdp_quick_summary_view", { product_slug: productSlug });
   }, [enabled, productSlug]);
 
   if (!enabled) return null;
