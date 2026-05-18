@@ -57,6 +57,19 @@ export default function AdminKitForm() {
   const [items, setItems] = useState<KitItem[]>([]);
   const [productSearch, setProductSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  // Sprint final — autosave de rascunho. Wraps form+items num único snapshot.
+  const autosave = useFormAutosave(
+    `kit:${id ?? "novo"}`,
+    { form, items },
+    (snap) => {
+      setForm(snap.form);
+      setItems(snap.items);
+    },
+    { enabled: !isLoading },
+  );
+  useUnsavedChangesPrompt(dirty || saving);
 
   const { data: existing, isLoading } = useQuery({
     queryKey: ["admin-kit", id],
