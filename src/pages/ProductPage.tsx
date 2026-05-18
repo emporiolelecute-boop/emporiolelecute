@@ -123,6 +123,32 @@ const ProductPage = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, [dbProduct?.id, ctaConfig?.sticky?.scrollViewportRatio]);
 
+  // Fase 1 — Replace controlado para slug primário.
+  // Blindagens: didReplaceRef (1x por mount) + checagem de pathname atual.
+  const didReplaceRef = useRef(false);
+  useEffect(() => {
+    const meta = dbProduct?.__slugMeta;
+    if (!meta || !meta.shouldRedirect) return;
+    if (didReplaceRef.current) return;
+    const targetPath = `/produtos/${meta.primarySlug}`;
+    if (window.location.pathname === targetPath) {
+      logSlugEvent("loop_prevented", {
+        matchedSlug: meta.matchedSlug,
+        primarySlug: meta.primarySlug,
+        pathname: window.location.pathname,
+      });
+      return;
+    }
+    didReplaceRef.current = true;
+    logSlugEvent("replace_executed", {
+      matchedSlug: meta.matchedSlug,
+      primarySlug: meta.primarySlug,
+      productId: dbProduct?.id,
+      pathname: window.location.pathname,
+    });
+    navigate(targetPath, { replace: true });
+  }, [dbProduct?.__slugMeta, dbProduct?.id, navigate]);
+
   // Convert to display format
   const product = dbProduct ? {
     id: dbProduct.id,
