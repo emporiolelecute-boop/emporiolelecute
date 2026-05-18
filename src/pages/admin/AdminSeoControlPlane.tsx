@@ -14,6 +14,7 @@ import {
   Database, FileSearch, Layers,
 } from "lucide-react";
 import { useSeoControlPlane, type ControlPlaneFinding } from "@/hooks/useSeoControlPlane";
+import AutopilotPanel from "@/components/admin/AutopilotPanel";
 
 const sevColor: Record<string, string> = {
   critical: "destructive",
