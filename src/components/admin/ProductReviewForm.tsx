@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import type { AdminReview } from '@/hooks/useAdminProductReviews';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 const SOURCES = ['manual', 'elo7', 'whatsapp', 'instagram', 'google', 'site', 'outros'];
 
@@ -34,6 +35,8 @@ const empty: Partial<AdminReview> = {
   is_featured: false,
   is_visible: true,
   review_date: '',
+  images: [],
+  position: 0,
 };
 
 const ProductReviewForm = ({
@@ -65,6 +68,8 @@ const ProductReviewForm = ({
       source_url: form.source_url || null,
       external_review_id: form.external_review_id || null,
       review_date: form.review_date || null,
+      images: Array.isArray(form.images) ? form.images : [],
+      position: Number(form.position ?? 0) || 0,
     });
   };
 
@@ -156,9 +161,31 @@ const ProductReviewForm = ({
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <Label>ID externo (Elo7, etc — opcional)</Label>
+          <Input value={form.external_review_id || ''} onChange={(e) => set('external_review_id', e.target.value)} />
+        </div>
+        <div>
+          <Label>Ordem manual (menor = primeiro)</Label>
+          <Input
+            type="number"
+            value={form.position ?? 0}
+            onChange={(e) => set('position', Number(e.target.value) || 0)}
+          />
+        </div>
+      </div>
+
       <div>
-        <Label>ID externo (Elo7, etc — opcional)</Label>
-        <Input value={form.external_review_id || ''} onChange={(e) => set('external_review_id', e.target.value)} />
+        <Label>Fotos da avaliação (clientes reais, eventos)</Label>
+        <p className="text-xs text-muted-foreground mb-2">
+          Arraste para reordenar. A primeira foto aparece em destaque.
+        </p>
+        <ImageUploader
+          images={Array.isArray(form.images) ? form.images : []}
+          onImagesChange={(imgs) => set('images', imgs)}
+          maxImages={6}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-3 pt-1">

@@ -1539,9 +1539,11 @@ export type Database = {
           created_at: string
           external_review_id: string | null
           id: string
+          images: string[]
           is_featured: boolean
           is_verified: boolean
           is_visible: boolean
+          position: number
           product_id: string
           rating: number
           review_date: string | null
@@ -1555,9 +1557,11 @@ export type Database = {
           created_at?: string
           external_review_id?: string | null
           id?: string
+          images?: string[]
           is_featured?: boolean
           is_verified?: boolean
           is_visible?: boolean
+          position?: number
           product_id: string
           rating: number
           review_date?: string | null
@@ -1571,9 +1575,11 @@ export type Database = {
           created_at?: string
           external_review_id?: string | null
           id?: string
+          images?: string[]
           is_featured?: boolean
           is_verified?: boolean
           is_visible?: boolean
+          position?: number
           product_id?: string
           rating?: number
           review_date?: string | null

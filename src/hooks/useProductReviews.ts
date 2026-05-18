@@ -14,6 +14,8 @@ export interface ProductReview {
   is_featured: boolean;
   review_date: string | null;
   created_at: string;
+  images: string[];
+  position: number;
 }
 
 export interface ProductReviewStats {
@@ -33,6 +35,7 @@ export function useProductReviews(productId?: string) {
         .select('*')
         .eq('product_id', productId!)
         .eq('is_visible', true)
+        .order('position', { ascending: true })
         .order('is_featured', { ascending: false })
         .order('review_date', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })

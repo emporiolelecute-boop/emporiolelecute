@@ -1,6 +1,9 @@
-// Fase 7 — Bloco visual de avaliações de produto
-import { Star, BadgeCheck, ExternalLink } from 'lucide-react';
+// Fase 7 — Bloco visual de avaliações de produto (com fotos)
+import { useState } from 'react';
+import { Star, BadgeCheck, ExternalLink, X } from 'lucide-react';
 import { useProductReviews, useProductReviewStats } from '@/hooks/useProductReviews';
+import { optimizeImage } from '@/lib/image';
+import { event as gaEvent } from '@/lib/analytics';
 
 interface Props {
   productId: string;
@@ -29,9 +32,20 @@ const Stars = ({ value }: { value: number }) => (
 const ProductReviews = ({ productId }: Props) => {
   const { data: reviews = [], isLoading } = useProductReviews(productId);
   const { data: stats } = useProductReviewStats(productId);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   if (isLoading) return null;
   if (!reviews.length) return null;
+
+  const openLightbox = (src: string, reviewId: string, idx: number) => {
+    setLightbox(src);
+    gaEvent('review_gallery_interaction', {
+      product_id: productId,
+      review_id: reviewId,
+      image_index: idx,
+      action: 'open',
+    });
+  };
 
   return (
     <section className="mb-16" aria-labelledby="product-reviews-title">
@@ -52,11 +66,17 @@ const ProductReviews = ({ productId }: Props) => {
         )}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      {/* Mobile: carrossel horizontal | Desktop: grid */}
+      <div
+        className="flex sm:grid sm:grid-cols-2 gap-4 overflow-x-auto sm:overflow-visible
+                   snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0
+                   [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {reviews.map((r) => (
           <article
             key={r.id}
-            className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3"
+            className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3
+                       min-w-[85%] sm:min-w-0 snap-start"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -77,6 +97,35 @@ const ProductReviews = ({ productId }: Props) => {
               <p className="text-sm text-muted-foreground leading-relaxed">{r.comment}</p>
             )}
 
+            {r.images && r.images.length > 0 && (
+              <div
+                className={`grid gap-2 ${
+                  r.images.length === 1 ? 'grid-cols-1' :
+                  r.images.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+                }`}
+                style={{ contain: 'layout' }}
+              >
+                {r.images.slice(0, 6).map((src, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => openLightbox(src, r.id, idx)}
+                    className="relative aspect-square rounded-lg overflow-hidden bg-muted
+                               group focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label={`Foto ${idx + 1} da avaliação de ${r.author_name}`}
+                  >
+                    <img
+                      src={optimizeImage(src, { width: 400, resize: 'cover' })}
+                      alt={`Foto real de ${r.author_name}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
             {r.source && r.source !== 'manual' && (
               <div className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <span className="px-2 py-0.5 bg-muted rounded-full capitalize">{r.source}</span>
@@ -95,6 +144,29 @@ const ProductReviews = ({ productId }: Props) => {
           </article>
         ))}
       </div>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 text-white p-2 rounded-full bg-white/10 hover:bg-white/20"
+            aria-label="Fechar"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <img
+            src={optimizeImage(lightbox, { width: 1600, resize: 'contain' })}
+            alt="Foto da avaliação"
+            className="max-w-full max-h-full object-contain rounded-lg"
+          />
+        </div>
+      )}
     </section>
   );
 };

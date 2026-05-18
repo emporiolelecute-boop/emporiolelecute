@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Loader2, ChevronRight, Package, MessageCircle, Sparkles, Minus, Plus, ShoppingBag } from "lucide-react";
 import Header from "@/components/Header";
@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useKitBySlug } from "@/hooks/useKits";
 import { useCart } from "@/contexts/CartContext";
 import { useContactInfo } from "@/hooks/useContactInfo";
-import { trackInquiry, trackWhatsAppClick, buildWhatsAppUrl } from "@/lib/analytics";
+import { trackInquiry, trackWhatsAppClick, buildWhatsAppUrl, event as gaEvent } from "@/lib/analytics";
 import { optimizeImage } from "@/lib/image";
 import { toast } from "@/hooks/use-toast";
 
@@ -32,6 +32,17 @@ export default function KitPage() {
   const phone = (whatsappNumber || "5541992214299").replace(/\D/g, "");
 
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (kit?.id) {
+      gaEvent("bundle_view", {
+        slug: kit.slug,
+        bundle_type: kit.bundle_type,
+        kit_id: kit.id,
+        origin: "kit_page",
+      });
+    }
+  }, [kit?.id, kit?.slug, kit?.bundle_type]);
 
   const items = useMemo(
     () =>
@@ -88,6 +99,13 @@ export default function KitPage() {
     });
     trackInquiry(kit.name, kit.id);
     trackWhatsAppClick({ source: "kit_page" as any, context: kit.slug, utm_campaign: `kit_${kit.slug}` });
+    gaEvent("bundle_whatsapp_click", {
+      slug: kit.slug,
+      bundle_type: kit.bundle_type,
+      kit_id: kit.id,
+      item_count: items.length,
+      origin: "kit_page",
+    });
     window.open(url, "_blank", "noopener,noreferrer");
   };
 

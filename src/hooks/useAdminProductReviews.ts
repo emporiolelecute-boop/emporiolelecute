@@ -17,6 +17,8 @@ export interface AdminReview {
   review_date: string | null;
   created_at: string;
   updated_at: string;
+  images: string[];
+  position: number;
 }
 
 export interface AdminReviewListParams {
