@@ -37,24 +37,41 @@ export interface KitLike {
 
 /** Resolve a ação primária para um produto individual (PDP, card, sticky CTA). */
 export function resolvePrimaryAction(product: ProductLike | null | undefined): PrimaryActionResult {
-  if (!product || product.is_active === false) {
-    return { primary: "unavailable", secondary: null, reason: "inactive" };
+  try {
+    if (!product || product.is_active === false) {
+      return { primary: "unavailable", secondary: null, reason: "inactive" };
+    }
+    if (product.stock_status === "out_of_stock") {
+      return { primary: "whatsapp", secondary: null, reason: "out_of_stock" };
+    }
+    if (product.personalization_enabled) {
+      return { primary: "whatsapp", secondary: "cart", reason: "personalized" };
+    }
+    return { primary: "cart", secondary: "whatsapp", reason: "ready_to_ship" };
+  } catch (err) {
+    // Sprint 4 — telemetria: nunca quebrar UI por causa do resolver.
+    void import("./telemetry").then(({ logTelemetryEvent }) =>
+      logTelemetryEvent("cta_resolution_fail", `resolvePrimaryAction:${(err as Error)?.message}`, {
+        product: { is_active: product?.is_active, personalization_enabled: product?.personalization_enabled, stock_status: product?.stock_status },
+      }),
+    );
+    return { primary: "cart", secondary: "whatsapp", reason: "ready_to_ship" };
   }
-  if (product.stock_status === "out_of_stock") {
-    return { primary: "whatsapp", secondary: null, reason: "out_of_stock" };
-  }
-  if (product.personalization_enabled) {
-    return { primary: "whatsapp", secondary: "cart", reason: "personalized" };
-  }
-  return { primary: "cart", secondary: "whatsapp", reason: "ready_to_ship" };
 }
 
 /** Resolve a ação primária para um kit (KitPage, bloco de kits). Sempre híbrido. */
 export function resolveKitPrimaryAction(kit: KitLike | null | undefined): PrimaryActionResult {
-  if (!kit || kit.is_active === false) {
-    return { primary: "unavailable", secondary: null, reason: "inactive" };
+  try {
+    if (!kit || kit.is_active === false) {
+      return { primary: "unavailable", secondary: null, reason: "inactive" };
+    }
+    return { primary: "cart", secondary: "whatsapp", reason: "bundle" };
+  } catch (err) {
+    void import("./telemetry").then(({ logTelemetryEvent }) =>
+      logTelemetryEvent("cta_resolution_fail", `resolveKitPrimaryAction:${(err as Error)?.message}`),
+    );
+    return { primary: "cart", secondary: "whatsapp", reason: "bundle" };
   }
-  return { primary: "cart", secondary: "whatsapp", reason: "bundle" };
 }
 
 /** Label canônico para o CTA — usado em botões e em analytics. */
