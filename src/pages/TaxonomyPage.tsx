@@ -205,7 +205,7 @@ const TaxonomyPage = ({ kind }: Props) => {
 
   const products: Product[] = useMemo(
     () =>
-      dbProducts.map((p) => ({
+      filteredLimited.map((p) => ({
         id: p.id, slug: p.slug, name: p.name, description: p.description || "",
         price: `R$ ${Number(p.price).toFixed(2).replace(".", ",")}`,
         originalPrice: p.original_price ? `R$ ${Number(p.original_price).toFixed(2).replace(".", ",")}` : undefined,
@@ -213,8 +213,10 @@ const TaxonomyPage = ({ kind }: Props) => {
         images: p.images ?? [], link: "", badge: p.badge || undefined,
         rating: Math.round(p.rating ?? 5), category: "outros" as const,
         occasions: [], keywords: p.keywords ?? [], min_quantity: p.min_quantity || undefined,
+        personalization_enabled: p.personalization_enabled ?? undefined,
+        production_days: p.production_days ?? undefined,
       })),
-    [dbProducts]
+    [filteredLimited]
   );
 
   const loading = entityQuery.isLoading || productsQuery.isLoading;
