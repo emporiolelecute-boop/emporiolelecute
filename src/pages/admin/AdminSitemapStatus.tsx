@@ -44,7 +44,7 @@ const AdminSitemapStatus = () => {
       const { data } = await supabase
         .from('store_settings').select('value')
         .eq('key', 'sitemap_monitor_history').maybeSingle();
-      const arr = (data?.value as Submission[] | null) || [];
+      const arr = (data?.value as unknown as Submission[] | null) || [];
       return arr.slice(-30).reverse();
     },
   });
