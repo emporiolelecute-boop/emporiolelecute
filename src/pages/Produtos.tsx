@@ -538,6 +538,39 @@ const Produtos = () => {
             </div>
           </div>
 
+          {/* Toggle: filtros encolhidos por padrão */}
+          <div className="mt-6 flex items-center justify-between gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((v) => !v)}
+              aria-expanded={filtersOpen}
+              aria-controls="produtos-filtros-taxonomia"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border
+                         bg-card hover:bg-muted/60 text-sm font-medium text-foreground transition-colors"
+            >
+              <SlidersHorizontal className="h-4 w-4 text-primary" />
+              Filtros
+              {activeFiltersCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5
+                                 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold">
+                  {activeFiltersCount}
+                </span>
+              )}
+              {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            {!filtersOpen && activeFiltersCount > 0 && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2"
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+
+          {filtersOpen && (
+          <div id="produtos-filtros-taxonomia" className="animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Category Filters */}
           <div className="mt-6">
             <h3 className="text-sm font-medium text-foreground mb-3">Categorias</h3>
