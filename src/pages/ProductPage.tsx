@@ -871,6 +871,15 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       <Footer />
       <WhatsAppButton />
       <Chatbot />
+
+      {/* Sticky CTA mobile (Q1) — aparece após scroll */}
+      <StickyAddToCart
+        productName={product.name}
+        price={`R$ ${product.price.toFixed(2).replace('.', ',')}`}
+        isVisible={showStickyCta}
+        onWhatsApp={() => openWhatsApp("sticky_cta")}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };
