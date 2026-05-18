@@ -364,33 +364,52 @@ const TaxonomyPage = ({ kind }: Props) => {
           </section>
         )}
 
-        {/* Grid */}
+        {/* Grid + Filtros */}
         <section className="container mx-auto px-4 py-10 lg:py-14">
-          {loading ? (
-            <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-20 max-w-md mx-auto">
-              <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-display font-semibold mb-2">Em breve novos produtos</h2>
-              <p className="text-muted-foreground mb-6">
-                Ainda não temos produtos cadastrados nesta {cfg.label.toLowerCase()}. Explore nosso catálogo completo enquanto isso.
-              </p>
-              <Button asChild><Link to="/produtos">Ver todos os produtos</Link></Button>
+          <div className="flex flex-col lg:flex-row gap-8">
+            <CatalogFilters
+              values={filters}
+              onChange={setFilters}
+              occasions={dbOccasions}
+              categories={dbCategories}
+              tags={dbTags}
+              segments={dbSegments}
+              priceBounds={priceBounds}
+              totalCount={filtered.length}
+              hide={{
+                category: cfg.kind === "categoria",
+                occasion: cfg.kind === "ocasiao",
+                segment: cfg.kind === "segmento",
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              {loading ? (
+                <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-20 max-w-md mx-auto">
+                  <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h2 className="text-xl font-display font-semibold mb-2">Nenhum produto encontrado</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Ajuste os filtros ou explore nosso catálogo completo.
+                  </p>
+                  <Button asChild><Link to="/produtos">Ver todos os produtos</Link></Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-between mb-6">
+                    <h2 className="text-lg font-display font-medium text-foreground">
+                      {filtered.length} {filtered.length === 1 ? "produto" : "produtos"}
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                    {products.map((product, i) => (
+                      <ProductCard key={product.id} product={product} priority={i < 4} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-          ) : (
-            <>
-              <div className="flex items-baseline justify-between mb-6">
-                <h2 className="text-lg font-display font-medium text-foreground">
-                  {products.length} {products.length === 1 ? "produto" : "produtos"}
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {products.map((product, i) => (
-                  <ProductCard key={product.id} product={product} priority={i < 4} />
-                ))}
-              </div>
-            </>
-          )}
+          </div>
         </section>
 
         {/* Internal linking — taxonomias relacionadas */}
