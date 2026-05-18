@@ -106,7 +106,7 @@ const ProductPage = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [product?.id]);
+  }, [dbProduct?.id]);
 
   // Convert to display format
   const product = dbProduct ? {
