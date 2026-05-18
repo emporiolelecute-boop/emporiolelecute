@@ -140,7 +140,7 @@ export function useDbProduct(slug: string) {
         logSlugEvent({ event: 'inactive_alias_attempt', matchedSlug: result.matchedSlug });
         return null;
       }
-      const resolved: ResolvedSlug = result; // narrowed to ResolvedSlug
+      const resolved = result as ResolvedSlug; // narrowed
 
       // Telemetria fire-and-forget
       recordProductSlugHit(resolved.matchedSlug);
