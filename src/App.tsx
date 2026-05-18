@@ -93,6 +93,9 @@ const AdminDiscovery = lazyWithRetry(() => import("./pages/admin/AdminDiscovery"
 const AdminThemes = lazyWithRetry(() => import("./pages/admin/AdminThemes"), "AdminThemes");
 const AdminAuthority = lazyWithRetry(() => import("./pages/admin/AdminAuthority"), "AdminAuthority");
 const AdminEditorialExecution = lazyWithRetry(() => import("./pages/admin/AdminEditorialExecution"), "AdminEditorialExecution");
+const Colecao = lazyWithRetry(() => import("./pages/Colecao"), "Colecao");
+const AdminCollections = lazyWithRetry(() => import("./pages/admin/AdminCollections"), "AdminCollections");
+const AdminCollectionForm = lazyWithRetry(() => import("./pages/admin/AdminCollectionForm"), "AdminCollectionForm");
 const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOperations"), "AdminSeoOperations");
 const AdminLinkHealth = lazyWithRetry(() => import("./pages/admin/AdminLinkHealth"), "AdminLinkHealth");
 const AdminContentGaps = lazyWithRetry(() => import("./pages/admin/AdminContentGaps"), "AdminContentGaps");
