@@ -1,7 +1,7 @@
 import { Component, ReactNode, ErrorInfo } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { logClientError } from "@/lib/telemetry";
+import { logClientError, logTelemetryEvent } from "@/lib/telemetry";
 
 interface State {
   err: Error | null;
