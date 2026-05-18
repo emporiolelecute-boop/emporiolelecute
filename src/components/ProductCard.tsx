@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Star, ArrowRight } from "lucide-react";
+import { Heart, Star, ArrowRight, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/data/products";
 import { optimizeImage, buildSrcSet } from "@/lib/image";
+import { getProductionSpeed, speedLabel } from "@/lib/productMeta";
 
 interface ProductCardProps {
   product: Product;
@@ -163,12 +164,35 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           <meta itemProp="availability" content="https://schema.org/InStock" />
         </div>
 
-        {/* Min Quantity */}
-        {product.min_quantity && product.min_quantity > 1 && (
-          <p className="text-[11px] md:text-xs text-muted-foreground mb-3">
-            Pedido mínimo: {product.min_quantity} un.
-          </p>
-        )}
+        {/* Quick info row */}
+        {(() => {
+          const speed = getProductionSpeed({
+            production_days: product.production_days,
+            production_speed: product.production_speed,
+          });
+          const minQty = product.min_quantity && product.min_quantity > 1 ? product.min_quantity : null;
+          const personalizable = !!product.personalization_enabled;
+          if (!speed && !minQty && !personalizable) return null;
+          return (
+            <ul className="mt-2 mb-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] md:text-xs text-muted-foreground">
+              {minQty && (
+                <li className="inline-flex items-center gap-1">
+                  <span aria-hidden>•</span> Mín. {minQty} un.
+                </li>
+              )}
+              {speed && (
+                <li className="inline-flex items-center gap-1">
+                  <Clock className="h-3 w-3" aria-hidden /> {speedLabel(speed)}
+                </li>
+              )}
+              {personalizable && (
+                <li className="inline-flex items-center gap-1 text-primary/90">
+                  <Sparkles className="h-3 w-3" aria-hidden /> Personalizável
+                </li>
+              )}
+            </ul>
+          );
+        })()}
 
         {/* CTA */}
         <Link to={`/produtos/${product.slug}`} className="block mt-3">

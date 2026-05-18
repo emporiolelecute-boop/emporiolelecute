@@ -12,6 +12,8 @@ import ProductCard from "@/components/ProductCard";
 import Chatbot from "@/components/Chatbot";
 import DynamicSEO from "@/components/DynamicSEO";
 import BreadcrumbStructuredData from "@/components/BreadcrumbStructuredData";
+import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
+import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
 import { useDbProducts, useDbCategories, useDbOccasions } from "@/hooks/useProducts";
 import { useTags } from "@/hooks/useTags";
 import { useSegments } from "@/hooks/useSegments";
@@ -176,7 +178,22 @@ const Produtos = () => {
   const structuralCount = structuralFilters.length;
 
   // Convert db products to Product format with relations
-  const products: (Product & { categoryId?: string; categoryName?: string; longDescriptionRaw?: string; occasionIds: string[]; occasionNames: string[]; tagIds: string[]; tagNames: string[]; segmentIds: string[]; segmentNames: string[] })[] = useMemo(() => {
+  const products: (Product & {
+    priceNum: number;
+    categoryId?: string;
+    categoryName?: string;
+    categorySlug?: string;
+    longDescriptionRaw?: string;
+    occasionIds: string[];
+    occasionNames: string[];
+    occasionSlugs: string[];
+    tagIds: string[];
+    tagNames: string[];
+    tagSlugs: string[];
+    segmentIds: string[];
+    segmentNames: string[];
+    segmentSlugs: string[];
+  })[] = useMemo(() => {
     return (dbProducts || [])
       .filter(p => p.is_active)
       .map(p => ({
@@ -187,6 +204,7 @@ const Produtos = () => {
         longDescription: p.long_description || undefined,
         longDescriptionRaw: p.long_description || '',
         price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
+        priceNum: Number(p.price),
         originalPrice: p.original_price ? `R$ ${p.original_price.toFixed(2).replace('.', ',')}` : undefined,
         image: p.images[0] || '/placeholder.svg',
         images: p.images,
@@ -197,39 +215,68 @@ const Produtos = () => {
         occasions: [],
         keywords: p.keywords,
         min_quantity: p.min_quantity || undefined,
+        production_days: p.production_days ?? null,
+        production_speed: p.production_speed ?? null,
+        personalization_enabled: p.personalization_enabled ?? null,
+        featured_weight: p.featured_weight ?? 0,
         categoryId: p.category_id || undefined,
         categoryName: p.category?.name,
+        categorySlug: p.category?.slug,
         occasionIds: (p.occasions || []).map(o => o.id),
         occasionNames: (p.occasions || []).map(o => o.name),
+        occasionSlugs: (p.occasions || []).map(o => o.slug),
         tagIds: (p.tags || []).map(t => t.id),
         tagNames: (p.tags || []).map(t => t.name),
+        tagSlugs: (p.tags || []).map(t => t.slug),
         segmentIds: (p.segments || []).map(s => s.id),
         segmentNames: (p.segments || []).map(s => s.name),
+        segmentSlugs: (p.segments || []).map(s => s.slug),
       }));
   }, [dbProducts]);
 
-  // Filter products — search now also covers long description + segments
+  // Sidebar filter state (URL-synced)
+  const [sideFilters, setSideFilters] = useCatalogFiltersFromUrl();
+  const priceBounds = useMemo(() => priceBoundsFrom(products.map(p => ({ price: p.priceNum }))), [products]);
+
+  // Filter products — text search + structural badges + sidebar filters (price/prazo/personalizável/tags-multi)
   const filteredProducts = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
-    return products.filter((product) => {
-      const matchesSearch = !q ||
-        product.name.toLowerCase().includes(q) ||
-        product.description.toLowerCase().includes(q) ||
-        (product.longDescriptionRaw?.toLowerCase().includes(q) ?? false) ||
-        product.keywords.some(k => k.toLowerCase().includes(q)) ||
-        (product.categoryName?.toLowerCase().includes(q) ?? false) ||
-        product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
-        product.tagNames.some(n => n.toLowerCase().includes(q)) ||
-        product.segmentNames.some(n => n.toLowerCase().includes(q));
+    const matchesText = (product: typeof products[number]) => !q ||
+      product.name.toLowerCase().includes(q) ||
+      product.description.toLowerCase().includes(q) ||
+      (product.longDescriptionRaw?.toLowerCase().includes(q) ?? false) ||
+      product.keywords.some(k => k.toLowerCase().includes(q)) ||
+      (product.categoryName?.toLowerCase().includes(q) ?? false) ||
+      product.occasionNames.some(n => n.toLowerCase().includes(q)) ||
+      product.tagNames.some(n => n.toLowerCase().includes(q)) ||
+      product.segmentNames.some(n => n.toLowerCase().includes(q));
 
+    const base = products.filter((product) => {
       const matchesCategory = !resolvedCategory || product.categoryId === resolvedCategory.id;
       const matchesOccasion = !resolvedOccasion || product.occasionIds.includes(resolvedOccasion.id);
       const matchesSegment = !resolvedSegment || product.segmentIds.includes(resolvedSegment.id);
       const matchesTag = !resolvedTag || product.tagIds.includes(resolvedTag.id);
-
-      return matchesSearch && matchesCategory && matchesOccasion && matchesSegment && matchesTag;
+      return matchesText(product) && matchesCategory && matchesOccasion && matchesSegment && matchesTag;
     });
-  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag]);
+
+    const sideAdapted = base.map((p) => ({
+      id: p.id,
+      price: p.priceNum,
+      is_active: true,
+      personalization_enabled: p.personalization_enabled,
+      production_days: p.production_days,
+      production_speed: p.production_speed,
+      featured_weight: p.featured_weight,
+      rating: p.rating,
+      category: p.categorySlug ? { slug: p.categorySlug } : null,
+      occasions: p.occasionSlugs.map((slug) => ({ slug })),
+      tags: p.tagSlugs.map((slug) => ({ slug })),
+      segments: p.segmentSlugs.map((slug) => ({ slug })),
+      _orig: p,
+    }));
+    const filtered = applyCatalogFilters(sideAdapted, sideFilters);
+    return sortByFeatured(filtered).map((x) => x._orig);
+  }, [products, debouncedSearch, resolvedCategory, resolvedOccasion, resolvedSegment, resolvedTag, sideFilters]);
 
   // Counts per taxonomy (over all active products, not the filtered list — keeps UI predictable)
   const counts = useMemo(() => {
@@ -594,6 +641,20 @@ const Produtos = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Sidebar filters trigger (price, prazo, personalizável, multi-tags) */}
+        <div className="container mx-auto px-4 mt-2 mb-4 flex justify-end">
+          <CatalogFilters
+            values={sideFilters}
+            onChange={setSideFilters}
+            occasions={dbOccasions}
+            categories={dbCategories}
+            tags={dbTags}
+            segments={dbSegments}
+            priceBounds={priceBounds}
+            totalCount={filteredProducts.length}
+          />
         </div>
 
         {/* Products Grid */}
