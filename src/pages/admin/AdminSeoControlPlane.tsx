@@ -233,6 +233,10 @@ export default function AdminSeoControlPlane() {
             )}
           </CardContent></Card>
         </TabsContent>
+
+        <TabsContent value="autopilot" className="mt-4">
+          <AutopilotPanel />
+        </TabsContent>
       </Tabs>
     </div>
   );
