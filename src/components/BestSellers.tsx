@@ -109,7 +109,7 @@ const BestSellers = () => {
   // ItemList JSON-LD (SEO)
   const itemListJsonLd = useMemo(() => {
     if (products.length === 0) return null;
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://emporiolelecute.com.br";
+    const origin = typeof window !== "undefined" ? window.location.origin : CANONICAL_ORIGIN;
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
@@ -119,7 +119,7 @@ const BestSellers = () => {
       itemListElement: products.map((p, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `${origin}/produtos/${p.slug}`,
+        url: urls.productAbsolute(p.slug, origin),
         name: p.name,
       })),
     };

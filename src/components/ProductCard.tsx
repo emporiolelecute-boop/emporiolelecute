@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/data/products";
 import { optimizeImage, buildSrcSet } from "@/lib/image";
 import { getProductionSpeed, speedLabel } from "@/lib/productMeta";
+import { urls } from "@/lib/urls";
 
 interface ProductCardProps {
   product: Product;
@@ -86,7 +87,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
       itemType="https://schema.org/Product"
     >
       {/* Product Image */}
-      <Link to={`/produtos/${product.slug}`} className="block relative aspect-square overflow-hidden bg-muted">
+      <Link to={urls.product(product.slug)} className="block relative aspect-square overflow-hidden bg-muted">
         <img 
           src={optimizeImage(product.image, { width: 600, resize: "contain" })}
           srcSet={buildSrcSet(product.image, [300, 450, 600, 800], 75, "contain")}
@@ -148,7 +149,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
         </div>
 
         {/* Name */}
-        <Link to={`/produtos/${product.slug}`}>
+        <Link to={urls.product(product.slug)}>
           <h3 className="font-display text-sm md:text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors" itemProp="name">
             {product.name}
           </h3>
@@ -195,7 +196,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
         })()}
 
         {/* CTA */}
-        <Link to={`/produtos/${product.slug}`} className="block mt-3">
+        <Link to={urls.product(product.slug)} className="block mt-3">
           <Button
             variant="outline"
             size="sm"
