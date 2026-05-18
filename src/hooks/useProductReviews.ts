@@ -35,10 +35,14 @@ export function useProductReviews(productId?: string) {
         .select('*')
         .eq('product_id', productId!)
         .eq('is_visible', true)
-        .order('position', { ascending: true })
+        // Ordem de relevância para a cliente:
+        // 1) destacadas pelo admin, 2) verificadas (Elo7/compra real),
+        // 3) mais recentes por data, 4) fallback created_at, 5) posição manual.
         .order('is_featured', { ascending: false })
+        .order('is_verified', { ascending: false })
         .order('review_date', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
+        .order('position', { ascending: true })
         .limit(20);
       if (error) throw error;
       return (data ?? []) as ProductReview[];
