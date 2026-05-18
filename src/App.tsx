@@ -69,6 +69,7 @@ const AdminCoupons = lazyWithRetry(() => import("./pages/admin/AdminCoupons"), "
 const AdminRedirects = lazyWithRetry(() => import("./pages/admin/AdminRedirects"), "AdminRedirects");
 const AdminRobots = lazyWithRetry(() => import("./pages/admin/AdminRobots"), "AdminRobots");
 const AdminTracking = lazyWithRetry(() => import("./pages/admin/AdminTracking"), "AdminTracking");
+const AdminConversionCTA = lazyWithRetry(() => import("./pages/admin/AdminConversionCTA"), "AdminConversionCTA");
 const AdminSEODashboard = lazyWithRetry(() => import("./pages/admin/AdminSEODashboard"), "AdminSEODashboard");
 const AdminTelemetry = lazyWithRetry(() => import("./pages/admin/AdminTelemetry"), "AdminTelemetry");
 const AdminUsage = lazyWithRetry(() => import("./pages/admin/AdminUsage"), "AdminUsage");
@@ -546,6 +547,11 @@ const App = () => {
                   <Route path="tracking" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminTracking />
+                    </Suspense>
+                  } />
+                  <Route path="conversao" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminConversionCTA />
                     </Suspense>
                   } />
                   <Route path="usuarios" element={

@@ -1,24 +1,40 @@
+import { useEffect, useRef } from "react";
 import { ShoppingCart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { event as trackEvent } from "@/lib/analytics";
 
 interface StickyAddToCartProps {
   productName: string;
+  productSlug?: string;
   price: string;
-  /** Ação primária — WhatsApp (orçamento direto, fluxo principal). */
   onWhatsApp: () => void;
-  /** Ação secundária — adicionar ao carrinho. */
   onAddToCart: () => void;
   isVisible: boolean;
+  enabled?: boolean;
+  buttonLabel?: string;
 }
 
 export const StickyAddToCart = ({
   productName,
+  productSlug,
   price,
   onWhatsApp,
   onAddToCart,
   isVisible,
+  enabled = true,
+  buttonLabel = "WhatsApp",
 }: StickyAddToCartProps) => {
+  const viewedRef = useRef(false);
+
+  useEffect(() => {
+    if (!enabled || !isVisible || viewedRef.current) return;
+    viewedRef.current = true;
+    trackEvent("pdp_sticky_view", { product_slug: productSlug });
+  }, [enabled, isVisible, productSlug]);
+
+  if (!enabled) return null;
+
   return (
     <div
       className={cn(
@@ -34,9 +50,7 @@ export const StickyAddToCart = ({
           <span className="text-[10px] text-muted-foreground uppercase font-bold truncate max-w-[110px]">
             {productName}
           </span>
-          <span className="text-base font-bold text-primary leading-tight">
-            {price}
-          </span>
+          <span className="text-base font-bold text-primary leading-tight">{price}</span>
         </div>
 
         <Button
@@ -54,7 +68,7 @@ export const StickyAddToCart = ({
           className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full font-bold shadow-lg h-11"
         >
           <MessageCircle className="h-4 w-4 mr-2" />
-          WhatsApp
+          {buttonLabel}
         </Button>
       </div>
     </div>

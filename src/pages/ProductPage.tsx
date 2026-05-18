@@ -49,6 +49,9 @@ import ProductReviews from "@/components/ProductReviews";
 import { usePaymentConfig } from "@/hooks/useStoreSettings";
 import { trackProductView, trackInquiry, buildWhatsAppUrl, trackWhatsAppClick, event as trackEvent } from "@/lib/analytics";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { toast as sonnerToast } from "sonner";
+import { useConversionCtaConfig } from "@/hooks/useConversionCtaConfig";
+import { renderWhatsAppMessage, normalizeQuantity, normalizePersonalization } from "@/lib/whatsappTemplate";
 import { useCart } from "@/contexts/CartContext";
 import { useSemanticContext } from "@/hooks/useSemanticContext";
 import { buildContextualLinksForProduct } from "@/lib/linkOrchestrator";
@@ -67,7 +70,8 @@ const ProductPage = () => {
   const { data: reviewStats } = useProductReviewStats(dbProduct?.id);
   const { addItem } = useCart();
   const { data: semanticCtx } = useSemanticContext();
-  
+  const { data: ctaConfig } = useConversionCtaConfig();
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(10);
   const [quantityInput, setQuantityInput] = useState<string>("10");
@@ -76,6 +80,12 @@ const ProductPage = () => {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const ctaAnchorRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+
+  // Ref sempre fresco com estado atual — garante que callbacks (sticky, popup, summary)
+  // construam a mensagem com a quantidade/personalização do momento do clique,
+  // sem depender de closures eventualmente desatualizadas.
+  const valuesRef = useRef({ quantity, personalization });
+  valuesRef.current = { quantity, personalization };
 
   // Sticky CTA: aparece quando o CTA principal sai do viewport (qualquer altura de tela)
   // e some quando o usuário volta para ele. Fallback por scroll caso o ref não exista.
@@ -98,15 +108,16 @@ const ProductPage = () => {
       observer.observe(anchor);
       return () => observer.disconnect();
     }
-    // Fallback: gatilho relativo à altura da viewport (não fixo em 520px).
+    // Fallback: gatilho relativo à altura da viewport (ratio configurável).
+    const ratio = ctaConfig?.sticky?.scrollViewportRatio ?? 0.7;
     const onScroll = () => {
-      const threshold = Math.max(320, window.innerHeight * 0.7);
+      const threshold = Math.max(320, window.innerHeight * ratio);
       setShowStickyCta(window.scrollY > threshold);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [dbProduct?.id]);
+  }, [dbProduct?.id, ctaConfig?.sticky?.scrollViewportRatio]);
 
   // Convert to display format
   const product = dbProduct ? {
@@ -200,23 +211,30 @@ const ProductPage = () => {
     }
   };
 
-  // ---- WhatsApp builder reutilizado pelo CTA inline e sticky mobile ----
+  // ---- WhatsApp builder reutilizado pelo CTA inline, sticky, summary e exit popup ----
+  // Lê SEMPRE o estado atual via valuesRef → sem delays de render (qty/personalização frescas).
   const buildWhatsAppMessage = () => {
     if (!product) return { url: "", utmCampaign: "" };
     const utmCampaign = `produto_${product.slug}`;
-    const ctxParts: string[] = [];
-    if (dbProduct?.category?.name) ctxParts.push(`categoria *${dbProduct.category.name}*`);
-    if (dbProduct?.occasions?.[0]?.name) ctxParts.push(`ocasião *${dbProduct.occasions[0].name}*`);
-    if (dbProduct?.segments?.[0]?.name) ctxParts.push(`segmento *${dbProduct.segments[0].name}*`);
-    const ctxLine = ctxParts.length ? `\n🏷️ Contexto: ${ctxParts.join(' · ')}` : '';
-    const imgLine = product.images?.[0] ? `\n🖼️ Imagem: ${product.images[0]}` : '';
-    const waMsg = `Olá! Tenho interesse no produto *${product.name}*.${ctxLine}
+    const liveQty = normalizeQuantity(valuesRef.current.quantity);
+    const livePersonalization = normalizePersonalization(valuesRef.current.personalization);
 
-📝 *Detalhes:*
-- Quantidade: ${quantity} unidades
-${personalization ? `- Personalização: ${personalization}\n` : ''}- Link: ${window.location.href}${imgLine}
+    const template = ctaConfig?.whatsappTemplate?.template
+      || "Olá! Tenho interesse no produto *{produto}*.{contexto}\n\n📝 *Detalhes:*\n- Quantidade: {qtd} unidades\n{personalizacao_linha}- Link: {link}{imagem_linha}\n\nPoderia me ajudar com o valor do frete e prazos?";
 
-Poderia me ajudar com o valor do frete e prazos?`;
+    const waMsg = renderWhatsAppMessage(template, {
+      productName: product.name,
+      productSlug: product.slug,
+      link: window.location.href,
+      quantity: liveQty,
+      personalization: livePersonalization,
+      price: `R$ ${product.price.toFixed(2).replace('.', ',')}`,
+      imageUrl: product.images?.[0],
+      category: dbProduct?.category?.name,
+      occasion: dbProduct?.occasions?.[0]?.name,
+      segment: dbProduct?.segments?.[0]?.name,
+    });
+
     return {
       url: buildWhatsAppUrl({
         phone,
@@ -236,17 +254,34 @@ Poderia me ajudar com o valor do frete e prazos?`;
     if (!product) return;
     const { url, utmCampaign } = buildWhatsAppMessage();
     if (!url) return;
+    const liveQty = normalizeQuantity(valuesRef.current.quantity);
+    const livePersonalized = Boolean(normalizePersonalization(valuesRef.current.personalization));
+
     trackInquiry(product.name, product.id);
     trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
-    // Evento granular adicional para o funil de PDP
     trackEvent("pdp_whatsapp_click", {
       source,
       product_id: product.id,
       product_slug: product.slug,
-      quantity,
-      personalized: Boolean(personalization?.trim()),
+      quantity: liveQty,
+      personalized: livePersonalized,
     });
     window.open(url, "_blank", "noopener,noreferrer");
+
+    // Confirmação visual + tracking pós-clique (reduz dúvida de "funcionou?")
+    if (ctaConfig?.toast?.enabled !== false) {
+      sonnerToast.success(
+        ctaConfig?.toast?.message || "Abrindo o WhatsApp…",
+        { duration: ctaConfig?.toast?.durationMs ?? 4000 }
+      );
+    }
+    trackEvent("whatsapp_click_confirmed", {
+      source,
+      product_id: product.id,
+      product_slug: product.slug,
+      quantity: liveQty,
+      personalized: livePersonalized,
+    });
   };
 
 
@@ -628,6 +663,14 @@ Poderia me ajudar com o valor do frete e prazos?`;
                 quantity={quantity}
                 personalization={personalization}
                 onWhatsApp={() => openWhatsApp("quick_summary")}
+                productSlug={product.slug}
+                enabled={ctaConfig?.quickSummary?.enabled !== false}
+                title={ctaConfig?.quickSummary?.title}
+                minLabel={ctaConfig?.quickSummary?.minLabel}
+                prazoLabel={ctaConfig?.quickSummary?.prazoLabel}
+                shippingLabel={ctaConfig?.quickSummary?.shippingLabel}
+                shippingValue={ctaConfig?.quickSummary?.shippingValue}
+                ctaLabel={ctaConfig?.quickSummary?.ctaLabel}
               />
 
               {/* Note about shipping */}
@@ -923,22 +966,32 @@ Personalizamos conforme o tema do seu evento com cores, aromas e papelaria exclu
       {/* Sticky CTA mobile — aparece quando o CTA principal sai do viewport */}
       <StickyAddToCart
         productName={product.name}
+        productSlug={product.slug}
         price={`R$ ${product.price.toFixed(2).replace('.', ',')}`}
         isVisible={showStickyCta}
         onWhatsApp={() => openWhatsApp("sticky_cta")}
         onAddToCart={handleAddToCart}
+        enabled={ctaConfig?.sticky?.enabled !== false}
+        buttonLabel={ctaConfig?.sticky?.buttonLabel}
       />
 
-      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
-      {/* Exit intent popup — desktop (mouse top) + mobile (visibility/scroll up rápido) */}
+      {/* Exit intent popup — usa getWhatsappUrl para garantir estado fresco no clique */}
       <ExitIntentPopup
-        whatsappUrl={buildWhatsAppMessage().url}
+        getWhatsappUrl={() => buildWhatsAppMessage().url}
         productName={product.name}
         productSlug={product.slug}
         minQuantity={product.minQuantity}
         productionDays={product.productionDays}
         quantity={quantity}
-        personalized={Boolean(personalization?.trim())}
+        personalized={Boolean(normalizePersonalization(personalization))}
+        enabled={ctaConfig?.exitPopup?.enabled !== false}
+        title={ctaConfig?.exitPopup?.title}
+        description={ctaConfig?.exitPopup?.description}
+        ctaLabel={ctaConfig?.exitPopup?.ctaLabel}
+        dismissLabel={ctaConfig?.exitPopup?.dismissLabel}
+        maxPerSession={ctaConfig?.exitPopup?.maxPerSession}
+        cooldownMinutes={ctaConfig?.exitPopup?.cooldownMinutes}
+        armDelayMs={ctaConfig?.exitPopup?.armDelayMs}
       />
 
     </div>
