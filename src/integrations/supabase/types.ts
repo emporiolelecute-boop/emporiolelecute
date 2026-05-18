@@ -1880,6 +1880,102 @@ export type Database = {
         }
         Relationships: []
       }
+      review_import_audit: {
+        Row: {
+          created_at: string
+          elo7_buyer_name: string | null
+          elo7_comment: string | null
+          elo7_image_url: string | null
+          elo7_product_name: string | null
+          elo7_product_slug: string | null
+          elo7_raw: Json
+          elo7_review_date: string | null
+          elo7_sentiment: string | null
+          feedback_id: string
+          id: string
+          import_batch_id: string
+          imported_review_id: string | null
+          manual_product_id: string | null
+          manual_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_email: string | null
+          suggested_confidence: number | null
+          suggested_method: string | null
+          suggested_product_id: string | null
+          suggested_product_name: string | null
+          updated_at: string
+          visual_notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          elo7_buyer_name?: string | null
+          elo7_comment?: string | null
+          elo7_image_url?: string | null
+          elo7_product_name?: string | null
+          elo7_product_slug?: string | null
+          elo7_raw?: Json
+          elo7_review_date?: string | null
+          elo7_sentiment?: string | null
+          feedback_id: string
+          id?: string
+          import_batch_id: string
+          imported_review_id?: string | null
+          manual_product_id?: string | null
+          manual_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_email?: string | null
+          suggested_confidence?: number | null
+          suggested_method?: string | null
+          suggested_product_id?: string | null
+          suggested_product_name?: string | null
+          updated_at?: string
+          visual_notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          elo7_buyer_name?: string | null
+          elo7_comment?: string | null
+          elo7_image_url?: string | null
+          elo7_product_name?: string | null
+          elo7_product_slug?: string | null
+          elo7_raw?: Json
+          elo7_review_date?: string | null
+          elo7_sentiment?: string | null
+          feedback_id?: string
+          id?: string
+          import_batch_id?: string
+          imported_review_id?: string | null
+          manual_product_id?: string | null
+          manual_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_email?: string | null
+          suggested_confidence?: number | null
+          suggested_method?: string | null
+          suggested_product_id?: string | null
+          suggested_product_name?: string | null
+          updated_at?: string
+          visual_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_import_audit_manual_product_id_fkey"
+            columns: ["manual_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_import_audit_suggested_product_id_fkey"
+            columns: ["suggested_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_promotion_audit: {
         Row: {
           created_at: string
