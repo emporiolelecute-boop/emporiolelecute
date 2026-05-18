@@ -239,7 +239,7 @@ Poderia me ajudar com o valor do frete e prazos?`;
     trackInquiry(product.name, product.id);
     trackWhatsAppClick({ source, context: product.slug, utm_campaign: utmCampaign });
     // Evento granular adicional para o funil de PDP
-    event("pdp_whatsapp_click", {
+    trackEvent("pdp_whatsapp_click", {
       source,
       product_id: product.id,
       product_slug: product.slug,
