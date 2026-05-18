@@ -164,6 +164,23 @@ const ProductReviews = ({ productId, initialLimit = 3, variant = 'default' }: Pr
         ))}
       </div>
 
+      {reviews.length > initialLimit && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
+                     rounded-full border border-primary/30 text-primary text-sm font-semibold
+                     hover:bg-primary/5 transition-colors"
+          aria-expanded={expanded}
+        >
+          {expanded ? (
+            <>Mostrar menos <ChevronUp className="h-4 w-4" /></>
+          ) : (
+            <>Ver mais {remaining} {remaining === 1 ? 'avaliação' : 'avaliações'} <ChevronDown className="h-4 w-4" /></>
+          )}
+        </button>
+      )}
+
       {lightbox && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
