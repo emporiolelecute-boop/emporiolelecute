@@ -34,7 +34,7 @@ const AdminSitemapStatus = () => {
       const { data } = await supabase
         .from('store_settings').select('value, updated_at')
         .eq('key', 'last_sitemap_submission').maybeSingle();
-      return data?.value as Submission | null;
+      return (data?.value as unknown as Submission | null);
     },
   });
 
