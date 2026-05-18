@@ -184,6 +184,7 @@ export default function AdminSeoControlPlane() {
           <TabsTrigger value="latest">Findings atuais</TabsTrigger>
           <TabsTrigger value="history">Histórico (10 últimas)</TabsTrigger>
           <TabsTrigger value="cache">Cache prerender</TabsTrigger>
+          <TabsTrigger value="autopilot">Autopilot</TabsTrigger>
         </TabsList>
 
         <TabsContent value="latest" className="mt-4">
