@@ -382,16 +382,42 @@ Poderia me ajudar com o valor do frete e prazos?`;
 
             {/* Info Section - Reference Style */}
             <div className="flex flex-col">
-              {/* Product Name & Rating */}
-              <div className="flex items-start justify-between gap-4 mb-3">
+              {/* Product Name & Rating + Social Proof (Q2) */}
+              <div className="flex items-start justify-between gap-4 mb-2">
                 <h1 className="font-display text-2xl md:text-3xl text-foreground leading-tight">
                   {product.name}
                 </h1>
-                <div className="flex items-center gap-1 bg-amber-400 text-white px-2 py-1 rounded-md flex-shrink-0">
-                  <Star className="h-4 w-4 fill-white" />
-                  <span className="font-bold text-sm">{product.rating.toFixed(1)}</span>
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 bg-amber-400 text-white px-2 py-1 rounded-md">
+                    <Star className="h-4 w-4 fill-white" />
+                    <span className="font-bold text-sm">
+                      {reviewStats?.avg_rating ? Number(reviewStats.avg_rating).toFixed(1) : product.rating.toFixed(1)}
+                    </span>
+                  </div>
+                  {reviewStats?.review_count ? (
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      {reviewStats.review_count} {reviewStats.review_count === 1 ? "avaliação" : "avaliações"}
+                    </span>
+                  ) : null}
                 </div>
               </div>
+
+              {/* Quick trust row — mínimo + prazo (Q3) */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                  <Package className="h-3.5 w-3.5" />
+                  Mínimo {product.minQuantity} un.
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                  <Clock className="h-3.5 w-3.5" />
+                  Pronto em {product.productionDays} dias úteis
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                  <Truck className="h-3.5 w-3.5" />
+                  Envio Brasil
+                </span>
+              </div>
+
 
               {/* Category, Occasions & Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
