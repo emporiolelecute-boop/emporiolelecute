@@ -643,8 +643,8 @@ const Produtos = () => {
           )}
         </div>
 
-        {/* Sidebar filters (price, prazo, personalizável, tags multi) */}
-        <div className="container mx-auto px-4 mt-2 mb-4 flex justify-end lg:hidden">
+        {/* Sidebar filters trigger (price, prazo, personalizável, multi-tags) */}
+        <div className="container mx-auto px-4 mt-2 mb-4 flex justify-end">
           <CatalogFilters
             values={sideFilters}
             onChange={setSideFilters}
@@ -655,19 +655,6 @@ const Produtos = () => {
             priceBounds={priceBounds}
             totalCount={filteredProducts.length}
           />
-        </div>
-        <div className="container mx-auto px-4 hidden lg:flex gap-8">
-          <CatalogFilters
-            values={sideFilters}
-            onChange={setSideFilters}
-            occasions={dbOccasions}
-            categories={dbCategories}
-            tags={dbTags}
-            segments={dbSegments}
-            priceBounds={priceBounds}
-            totalCount={filteredProducts.length}
-          />
-          <div className="flex-1 min-w-0" id="produtos-grid-wrap" />
         </div>
 
         {/* Products Grid */}
