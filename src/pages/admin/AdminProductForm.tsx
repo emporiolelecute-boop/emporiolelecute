@@ -693,6 +693,42 @@ const AdminProductForm = () => {
                 </p>
               </div>
             </div>
+
+            {/* Sprint 2 — Discovery editorial */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="featured_weight">Peso editorial (destaque)</Label>
+                <Input
+                  id="featured_weight"
+                  type="number"
+                  min="0"
+                  max="999"
+                  value={formData.featured_weight}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, featured_weight: e.target.value }))}
+                  placeholder="0"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Quanto maior, mais alto aparece no catálogo, busca e relacionados. Padrão 0.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="production_speed">Override prazo</Label>
+                <select
+                  id="production_speed"
+                  value={formData.production_speed}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, production_speed: e.target.value as '' | 'rapido' | 'normal' | 'longo' }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Automático (pelo prazo em dias)</option>
+                  <option value="rapido">Pronta entrega</option>
+                  <option value="normal">Prazo normal</option>
+                  <option value="longo">Sob encomenda</option>
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Force a faixa exibida no filtro e badge do card, independentemente dos dias.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
