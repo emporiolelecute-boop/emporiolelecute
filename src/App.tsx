@@ -264,13 +264,14 @@ const App = () => {
                     <Buscar />
                   </Suspense>
                 } />
-                <Route path="/produtos/:slug" element={
+                {/* Fase 2.2 (FLIPPED) — /produto/:slug é canônico. */}
+                <Route path="/produto/:slug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <ProductPage />
                   </Suspense>
                 } />
-                {/* Fase A — Canonical: /produto/:slug é forma legada; redireciona 1-hop para /produtos/:slug, preservando query/hash. */}
-                <Route path="/produto/:slug" element={<LegacyProductRedirect />} />
+                {/* Legado coexistente: /produtos/:slug → replace para canônico. */}
+                <Route path="/produtos/:slug" element={<LegacyProductRedirect />} />
                 <Route path="/produto" element={<Navigate to="/produtos" replace />} />
                 <Route path="/carrinho" element={
                   <Suspense fallback={<PageSkeleton />}>
