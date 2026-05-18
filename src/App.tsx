@@ -93,6 +93,9 @@ const AdminDiscovery = lazyWithRetry(() => import("./pages/admin/AdminDiscovery"
 const AdminThemes = lazyWithRetry(() => import("./pages/admin/AdminThemes"), "AdminThemes");
 const AdminAuthority = lazyWithRetry(() => import("./pages/admin/AdminAuthority"), "AdminAuthority");
 const AdminEditorialExecution = lazyWithRetry(() => import("./pages/admin/AdminEditorialExecution"), "AdminEditorialExecution");
+const Colecao = lazyWithRetry(() => import("./pages/Colecao"), "Colecao");
+const AdminCollections = lazyWithRetry(() => import("./pages/admin/AdminCollections"), "AdminCollections");
+const AdminCollectionForm = lazyWithRetry(() => import("./pages/admin/AdminCollectionForm"), "AdminCollectionForm");
 const AdminSeoOperations = lazyWithRetry(() => import("./pages/admin/AdminSeoOperations"), "AdminSeoOperations");
 const AdminLinkHealth = lazyWithRetry(() => import("./pages/admin/AdminLinkHealth"), "AdminLinkHealth");
 const AdminContentGaps = lazyWithRetry(() => import("./pages/admin/AdminContentGaps"), "AdminContentGaps");
@@ -329,8 +332,11 @@ const App = () => {
                     <TaxonomyPage kind="segmento" />
                   </Suspense>
                 } />
-
-                {/* Fase 10.2 — Rota combinatória SAFE MODE (noindex por padrão) */}
+                <Route path="/colecao/:slug" element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Colecao />
+                  </Suspense>
+                } />
                 <Route path="/segmento/:segmentSlug/ocasiao/:occasionSlug" element={
                   <Suspense fallback={<PageSkeleton />}>
                     <CombinationPage />
@@ -552,6 +558,21 @@ const App = () => {
                   <Route path="conversao" element={
                     <Suspense fallback={<AdminSkeleton />}>
                       <AdminConversionCTA />
+                    </Suspense>
+                  } />
+                  <Route path="colecoes" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCollections />
+                    </Suspense>
+                  } />
+                  <Route path="colecoes/nova" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCollectionForm />
+                    </Suspense>
+                  } />
+                  <Route path="colecoes/:id" element={
+                    <Suspense fallback={<AdminSkeleton />}>
+                      <AdminCollectionForm />
                     </Suspense>
                   } />
                   <Route path="usuarios" element={

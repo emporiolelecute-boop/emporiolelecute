@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
+import CatalogFilters, { useCatalogFiltersFromUrl } from "@/components/CatalogFilters";
+import { applyCatalogFilters, sortByFeatured, priceBoundsFrom } from "@/lib/catalogFilter";
+import { useDbCategories, useDbOccasions } from "@/hooks/useProducts";
+import { useTags } from "@/hooks/useTags";
+import { useSegments } from "@/hooks/useSegments";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ChevronRight, ShoppingBag } from "lucide-react";
@@ -92,32 +97,59 @@ const TaxonomyPage = ({ kind }: Props) => {
     queryKey: ["taxonomy-products", cfg.table, entity?.id],
     enabled: !!entity?.id,
     queryFn: async () => {
+      const selectExpr = `id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active, created_at, personalization_enabled, production_days, production_speed, featured_weight,
+        category:categories(id, name, slug),
+        occasions:product_occasions(occasion:occasions(id, name, slug)),
+        tags:product_tags(tag:tags(id, name, slug)),
+        segments:product_segments(segment:segments(id, name, slug))`;
       if (cfg.kind === "categoria") {
         const { data, error } = await supabase
           .from("products")
-          .select("id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active")
+          .select(selectExpr)
           .eq("is_active", true)
           .eq("category_id", entity!.id)
-          .order("created_at", { ascending: false })
-          .limit(MAX_PRODUCTS);
+          .order("created_at", { ascending: false });
         if (error) throw error;
         return data ?? [];
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase.from(cfg.joinTable) as any)
-        .select(`product:products(id, slug, name, description, price, original_price, images, badge, rating, min_quantity, keywords, is_active, created_at)`)
+        .select(`product:products(${selectExpr})`)
         .eq(cfg.joinCol, entity!.id);
       if (error) throw error;
-      type Row = { product: { id: string; slug: string; name: string; description: string | null; price: number; original_price: number | null; images: string[]; badge: string | null; rating: number; min_quantity: number; keywords: string[]; is_active: boolean; created_at: string } | null };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      type Row = { product: any | null };
       return ((data as Row[] | null) ?? [])
         .map((r) => r.product)
-        .filter((p): p is NonNullable<Row["product"]> => !!p && p.is_active)
-        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-        .slice(0, MAX_PRODUCTS);
+        .filter((p) => !!p && p.is_active)
+        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
     },
   });
 
   const dbProducts = productsQuery.data ?? [];
+
+  // ============ FILTROS ============
+  const { data: dbCategories } = useDbCategories();
+  const { data: dbOccasions } = useDbOccasions();
+  const { data: dbTags } = useTags();
+  const { data: dbSegments } = useSegments();
+  const [filters, setFilters] = useCatalogFiltersFromUrl();
+
+  const normalized = useMemo(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (dbProducts as any[]).map((p) => ({
+        ...p,
+        occasions: (p.occasions || []).map((x: { occasion: unknown }) => x.occasion).filter(Boolean),
+        tags: (p.tags || []).map((x: { tag: unknown }) => x.tag).filter(Boolean),
+        segments: (p.segments || []).map((x: { segment: unknown }) => x.segment).filter(Boolean),
+      })),
+    [dbProducts]
+  );
+
+  const priceBounds = useMemo(() => priceBoundsFrom(normalized), [normalized]);
+  const filtered = useMemo(() => sortByFeatured(applyCatalogFilters(normalized, filters)), [normalized, filters]);
+  const filteredLimited = filtered.slice(0, MAX_PRODUCTS);
 
   // 3. Taxonomias relacionadas (linking cruzado) — uma query por relação
   const productIds = useMemo(() => dbProducts.map((p) => p.id), [dbProducts]);
@@ -173,7 +205,7 @@ const TaxonomyPage = ({ kind }: Props) => {
 
   const products: Product[] = useMemo(
     () =>
-      dbProducts.map((p) => ({
+      filteredLimited.map((p) => ({
         id: p.id, slug: p.slug, name: p.name, description: p.description || "",
         price: `R$ ${Number(p.price).toFixed(2).replace(".", ",")}`,
         originalPrice: p.original_price ? `R$ ${Number(p.original_price).toFixed(2).replace(".", ",")}` : undefined,
@@ -181,8 +213,10 @@ const TaxonomyPage = ({ kind }: Props) => {
         images: p.images ?? [], link: "", badge: p.badge || undefined,
         rating: Math.round(p.rating ?? 5), category: "outros" as const,
         occasions: [], keywords: p.keywords ?? [], min_quantity: p.min_quantity || undefined,
+        personalization_enabled: p.personalization_enabled ?? undefined,
+        production_days: p.production_days ?? undefined,
       })),
-    [dbProducts]
+    [filteredLimited]
   );
 
   const loading = entityQuery.isLoading || productsQuery.isLoading;
@@ -330,33 +364,52 @@ const TaxonomyPage = ({ kind }: Props) => {
           </section>
         )}
 
-        {/* Grid */}
+        {/* Grid + Filtros */}
         <section className="container mx-auto px-4 py-10 lg:py-14">
-          {loading ? (
-            <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-20 max-w-md mx-auto">
-              <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-display font-semibold mb-2">Em breve novos produtos</h2>
-              <p className="text-muted-foreground mb-6">
-                Ainda não temos produtos cadastrados nesta {cfg.label.toLowerCase()}. Explore nosso catálogo completo enquanto isso.
-              </p>
-              <Button asChild><Link to="/produtos">Ver todos os produtos</Link></Button>
+          <div className="flex flex-col lg:flex-row gap-8">
+            <CatalogFilters
+              values={filters}
+              onChange={setFilters}
+              occasions={dbOccasions}
+              categories={dbCategories}
+              tags={dbTags}
+              segments={dbSegments}
+              priceBounds={priceBounds}
+              totalCount={filtered.length}
+              hide={{
+                category: cfg.kind === "categoria",
+                occasion: cfg.kind === "ocasiao",
+                segment: cfg.kind === "segmento",
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              {loading ? (
+                <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-20 max-w-md mx-auto">
+                  <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h2 className="text-xl font-display font-semibold mb-2">Nenhum produto encontrado</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Ajuste os filtros ou explore nosso catálogo completo.
+                  </p>
+                  <Button asChild><Link to="/produtos">Ver todos os produtos</Link></Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-between mb-6">
+                    <h2 className="text-lg font-display font-medium text-foreground">
+                      {filtered.length} {filtered.length === 1 ? "produto" : "produtos"}
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                    {products.map((product, i) => (
+                      <ProductCard key={product.id} product={product} priority={i < 4} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-          ) : (
-            <>
-              <div className="flex items-baseline justify-between mb-6">
-                <h2 className="text-lg font-display font-medium text-foreground">
-                  {products.length} {products.length === 1 ? "produto" : "produtos"}
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {products.map((product, i) => (
-                  <ProductCard key={product.id} product={product} priority={i < 4} />
-                ))}
-              </div>
-            </>
-          )}
+          </div>
         </section>
 
         {/* Internal linking — taxonomias relacionadas */}

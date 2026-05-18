@@ -14,6 +14,7 @@ export const HOME_SECTIONS_REGISTRY: Record<
   CategoriesScroll: lazy(() => import("@/components/CategoriesScroll")),
   OccasionsThumbs: lazy(() => import("@/components/OccasionsThumbs")),
   BestSellers: lazy(() => import("@/components/BestSellers")),
+  FeaturedCollections: lazy(() => import("@/components/FeaturedCollections")),
   QuoteCTABanner: lazy(() => import("@/components/QuoteCTABanner")),
   Testimonials: lazy(() => import("@/components/Testimonials")),
   FAQSection: lazy(() => import("@/components/FAQSection")),
