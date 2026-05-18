@@ -1,15 +1,23 @@
 /**
  * Resolve um produto a partir de qualquer slug conhecido (primário ou alias).
  *
- * Fase 0: criado mas NÃO consumido por componentes. Está aqui para que
- * a Fase 1 possa plugar dentro de `useDbProduct` sem reescrever lógica.
+ * Fase 1: consumido por useDbProduct como fonte oficial de lookup.
  *
- * Telemetria de hits é fire-and-forget; falha silenciosa para não
- * impactar a renderização.
+ * Contrato:
+ *   - slug primário (is_primary=true)        → resolvedVia: 'primary'
+ *   - slug não primário ativo, source manual → resolvedVia: 'alias'
+ *   - slug não primário ativo, source legacy/rename/import → resolvedVia: 'historical'
+ *   - alias inativo (is_active=false)        → retorna null (404 definitivo,
+ *                                              SEM redirect, SEM soft canonical)
+ *   - slug desconhecido                      → retorna null
+ *
+ * Telemetria de hits é fire-and-forget; falha silenciosa.
  */
 
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeSlug } from "@/lib/slug";
+
+export type ResolvedVia = "primary" | "alias" | "historical";
 
 export interface ResolvedSlug {
   productId: string;
@@ -17,14 +25,28 @@ export interface ResolvedSlug {
   primarySlug: string;
   isPrimary: boolean;
   isActive: boolean;
-  /** true quando o slug consultado é diferente do primário (alias/histórico). */
+  /** true quando o slug consultado é diferente do primário. */
   shouldRedirect: boolean;
+  /** Como o produto foi resolvido. */
+  resolvedVia: ResolvedVia;
 }
 
-/**
- * Resolve um slug arbitrário para o produto canônico.
- * Retorna `null` quando o slug é desconhecido ou inativo.
- */
+interface ResolveRow {
+  product_id: string;
+  matched_slug: string;
+  primary_slug: string;
+  is_primary: boolean;
+  is_active: boolean;
+  source?: string | null;
+}
+
+function classify(row: ResolveRow): ResolvedVia {
+  if (row.is_primary) return "primary";
+  const src = (row.source || "").toLowerCase();
+  if (src === "manual" || src === "alias") return "alias";
+  return "historical";
+}
+
 export async function resolveProductSlug(rawSlug: string): Promise<ResolvedSlug | null> {
   const normalized = normalizeSlug(rawSlug);
   if (!normalized) return null;
@@ -32,14 +54,7 @@ export async function resolveProductSlug(rawSlug: string): Promise<ResolvedSlug 
   const { data, error } = await supabase.rpc("resolve_product_slug", { _slug: normalized });
   if (error || !data || data.length === 0) return null;
 
-  const row = data[0] as {
-    product_id: string;
-    matched_slug: string;
-    primary_slug: string;
-    is_primary: boolean;
-    is_active: boolean;
-  };
-
+  const row = data[0] as ResolveRow;
   if (!row.is_active) return null;
 
   return {
@@ -49,10 +64,10 @@ export async function resolveProductSlug(rawSlug: string): Promise<ResolvedSlug 
     isPrimary: row.is_primary,
     isActive: row.is_active,
     shouldRedirect: row.matched_slug !== row.primary_slug,
+    resolvedVia: classify(row),
   };
 }
 
-/** Telemetria fire-and-forget de hit em um slug. */
 export function recordProductSlugHit(rawSlug: string): void {
   const normalized = normalizeSlug(rawSlug);
   if (!normalized) return;
